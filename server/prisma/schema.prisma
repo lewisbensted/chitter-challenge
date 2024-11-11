@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int         @id @default(autoincrement())
+  firstName   String      @map(name: "first_name")
+  lastName    String      @map(name: "last_name")
+  email       String      @unique
+  username    String      @unique @db.VarChar(30)
+  password    String      @db.Char(60)
+  cheets      Cheet[]
+  replies     Reply[]
+  sender      Message[]   @relation("sender")
+  recipient   Message[]   @relation("recipient")
+
+  @@unique([id, username])
+  @@map("Users")
+}
+
+model Cheet {
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId, username], references: [id, username], onDelete: Cascade)
+  userId      Int         @map(name: "user_id")
+  username    String      @db.VarChar(30)
+  text        String      @db.VarChar(50)
+  createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
+  updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
+  replies     Reply[]
+
+  @@map("Cheets")
+}
+
+model Reply {
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId, username], references: [id, username], onDelete: Cascade)
+  userId      Int         @map(name: "user_id")
+  username    String      @db.VarChar(30)
+  cheet       Cheet       @relation(fields: [cheetId], references: [id], onDelete: Cascade)
+  cheetId     Int         @map(name: "cheet_id")
+  text        String      @db.VarChar(50)
+  createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
+  updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
+
+  @@map("Replies")
+}
+
+model Message {
+  id                  Int         @id @default(autoincrement())
+  sender              User        @relation(name: "sender", fields: [senderId, senderUsername], references: [id, username], onDelete: Cascade)
+  senderId            Int         @map(name: "sender_id")
+  senderUsername      String      @db.VarChar(30) @map(name: "sender_username")
+  recipient           User        @relation(name:"recipient", fields: [recipientId, recipientUsername], references: [id, username], onDelete: Cascade)
+  recipientId         Int         @map(name: "recipient_id")
+  recipientUsername   String      @db.VarChar(30) @map(name: "recipient_username")
+  text                String      @db.VarChar(50)
+  isRead              Boolean     @default(false) @map(name: "is_read")
+  createdAt           DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
+  updatedAt           DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "updated_at")
+
+  @@map("Messages")      
+}
+
+
+

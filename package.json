@@ -1,0 +1,29 @@
+{
+    "name": "chitter",
+    "version": "1.0.0",
+    "description": "A mock Twitter app built with Express and React.",
+    "scripts": {
+        "install": "concurrently --names Backend,Frontend \"cd server && npm install\" \"cd frontend && npm install\"",
+        "migrate:dev": "cd server && npm run migrate:dev",
+        "start:dev": "concurrently --names Backend,Frontend \"cd server && npm run start:dev\" \"cd frontend && npm start\"",
+        "seed:dev": "cd server && npm run seed:dev",
+        "migrate:test": "cd server && npm run migrate:test",
+        "start:test": "concurrently --names Backend,Frontend \"cd server && npm run start:test\" \"cd frontend && npm start\"",
+        "seed:test": "cd server && npm run seed:test",
+        "migrate:prod": "cd server && npm run migrate:prod",
+        "start:prod": "cd frontend && npm run build && cd ../server && npm run start:prod"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lewisbensted/chitter.git"
+    },
+    "author": "Lewis Bensted",
+    "license": "ISC",
+    "homepage": "https://github.com/lewisbensted/chitter#readme",
+    "dependencies": {
+        "concurrently": "^8.2.2",
+        "date-fns-tz": "^3.2.0",
+        "dotenv-cli": "^7.4.2",
+        "dotenv-expand": "^11.0.6"
+    }
+}

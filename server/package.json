@@ -1,0 +1,52 @@
+{
+    "name": "server",
+    "version": "1.0.0",
+    "description": "Chitter app backend built with Express and Prisma.",
+    "main": "app.ts",
+    "type": "module",
+    "scripts": {
+        "migrate:dev": "dotenv -e ../.env.development -r dotenv-expand/config -- npx prisma migrate dev --name inititalise",
+        "seed:dev": "set NODE_ENV=development&& node --loader ts-node/esm prisma/seed.ts",
+        "start:dev": "set NODE_ENV=development&& nodemon app.ts",
+        "migrate:test": "dotenv -e ../.env.test -r dotenv-expand/config -- npx prisma migrate deploy",
+        "seed:test": "set NODE_ENV=test&& node --loader ts-node/esm prisma/seed.ts",
+        "start:test": "set NODE_ENV=test&& nodemon app.ts",
+        "test": "dotenv -e ../.env.test vitest",
+        "migrate:prod": "dotenv -e ../.env.production -r dotenv-expand/config -- npx prisma migrate deploy",
+        "start:prod": "set NODE_ENV=production&& node --loader ts-node/esm app.ts"
+    },
+    "license": "ISC",
+    "devDependencies": {
+        "@faker-js/faker": "^8.4.1",
+        "@types/cookie-parser": "^1.4.7",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/express-mysql-session": "^3.0.6",
+        "@types/express-session": "^1.18.0",
+        "@types/node": "^20.11.25",
+        "@types/supertest": "^6.0.2",
+        "@typescript-eslint/eslint-plugin": "^7.1.1",
+        "@typescript-eslint/parser": "^7.1.1",
+        "eslint": "^8.57.0",
+        "eslint-plugin-only-warn": "^1.1.0",
+        "nodemon": "^3.1.0",
+        "supertest": "^6.3.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.4.2",
+        "vitest": "^1.3.1",
+        "vitest-mock-extended": "^1.3.1"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.15.1",
+        "@types/bcrypt": "^5.0.2",
+        "bcrypt": "^5.1.1",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.18.3",
+        "express-mysql-session": "^3.0.2",
+        "express-session": "^1.18.0",
+        "prisma": "^5.18.0",
+        "zod": "^3.22.4"
+    }
+}
