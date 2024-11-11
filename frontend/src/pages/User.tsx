@@ -11,14 +11,15 @@ import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 
 const User: React.FC = () => {
-    const [isLoading, setLoading] = useState<boolean>(true);
     const [userId, setUserId] = useState<number>();
-    const [errors, setErrors] = useState<string[]>([]);
-    const [isInfoLoading, setInfoLoading] = useState<boolean>(false);
-    const [cheets, setCheets] = useState<ICheet[]>([]);
+    const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
+    const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
+    const [conversation, setConversation] = useState<IConversation[]>([]);
+    const [cheets, setCheets] = useState<ICheet[]>([]);
+    const [errors, setErrors] = useState<string[]>([]);
     const [cheetsError, setCheetsError] = useState<string>("");
-    const [info, setInfo] = useState<IConversation[]>([]);
+
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -41,13 +42,12 @@ const User: React.FC = () => {
 
     useEffect(() => {
         if (userId) {
-            setInfoLoading(true);
             axios
                 .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
                 .then(async (res: { data: IConversation[] }) => {
                     setCheetsLoading(true);
-                    setInfo(res.data);
-                    setInfoLoading(false);
+                    setConversation(res.data);
+                    setPageLoading(false);
                     await axios
                         .get(`${serverURL}/users/${id}/cheets`, { withCredentials: true })
                         .then((res: { data: ICheet[] }) => {
@@ -57,75 +57,85 @@ const User: React.FC = () => {
                             setCheetsError("An unexpected error occured while loading cheets.");
                         });
                     setCheetsLoading(false);
-                    setLoading(false);
                 })
                 .catch((error: unknown) => {
                     if (axios.isAxiosError(error) && error.response?.status == 404) {
                         navigate("/");
+                    } else {
+                        setErrors(["An unexpected error occured while loading the page."]);
                     }
-                    setInfoLoading(false);
-                    setLoading(false);
+                    setPageLoading(false);
                 });
+        } else {
+            setPageLoading(false);
         }
     }, [userId]);
 
     return (
-        <Layout isLoading={isLoading} setLoading={setLoading} userId={userId} setUserId={setUserId}>
+        <Layout
+            userId={userId}
+            setUserId={setUserId}
+            isPageLoading={isPageLoading}
+            isComponentLoading={isComponentLoading || isCheetsLoading}
+            setLoading={setPageLoading}
+        >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                {isInfoLoading ? (
-                    <ClipLoader />
-                ) : (
-                    <div>
-                        {info[0] ? (
-                            <div>
-                                {info[0].interlocutorUsername}
-                                {userId == Number(id) ? null : 
-                                    <Conversation
-                                        userId={userId}
-                                        conversation={info[0]}
-                                        isLoading={isLoading}
-                                        setLoading={setLoading}
-                                        setConversations={setInfo}
-                                        isUserPage={true}
-                                    />
-                                }
-                            </div>
-                        ) : (
-                            "Error loading user."
-                        )}
-
+                {userId ? (
+                    isPageLoading ? (
+                        <ClipLoader />
+                    ) : (
                         <div>
-                            {isCheetsLoading ? (
-                                <ClipLoader />
-                            ) : cheetsError ? (
-                                cheetsError
+                            {conversation[0] ? (
+                                <div>
+                                    {conversation[0].interlocutorUsername}
+                                    {userId == Number(id) ? null : (
+                                        <Conversation
+                                            userId={userId}
+                                            conversation={conversation[0]}
+                                            isLoading={isComponentLoading}
+                                            setLoading={setComponentLoading}
+                                            setConversations={setConversation}
+                                            isUserPage={true}
+                                        />
+                                    )}
+                                </div>
                             ) : (
-                                cheets.map((cheet, key) => (
-                                    <Cheet
-                                        cheet={cheet}
-                                        userId={userId}
+                                "Error loading user."
+                            )}
+
+                            <div>
+                                {isCheetsLoading ? (
+                                    <ClipLoader />
+                                ) : cheetsError ? (
+                                    cheetsError
+                                ) : (
+                                    cheets.map((cheet, key) => (
+                                        <Cheet
+                                            cheet={cheet}
+                                            userId={userId}
+                                            setCheets={setCheets}
+                                            setErrors={setErrors}
+                                            key={key}
+                                            setLoading={setComponentLoading}
+                                            isLoading={isComponentLoading}
+                                            isModalView={false}
+                                        />
+                                    ))
+                                )}
+                                {userId === Number(id) ? (
+                                    <SubmitCheet
+                                        setCheetsError={setCheetsError}
+                                        isDisabled={isComponentLoading || isCheetsLoading}
                                         setCheets={setCheets}
                                         setErrors={setErrors}
-                                        key={key}
-                                        setLoading={setLoading}
-                                        isLoading={isLoading}
-                                        isModalView={false}
+                                        setLoading={setComponentLoading}
                                     />
-                                ))
-                            )}
-                            {userId === Number(id) ? (
-                                <SubmitCheet
-                                    setCheetsError={setCheetsError}
-                                    isDisabled={isLoading || isCheetsLoading || !info}
-                                    setCheets={setCheets}
-                                    setErrors={setErrors}
-                                    setLoading={setLoading}
-                                />
-                            ) : null}
+                                ) : null}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                ) : null}
             </div>
         </Layout>
     );

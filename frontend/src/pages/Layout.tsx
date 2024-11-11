@@ -5,28 +5,31 @@ import ErrorModal from "../components/ErrorModal";
 
 interface Props {
     children: JSX.Element;
-    isLoading: boolean;
+    isComponentLoading: boolean;
     userId?: number;
     setLoading: (arg: boolean) => void;
     setUserId: (arg?: number) => void;
+    isPageLoading: boolean;
 }
 
-const Layout: React.FC<Props> = ({ children, isLoading, setLoading, userId, setUserId }) => {
+const Layout: React.FC<Props> = ({ children, isComponentLoading, setLoading, userId, setUserId, isPageLoading }) => {
     const [error, setError] = useState<string>();
+
+    console.log(isPageLoading)
 
     return (
         <div>
             <ErrorModal errors={error ? [error] : []} closeModal={() => setError(undefined)} />
             {children}
-            {isLoading ? null : userId ? (
+            {isPageLoading ? null : userId ? (
                 <div>
-                    <Link to="/conversations" style={{ pointerEvents: isLoading ? "none" : undefined }}>
+                    <Link to="/conversations" style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
                         MESSAGES
                     </Link>
-					&nbsp;
+                    &nbsp;
                     <Link
                         to={"/"}
-                        style={{ pointerEvents: isLoading ? "none" : undefined }}
+                        style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
                         onClick={() => {
                             logout(setLoading, setUserId, setError);
                         }}
@@ -36,18 +39,18 @@ const Layout: React.FC<Props> = ({ children, isLoading, setLoading, userId, setU
                 </div>
             ) : (
                 <div>
-                    <Link to="/login" style={{ pointerEvents: isLoading ? "none" : undefined }}>
+                    <Link to="/login" style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
                         LOGIN
                     </Link>
                     &nbsp;
-                    <Link to="/register" style={{ pointerEvents: isLoading ? "none" : undefined }}>
+                    <Link to="/register" style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
                         REGISTER
                     </Link>
                 </div>
             )}
             <div>
                 {"\n"}
-                <Link to="/" style={{ pointerEvents: isLoading ? "none" : undefined }}>
+                <Link to="/" style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
                     HOME
                 </Link>
             </div>

@@ -9,9 +9,10 @@ import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 
 const Homepage: React.FC = () => {
-    const [userId, setUserId] = useState<number | undefined>(undefined);
-    const [isLoading, setLoading] = useState<boolean>(true);
-    const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
+    const [userId, setUserId] = useState<number>();
+    const [isPageLoading, setPageLoading] = useState<boolean>(true);
+    const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
+    const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
     const [cheets, setCheets] = useState<ICheet[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const [cheetsError, setCheetsError] = useState<string>("");
@@ -20,6 +21,7 @@ const Homepage: React.FC = () => {
         axios
             .get(`${serverURL}/validate`, { withCredentials: true })
             .then(async (res: { data: IUser }) => {
+                setCheetsLoading(true);
                 setUserId(res.data.id);
                 await axios
                     .get(`${serverURL}/cheets`, { withCredentials: true })
@@ -30,7 +32,7 @@ const Homepage: React.FC = () => {
                         setCheetsError("An unexpected error occured while loading cheets.");
                     });
                 setCheetsLoading(false);
-                setLoading(false);
+                setPageLoading(false);
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
@@ -40,16 +42,23 @@ const Homepage: React.FC = () => {
                 } else {
                     setErrors(["An unexpected error occured while authenticating the user."]);
                 }
-                setLoading(false);
+                setPageLoading(false);
             });
     }, []);
 
     return (
-        <Layout isLoading={isLoading} setLoading={setLoading} userId={userId} setUserId={setUserId}>
+        <Layout
+            userId={userId}
+            setUserId={setUserId}
+            isPageLoading={isPageLoading}
+            isComponentLoading={isComponentLoading || isCheetsLoading}
+            setLoading={setPageLoading}
+        >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <h1>Welcome to Chitter</h1>
-                {isLoading ? (
+
+                {isPageLoading ? (
                     <ClipLoader />
                 ) : userId ? (
                     <div>
@@ -65,18 +74,18 @@ const Homepage: React.FC = () => {
                                     setCheets={setCheets}
                                     setErrors={setErrors}
                                     key={key}
-                                    setLoading={setLoading}
-                                    isLoading={isLoading}
+                                    setLoading={setComponentLoading}
+                                    isLoading={isComponentLoading}
                                     isModalView={false}
                                 />
                             ))
                         )}
                         <SubmitCheet
-                            isDisabled={isLoading || isCheetsLoading}
+                            isDisabled={isComponentLoading || isCheetsLoading}
                             setCheets={setCheets}
                             setCheetsError={setCheetsError}
                             setErrors={setErrors}
-                            setLoading={setLoading}
+                            setLoading={setComponentLoading}
                         />
                     </div>
                 ) : null}

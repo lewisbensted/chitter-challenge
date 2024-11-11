@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 
 const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<number | undefined>(undefined);
-    const [isLoading, setLoading] = useState<boolean>(true);
-    const [isConversationsLoading, setConversationsLoading] = useState<boolean>(true);
+    const [isPageLoading, setPageLoading] = useState<boolean>(true);
+    const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
     const [conversations, setConversations] = useState<IConversation[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const [conversationsError, setConversationsError] = useState<string>("");
@@ -30,8 +30,7 @@ const Conversations: React.FC = () => {
                     .catch(() => {
                         setConversationsError("An unexpected error occured while loading conversations.");
                     });
-                setConversationsLoading(false);
-                setLoading(false);
+                setPageLoading(false);
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
@@ -41,40 +40,40 @@ const Conversations: React.FC = () => {
                 } else {
                     setErrors(["An unexpected error occured while authenticating the user."]);
                 }
-                setLoading(false);
+                setPageLoading(false);
             });
     }, []);
 
     return (
-        <Layout isLoading={isLoading} setLoading={setLoading} userId={userId} setUserId={setUserId}>
+        <Layout
+            isPageLoading={isPageLoading}
+            isComponentLoading={isComponentLoading}
+            setLoading={setPageLoading}
+            userId={userId}
+            setUserId={setUserId}
+        >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <div>
-                    {userId ? (
-                        <div>
-                            {isConversationsLoading ? (
-                                <ClipLoader />
-                            ) : (
-                                <div>
-                                    {conversationsError
-                                        ? conversationsError
-                                        : conversations.map((conversation, key) => (
-                                              <div key={key}>
-                                                  <span>{conversation.interlocutorUsername}</span>
-                                                  <Conversation
-                                                      userId={userId}
-                                                      conversation={conversation}
-                                                      isLoading={isLoading}
-                                                      setLoading={setLoading}
-                                                      setConversations={setConversations}
-                                                  />
-                                              </div>
-                                          ))}
-                                </div>
-                            )}
-                        </div>
-                    ) : null}
-                </div>
+                {isPageLoading ? (
+                    <ClipLoader />
+                ) : userId ? (
+                    <div>
+                        {conversationsError
+                            ? conversationsError
+                            : conversations.map((conversation, key) => (
+                                  <div key={key}>
+                                      <span>{conversation.interlocutorUsername}</span>
+                                      <Conversation
+                                          userId={userId}
+                                          conversation={conversation}
+                                          isLoading={isComponentLoading}
+                                          setLoading={setComponentLoading}
+                                          setConversations={setConversations}
+                                      />
+                                  </div>
+                              ))}
+                    </div>
+                ) : null}
             </div>
         </Layout>
     );
