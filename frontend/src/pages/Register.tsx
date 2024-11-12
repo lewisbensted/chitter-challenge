@@ -7,6 +7,7 @@ import SuccessModal from "../components/SuccessModal";
 import Layout from "./Layout";
 import { useNavigate } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
+import { handleErrors } from "../utils/handleErrors";
 
 interface RegisterFormFields {
     firstName: string;
@@ -35,10 +36,8 @@ const Register: React.FC = () => {
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
                     setUserId(undefined);
-                } else if (axios.isAxiosError(error) && error.code == "ERR_NETWORK") {
-                    setErrors(["Network Error: Servers unreachable."]);
                 } else {
-                    setErrors(["An unexpected error occured while authenticating the user."]);
+                    handleErrors(error, "authenticating the user", setErrors);
                 }
                 setPageLoading(false);
             });
@@ -53,9 +52,7 @@ const Register: React.FC = () => {
                 setSuccess(true);
             })
             .catch((error: unknown) => {
-                axios.isAxiosError(error) && error.response?.status == 400
-                    ? setErrors(error.response.data)
-                    : setErrors(["An unexpected error occured while registering the user."]);
+                handleErrors(error, "registering the user", setErrors);
             });
         setFormLoading(false);
     };
@@ -64,7 +61,7 @@ const Register: React.FC = () => {
         <Layout
             isPageLoading={isPageLoading}
             isComponentLoading={isFormLoading}
-            setLoading={setPageLoading}
+            setComponentLoading={setPageLoading}
             userId={userId}
             setUserId={setUserId}
         >

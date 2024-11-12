@@ -4,10 +4,11 @@ import { IReply } from "../utils/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ClipLoader } from "react-spinners";
 import { serverURL } from "../utils/serverURL";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     isDisabled: boolean;
-    setLoading: (arg: boolean) => void;
+    setComponentLoading: (arg: boolean) => void;
     setReplies: (arg: IReply[]) => void;
     setErrors: (arg: string[]) => void;
     reply: IReply;
@@ -15,14 +16,14 @@ interface Props {
     userId?: number;
 }
 
-const EditReply: React.FC<Props> = ({ reply, cheetId, isDisabled, setLoading, setReplies, setErrors, userId }) => {
+const EditReply: React.FC<Props> = ({ reply, cheetId, isDisabled, setComponentLoading, setReplies, setErrors, userId }) => {
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
     const [isReplyLoading, setReplyLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setReplyLoading(true);
-        setLoading(true);
+        setComponentLoading(true);
         await axios
             .put(`${serverURL}/cheets/${cheetId}/replies/${reply.id}`, data, {
                 withCredentials: true,
@@ -31,12 +32,10 @@ const EditReply: React.FC<Props> = ({ reply, cheetId, isDisabled, setLoading, se
                 setReplies(res.data);
             })
             .catch((error: unknown) => {
-                axios.isAxiosError(error) && [400, 401, 403].includes(error.response?.status!)
-                    ? setErrors(error.response?.data)
-                    : setErrors(["An unexpected error occured while editing reply."]);
+                handleErrors(error, 'editing the reply', setErrors)
             });
         setReplyLoading(false);
-        setLoading(false);
+        setComponentLoading(false);
         setEditing(false);
     };
 

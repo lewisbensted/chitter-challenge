@@ -7,18 +7,19 @@ import { Link, useParams } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import { ClipLoader } from "react-spinners";
 import EditCheet from "./EditCheet";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     userId?: number;
     cheet: ICheet;
     setErrors: (arg: string[]) => void;
     setCheets: (arg: ICheet[]) => void;
-    isLoading: boolean;
-    setLoading: (arg: boolean) => void;
+    isComponentLoading: boolean;
+    setComponentLoading: (arg: boolean) => void;
     isModalView: boolean;
 }
 
-const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setLoading, isLoading, isModalView }) => {
+const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setComponentLoading, isComponentLoading, isModalView }) => {
     const { id } = useParams();
     const [isModalOpen, setModalOpen] = useState<boolean>(false);
     const [isCheetLoading, setCheetLoading] = useState<boolean>(false);
@@ -33,14 +34,14 @@ const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setLoadin
                     setModalOpen(false);
                 }}
                 setCheets={setCheets}
-                isLoading={isLoading}
-                setLoading={setLoading}
+                isComponentLoading={isComponentLoading}
+                setComponentLoading={setComponentLoading}
             />
             <Link to={`/users/${cheet.userId}`}>{cheet.username}</Link> &nbsp;
             <EditCheet
                 cheet={cheet}
-                isDisabled={isLoading}
-                setLoading={setLoading}
+                isDisabled={isComponentLoading}
+                setComponentLoading={setComponentLoading}
                 setCheets={setCheets}
                 setErrors={setErrors}
                 userId={userId}
@@ -50,16 +51,16 @@ const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setLoadin
             {new Date(cheet.updatedAt) > new Date(cheet.createdAt) ? (
                 <span>{`Edited at ${(format(cheet.updatedAt, "HH:mm dd/MM/yy"))}`} &nbsp;</span>
             ) : null}
-            {isModalView ? null : <button onClick={() => setModalOpen(true)}>MORE</button>} &nbsp;
+            {isModalView ? null : <button onClick={() => setModalOpen(true)} disabled={isComponentLoading}>MORE</button>} &nbsp;
             {userId === cheet.userId ? (
                 isCheetLoading ? (
                     <ClipLoader />
                 ) : (
                     <button
-                        disabled={isLoading}
+                        disabled={isComponentLoading}
                         onClick={async () => {
                             setCheetLoading(true);
-                            setLoading(true);
+                            setComponentLoading(true);
                             await axios
                                 .delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.id}`, {
                                     withCredentials: true,
@@ -68,12 +69,10 @@ const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setLoadin
                                     setCheets(res.data);
                                 })
                                 .catch((error: unknown) => {
-                                    axios.isAxiosError(error) && [401, 403].includes(error.response?.status!)
-                                        ? setErrors(error.response?.data)
-                                        : setErrors(["An unexpected error occured while deleting cheet."]);
+                                    handleErrors(error, 'editing the message', setErrors)
                                 });
                             setCheetLoading(false);
-                            setLoading(false);
+                            setComponentLoading(false);
                         }}
                     >
                         DELETE

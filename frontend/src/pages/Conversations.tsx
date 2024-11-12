@@ -7,6 +7,7 @@ import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
+import { handleErrors } from "../utils/handleErrors";
 
 const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<number | undefined>(undefined);
@@ -35,10 +36,8 @@ const Conversations: React.FC = () => {
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
                     navigate("/");
-                } else if (axios.isAxiosError(error) && error.code == "ERR_NETWORK") {
-                    setErrors(["Network Error: Servers unreachable."]);
                 } else {
-                    setErrors(["An unexpected error occured while authenticating the user."]);
+                    handleErrors(error, 'authenticating the user', setErrors)
                 }
                 setPageLoading(false);
             });
@@ -48,7 +47,7 @@ const Conversations: React.FC = () => {
         <Layout
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading}
-            setLoading={setPageLoading}
+            setComponentLoading={setPageLoading}
             userId={userId}
             setUserId={setUserId}
         >
@@ -66,8 +65,8 @@ const Conversations: React.FC = () => {
                                       <Conversation
                                           userId={userId}
                                           conversation={conversation}
-                                          isLoading={isComponentLoading}
-                                          setLoading={setComponentLoading}
+                                          isComponentLoading={isComponentLoading}
+                                          setComponentLoading={setComponentLoading}
                                           setConversations={setConversations}
                                       />
                                   </div>

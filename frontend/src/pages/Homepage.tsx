@@ -7,6 +7,7 @@ import SubmitCheet from "../components/SubmitCheet";
 import Cheet from "../components/Cheet";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
+import { handleErrors } from "../utils/handleErrors";
 
 const Homepage: React.FC = () => {
     const [userId, setUserId] = useState<number>();
@@ -37,10 +38,8 @@ const Homepage: React.FC = () => {
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
                     setUserId(undefined);
-                } else if (axios.isAxiosError(error) && error.code == "ERR_NETWORK") {
-                    setErrors(["Network Error: Servers unreachable."]);
                 } else {
-                    setErrors(["An unexpected error occured while authenticating the user."]);
+                    handleErrors(error, 'authenticating the user', setErrors)
                 }
                 setPageLoading(false);
             });
@@ -52,7 +51,7 @@ const Homepage: React.FC = () => {
             setUserId={setUserId}
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading || isCheetsLoading}
-            setLoading={setPageLoading}
+            setComponentLoading={setPageLoading}
         >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
@@ -74,8 +73,8 @@ const Homepage: React.FC = () => {
                                     setCheets={setCheets}
                                     setErrors={setErrors}
                                     key={key}
-                                    setLoading={setComponentLoading}
-                                    isLoading={isComponentLoading}
+                                    setComponentLoading={setComponentLoading}
+                                    isComponentLoading={isComponentLoading}
                                     isModalView={false}
                                 />
                             ))
@@ -85,7 +84,7 @@ const Homepage: React.FC = () => {
                             setCheets={setCheets}
                             setCheetsError={setCheetsError}
                             setErrors={setErrors}
-                            setLoading={setComponentLoading}
+                            setComponentLoading={setComponentLoading}
                         />
                     </div>
                 ) : null}

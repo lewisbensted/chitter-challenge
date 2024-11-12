@@ -4,24 +4,25 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../utils/interfaces";
 import { serverURL } from "../utils/serverURL";
 import { ClipLoader } from "react-spinners";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     message: IMessage;
     isDisabled: boolean;
-    setLoading: (arg: boolean) => void;
+    setComponentLoading: (arg: boolean) => void;
     setMessages: (arg: IMessage[]) => void;
     setErrors: (arg: string[]) => void;
     userId?: number;
 }
 
-const EditMessage: React.FC<Props> = ({ message, isDisabled, setLoading, setMessages, setErrors, userId }) => {
+const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading, setMessages, setErrors, userId }) => {
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
     const [isMessageLoading, setMessageLoading] = useState<boolean>();
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setMessageLoading(true);
-        setLoading(true);
+        setComponentLoading(true);
         await axios
             .put(`${serverURL}/messages/${message.recipientId}/message/${message.id}`, data, {
                 withCredentials: true,
@@ -30,13 +31,11 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setLoading, setMess
                 setMessages(res.data);
             })
             .catch((error: unknown) => {
-                axios.isAxiosError(error) && [400, 401, 403].includes(error.response?.status!)
-                    ? setErrors(error.response?.data)
-                    : setErrors(["An unexpected error occured while editing message."]);
+                handleErrors(error, 'editing the message', setErrors)
             });
         setEditing(false);
         setMessageLoading(false);
-        setLoading(false);
+        setComponentLoading(false);
     };
     return (
         <div>

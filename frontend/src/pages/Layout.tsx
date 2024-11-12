@@ -7,15 +7,13 @@ interface Props {
     children: JSX.Element;
     isComponentLoading: boolean;
     userId?: number;
-    setLoading: (arg: boolean) => void;
+    setComponentLoading: (arg: boolean) => void;
     setUserId: (arg?: number) => void;
     isPageLoading: boolean;
 }
 
-const Layout: React.FC<Props> = ({ children, isComponentLoading, setLoading, userId, setUserId, isPageLoading }) => {
+const Layout: React.FC<Props> = ({ children, isComponentLoading, setComponentLoading, userId, setUserId, isPageLoading }) => {
     const [error, setError] = useState<string>();
-
-    console.log(isPageLoading)
 
     return (
         <div>
@@ -31,7 +29,7 @@ const Layout: React.FC<Props> = ({ children, isComponentLoading, setLoading, use
                         to={"/"}
                         style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
                         onClick={() => {
-                            logout(setLoading, setUserId, setError);
+                            logout(setComponentLoading, setUserId, setError);
                         }}
                     >
                         LOGOUT

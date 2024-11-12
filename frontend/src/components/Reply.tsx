@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import EditReply from "./EditReply";
 import { serverURL } from "../utils/serverURL";
 import { ClipLoader } from "react-spinners";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     userId?: number;
@@ -13,11 +14,11 @@ interface Props {
     reply: IReply;
     setErrors: (arg: string[]) => void;
     setReplies: (arg: IReply[]) => void;
-    isLoading: boolean;
-    setLoading: (arg: boolean) => void;
+    isComponentLoading: boolean;
+    setComponentLoading: (arg: boolean) => void;
 }
 
-const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors, isLoading, setLoading }) => {
+const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors, isComponentLoading, setComponentLoading }) => {
     const [isReplyLoading, setReplyLoading] = useState<boolean>(false);
 
     return (
@@ -26,8 +27,8 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
             <EditReply
                 cheetId={cheetId}
                 reply={reply}
-                isDisabled={isLoading}
-                setLoading={setLoading}
+                isDisabled={isComponentLoading}
+                setComponentLoading={setComponentLoading}
                 setReplies={setReplies}
                 setErrors={setErrors}
                 userId={userId}
@@ -41,10 +42,10 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
                     <ClipLoader />
                 ) : (
                     <button
-                        disabled={isLoading}
+                        disabled={isComponentLoading}
                         onClick={async () => {
                             setReplyLoading(true);
-                            setLoading(true);
+                            setComponentLoading(true);
                             await axios
                                 .delete(`${serverURL}/cheets/${reply.cheetId}/replies/${reply.id}`, {
                                     withCredentials: true,
@@ -53,12 +54,10 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
                                     setReplies(res.data);
                                 })
                                 .catch((error: unknown) => {
-                                    axios.isAxiosError(error) && [401, 403].includes(error.response?.status!)
-                                        ? setErrors(error.response?.data)
-                                        : setErrors(["An unexpected error occured while deleting reply."]);
+                                    handleErrors(error, 'deleting the reply', setErrors)
                                 });
                             setReplyLoading(false);
-                            setLoading(false);
+                            setComponentLoading(false);
                         }}
                     >
                         DELETE

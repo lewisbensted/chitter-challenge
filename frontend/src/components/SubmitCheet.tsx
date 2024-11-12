@@ -5,23 +5,24 @@ import { ICheet } from "../utils/interfaces";
 import { useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import { serverURL } from "../utils/serverURL";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     isDisabled: boolean;
     setCheets: (arg: ICheet[]) => void;
     setCheetsError: (arg: string) => void;
     setErrors: (arg: string[]) => void;
-    setLoading: (arg: boolean) => void;
+    setComponentLoading: (arg: boolean) => void;
 }
 
-const SubmitCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, setErrors, setLoading }) => {
+const SubmitCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, setErrors, setComponentLoading }) => {
     const { id } = useParams();
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
     const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setSubmitLoading(true);
-        setLoading(true);
+        setComponentLoading(true);
         reset();
         await axios
             .post(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, data, {
@@ -32,12 +33,10 @@ const SubmitCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, s
                 setCheetsError("");
             })
             .catch((error: unknown) => {
-                axios.isAxiosError(error) && [400, 401].includes(error.response?.status!)
-                    ? setErrors(error.response?.data)
-                    : setErrors(["An unexpected error occured while sending cheet."]);
+                handleErrors(error, 'sending cheet', setErrors)
             });
         setSubmitLoading(false);
-        setLoading(false);
+        setComponentLoading(false);
     };
     return (
         <div>

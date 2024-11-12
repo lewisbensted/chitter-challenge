@@ -4,22 +4,23 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IReply } from "../utils/interfaces";
 import { ClipLoader } from "react-spinners";
 import { serverURL } from "../utils/serverURL";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     cheetId: number;
     isDisabled: boolean;
     setReplies: (arg: IReply[]) => void;
     setErrors: (arg: string[]) => void;
-    setLoading: (arg: boolean) => void;
+    setComponentLoading: (arg: boolean) => void;
 }
 
-const SubmitReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setLoading }) => {
+const SubmitReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setComponentLoading }) => {
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
     const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setSubmitLoading(true);
-        setLoading(true);
+        setComponentLoading(true);
         reset();
         await axios
             .post(`${serverURL}/cheets/${cheetId}/replies`, data, {
@@ -29,12 +30,10 @@ const SubmitReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErro
                 setReplies(res.data);
             })
             .catch((error: unknown) => {
-                axios.isAxiosError(error) && [400, 401].includes(error.response?.status!)
-                    ? setErrors(error.response?.data)
-                    : setErrors(["An unexpected error occured while sending reply."]);
+                handleErrors(error, 'sending the reply', setErrors)
             });
         setSubmitLoading(false);
-        setLoading(false);
+        setComponentLoading(false);
     };
     return (
         <div>

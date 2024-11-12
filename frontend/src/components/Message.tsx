@@ -6,25 +6,26 @@ import axios from "axios";
 import { serverURL } from "../utils/serverURL";
 import { format } from "date-fns";
 import EditMessage from "./EditMessage";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     userId?: number;
     message: IMessage;
     setErrors: (arg: string[]) => void;
     setMessages: (arg: IMessage[]) => void;
-    isLoading: boolean;
-    setLoading: (arg: boolean) => void;
+    isComponentLoading: boolean;
+    setComponentLoading: (arg: boolean) => void;
 }
 
-const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isLoading, setLoading }) => {
+const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isComponentLoading, setComponentLoading }) => {
     const [isMessageLoading, setMessageLoading] = useState<boolean>(false);
 
     return (
         <div style={{ display: "flex", justifyContent: message.senderId === userId ? "left" : "right" }}>
             <EditMessage
                 message={message}
-                isDisabled={isLoading}
-                setLoading={setLoading}
+                isDisabled={isComponentLoading}
+                setComponentLoading={setComponentLoading}
                 setMessages={setMessages}
                 setErrors={setErrors}
                 userId={userId}
@@ -40,10 +41,10 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isL
                     <ClipLoader />
                 ) : (
                     <button
-                        disabled={isLoading}
+                        disabled={isComponentLoading}
                         onClick={async () => {
                             setMessageLoading(true);
-                            setLoading(true);
+                            setComponentLoading(true);
                             await axios
                                 .delete(`${serverURL}/messages/${message.recipientId}/message/${message.id}`, {
                                     withCredentials: true,
@@ -52,12 +53,10 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isL
                                     setMessages(res.data);
                                 })
                                 .catch((error: unknown) => {
-                                    axios.isAxiosError(error) && [401, 403].includes(error.response?.status!)
-                                        ? setErrors(error.response?.data)
-                                        : setErrors(["An unexpected error occured while deleting message."]);
+                                    handleErrors(error, 'deleting the message', setErrors)
                                 });
                             setMessageLoading(false);
-                            setLoading(false);
+                            setComponentLoading(false);
                         }}
                     >
                         DELETE

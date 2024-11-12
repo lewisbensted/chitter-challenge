@@ -9,6 +9,7 @@ import Cheet from "../components/Cheet";
 import SubmitCheet from "../components/SubmitCheet";
 import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
+import { handleErrors } from "../utils/handleErrors";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<number>();
@@ -32,10 +33,8 @@ const User: React.FC = () => {
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
                     navigate("/");
-                } else if (axios.isAxiosError(error) && error.code == "ERR_NETWORK") {
-                    setErrors(["Network Error: Servers unreachable."]);
                 } else {
-                    setErrors(["An unexpected error occured while authenticating the user."]);
+                    handleErrors(error, "authenticating the user", setErrors);
                 }
             });
     }, []);
@@ -62,7 +61,7 @@ const User: React.FC = () => {
                     if (axios.isAxiosError(error) && error.response?.status == 404) {
                         navigate("/");
                     } else {
-                        setErrors(["An unexpected error occured while loading the page."]);
+                        handleErrors(error, "loading the page", setErrors);
                     }
                     setPageLoading(false);
                 });
@@ -77,7 +76,7 @@ const User: React.FC = () => {
             setUserId={setUserId}
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading || isCheetsLoading}
-            setLoading={setPageLoading}
+            setComponentLoading={setPageLoading}
         >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
@@ -93,8 +92,8 @@ const User: React.FC = () => {
                                         <Conversation
                                             userId={userId}
                                             conversation={conversation[0]}
-                                            isLoading={isComponentLoading}
-                                            setLoading={setComponentLoading}
+                                            isComponentLoading={isComponentLoading}
+                                            setComponentLoading={setComponentLoading}
                                             setConversations={setConversation}
                                             isUserPage={true}
                                         />
@@ -117,8 +116,8 @@ const User: React.FC = () => {
                                             setCheets={setCheets}
                                             setErrors={setErrors}
                                             key={key}
-                                            setLoading={setComponentLoading}
-                                            isLoading={isComponentLoading}
+                                            setComponentLoading={setComponentLoading}
+                                            isComponentLoading={isComponentLoading}
                                             isModalView={false}
                                         />
                                     ))
@@ -129,7 +128,7 @@ const User: React.FC = () => {
                                         isDisabled={isComponentLoading || isCheetsLoading}
                                         setCheets={setCheets}
                                         setErrors={setErrors}
-                                        setLoading={setComponentLoading}
+                                        setComponentLoading={setComponentLoading}
                                     />
                                 ) : null}
                             </div>

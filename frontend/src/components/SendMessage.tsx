@@ -4,22 +4,23 @@ import { IMessage } from "../utils/interfaces";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
 import { ClipLoader } from "react-spinners";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
     recipientId: number;
     isDisabled: boolean;
     setMessages: (arg: IMessage[]) => void;
     setErrors: (arg: string[]) => void;
-    setLoading: (arg: boolean) => void;
+    setComponentLoading: (arg: boolean) => void;
 }
 
-const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, setErrors, setLoading }) => {
+const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, setErrors, setComponentLoading }) => {
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
     const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setSubmitLoading(true);
-        setLoading(true);
+        setComponentLoading(true);
         reset();
         await axios
             .post(`${serverURL}/messages/${recipientId}`, data, {
@@ -29,12 +30,10 @@ const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, se
                 setMessages(res.data);
             })
             .catch((error: unknown) => {
-                axios.isAxiosError(error) && [400, 401].includes(error.response?.status!)
-                    ? setErrors(error.response?.data)
-                    : setErrors(["An unexpected error occured while sending message."]);
+                handleErrors(error, 'sending message', setErrors)
             });
         setSubmitLoading(false);
-        setLoading(false);
+        setComponentLoading(false);
     };
     
     return (

@@ -18,11 +18,11 @@ interface Props {
     isOpen: boolean;
     closeModal: () => void;
     setCheets: (arg: ICheet[]) => void;
-    isLoading: boolean;
-    setLoading: (arg: boolean) => void;
+    isComponentLoading: boolean;
+    setComponentLoading: (arg: boolean) => void;
 }
 
-const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setCheets, setLoading, isLoading }) => {
+const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setCheets, setComponentLoading, isComponentLoading }) => {
     const [errors, setErrors] = useState<string[]>([]);
     const [replies, setReplies] = useState<IReply[]>([]);
     const [repliesError, setRepliesError] = useState<string>("");
@@ -30,7 +30,7 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
 
     useEffect(() => {
         if (isOpen) {
-            setLoading(true);
+            setComponentLoading(true);
             axios
                 .get(`${serverURL}/cheets/${cheet.id}/replies`, {
                     withCredentials: true,
@@ -38,12 +38,12 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
                 .then((res: { data: IReply[] }) => {
                     setReplies(res.data);
                     setRepliesLoading(false);
-                    setLoading(false);
+                    setComponentLoading(false);
                 })
                 .catch(() => {
                     setRepliesError("An unexpected error occured while loading replies.");
                     setRepliesLoading(false);
-                    setLoading(false);
+                    setComponentLoading(false);
                 });
         }
     }, [isOpen]);
@@ -57,8 +57,8 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
                     userId={userId}
                     setCheets={setCheets}
                     setErrors={setErrors}
-                    setLoading={setLoading}
-                    isLoading={isLoading}
+                    setComponentLoading={setComponentLoading}
+                    isComponentLoading={isComponentLoading}
                     isModalView = {true}
                 />
             </div>
@@ -70,14 +70,14 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
                 ) : (
                     replies.map((reply, key) => (
                         <Reply
-                            isLoading={isLoading}
+                            isComponentLoading={isComponentLoading}
                             userId={userId}
                             cheetId={cheet.id}
                             reply={reply}
                             key={key}
                             setReplies={setReplies}
                             setErrors={setErrors}
-                            setLoading={setLoading}
+                            setComponentLoading={setComponentLoading}
                         />
                     ))
                 )}
@@ -85,13 +85,13 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
 
             <SubmitReply
                 cheetId={cheet.id}
-                isDisabled={isLoading}
+                isDisabled={isComponentLoading}
                 setReplies={setReplies}
                 setErrors={setErrors}
-                setLoading={setLoading}
+                setComponentLoading={setComponentLoading}
             />
             <div>
-                <button onClick={closeModal} disabled={isLoading}>
+                <button onClick={closeModal} disabled={isComponentLoading}>
                     Close Modal
                 </button>
             </div>

@@ -8,13 +8,13 @@ import MarkUnreadChatAltIcon from "@mui/icons-material/MarkUnreadChatAlt";
 interface Props {
     userId?: number;
     conversation: IConversation;
-    isLoading: boolean;
-    setLoading: (arg: boolean) => void;
+    isComponentLoading: boolean;
+    setComponentLoading: (arg: boolean) => void;
     setConversations: (arg: IConversation[]) => void;
     isUserPage? : boolean
 }
 
-const Conversation: React.FC<Props> = ({ userId, conversation, isLoading, setLoading, setConversations, isUserPage }) => {
+const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoading, setComponentLoading, setConversations, isUserPage }) => {
     const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
 
     const onCloseModal = (convs: IConversation[]) => {
@@ -28,13 +28,13 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isLoading, setLoa
                 userId={userId}
                 interlocutorId={conversation.interlocutorId}
                 isOpen={messageModalOpen}
-                isLoading={isLoading}
-                setLoading={setLoading}
+                isComponentLoading={isComponentLoading}
+                setComponentLoading={setComponentLoading}
                 closeModal={onCloseModal}
                 setConversations={setConversations}
                 isUserPage = {isUserPage}
             />
-            <IconButton onClick={() => setMessageModalOpen(true)} disabled={isLoading}>
+            <IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading}>
                 {conversation.unread > 0 ? <MarkUnreadChatAltIcon /> : <ChatIcon />}
             </IconButton>
             &nbsp;
