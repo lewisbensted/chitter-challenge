@@ -76,7 +76,7 @@ const User: React.FC = () => {
             setUserId={setUserId}
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading || isCheetsLoading}
-            setComponentLoading={setPageLoading}
+            setPageLoading={setPageLoading}
         >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />

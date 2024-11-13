@@ -6,10 +6,7 @@ import { ClipLoader } from "react-spinners";
 import ErrorModal from "./ErrorModal";
 import Reply from "./Reply";
 import SubmitReply from "./SubmitReply";
-import EditCheet from "./EditCheet";
-import { Link } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
-import { format } from "date-fns";
 import Cheet from "./Cheet";
 
 interface Props {

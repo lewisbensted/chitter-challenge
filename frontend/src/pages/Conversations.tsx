@@ -47,7 +47,7 @@ const Conversations: React.FC = () => {
         <Layout
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading}
-            setComponentLoading={setPageLoading}
+            setPageLoading={setPageLoading}
             userId={userId}
             setUserId={setUserId}
         >

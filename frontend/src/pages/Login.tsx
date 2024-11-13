@@ -56,7 +56,7 @@ const Login: React.FC = () => {
         <Layout
             isPageLoading={isPageLoading}
             isComponentLoading={isFormLoading}
-            setComponentLoading={setPageLoading}
+            setPageLoading={setPageLoading}
             userId={userId}
             setUserId={setUserId}
         >

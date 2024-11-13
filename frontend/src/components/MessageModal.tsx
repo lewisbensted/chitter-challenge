@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { IConversation, IMessage } from "../utils/interfaces";
 import axios from "axios";

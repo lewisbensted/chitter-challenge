@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { IMessage } from "../utils/interfaces";
 import { ClipLoader } from "react-spinners";
 import { useState } from "react";
