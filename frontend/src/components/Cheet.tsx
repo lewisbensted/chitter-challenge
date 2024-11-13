@@ -17,26 +17,38 @@ interface Props {
     isComponentLoading: boolean;
     setComponentLoading: (arg: boolean) => void;
     isModalView: boolean;
+    closeModal?: () => void;
 }
 
-const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setComponentLoading, isComponentLoading, isModalView }) => {
+const Cheet: React.FC<Props> = ({
+    userId,
+    cheet,
+    setErrors,
+    setCheets,
+    setComponentLoading,
+    isComponentLoading,
+    isModalView,
+    closeModal,
+}) => {
     const { id } = useParams();
     const [isModalOpen, setModalOpen] = useState<boolean>(false);
     const [isCheetLoading, setCheetLoading] = useState<boolean>(false);
 
     return (
         <div>
-            <CheetModal
-                cheet={cheet}
-                userId={userId}
-                isOpen={isModalOpen}
-                closeModal={() => {
-                    setModalOpen(false);
-                }}
-                setCheets={setCheets}
-                isComponentLoading={isComponentLoading}
-                setComponentLoading={setComponentLoading}
-            />
+            {isModalView ? null : (
+                <CheetModal
+                    cheet={cheet}
+                    userId={userId}
+                    isOpen={isModalOpen}
+                    closeModal={() => {
+                        setModalOpen(false);
+                    }}
+                    setCheets={setCheets}
+                    isComponentLoading={isComponentLoading}
+                    setComponentLoading={setComponentLoading}
+                />
+            )}
             <Link to={`/users/${cheet.userId}`}>{cheet.username}</Link> &nbsp;
             <EditCheet
                 cheet={cheet}
@@ -49,9 +61,19 @@ const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setCompon
             &nbsp;
             <span>{format(cheet.createdAt, "HH:mm dd/MM/yy")}</span> &nbsp;
             {new Date(cheet.updatedAt) > new Date(cheet.createdAt) ? (
-                <span>{`Edited at ${(format(cheet.updatedAt, "HH:mm dd/MM/yy"))}`} &nbsp;</span>
+                <span>{`Edited at ${format(cheet.updatedAt, "HH:mm dd/MM/yy")}`} &nbsp;</span>
             ) : null}
-            {isModalView ? null : <button onClick={() => setModalOpen(true)} disabled={isComponentLoading}>MORE</button>} &nbsp;
+            {isModalView ? null : (
+                <button
+                    onClick={() => {
+                        setModalOpen(true);
+                    }}
+                    disabled={isComponentLoading}
+                >
+                    MORE
+                </button>
+            )}
+            &nbsp;
             {userId === cheet.userId ? (
                 isCheetLoading ? (
                     <ClipLoader />
@@ -67,9 +89,10 @@ const Cheet: React.FC<Props> = ({ userId, cheet, setErrors, setCheets, setCompon
                                 })
                                 .then((res: { data: ICheet[] }) => {
                                     setCheets(res.data);
+                                    closeModal ? closeModal() : null;
                                 })
                                 .catch((error: unknown) => {
-                                    handleErrors(error, 'editing the message', setErrors)
+                                    handleErrors(error, "deleting the cheet", setErrors);
                                 });
                             setCheetLoading(false);
                             setComponentLoading(false);

@@ -60,6 +60,7 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
                     setComponentLoading={setComponentLoading}
                     isComponentLoading={isComponentLoading}
                     isModalView = {true}
+                    closeModal = {closeModal}
                 />
             </div>
             <div>

@@ -44,11 +44,12 @@ const MessageModal: React.FC<Props> = ({
                 .then((res: { data: IMessage[] }) => {
                     setMessages(res.data);
                     setMessagesLoading(false);
+                    setComponentLoading(false);
                 })
                 .catch(() => {
                     setMessagesError("An unexpected error occured while loading messages.");
-                    setComponentLoading(false);
                     setMessagesLoading(false);
+                    setComponentLoading(false);
                 });
         }
     }, [isOpen]);
@@ -93,12 +94,12 @@ const MessageModal: React.FC<Props> = ({
             </div>
             <SendMessage
                 recipientId={interlocutorId}
-                isDisabled={isComponentLoading || isMessagesLoading}
+                isDisabled={isComponentLoading}
                 setMessages={setMessages}
                 setErrors={setErrors}
                 setComponentLoading={setComponentLoading}
             />
-            <button onClick={() => closeModal(updatedConversations)} disabled={isComponentLoading || isMessagesLoading}>
+            <button onClick={() => closeModal(updatedConversations)} disabled={isComponentLoading}>
                 Close Modal
             </button>
         </Modal>
