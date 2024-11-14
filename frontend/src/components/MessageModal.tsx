@@ -3,10 +3,11 @@ import Modal from "react-modal";
 import { IConversation, IMessage } from "../utils/interfaces";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
-import { ClipLoader } from "react-spinners";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Close } from "@mui/icons-material";
 
 interface Props {
     userId?: number;
@@ -72,10 +73,9 @@ const MessageModal: React.FC<Props> = ({
     return (
         <Modal isOpen={isOpen} ariaHideApp={false}>
             <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-
             <div>
                 {isMessagesLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : messagesError ? (
                     messagesError
                 ) : (
@@ -99,9 +99,9 @@ const MessageModal: React.FC<Props> = ({
                 setErrors={setErrors}
                 setComponentLoading={setComponentLoading}
             />
-            <button onClick={() => closeModal(updatedConversations)} disabled={isComponentLoading}>
-                Close Modal
-            </button>
+            <IconButton onClick={() => closeModal(updatedConversations)} disabled={isComponentLoading}>
+                <Close />
+            </IconButton>
         </Modal>
     );
 };

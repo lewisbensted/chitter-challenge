@@ -3,8 +3,9 @@ import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../utils/interfaces";
 import { serverURL } from "../utils/serverURL";
-import { ClipLoader } from "react-spinners";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 
 interface Props {
     message: IMessage;
@@ -31,7 +32,7 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading
                 setMessages(res.data);
             })
             .catch((error: unknown) => {
-                handleErrors(error, 'editing the message', setErrors)
+                handleErrors(error, "editing the message", setErrors);
             });
         setEditing(false);
         setMessageLoading(false);
@@ -43,12 +44,14 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={message.text} />
-                        {isMessageLoading ? <ClipLoader /> : <input disabled={isDisabled} type="submit" />}
+                        {isMessageLoading ? <CircularProgress /> : <input disabled={isDisabled} type="submit" />}
                     </form>
                 ) : (
                     <span>
                         {message.text} &nbsp;
-                        <button onClick={() => setEditing(true)}>EDIT</button>
+                        <IconButton>
+                            <Edit onClick={() => setEditing(true)} />
+                        </IconButton>
                     </span>
                 )
             ) : (

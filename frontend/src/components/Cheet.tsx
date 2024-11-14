@@ -5,9 +5,10 @@ import { format } from "date-fns";
 import CheetModal from "./CheetModal";
 import { Link, useParams } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
-import { ClipLoader } from "react-spinners";
 import EditCheet from "./EditCheet";
 import { handleErrors } from "../utils/handleErrors";
+import { OpenInNew, Delete } from "@mui/icons-material";
+import { CircularProgress, IconButton } from "@mui/material";
 
 interface Props {
     userId?: number;
@@ -64,22 +65,16 @@ const Cheet: React.FC<Props> = ({
                 <span>{`Edited at ${format(cheet.updatedAt, "HH:mm dd/MM/yy")}`} &nbsp;</span>
             ) : null}
             {isModalView ? null : (
-                <button
-                    onClick={() => {
-                        setModalOpen(true);
-                    }}
-                    disabled={isComponentLoading}
-                >
-                    MORE
-                </button>
+                <IconButton onClick={() => setModalOpen(true)} disabled={isComponentLoading}>
+                    <OpenInNew />
+                </IconButton>
             )}
             &nbsp;
             {userId === cheet.userId ? (
                 isCheetLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : (
-                    <button
-                        disabled={isComponentLoading}
+                    <IconButton
                         onClick={async () => {
                             setCheetLoading(true);
                             setComponentLoading(true);
@@ -97,9 +92,10 @@ const Cheet: React.FC<Props> = ({
                             setCheetLoading(false);
                             setComponentLoading(false);
                         }}
+                        disabled={isComponentLoading}
                     >
-                        DELETE
-                    </button>
+                        <Delete />
+                    </IconButton>
                 )
             ) : null}
         </div>

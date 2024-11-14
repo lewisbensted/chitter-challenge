@@ -3,8 +3,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../utils/interfaces";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
-import { ClipLoader } from "react-spinners";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Send } from "@mui/icons-material";
 
 interface Props {
     recipientId: number;
@@ -30,18 +31,24 @@ const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, se
                 setMessages(res.data);
             })
             .catch((error: unknown) => {
-                handleErrors(error, 'sending message', setErrors)
+                handleErrors(error, "sending message", setErrors);
             });
         setSubmitLoading(false);
         setComponentLoading(false);
     };
-    
+
     return (
         <div>
             <form onSubmit={handleSubmit(onSubmit)}>
                 Send a Message: &nbsp;
                 <input {...register("text")} type="text" /> &nbsp;
-                {isSubmitLoading ? <ClipLoader /> : <input disabled={isDisabled} type="submit" />}
+                {isSubmitLoading ? (
+                    <CircularProgress />
+                ) : (
+                    <IconButton type="submit" disabled={isDisabled}>
+                        <Send />
+                    </IconButton>
+                )}
             </form>
         </div>
     );

@@ -2,9 +2,10 @@ import axios from "axios";
 import React, { useState } from "react";
 import { IReply } from "../utils/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ClipLoader } from "react-spinners";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 
 interface Props {
     isDisabled: boolean;
@@ -16,7 +17,15 @@ interface Props {
     userId?: number;
 }
 
-const EditReply: React.FC<Props> = ({ reply, cheetId, isDisabled, setComponentLoading, setReplies, setErrors, userId }) => {
+const EditReply: React.FC<Props> = ({
+    reply,
+    cheetId,
+    isDisabled,
+    setComponentLoading,
+    setReplies,
+    setErrors,
+    userId,
+}) => {
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
     const [isReplyLoading, setReplyLoading] = useState<boolean>(false);
@@ -32,7 +41,7 @@ const EditReply: React.FC<Props> = ({ reply, cheetId, isDisabled, setComponentLo
                 setReplies(res.data);
             })
             .catch((error: unknown) => {
-                handleErrors(error, 'editing the reply', setErrors)
+                handleErrors(error, "editing the reply", setErrors);
             });
         setReplyLoading(false);
         setComponentLoading(false);
@@ -45,12 +54,14 @@ const EditReply: React.FC<Props> = ({ reply, cheetId, isDisabled, setComponentLo
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={reply.text} />
-                        {isReplyLoading ? <ClipLoader /> : <input disabled={isDisabled} type="submit" />}
+                        {isReplyLoading ? <CircularProgress /> : <input disabled={isDisabled} type="submit" />}
                     </form>
                 ) : (
                     <span>
                         {reply.text} &nbsp;
-                        <button onClick={() => setEditing(true)}>EDIT</button> &nbsp;
+                        <IconButton>
+                            <Edit onClick={() => setEditing(true)} />
+                        </IconButton>
                     </span>
                 )
             ) : (

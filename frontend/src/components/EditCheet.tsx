@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import { ICheet } from "../utils/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ClipLoader } from "react-spinners";
 import { useParams } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 
 interface Props {
     cheet: ICheet;
@@ -45,12 +46,14 @@ const EditCheet: React.FC<Props> = ({ cheet, isDisabled, setComponentLoading, se
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={cheet.text} />
-                        {isCheetLoading ? <ClipLoader /> : <input disabled={isDisabled} type="submit" />}
+                        {isCheetLoading ? <CircularProgress /> : <input disabled={isDisabled} type="submit" />}
                     </form>
                 ) : (
                     <span>
                         {cheet.text} &nbsp;
-                        <button onClick={() => setEditing(true)}>EDIT</button>
+                        <IconButton>
+                            <Edit onClick={() => setEditing(true)} />
+                        </IconButton>
                     </span>
                 )
             ) : (

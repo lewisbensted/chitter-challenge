@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IReply } from "../utils/interfaces";
-import { ClipLoader } from "react-spinners";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton, Input } from "@mui/material";
+import { Reply } from "@mui/icons-material";
 
 interface Props {
     cheetId: number;
@@ -14,7 +15,7 @@ interface Props {
     setComponentLoading: (arg: boolean) => void;
 }
 
-const SubmitReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setComponentLoading }) => {
+const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setComponentLoading }) => {
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
     const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
 
@@ -30,7 +31,7 @@ const SubmitReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErro
                 setReplies(res.data);
             })
             .catch((error: unknown) => {
-                handleErrors(error, 'sending the reply', setErrors)
+                handleErrors(error, "sending the reply", setErrors);
             });
         setSubmitLoading(false);
         setComponentLoading(false);
@@ -40,10 +41,16 @@ const SubmitReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErro
             <form onSubmit={handleSubmit(onSubmit)}>
                 Send a Reply: &nbsp;
                 <input {...register("text")} type="text" /> &nbsp;
-                {isSubmitLoading ? <ClipLoader /> : <input disabled={isDisabled} type="submit" />}
+                {isSubmitLoading ? (
+                    <CircularProgress />
+                ) : (
+                    <IconButton type="submit" disabled={isDisabled}>
+                        <Reply />
+                    </IconButton>
+                )}
             </form>
         </div>
     );
 };
 
-export default SubmitReply;
+export default SendReply;

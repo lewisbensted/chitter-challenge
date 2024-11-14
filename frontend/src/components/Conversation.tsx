@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { IConversation } from "../utils/interfaces";
 import MessageModal from "./MessageModal";
 import { IconButton } from "@mui/material";
-import ChatIcon from "@mui/icons-material/Chat";
-import MarkUnreadChatAltIcon from "@mui/icons-material/MarkUnreadChatAlt";
+import {Chat, MarkUnreadChatAlt} from "@mui/icons-material";
+
 
 interface Props {
     userId?: number;
@@ -35,7 +35,7 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
                 isUserPage = {isUserPage}
             />
             <IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading}>
-                {conversation.unread > 0 ? <MarkUnreadChatAltIcon /> : <ChatIcon />}
+                {conversation.unread > 0 ? <MarkUnreadChatAlt /> : <Chat />}
             </IconButton>
             &nbsp;
         </span>

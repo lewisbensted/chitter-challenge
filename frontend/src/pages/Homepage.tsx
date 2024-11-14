@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { ICheet, IUser } from "../utils/interfaces";
-import { ClipLoader } from "react-spinners";
-import SubmitCheet from "../components/SubmitCheet";
+import SubmitCheet from "../components/SendCheet";
 import Cheet from "../components/Cheet";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress } from "@mui/material";
 
 const Homepage: React.FC = () => {
     const [userId, setUserId] = useState<number>();
@@ -39,7 +39,7 @@ const Homepage: React.FC = () => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
                     setUserId(undefined);
                 } else {
-                    handleErrors(error, 'authenticating the user', setErrors)
+                    handleErrors(error, "authenticating the user", setErrors);
                 }
                 setPageLoading(false);
             });
@@ -58,11 +58,11 @@ const Homepage: React.FC = () => {
                 <h1>Welcome to Chitter</h1>
 
                 {isPageLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : userId ? (
                     <div>
                         {isCheetsLoading ? (
-                            <ClipLoader />
+                            <CircularProgress />
                         ) : cheetsError ? (
                             cheetsError
                         ) : (

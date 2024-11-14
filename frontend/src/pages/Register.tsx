@@ -2,12 +2,12 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ErrorModal from "../components/ErrorModal";
-import { ClipLoader } from "react-spinners";
 import SuccessModal from "../components/SuccessModal";
 import Layout from "./Layout";
 import { useNavigate } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress } from "@mui/material";
 
 interface RegisterFormFields {
     firstName: string;
@@ -75,7 +75,7 @@ const Register: React.FC = () => {
                 />
                 <h1>Registration Page</h1>
                 {isPageLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         First Name:
@@ -88,7 +88,7 @@ const Register: React.FC = () => {
                         <input {...register("password")} type="text" />
                         E-mail:
                         <input {...register("email")} type="text" />
-                        {isFormLoading ? <ClipLoader /> : <input type="submit" disabled={userId != undefined} />}
+                        {isFormLoading ? <CircularProgress /> : <input type="submit" disabled={userId != undefined} />}
                     </form>
                 )}
             </div>

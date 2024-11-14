@@ -3,9 +3,10 @@ import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ICheet } from "../utils/interfaces";
 import { useParams } from "react-router-dom";
-import { ClipLoader } from "react-spinners";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Send } from "@mui/icons-material";
 
 interface Props {
     isDisabled: boolean;
@@ -15,7 +16,7 @@ interface Props {
     setComponentLoading: (arg: boolean) => void;
 }
 
-const SubmitCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, setErrors, setComponentLoading }) => {
+const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, setErrors, setComponentLoading }) => {
     const { id } = useParams();
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
     const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
@@ -33,7 +34,7 @@ const SubmitCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, s
                 setCheetsError("");
             })
             .catch((error: unknown) => {
-                handleErrors(error, 'sending cheet', setErrors)
+                handleErrors(error, "sending cheet", setErrors);
             });
         setSubmitLoading(false);
         setComponentLoading(false);
@@ -43,10 +44,16 @@ const SubmitCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, s
             <form onSubmit={handleSubmit(onSubmit)}>
                 Send a Cheet: &nbsp;
                 <input {...register("text")} type="text" /> &nbsp;
-                {isSubmitLoading ? <ClipLoader /> : <input disabled={isDisabled} type="submit" />}
+                {isSubmitLoading ? (
+                    <CircularProgress />
+                ) : (
+                    <IconButton type="submit" disabled={isDisabled}>
+                        <Send />
+                    </IconButton>
+                )}
             </form>
         </div>
     );
 };
 
-export default SubmitCheet;
+export default SendCheet;

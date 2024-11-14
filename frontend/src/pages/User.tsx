@@ -3,13 +3,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ICheet, IConversation, IUser } from "../utils/interfaces";
 import Layout from "./Layout";
-import { ClipLoader } from "react-spinners";
 import ErrorModal from "../components/ErrorModal";
 import Cheet from "../components/Cheet";
-import SubmitCheet from "../components/SubmitCheet";
+import SubmitCheet from "../components/SendCheet";
 import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress } from "@mui/material";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<number>();
@@ -82,7 +82,7 @@ const User: React.FC = () => {
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 {userId ? (
                     isPageLoading ? (
-                        <ClipLoader />
+                        <CircularProgress />
                     ) : (
                         <div>
                             {conversation[0] ? (
@@ -105,7 +105,7 @@ const User: React.FC = () => {
 
                             <div>
                                 {isCheetsLoading ? (
-                                    <ClipLoader />
+                                    <CircularProgress />
                                 ) : cheetsError ? (
                                     cheetsError
                                 ) : (

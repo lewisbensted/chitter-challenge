@@ -1,11 +1,12 @@
 import { IMessage } from "../utils/interfaces";
-import { ClipLoader } from "react-spinners";
 import { useState } from "react";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
 import { format } from "date-fns";
 import EditMessage from "./EditMessage";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 
 interface Props {
     userId?: number;
@@ -37,9 +38,9 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
             <span>{!message.isRead && message.recipientId == userId ? 'New!' : null}</span>
             {userId === message.senderId ? (
                 isMessageLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : (
-                    <button
+                    <IconButton
                         disabled={isComponentLoading}
                         onClick={async () => {
                             setMessageLoading(true);
@@ -58,8 +59,8 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
                             setComponentLoading(false);
                         }}
                     >
-                        DELETE
-                    </button>
+                        <Delete/>
+                    </IconButton>
                 )
             ) : null}
         </div>

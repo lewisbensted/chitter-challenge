@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { IConversation, IUser } from "../utils/interfaces";
-import { ClipLoader } from "react-spinners";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress } from "@mui/material";
 
 const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<number | undefined>(undefined);
@@ -54,7 +54,7 @@ const Conversations: React.FC = () => {
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 {isPageLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : userId ? (
                     <div>
                         {conversationsError

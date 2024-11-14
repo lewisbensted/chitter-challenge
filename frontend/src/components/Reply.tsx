@@ -5,8 +5,9 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import EditReply from "./EditReply";
 import { serverURL } from "../utils/serverURL";
-import { ClipLoader } from "react-spinners";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 
 interface Props {
     userId?: number;
@@ -39,9 +40,9 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
             ) : null}
             {userId === reply.userId ? (
                 isReplyLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : (
-                    <button
+                    <IconButton
                         disabled={isComponentLoading}
                         onClick={async () => {
                             setReplyLoading(true);
@@ -60,8 +61,8 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
                             setComponentLoading(false);
                         }}
                     >
-                        DELETE
-                    </button>
+                        <Delete />
+                    </IconButton>
                 )
             ) : null}
         </div>

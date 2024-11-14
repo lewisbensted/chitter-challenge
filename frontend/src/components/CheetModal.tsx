@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import ReactModal from "react-modal";
 import { ICheet, IReply } from "../utils/interfaces";
 import axios from "axios";
-import { ClipLoader } from "react-spinners";
 import ErrorModal from "./ErrorModal";
 import Reply from "./Reply";
 import SubmitReply from "./SubmitReply";
 import { serverURL } from "../utils/serverURL";
 import Cheet from "./Cheet";
+import { CircularProgress, IconButton } from "@mui/material";
+import { Close } from "@mui/icons-material";
 
 interface Props {
     userId?: number;
@@ -19,7 +20,15 @@ interface Props {
     setComponentLoading: (arg: boolean) => void;
 }
 
-const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setCheets, setComponentLoading, isComponentLoading }) => {
+const CheetModal: React.FC<Props> = ({
+    userId,
+    cheet,
+    isOpen,
+    closeModal,
+    setCheets,
+    setComponentLoading,
+    isComponentLoading,
+}) => {
     const [errors, setErrors] = useState<string[]>([]);
     const [replies, setReplies] = useState<IReply[]>([]);
     const [repliesError, setRepliesError] = useState<string>("");
@@ -48,21 +57,19 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
     return (
         <ReactModal isOpen={isOpen} ariaHideApp={false}>
             <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-            <div>
-                <Cheet
-                    cheet={cheet}
-                    userId={userId}
-                    setCheets={setCheets}
-                    setErrors={setErrors}
-                    setComponentLoading={setComponentLoading}
-                    isComponentLoading={isComponentLoading}
-                    isModalView = {true}
-                    closeModal = {closeModal}
-                />
-            </div>
+            <Cheet
+                cheet={cheet}
+                userId={userId}
+                setCheets={setCheets}
+                setErrors={setErrors}
+                setComponentLoading={setComponentLoading}
+                isComponentLoading={isComponentLoading}
+                isModalView={true}
+                closeModal={closeModal}
+            />
             <div>
                 {isRepliesLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : repliesError ? (
                     repliesError
                 ) : (
@@ -80,7 +87,6 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
                     ))
                 )}
             </div>
-
             <SubmitReply
                 cheetId={cheet.id}
                 isDisabled={isComponentLoading}
@@ -89,9 +95,9 @@ const CheetModal: React.FC<Props> = ({ userId, cheet, isOpen, closeModal, setChe
                 setComponentLoading={setComponentLoading}
             />
             <div>
-                <button onClick={closeModal} disabled={isComponentLoading}>
-                    Close Modal
-                </button>
+                <IconButton onClick={closeModal} disabled={isComponentLoading}>
+                    <Close/>
+                </IconButton>
             </div>
         </ReactModal>
     );

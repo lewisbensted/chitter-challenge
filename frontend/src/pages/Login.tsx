@@ -2,11 +2,11 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { ClipLoader } from "react-spinners";
 import ErrorModal from "../components/ErrorModal";
 import Layout from "./Layout";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
+import { CircularProgress } from "@mui/material";
 
 interface LoginFormFields {
     username: string;
@@ -64,7 +64,7 @@ const Login: React.FC = () => {
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <h1>Login Page</h1>
                 {isPageLoading ? (
-                    <ClipLoader />
+                    <CircularProgress />
                 ) : (
                     <div>
                         <form onSubmit={handleSubmit(onSubmit)}>
@@ -73,7 +73,7 @@ const Login: React.FC = () => {
                             {"\n"}
                             Password:
                             <input {...register("password")} type="text" />
-                            {isFormLoading ? <ClipLoader /> : <input type="submit" disabled={userId != undefined} />}
+                            {isFormLoading ? <CircularProgress /> : <input type="submit" disabled={userId != undefined} />}
                         </form>
                     </div>
                 )}
