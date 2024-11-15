@@ -57,11 +57,12 @@ describe("Register a new user at route: [POST] /register.", async () => {
         const count = await prisma.user.count();
         expect(status).toEqual(400);
         expect(count).toEqual(0);
-        expect(body.length).toEqual(4);
+        expect(body.length).toEqual(5);
         expect(body).toContain("Password must contain at least one number, one letter and one special character.");
         expect(body).toContain("Password cannot contain spaces.");
         expect(body).toContain("First name cannot contain numbers or special characters.");
         expect(body).toContain("Last name cannot contain numbers or special characters.");
+        expect(body).toContain("Invalid last name format.");
     });
     test("Responds with HTTP status 400 if multiple validations fail at the same time.", async () => {
         await prisma.user.create({ data: testUser1 });

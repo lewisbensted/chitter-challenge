@@ -64,7 +64,7 @@ export const testUserBadRegex = {
 	id: 8,
 	email: "testuser8@test.com",
 	firstName: "Test8",
-	lastName: "User8",
+	lastName: "Use'r8",
 	password: "password 8",
 	username: "testuser8",
 };
