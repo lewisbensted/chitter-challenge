@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { ICheet, IUser } from "../utils/interfaces";
@@ -7,7 +7,7 @@ import Cheet from "../components/Cheet";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 
 const Homepage: React.FC = () => {
     const [userId, setUserId] = useState<number>();
@@ -53,14 +53,14 @@ const Homepage: React.FC = () => {
             isComponentLoading={isComponentLoading || isCheetsLoading}
             setPageLoading={setPageLoading}
         >
-            <div>
+            <Box>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <h1>Welcome to Chitter</h1>
 
                 {isPageLoading ? (
                     <CircularProgress />
                 ) : userId ? (
-                    <div>
+                    <Box>
                         {isCheetsLoading ? (
                             <CircularProgress />
                         ) : cheetsError ? (
@@ -86,9 +86,9 @@ const Homepage: React.FC = () => {
                             setErrors={setErrors}
                             setComponentLoading={setComponentLoading}
                         />
-                    </div>
+                    </Box>
                 ) : null}
-            </div>
+            </Box>
         </Layout>
     );
 };
