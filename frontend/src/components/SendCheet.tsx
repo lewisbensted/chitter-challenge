@@ -5,8 +5,9 @@ import { ICheet } from "../utils/interfaces";
 import { useParams } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress, IconButton } from "@mui/material";
-import { Send } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Send from "@mui/icons-material/Send";
 
 interface Props {
     isDisabled: boolean;

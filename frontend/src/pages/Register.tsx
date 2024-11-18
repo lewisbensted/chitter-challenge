@@ -7,7 +7,7 @@ import Layout from "./Layout";
 import { useNavigate } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 interface RegisterFormFields {
     firstName: string;

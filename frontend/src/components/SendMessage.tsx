@@ -4,8 +4,9 @@ import { IMessage } from "../utils/interfaces";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress, IconButton } from "@mui/material";
-import { Send } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Send from "@mui/icons-material/Send";
 
 interface Props {
     recipientId: number;

@@ -6,8 +6,10 @@ import { serverURL } from "../utils/serverURL";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";
-import { CircularProgress, IconButton } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Close from "@mui/icons-material/Close";
+import Box from "@mui/material/Box/Box";
 
 interface Props {
     userId?: number;

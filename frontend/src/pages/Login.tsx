@@ -6,7 +6,7 @@ import ErrorModal from "../components/ErrorModal";
 import Layout from "./Layout";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 interface LoginFormFields {
     username: string;
@@ -21,6 +21,7 @@ const Login: React.FC = () => {
     const [isFormLoading, setFormLoading] = useState<boolean>(false);
     const [userId, setUserId] = useState<number | undefined>(undefined);
     const [errors, setErrors] = useState<string[]>([]);
+    
 
     useEffect(() => {
         axios

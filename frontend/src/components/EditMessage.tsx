@@ -4,8 +4,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../utils/interfaces";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress, IconButton } from "@mui/material";
-import { Edit } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Edit from "@mui/icons-material/Edit";
 
 interface Props {
     message: IMessage;
@@ -49,8 +50,8 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading
                 ) : (
                     <span>
                         {message.text} &nbsp;
-                        <IconButton>
-                            <Edit onClick={() => setEditing(true)} />
+                        <IconButton onClick={() => setEditing(true)}>
+                            <Edit />
                         </IconButton>
                     </span>
                 )

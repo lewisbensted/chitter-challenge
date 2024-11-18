@@ -4,8 +4,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IReply } from "../utils/interfaces";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress, IconButton, Input } from "@mui/material";
-import { Reply } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Reply from "@mui/icons-material/Reply";
 
 interface Props {
     cheetId: number;

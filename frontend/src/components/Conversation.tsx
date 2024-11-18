@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { IConversation } from "../utils/interfaces";
 import MessageModal from "./MessageModal";
-import { IconButton } from "@mui/material";
-import {Chat, MarkUnreadChatAlt} from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import Chat from "@mui/icons-material/Chat";
+import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 
 
 interface Props {

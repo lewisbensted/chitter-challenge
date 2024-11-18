@@ -7,8 +7,11 @@ import { Link, useParams } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import EditCheet from "./EditCheet";
 import { handleErrors } from "../utils/handleErrors";
-import { OpenInNew, Delete } from "@mui/icons-material";
-import { CircularProgress, IconButton } from "@mui/material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import OpenInNew from "@mui/icons-material/OpenInNew";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Delete  from "@mui/icons-material/Delete";
+
 
 interface Props {
     userId?: number;

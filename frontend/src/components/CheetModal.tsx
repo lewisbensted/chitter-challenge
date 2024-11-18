@@ -4,11 +4,12 @@ import { ICheet, IReply } from "../utils/interfaces";
 import axios from "axios";
 import ErrorModal from "./ErrorModal";
 import Reply from "./Reply";
-import SubmitReply from "./SubmitReply";
+import SubmitReply from "./SendReply";
 import { serverURL } from "../utils/serverURL";
 import Cheet from "./Cheet";
-import { CircularProgress, IconButton } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Close from "@mui/icons-material/Close";
 
 interface Props {
     userId?: number;
@@ -96,7 +97,7 @@ const CheetModal: React.FC<Props> = ({
             />
             <div>
                 <IconButton onClick={closeModal} disabled={isComponentLoading}>
-                    <Close/>
+                    <Close />
                 </IconButton>
             </div>
         </ReactModal>

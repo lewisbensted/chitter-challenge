@@ -1,3 +1,5 @@
+import Close from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton/IconButton";
 import React from "react";
 import ReactModal from "react-modal";
 
@@ -13,7 +15,9 @@ const SuccessModal: React.FC<Props> = ({ success, closeModal }) => {
 			ariaHideApp={false}>
 			<h2>Success</h2>
 			<p>Account created.</p>
-			<button onClick={closeModal}>OK</button>
+			<IconButton onClick={closeModal} >
+                <Close />
+            </IconButton>
 		</ReactModal>
 	);
 };

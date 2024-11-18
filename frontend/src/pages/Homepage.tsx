@@ -7,7 +7,8 @@ import Cheet from "../components/Cheet";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { Box, CircularProgress } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Box from "@mui/material/Box/Box";
 
 const Homepage: React.FC = () => {
     const [userId, setUserId] = useState<number>();

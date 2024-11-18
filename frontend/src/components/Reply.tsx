@@ -6,8 +6,9 @@ import { Link } from "react-router-dom";
 import EditReply from "./EditReply";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress, IconButton } from "@mui/material";
-import { Delete } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton/IconButton";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import Delete from "@mui/icons-material/Delete";
 
 interface Props {
     userId?: number;

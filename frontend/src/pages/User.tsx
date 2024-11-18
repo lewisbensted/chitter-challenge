@@ -9,7 +9,7 @@ import SubmitCheet from "../components/SendCheet";
 import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<number>();
