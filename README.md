@@ -72,4 +72,4 @@ Once the app is running, the user must register and then login to an account in 
 
 ## Tech Stack
 
-[![My Skills](https://skillicons.dev/icons?i=ts,express,react,prisma,mysql,vitest,materialui)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=nodejs,ts,express,react,prisma,mysql,vitest,materialui,vscode,github)](https://skillicons.dev)
