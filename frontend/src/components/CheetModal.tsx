@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ReactModal from "react-modal";
 import { ICheet, IReply } from "../utils/interfaces";
 import axios from "axios";
 import ErrorModal from "./ErrorModal";
@@ -10,6 +9,7 @@ import Cheet from "./Cheet";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
+import Dialog from "@mui/material/Dialog/Dialog";
 
 interface Props {
     userId?: number;
@@ -56,7 +56,7 @@ const CheetModal: React.FC<Props> = ({
     }, [isOpen]);
 
     return (
-        <ReactModal isOpen={isOpen} ariaHideApp={false}>
+        <Dialog open={isOpen}>
             <ErrorModal errors={errors} closeModal={() => setErrors([])} />
             <Cheet
                 cheet={cheet}
@@ -100,7 +100,7 @@ const CheetModal: React.FC<Props> = ({
                     <Close />
                 </IconButton>
             </div>
-        </ReactModal>
+        </Dialog>
     );
 };
 

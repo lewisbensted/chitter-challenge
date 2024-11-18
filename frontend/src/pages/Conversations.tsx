@@ -16,6 +16,7 @@ const Conversations: React.FC = () => {
     const [conversations, setConversations] = useState<IConversation[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const [conversationsError, setConversationsError] = useState<string>("");
+    const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,11 +38,23 @@ const Conversations: React.FC = () => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
                     navigate("/");
                 } else {
-                    handleErrors(error, 'authenticating the user', setErrors)
+                    handleErrors(error, "authenticating the user", setErrors);
                 }
                 setPageLoading(false);
             });
     }, []);
+
+    useEffect(() => {
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations`, { withCredentials: true })
+                    .then((res: { data: IConversation[] }) => {
+                        setConversations(res.data);
+                    });
+            })();
+        }
+    }, [reloadTrigger]);
 
     return (
         <Layout
@@ -68,6 +81,8 @@ const Conversations: React.FC = () => {
                                           isComponentLoading={isComponentLoading}
                                           setComponentLoading={setComponentLoading}
                                           setConversations={setConversations}
+                                          reloadTrigger={reloadTrigger}
+                                          toggleReloadTrigger={toggleReloadTrigger}
                                       />
                                   </div>
                               ))}

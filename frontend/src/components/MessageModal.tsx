@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Modal from "react-modal";
 import { IConversation, IMessage } from "../utils/interfaces";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
@@ -9,17 +8,18 @@ import SendMessage from "./SendMessage";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
-import Box from "@mui/material/Box/Box";
+import Dialog from "@mui/material/Dialog";
 
 interface Props {
     userId?: number;
     interlocutorId: number;
     isOpen: boolean;
     isComponentLoading: boolean;
-    closeModal: (conversations: IConversation[]) => void;
+    closeModal: () => void;
     setComponentLoading: (arg: boolean) => void;
     setConversations: (arg: IConversation[]) => void;
-    isUserPage?: boolean;
+    reloadTrigger: boolean;
+    toggleReloadTrigger: (arg: boolean) => void;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -29,13 +29,13 @@ const MessageModal: React.FC<Props> = ({
     isComponentLoading,
     closeModal,
     setComponentLoading,
-    isUserPage,
+    reloadTrigger,
+    toggleReloadTrigger,
 }) => {
     const [errors, setErrors] = useState<string[]>([]);
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [messagesError, setMessagesError] = useState<string>("");
     const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
-    const [updatedConversations, setUpdatedConversations] = useState<IConversation[]>([]);
 
     useEffect(() => {
         if (isOpen) {
@@ -48,6 +48,7 @@ const MessageModal: React.FC<Props> = ({
                     setMessages(res.data);
                     setMessagesLoading(false);
                     setComponentLoading(false);
+                    toggleReloadTrigger(!reloadTrigger);
                 })
                 .catch(() => {
                     setMessagesError("An unexpected error occured while loading messages.");
@@ -57,23 +58,8 @@ const MessageModal: React.FC<Props> = ({
         }
     }, [isOpen]);
 
-    useEffect(() => {
-        axios
-            .get(`${serverURL}/conversations/${isUserPage ? interlocutorId : ""}`, {
-                withCredentials: true,
-            })
-            .then((res: { data: IConversation[] }) => {
-                setUpdatedConversations(res.data);
-                setComponentLoading(false);
-            })
-            .catch(() => {
-                setMessagesError("An unexpected error occured while loading messages.");
-                setComponentLoading(false);
-            });
-    }, [messages]);
-
     return (
-        <Modal isOpen={isOpen} ariaHideApp={false}>
+        <Dialog open={isOpen}>
             <ErrorModal errors={errors} closeModal={() => setErrors([])} />
             <div>
                 {isMessagesLoading ? (
@@ -101,10 +87,10 @@ const MessageModal: React.FC<Props> = ({
                 setErrors={setErrors}
                 setComponentLoading={setComponentLoading}
             />
-            <IconButton onClick={() => closeModal(updatedConversations)} disabled={isComponentLoading}>
+            <IconButton onClick={closeModal} disabled={isComponentLoading}>
                 <Close />
             </IconButton>
-        </Modal>
+        </Dialog>
     );
 };
 

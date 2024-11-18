@@ -20,6 +20,7 @@ const User: React.FC = () => {
     const [cheets, setCheets] = useState<ICheet[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const [cheetsError, setCheetsError] = useState<string>("");
+    const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -70,6 +71,18 @@ const User: React.FC = () => {
         }
     }, [userId]);
 
+    useEffect(() => {
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
+                    .then((res: { data: IConversation[] }) => {
+                        setConversation(res.data);
+                    });
+            })();
+        }
+    }, [reloadTrigger]);
+
     return (
         <Layout
             userId={userId}
@@ -95,7 +108,8 @@ const User: React.FC = () => {
                                             isComponentLoading={isComponentLoading}
                                             setComponentLoading={setComponentLoading}
                                             setConversations={setConversation}
-                                            isUserPage={true}
+                                            reloadTrigger={reloadTrigger}
+                                            toggleReloadTrigger={toggleReloadTrigger}
                                         />
                                     )}
                                 </div>

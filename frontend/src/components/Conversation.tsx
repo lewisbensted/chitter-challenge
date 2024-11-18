@@ -5,23 +5,27 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import Chat from "@mui/icons-material/Chat";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 
-
 interface Props {
     userId?: number;
     conversation: IConversation;
     isComponentLoading: boolean;
     setComponentLoading: (arg: boolean) => void;
     setConversations: (arg: IConversation[]) => void;
-    isUserPage? : boolean
+    isUserPage?: boolean;
+    reloadTrigger: boolean;
+    toggleReloadTrigger: (arg: boolean) => void;
 }
 
-const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoading, setComponentLoading, setConversations, isUserPage }) => {
+const Conversation: React.FC<Props> = ({
+    userId,
+    conversation,
+    isComponentLoading,
+    setComponentLoading,
+    setConversations,
+    reloadTrigger,
+    toggleReloadTrigger,
+}) => {
     const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
-
-    const onCloseModal = (convs: IConversation[]) => {
-        setMessageModalOpen(false);
-        setConversations(convs);
-    };
 
     return (
         <span>
@@ -31,9 +35,13 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
                 isOpen={messageModalOpen}
                 isComponentLoading={isComponentLoading}
                 setComponentLoading={setComponentLoading}
-                closeModal={onCloseModal}
+                closeModal={() => {
+                    setMessageModalOpen(false);
+                    toggleReloadTrigger(!reloadTrigger);
+                }}
                 setConversations={setConversations}
-                isUserPage = {isUserPage}
+                reloadTrigger={reloadTrigger}
+                toggleReloadTrigger={toggleReloadTrigger}
             />
             <IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading}>
                 {conversation.unread > 0 ? <MarkUnreadChatAlt /> : <Chat />}
