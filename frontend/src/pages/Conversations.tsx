@@ -17,6 +17,7 @@ const Conversations: React.FC = () => {
     const [errors, setErrors] = useState<string[]>([]);
     const [conversationsError, setConversationsError] = useState<string>("");
     const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
+    const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -56,6 +57,18 @@ const Conversations: React.FC = () => {
         }
     }, [reloadTrigger]);
 
+    useEffect(() => {
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                    .then((res: { data: boolean }) => {
+                        setUnreadMessages(res.data);
+                    });
+            })();
+        }
+    }, [conversations]);
+
     return (
         <Layout
             isPageLoading={isPageLoading}
@@ -63,6 +76,7 @@ const Conversations: React.FC = () => {
             setPageLoading={setPageLoading}
             userId={userId}
             setUserId={setUserId}
+            isUnreadMessages={isUnreadMessages}
         >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />

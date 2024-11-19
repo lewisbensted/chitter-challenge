@@ -13,6 +13,8 @@ import Chat from "@mui/icons-material/Chat";
 import AppRegistration from "@mui/icons-material/AppRegistration";
 import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
+import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
     isComponentLoading: boolean;
@@ -21,6 +23,7 @@ interface Props {
     setUserId: (arg?: number) => void;
     isPageLoading: boolean;
     children: JSX.Element;
+    isUnreadMessages?: boolean;
 }
 
 const drawerWidth = 200;
@@ -32,8 +35,10 @@ const Layout: React.FC<Props> = ({
     userId,
     setUserId,
     isPageLoading,
+    isUnreadMessages,
 }) => {
     const [isDrawerOpen, setDrawerOpen] = useState(false);
+    const navigate = useNavigate();
 
     return (
         <Box sx={{ display: "flex" }}>
@@ -53,34 +58,37 @@ const Layout: React.FC<Props> = ({
                             <DrawerElement
                                 link="/conversations"
                                 text="Messages"
-                                icon={<Chat />}
+                                icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
                                 isComponentLoading={isComponentLoading}
                                 isDrawerOpen={isDrawerOpen}
                             />
                             <DrawerElement
                                 link="/"
-                                text="Logout"
+                                text="Log out"
                                 icon={<Logout />}
                                 isComponentLoading={isComponentLoading}
                                 isDrawerOpen={isDrawerOpen}
-                                onClick={() => {
-                                    logout(setPageLoading, setUserId);
+                                onClick={async () => {
+                                    {
+                                        await logout(setPageLoading, setUserId);
+                                        navigate("/login");
+                                    }
                                 }}
                             />
                         </Fragment>
                     ) : (
                         <Fragment>
                             <DrawerElement
-                                link="/login"
-                                text="Log in"
-                                icon={<Login />}
+                                link="/register"
+                                text="Registration"
+                                icon={<AppRegistration />}
                                 isComponentLoading={isComponentLoading}
                                 isDrawerOpen={isDrawerOpen}
                             />
                             <DrawerElement
-                                link="/register"
-                                text="Registration"
-                                icon={<AppRegistration />}
+                                link="/login"
+                                text="Log in"
+                                icon={<Login />}
                                 isComponentLoading={isComponentLoading}
                                 isDrawerOpen={isDrawerOpen}
                             />

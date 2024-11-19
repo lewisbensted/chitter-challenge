@@ -18,6 +18,7 @@ const Homepage: React.FC = () => {
     const [cheets, setCheets] = useState<ICheet[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const [cheetsError, setCheetsError] = useState<string>("");
+    const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
 
     useEffect(() => {
         axios
@@ -46,6 +47,20 @@ const Homepage: React.FC = () => {
             });
     }, []);
 
+    useEffect(() => {
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                    .then((res: { data: boolean }) => {
+                        setUnreadMessages(res.data);
+                    });
+            })();
+        }
+    }, [userId]);
+
+
+
     return (
         <Layout
             userId={userId}
@@ -53,6 +68,7 @@ const Homepage: React.FC = () => {
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading || isCheetsLoading}
             setPageLoading={setPageLoading}
+            isUnreadMessages={isUnreadMessages}
         >
             <Box>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
