@@ -52,17 +52,15 @@ const Conversations: React.FC = () => {
     }, [userId, reloadTrigger]);
 
     useEffect(() => {
-        if (userId) {
-            (async () => {
-                await axios
-                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
-                    .then((res: { data: boolean }) => {
-                        setUnreadMessages(res.data);
-                    });
-                    setPageLoading(false);
-            })();
-        }
-    }, [userId, conversations]);
+        (async () => {
+            await axios
+                .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                .then((res: { data: boolean }) => {
+                    setUnreadMessages(res.data);
+                });
+            setPageLoading(false);
+        })();
+    }, [conversations]);
 
     return (
         <Layout
@@ -96,7 +94,7 @@ const Conversations: React.FC = () => {
                                   </div>
                               ))}
                     </div>
-                ) : null}
+                ) : 'Error loading conversations.'}
             </div>
         </Layout>
     );

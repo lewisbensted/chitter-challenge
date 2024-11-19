@@ -37,19 +37,17 @@ const Homepage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (userId) {
-            (async () => {
-                await axios
-                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
-                    .then((res: { data: boolean }) => {
-                        setUnreadMessages(res.data);
-                    })
-                    .catch((error) => {
-                        handleErrors(error, "loading user information", setErrors);
-                    });
-                setPageLoading(false);
-            })();
-        }
+        (async () => {
+            await axios
+                .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                .then((res: { data: boolean }) => {
+                    setUnreadMessages(res.data);
+                })
+                .catch((error) => {
+                    handleErrors(error, "loading user information", setErrors);
+                });
+            setPageLoading(false);
+        })();
     }, [userId]);
 
     useEffect(() => {

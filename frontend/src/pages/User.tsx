@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ICheet, IConversation, IUser } from "../utils/interfaces";
 import Layout from "./Layout";
@@ -79,20 +79,18 @@ const User: React.FC = () => {
     }, [userId, reloadTrigger]);
 
     useEffect(() => {
-        if (userId) {
-            (async () => {
-                await axios
-                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
-                    .then((res: { data: boolean }) => {
-                        setUnreadMessages(res.data);
-                    })
-                    .catch((error) => {
-                        handleErrors(error, "loading user information", setErrors);
-                    });
-                setPageLoading(false);
-            })();
-        }
-    }, [userId, conversation]);
+        (async () => {
+            await axios
+                .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                .then((res: { data: boolean }) => {
+                    setUnreadMessages(res.data);
+                })
+                .catch((error) => {
+                    handleErrors(error, "loading user information", setErrors);
+                });
+            setPageLoading(false);
+        })();
+    }, [conversation]);
 
     return (
         <Layout
@@ -103,32 +101,28 @@ const User: React.FC = () => {
             setPageLoading={setPageLoading}
             isUnreadMessages={isUnreadMessages}
         >
-            <div>
+            <Fragment>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                {userId ? (
-                    isPageLoading ? (
-                        <CircularProgress />
-                    ) : (
-                        <div>
-                            {conversation[0] ? (
-                                <div>
-                                    {conversation[0].interlocutorUsername}
-                                    {userId == Number(id) ? null : (
-                                        <Conversation
-                                            userId={userId}
-                                            conversation={conversation[0]}
-                                            isComponentLoading={isComponentLoading}
-                                            setComponentLoading={setComponentLoading}
-                                            setConversations={setConversation}
-                                            reloadTrigger={reloadTrigger}
-                                            toggleReloadTrigger={toggleReloadTrigger}
-                                        />
-                                    )}
-                                </div>
-                            ) : (
-                                "Error loading user."
-                            )}
-
+                {/* {userId ? ( */}
+                {isPageLoading ? (
+                    <CircularProgress />
+                ) : userId ? (
+                    conversation[0] ? (
+                        <Fragment>
+                            <div>
+                                {conversation[0].interlocutorUsername}
+                                {userId == Number(id) ? null : (
+                                    <Conversation
+                                        userId={userId}
+                                        conversation={conversation[0]}
+                                        isComponentLoading={isComponentLoading}
+                                        setComponentLoading={setComponentLoading}
+                                        setConversations={setConversation}
+                                        reloadTrigger={reloadTrigger}
+                                        toggleReloadTrigger={toggleReloadTrigger}
+                                    />
+                                )}
+                            </div>
                             <div>
                                 {isCheetsLoading ? (
                                     <CircularProgress />
@@ -158,10 +152,17 @@ const User: React.FC = () => {
                                     />
                                 ) : null}
                             </div>
-                        </div>
+                        </Fragment>
+                    ) : (
+                        "Error loading user."
                     )
-                ) : null}
-            </div>
+                ) : (
+                    "Error loading user."
+                )}
+                {/* ) : (
+                    isPageLoading?'loading':'error'
+                )} */}
+            </Fragment>
         </Layout>
     );
 };
