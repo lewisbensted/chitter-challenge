@@ -38,37 +38,24 @@ const User: React.FC = () => {
                 } else {
                     handleErrors(error, "authenticating the user", setErrors);
                 }
+                setPageLoading(false);
             });
     }, []);
 
     useEffect(() => {
         if (userId) {
-            axios
-                .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
-                .then(async (res: { data: IConversation[] }) => {
-                    setCheetsLoading(true);
-                    setConversation(res.data);
-                    setPageLoading(false);
-                    await axios
-                        .get(`${serverURL}/users/${id}/cheets`, { withCredentials: true })
-                        .then((res: { data: ICheet[] }) => {
-                            setCheets(res.data);
-                        })
-                        .catch(() => {
-                            setCheetsError("An unexpected error occured while loading cheets.");
-                        });
-                    setCheetsLoading(false);
-                })
-                .catch((error: unknown) => {
-                    if (axios.isAxiosError(error) && error.response?.status == 404) {
-                        navigate("/");
-                    } else {
-                        handleErrors(error, "loading the page", setErrors);
-                    }
-                    setPageLoading(false);
-                });
-        } else {
-            setPageLoading(false);
+            (async () => {
+                setCheetsLoading(true);
+                await axios
+                    .get(`${serverURL}/users/${id}/cheets`, { withCredentials: true })
+                    .then((res: { data: ICheet[] }) => {
+                        setCheets(res.data);
+                    })
+                    .catch(() => {
+                        setCheetsError("An unexpected error occured while loading cheets.");
+                    });
+                setCheetsLoading(false);
+            })();
         }
     }, [userId]);
 
@@ -79,10 +66,17 @@ const User: React.FC = () => {
                     .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
                     .then((res: { data: IConversation[] }) => {
                         setConversation(res.data);
+                    })
+                    .catch((error: unknown) => {
+                        if (axios.isAxiosError(error) && error.response?.status == 404) {
+                            navigate("/");
+                        } else {
+                            handleErrors(error, "loading the page", setErrors);
+                        }
                     });
             })();
         }
-    }, [reloadTrigger]);
+    }, [userId, reloadTrigger]);
 
     useEffect(() => {
         if (userId) {
@@ -91,10 +85,14 @@ const User: React.FC = () => {
                     .get(`${serverURL}/conversations/unread`, { withCredentials: true })
                     .then((res: { data: boolean }) => {
                         setUnreadMessages(res.data);
+                    })
+                    .catch((error) => {
+                        handleErrors(error, "loading user information", setErrors);
                     });
+                setPageLoading(false);
             })();
         }
-    }, [conversation]);
+    }, [userId, conversation]);
 
     return (
         <Layout
@@ -103,7 +101,7 @@ const User: React.FC = () => {
             isPageLoading={isPageLoading}
             isComponentLoading={isComponentLoading || isCheetsLoading}
             setPageLoading={setPageLoading}
-            isUnreadMessages = {isUnreadMessages}
+            isUnreadMessages={isUnreadMessages}
         >
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />

@@ -1,25 +1,24 @@
-import Close from "@mui/icons-material/Close";
-import IconButton from "@mui/material/IconButton/IconButton";
 import React from "react";
-import ReactModal from "react-modal";
+import Close from "@mui/icons-material/Close";
+import Dialog from "@mui/material/Dialog/Dialog";
+import IconButton from "@mui/material/IconButton/IconButton";
+
 
 interface Props {
-	success : boolean
-	closeModal: () => void;
+    success: boolean;
+    closeModal: () => void;
 }
 
 const SuccessModal: React.FC<Props> = ({ success, closeModal }) => {
-	return (
-		<ReactModal
-			isOpen={success}
-			ariaHideApp={false}>
-			<h2>Success</h2>
-			<p>Account created.</p>
-			<IconButton onClick={closeModal} >
+    return (
+        <Dialog open={success}>
+            <h2>Success</h2>
+            <p>Account created.</p>
+            <IconButton onClick={closeModal}>
                 <Close />
             </IconButton>
-		</ReactModal>
-	);
+        </Dialog>
+    );
 };
 
 export default SuccessModal;

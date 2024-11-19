@@ -7,6 +7,7 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Edit from "@mui/icons-material/Edit";
+import Done from "@mui/icons-material/Done";
 
 interface Props {
     message: IMessage;
@@ -45,7 +46,13 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={message.text} />
-                        {isMessageLoading ? <CircularProgress /> : <input disabled={isDisabled} type="submit" />}
+                        {isMessageLoading ? (
+                            <CircularProgress />
+                        ) : (
+                            <IconButton type="submit" disabled={isDisabled}>
+                                <Done />
+                            </IconButton>
+                        )}
                     </form>
                 ) : (
                     <span>

@@ -24,18 +24,7 @@ const Homepage: React.FC = () => {
         axios
             .get(`${serverURL}/validate`, { withCredentials: true })
             .then(async (res: { data: IUser }) => {
-                setCheetsLoading(true);
                 setUserId(res.data.id);
-                await axios
-                    .get(`${serverURL}/cheets`, { withCredentials: true })
-                    .then((res: { data: ICheet[] }) => {
-                        setCheets(res.data);
-                    })
-                    .catch(() => {
-                        setCheetsError("An unexpected error occured while loading cheets.");
-                    });
-                setCheetsLoading(false);
-                setPageLoading(false);
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
@@ -54,12 +43,31 @@ const Homepage: React.FC = () => {
                     .get(`${serverURL}/conversations/unread`, { withCredentials: true })
                     .then((res: { data: boolean }) => {
                         setUnreadMessages(res.data);
+                    })
+                    .catch((error) => {
+                        handleErrors(error, "loading user information", setErrors);
                     });
+                setPageLoading(false);
             })();
         }
     }, [userId]);
 
-
+    useEffect(() => {
+        if (userId) {
+            (async () => {
+                setCheetsLoading(true);
+                await axios
+                    .get(`${serverURL}/cheets`, { withCredentials: true })
+                    .then((res: { data: ICheet[] }) => {
+                        setCheets(res.data);
+                    })
+                    .catch(() => {
+                        setCheetsError("An unexpected error occured while loading cheets.");
+                    });
+                setCheetsLoading(false);
+            })();
+        }
+    }, [userId]);
 
     return (
         <Layout

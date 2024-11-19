@@ -80,7 +80,7 @@ const Layout: React.FC<Props> = ({
                         <Fragment>
                             <DrawerElement
                                 link="/register"
-                                text="Registration"
+                                text="Register"
                                 icon={<AppRegistration />}
                                 isComponentLoading={isComponentLoading}
                                 isDrawerOpen={isDrawerOpen}

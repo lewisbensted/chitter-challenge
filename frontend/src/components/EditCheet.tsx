@@ -8,6 +8,7 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Edit from "@mui/icons-material/Edit";
+import Done from "@mui/icons-material/Done";
 
 interface Props {
     cheet: ICheet;
@@ -41,13 +42,20 @@ const EditCheet: React.FC<Props> = ({ cheet, isDisabled, setComponentLoading, se
         setCheetLoading(false);
         setComponentLoading(false);
     };
+
     return (
         <span>
             {userId === cheet.userId ? (
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={cheet.text} />
-                        {isCheetLoading ? <CircularProgress /> : <input disabled={isDisabled} type="submit" />}
+                        {isCheetLoading ? (
+                            <CircularProgress />
+                        ) : (
+                            <IconButton disabled={isDisabled} type="submit">
+                                <Done />
+                            </IconButton>
+                        )}
                     </form>
                 ) : (
                     <span>

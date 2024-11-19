@@ -7,6 +7,8 @@ import Layout from "./Layout";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import IconButton from "@mui/material/IconButton/IconButton";
+import Send from "@mui/icons-material/Send";
 
 interface LoginFormFields {
     username: string;
@@ -21,7 +23,6 @@ const Login: React.FC = () => {
     const [isFormLoading, setFormLoading] = useState<boolean>(false);
     const [userId, setUserId] = useState<number | undefined>(undefined);
     const [errors, setErrors] = useState<string[]>([]);
-    
 
     useEffect(() => {
         axios
@@ -74,7 +75,13 @@ const Login: React.FC = () => {
                             {"\n"}
                             Password:
                             <input {...register("password")} type="text" />
-                            {isFormLoading ? <CircularProgress /> : <input type="submit" disabled={userId != undefined} />}
+                            {isFormLoading ? (
+                                <CircularProgress />
+                            ) : (
+                                <IconButton type="submit" disabled={!!userId}>
+                                    <Send />
+                                </IconButton>
+                            )}
                         </form>
                     </div>
                 )}

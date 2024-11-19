@@ -25,15 +25,6 @@ const Conversations: React.FC = () => {
             .get(`${serverURL}/validate`, { withCredentials: true })
             .then(async (res: { data: IUser }) => {
                 setUserId(res.data.id);
-                await axios
-                    .get(`${serverURL}/conversations`, { withCredentials: true })
-                    .then((res: { data: IConversation[] }) => {
-                        setConversations(res.data);
-                    })
-                    .catch(() => {
-                        setConversationsError("An unexpected error occured while loading conversations.");
-                    });
-                setPageLoading(false);
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
@@ -52,10 +43,13 @@ const Conversations: React.FC = () => {
                     .get(`${serverURL}/conversations`, { withCredentials: true })
                     .then((res: { data: IConversation[] }) => {
                         setConversations(res.data);
+                    })
+                    .catch(() => {
+                        setConversationsError("An unexpected error occured while loading conversations.");
                     });
             })();
         }
-    }, [reloadTrigger]);
+    }, [userId, reloadTrigger]);
 
     useEffect(() => {
         if (userId) {
@@ -65,9 +59,10 @@ const Conversations: React.FC = () => {
                     .then((res: { data: boolean }) => {
                         setUnreadMessages(res.data);
                     });
+                    setPageLoading(false);
             })();
         }
-    }, [conversations]);
+    }, [userId, conversations]);
 
     return (
         <Layout

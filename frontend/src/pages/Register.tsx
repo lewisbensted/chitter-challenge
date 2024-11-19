@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import AppRegistration from "@mui/icons-material/AppRegistration";
+import IconButton from "@mui/material/IconButton/IconButton";
 
 interface RegisterFormFields {
     firstName: string;
@@ -88,7 +90,13 @@ const Register: React.FC = () => {
                         <input {...register("password")} type="text" />
                         E-mail:
                         <input {...register("email")} type="text" />
-                        {isFormLoading ? <CircularProgress /> : <input type="submit" disabled={userId != undefined} />}
+                        {isFormLoading ? (
+                            <CircularProgress />
+                        ) : (
+                            <IconButton type="submit" disabled={!!userId}>
+                                <AppRegistration />
+                            </IconButton>
+                        )}
                     </form>
                 )}
             </div>
