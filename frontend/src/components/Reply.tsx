@@ -11,8 +11,8 @@ import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Delete from "@mui/icons-material/Delete";
 
 interface Props {
-    userId?: number;
-    cheetId: number;
+    userId?: string;
+    cheetId: string;
     reply: IReply;
     setErrors: (arg: string[]) => void;
     setReplies: (arg: IReply[]) => void;
@@ -20,12 +20,20 @@ interface Props {
     setComponentLoading: (arg: boolean) => void;
 }
 
-const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors, isComponentLoading, setComponentLoading }) => {
+const Reply: React.FC<Props> = ({
+    userId,
+    cheetId,
+    reply,
+    setReplies,
+    setErrors,
+    isComponentLoading,
+    setComponentLoading,
+}) => {
     const [isReplyLoading, setReplyLoading] = useState<boolean>(false);
 
     return (
         <div>
-            <Link to={`/users/${reply.userId}`}>{reply.username}</Link> &nbsp;
+            <Link to={`/users/${reply.user.uuid}`}>{reply.user.username}</Link> &nbsp;
             <EditReply
                 cheetId={cheetId}
                 reply={reply}
@@ -39,7 +47,7 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
             {new Date(reply.updatedAt) > new Date(reply.createdAt) ? (
                 <span>{`Edited at ${format(reply.updatedAt, "HH:mm dd/MM/yy")}`} &nbsp;</span>
             ) : null}
-            {userId === reply.userId ? (
+            {userId === reply.user.uuid ? (
                 isReplyLoading ? (
                     <CircularProgress />
                 ) : (
@@ -49,14 +57,14 @@ const Reply: React.FC<Props> = ({ userId, cheetId, reply, setReplies, setErrors,
                             setReplyLoading(true);
                             setComponentLoading(true);
                             await axios
-                                .delete(`${serverURL}/cheets/${reply.cheetId}/replies/${reply.id}`, {
+                                .delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
                                     withCredentials: true,
                                 })
                                 .then((res: { data: IReply[] }) => {
                                     setReplies(res.data);
                                 })
                                 .catch((error: unknown) => {
-                                    handleErrors(error, 'deleting the reply', setErrors)
+                                    handleErrors(error, "deleting the reply", setErrors);
                                 });
                             setReplyLoading(false);
                             setComponentLoading(false);

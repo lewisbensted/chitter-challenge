@@ -12,7 +12,7 @@ import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
 
 interface Props {
-    userId?: number;
+    userId?: string;
     cheet: ICheet;
     isOpen: boolean;
     closeModal: () => void;
@@ -39,7 +39,7 @@ const CheetModal: React.FC<Props> = ({
         if (isOpen) {
             setComponentLoading(true);
             axios
-                .get(`${serverURL}/cheets/${cheet.id}/replies`, {
+                .get(`${serverURL}/cheets/${cheet.uuid}/replies`, {
                     withCredentials: true,
                 })
                 .then((res: { data: IReply[] }) => {
@@ -78,7 +78,7 @@ const CheetModal: React.FC<Props> = ({
                         <Reply
                             isComponentLoading={isComponentLoading}
                             userId={userId}
-                            cheetId={cheet.id}
+                            cheetId={cheet.uuid}
                             reply={reply}
                             key={key}
                             setReplies={setReplies}
@@ -89,7 +89,7 @@ const CheetModal: React.FC<Props> = ({
                 )}
             </div>
             <SubmitReply
-                cheetId={cheet.id}
+                cheetId={cheet.uuid}
                 isDisabled={isComponentLoading}
                 setReplies={setReplies}
                 setErrors={setErrors}

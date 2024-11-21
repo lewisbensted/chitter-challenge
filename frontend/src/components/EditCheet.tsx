@@ -16,7 +16,7 @@ interface Props {
     setComponentLoading: (arg: boolean) => void;
     setCheets: (arg: ICheet[]) => void;
     setErrors: (arg: string[]) => void;
-    userId?: number;
+    userId?: string;
 }
 
 const EditCheet: React.FC<Props> = ({ cheet, isDisabled, setComponentLoading, setCheets, setErrors, userId }) => {
@@ -29,7 +29,7 @@ const EditCheet: React.FC<Props> = ({ cheet, isDisabled, setComponentLoading, se
         setCheetLoading(true);
         setComponentLoading(true);
         await axios
-            .put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.id}`, data, {
+            .put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, data, {
                 withCredentials: true,
             })
             .then((res: { data: ICheet[] }) => {
@@ -45,7 +45,7 @@ const EditCheet: React.FC<Props> = ({ cheet, isDisabled, setComponentLoading, se
 
     return (
         <span>
-            {userId === cheet.userId ? (
+            {userId === cheet.user.uuid ? (
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={cheet.text} />

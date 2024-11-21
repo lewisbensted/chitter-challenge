@@ -6,7 +6,7 @@ import Chat from "@mui/icons-material/Chat";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 
 interface Props {
-    userId?: number;
+    userId?: string;
     conversation: IConversation;
     isComponentLoading: boolean;
     setComponentLoading: (arg: boolean) => void;

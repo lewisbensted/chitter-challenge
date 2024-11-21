@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -15,6 +16,7 @@ datasource db {
 
 model User {
   id          Int         @id @default(autoincrement())
+  uuid        String      @default(uuid()) @db.Char(36) @unique
   firstName   String      @map(name: "first_name")
   lastName    String      @map(name: "last_name")
   email       String      @unique
@@ -31,22 +33,23 @@ model User {
 
 model Cheet {
   id          Int         @id @default(autoincrement())
-  user        User        @relation(fields: [userId, username], references: [id, username], onDelete: Cascade)
+  uuid        String      @default(uuid()) @db.Char(36) @unique
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int         @map(name: "user_id")
-  username    String      @db.VarChar(30)
   text        String      @db.VarChar(50)
   createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
   updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
   replies     Reply[]
 
+  @@unique([id, uuid])
   @@map("Cheets")
 }
 
 model Reply {
   id          Int         @id @default(autoincrement())
-  user        User        @relation(fields: [userId, username], references: [id, username], onDelete: Cascade)
+  uuid        String      @default(uuid()) @db.Char(36) @unique
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int         @map(name: "user_id")
-  username    String      @db.VarChar(30)
   cheet       Cheet       @relation(fields: [cheetId], references: [id], onDelete: Cascade)
   cheetId     Int         @map(name: "cheet_id")
   text        String      @db.VarChar(50)
@@ -58,12 +61,11 @@ model Reply {
 
 model Message {
   id                  Int         @id @default(autoincrement())
-  sender              User        @relation(name: "sender", fields: [senderId, senderUsername], references: [id, username], onDelete: Cascade)
+  uuid                String      @default(uuid()) @db.Char(36) @unique
+  sender              User        @relation(name: "sender", fields: [senderId], references: [id], onDelete: Cascade)
   senderId            Int         @map(name: "sender_id")
-  senderUsername      String      @db.VarChar(30) @map(name: "sender_username")
-  recipient           User        @relation(name:"recipient", fields: [recipientId, recipientUsername], references: [id, username], onDelete: Cascade)
+  recipient           User        @relation(name:"recipient", fields: [recipientId], references: [id], onDelete: Cascade)
   recipientId         Int         @map(name: "recipient_id")
-  recipientUsername   String      @db.VarChar(30) @map(name: "recipient_username")
   text                String      @db.VarChar(50)
   isRead              Boolean     @default(false) @map(name: "is_read")
   createdAt           DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")

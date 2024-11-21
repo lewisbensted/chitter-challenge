@@ -6,7 +6,6 @@ import { logError } from "../utils/logError.js";
 import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../schemas/message.schema.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { checkUser } from "../utils/checkUser.js";
 import { checkMessage } from "../utils/checkMessage.js";
 
 const router = express.Router({ mergeParams: true });
@@ -62,7 +61,7 @@ export const readMessages = async (userId: number, interlocutorId: number) => {
 
 router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        await checkUser(req.params.recipientId, "recipient");
+        await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
         const messages = await fetchMessages(req.session.user!.id, Number(req.params.recipientId));
         res.status(200).send(messages);
         await readMessages(req.session.user!.id, Number(req.params.recipientId));
@@ -75,13 +74,11 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 router.post("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
     const date = new Date();
     try {
-        const recipientUser = await checkUser(req.params.recipientId, "recipient");
+        const recipientUser = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
         await prisma.$extends(messageExtension).message.create({
             data: {
                 senderId: req.session.user!.id,
-                senderUsername: req.session.user!.username,
                 recipientId: Number(req.params.recipientId),
-                recipientUsername: recipientUser!.username,
                 text: req.body.text,
                 createdAt: date,
                 updatedAt: date,
@@ -98,7 +95,7 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Request, res: Response) => {
     const date = new Date();
     try {
-        await checkUser(req.params.recipientId, "recipient");
+        await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
         const targetMessage = await checkMessage(req.params.messageId);
         if (targetMessage.senderId === req.session.user!.id) {
             if (req.body.text !== targetMessage.text) {
@@ -122,7 +119,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 
 router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        await checkUser(req.params.recipientId, "recipient");
+        await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
         const targetMessage = await checkMessage(req.params.messageId);
         if (targetMessage.senderId === req.session.user!.id) {
             await prisma.message.delete({

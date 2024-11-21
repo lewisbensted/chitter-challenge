@@ -5,7 +5,6 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { checkCheet } from "../utils/checkCheet.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -30,10 +29,11 @@ export const replyExtension = Prisma.defineExtension({
     },
 });
 
-export const fetchReplies = async (cheetId: number) => {
+export const fetchReplies = async (cheetId: string) => {
     const replies = await prisma.reply.findMany({
+        include: { cheet: true, user:true },
         where: {
-            cheetId: cheetId,
+            cheet: {uuid: cheetId}
         },
     });
     replies.sort((replyA, replyB) => {
@@ -44,8 +44,8 @@ export const fetchReplies = async (cheetId: number) => {
 
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
     try {
-        await checkCheet(req.params.cheetId);
-        const replies = await fetchReplies(Number(req.params.cheetId));
+        await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+        const replies = await fetchReplies(req.params.cheetId);
         res.status(200).send(replies);
     } catch (error) {
         console.error("Error retrieving replies from the database:\n" + logError(error));
@@ -56,18 +56,17 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
     const date = new Date();
     try {
-        await checkCheet(req.params.cheetId);
+        const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
         await prisma.$extends(replyExtension).reply.create({
             data: {
                 userId: req.session.user!.id,
-                username: req.session.user!.username,
                 text: req.body.text,
-                cheetId: Number(req.params.cheetId),
+                cheetId: cheet.id,
                 createdAt: date,
                 updatedAt: date,
             },
         });
-        const replies = await fetchReplies(Number(req.params.cheetId));
+        const replies = await fetchReplies(req.params.cheetId);
         res.status(201).send(replies);
     } catch (error) {
         console.error("Error adding reply to the database:\n" + logError(error));
@@ -78,19 +77,17 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
     const date = new Date();
     try {
-        await checkCheet(req.params.cheetId);
-        if (isNaN(Number(req.params.replyId))) {
-            throw new TypeError("Invalid reply ID provided - must be a number.");
-        }
+        await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
         const targetReply = await prisma.reply.findUniqueOrThrow({
-            where: { id: Number(req.params.replyId) },
+            include: { cheet: true},
+            where: { uuid: req.params.replyId },
         });
         if (targetReply.userId === req.session.user!.id) {
-            if (targetReply.cheetId === Number(req.params.cheetId)) {
+            if (targetReply.cheet.uuid === req.params.cheetId) {
                 if (req.body.text !== targetReply.text) {
                     await prisma.$extends(replyExtension).reply.update({
                         where: {
-                            id: Number(req.params.replyId),
+                            id: targetReply.id
                         },
                         data: {
                             text: req.body.text,
@@ -98,7 +95,7 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
                         },
                     });
                 }
-                const replies = await fetchReplies(Number(req.params.cheetId));
+                const replies = await fetchReplies(req.params.cheetId);
                 res.status(200).send(replies);
             } else {
                 res.status(403).send(["Cheet IDs do not match."]);
@@ -114,21 +111,20 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 
 router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        await checkCheet(req.params.cheetId);
-        if (isNaN(Number(req.params.replyId))) {
-            throw new TypeError("Invalid reply ID provided - must be a number.");
-        }
+       
+        await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
         const targetReply = await prisma.reply.findUniqueOrThrow({
-            where: { id: Number(req.params.replyId) },
+            include: { cheet: true},
+            where: { uuid: req.params.replyId },
         });
         if (targetReply.userId === req.session.user!.id) {
-            if (targetReply.cheetId === Number(req.params.cheetId)) {
+            if (targetReply.cheet.uuid === req.params.cheetId) {
                 await prisma.reply.delete({
                     where: {
-                        id: Number(req.params.replyId),
+                        id: targetReply.id
                     },
                 });
-                const replies = await fetchReplies(Number(req.params.cheetId));
+                const replies = await fetchReplies(req.params.cheetId);
                 res.status(200).send(replies);
             } else {
                 res.status(403).send(["Cheet IDs do not match."]);

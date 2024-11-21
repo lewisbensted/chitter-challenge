@@ -1,41 +1,39 @@
 export interface IUser {
-    id: number;
+    uuid: string;
     username: string;
+    firstName: string;
+    lastName: string;
 }
 
 export interface ICheet {
-    id: number;
-    userId: number;
-    username: string;
+    uuid: string;
     text: string;
     createdAt: string;
     updatedAt: string;
+    user: IUser;
 }
 
 export interface IReply {
-    id: number;
-    userId: number;
-    username: string;
-    cheetId: number;
+    uuid: string;
     text: string;
     createdAt: string;
     updatedAt: string;
+    cheet: ICheet;
+    user: IUser;
 }
 
 export interface IMessage {
-    id: number;
-    senderId: number;
-    senderUsername: string;
-    recipientId: number;
-    recipientUsername: string;
+    uuid: string
+    sender: IUser
+    recipient: IUser
     text: string;
     createdAt: string;
     updatedAt: string;
-    isRead: boolean
+    isRead: boolean;
 }
 
 export interface IConversation {
-    interlocutorId: number,
-    interlocutorUsername: string
-    unread: number
+    interlocutorId: string;
+    interlocutorUsername: string;
+    unread: number;
 }

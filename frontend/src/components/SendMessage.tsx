@@ -9,7 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 
 interface Props {
-    recipientId: number;
+    recipientId: string;
     isDisabled: boolean;
     setMessages: (arg: IMessage[]) => void;
     setErrors: (arg: string[]) => void;

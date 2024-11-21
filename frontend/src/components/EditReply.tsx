@@ -15,8 +15,8 @@ interface Props {
     setReplies: (arg: IReply[]) => void;
     setErrors: (arg: string[]) => void;
     reply: IReply;
-    cheetId: number;
-    userId?: number;
+    cheetId: string;
+    userId?: string;
 }
 
 const EditReply: React.FC<Props> = ({
@@ -36,7 +36,7 @@ const EditReply: React.FC<Props> = ({
         setReplyLoading(true);
         setComponentLoading(true);
         await axios
-            .put(`${serverURL}/cheets/${cheetId}/replies/${reply.id}`, data, {
+            .put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}`, data, {
                 withCredentials: true,
             })
             .then((res: { data: IReply[] }) => {
@@ -52,7 +52,7 @@ const EditReply: React.FC<Props> = ({
 
     return (
         <span>
-            {userId === reply.userId ? (
+            {userId === reply.user.uuid ? (
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={reply.text} />

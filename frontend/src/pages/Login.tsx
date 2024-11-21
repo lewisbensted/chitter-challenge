@@ -21,7 +21,7 @@ const Login: React.FC = () => {
 
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isFormLoading, setFormLoading] = useState<boolean>(false);
-    const [userId, setUserId] = useState<number | undefined>(undefined);
+    const [userId, setUserId] = useState<string>();
     const [errors, setErrors] = useState<string[]>([]);
 
     useEffect(() => {

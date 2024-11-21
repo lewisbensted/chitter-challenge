@@ -10,7 +10,7 @@ import { handleErrors } from "../utils/handleErrors";
 import { CircularProgress } from "@mui/material";
 
 const Conversations: React.FC = () => {
-    const [userId, setUserId] = useState<number | undefined>(undefined);
+    const [userId, setUserId] = useState<string>();
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
     const [conversations, setConversations] = useState<IConversation[]>([]);
@@ -23,8 +23,8 @@ const Conversations: React.FC = () => {
     useEffect(() => {
         axios
             .get(`${serverURL}/validate`, { withCredentials: true })
-            .then(async (res: { data: IUser }) => {
-                setUserId(res.data.id);
+            .then(async (res: { data: string }) => {
+                setUserId(res.data);
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {

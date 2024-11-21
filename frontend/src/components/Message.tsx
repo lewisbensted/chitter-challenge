@@ -10,7 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Delete from "@mui/icons-material/Delete";
 
 interface Props {
-    userId?: number;
+    userId?: string;
     message: IMessage;
     setErrors: (arg: string[]) => void;
     setMessages: (arg: IMessage[]) => void;

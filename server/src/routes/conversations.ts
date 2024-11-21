@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { checkUser } from "../utils/checkUser.js";
 import { Message, User } from "@prisma/client";
 import prisma from "../../prisma/prismaClient.js";
 
@@ -32,24 +31,24 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
         (result: IConversation[], message: Message) => {
             if (message.senderId === userId) {
                 if (!interlocutor && !result.find((item) => item.interlocutorId == message.recipientId)) {
-                    result.push({
-                        interlocutorId: message.recipientId,
-                        interlocutorUsername: message.recipientUsername,
-                        unread: 0,
-                    });
+                    // result.push({
+                    //     interlocutorId: message.recipientId,
+                    //     interlocutorUsername: message.recipientUsername,
+                    //     unread: 0,
+                    // });
                 }
             } else {
                 let target = result.find((item) => item.interlocutorId == message.senderId);
                 if (!target) {
-                    target = {
-                        interlocutorId: message.senderId,
-                        interlocutorUsername: message.senderUsername,
-                        unread: 0,
-                    };
-                    result.push(target);
-                }
-                if (!message.isRead) {
-                    target.unread++;
+                    // target = {
+                    //     interlocutorId: message.senderId,
+                    //     interlocutorUsername: message.senderUsername,
+                    //     unread: 0,
+                    // };
+                    // result.push(target);
+                // }
+                // if (!message.isRead) {
+                    //target.unread++;
                 }
             }
             return result;
@@ -86,7 +85,7 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 
 router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        const user = await checkUser(req.params.userId);
+        const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
         const conversation = await fetchConversations(req.session.user!.id, user);
         res.status(200).send(conversation);
     } catch (error) {
