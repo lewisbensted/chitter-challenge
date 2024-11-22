@@ -22,7 +22,7 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
     const [isMessageLoading, setMessageLoading] = useState<boolean>(false);
 
     return (
-        <div style={{ display: "flex", justifyContent: message.senderId === userId ? "left" : "right" }}>
+        <div style={{ display: "flex", justifyContent: message.sender.uuid === userId ? "left" : "right" }}>
             <EditMessage
                 message={message}
                 isDisabled={isComponentLoading}
@@ -36,8 +36,8 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
             {new Date(message.updatedAt) > new Date(message.createdAt) ? (
                 <span>{`Edited at ${format(message.updatedAt, "HH:mm dd/MM/yy")}`} &nbsp;</span>
             ) : null}
-            <span>{!message.isRead && message.recipientId == userId ? 'New!' : null}</span>
-            {userId === message.senderId ? (
+            <span>{!message.isRead && message.recipient.uuid == userId ? 'New!' : null}</span>
+            {userId === message.sender.uuid ? (
                 isMessageLoading ? (
                     <CircularProgress />
                 ) : (
@@ -47,7 +47,7 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
                             setMessageLoading(true);
                             setComponentLoading(true);
                             await axios
-                                .delete(`${serverURL}/messages/${message.recipientId}/message/${message.id}`, {
+                                .delete(`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`, {
                                     withCredentials: true,
                                 })
                                 .then((res: { data: IMessage[] }) => {

@@ -7,7 +7,7 @@ import prisma from "../../prisma/prismaClient.js";
 
 interface IConversation {
     interlocutorUsername: string;
-    interlocutorId: number;
+    interlocutorId: string;
     unread: number;
 }
 
@@ -15,6 +15,7 @@ const router = express.Router({ mergeParams: true });
 
 export const fetchConversations = async (userId: number, interlocutor?: User) => {
     const messages = await prisma.message.findMany({
+        include: {sender: true, recipient:true},
         where: {
             OR: [
                 { senderId: userId, recipientId: interlocutor ? interlocutor.id : undefined },
@@ -28,33 +29,33 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
     });
 
     const conversations = messages.reduce(
-        (result: IConversation[], message: Message) => {
+        (result: IConversation[], message) => {
             if (message.senderId === userId) {
-                if (!interlocutor && !result.find((item) => item.interlocutorId == message.recipientId)) {
-                    // result.push({
-                    //     interlocutorId: message.recipientId,
-                    //     interlocutorUsername: message.recipientUsername,
-                    //     unread: 0,
-                    // });
+                if (!interlocutor && !result.find((item) => item.interlocutorId == message.recipient.uuid)) {
+                    result.push({
+                        interlocutorId: message.recipient.uuid,
+                        interlocutorUsername: message.recipient.username,
+                        unread: 0,
+                    });
                 }
             } else {
-                let target = result.find((item) => item.interlocutorId == message.senderId);
+                let target = result.find((item) => item.interlocutorId == message.sender.uuid);
                 if (!target) {
-                    // target = {
-                    //     interlocutorId: message.senderId,
-                    //     interlocutorUsername: message.senderUsername,
-                    //     unread: 0,
-                    // };
-                    // result.push(target);
-                // }
-                // if (!message.isRead) {
-                    //target.unread++;
+                    target = {
+                        interlocutorId: message.sender.uuid,
+                        interlocutorUsername: message.sender.username,
+                        unread: 0,
+                    };
+                    result.push(target);
+                }
+                if (!message.isRead) {
+                    target.unread++;
                 }
             }
             return result;
         },
         interlocutor
-            ? [{ interlocutorId: interlocutor.id, interlocutorUsername: interlocutor.username, unread: 0 }]
+            ? [{ interlocutorId: interlocutor.uuid, interlocutorUsername: interlocutor.username, unread: 0 }]
             : []
     );
 

@@ -15,7 +15,7 @@ interface Props {
     setComponentLoading: (arg: boolean) => void;
     setMessages: (arg: IMessage[]) => void;
     setErrors: (arg: string[]) => void;
-    userId?: number;
+    userId?: string;
 }
 
 const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading, setMessages, setErrors, userId }) => {
@@ -27,7 +27,7 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading
         setMessageLoading(true);
         setComponentLoading(true);
         await axios
-            .put(`${serverURL}/messages/${message.recipientId}/message/${message.id}`, data, {
+            .put(`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`, data, {
                 withCredentials: true,
             })
             .then((res: { data: IMessage[] }) => {
@@ -42,7 +42,7 @@ const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading
     };
     return (
         <div>
-            {userId === message.senderId ? (
+            {userId === message.sender.uuid ? (
                 isEditing ? (
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <input {...register("text")} type="text" defaultValue={message.text} />

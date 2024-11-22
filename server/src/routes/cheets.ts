@@ -84,14 +84,13 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
             await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
         }
         const targetCheet = await prisma.cheet.findUniqueOrThrow({
-            include: { user: true },
             where: { uuid: req.params.cheetId },
         });
-        if (targetCheet.user.id === req.session.user!.id) {
+        if (targetCheet.userId === req.session.user!.id) {
             if (req.body.text !== targetCheet.text) {
                 await prisma.$extends(cheetExtension).cheet.update({
                     where: {
-                        id: targetCheet.id
+                        id: targetCheet.id,
                     },
                     data: {
                         text: req.body.text,
@@ -119,7 +118,7 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
         if (targetCheet.userId === req.session.user!.id) {
             await prisma.cheet.delete({
                 where: {
-                    id: targetCheet.id
+                    id: targetCheet.id,
                 },
             });
             const cheets = await fetchCheets(req.params.userId);

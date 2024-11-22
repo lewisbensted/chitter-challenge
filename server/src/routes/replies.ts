@@ -31,9 +31,9 @@ export const replyExtension = Prisma.defineExtension({
 
 export const fetchReplies = async (cheetId: string) => {
     const replies = await prisma.reply.findMany({
-        include: { cheet: true, user:true },
+        include: { cheet: true, user: true },
         where: {
-            cheet: {uuid: cheetId}
+            cheet: { uuid: cheetId },
         },
     });
     replies.sort((replyA, replyB) => {
@@ -79,7 +79,7 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
     try {
         await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
         const targetReply = await prisma.reply.findUniqueOrThrow({
-            include: { cheet: true},
+            include: { cheet: true },
             where: { uuid: req.params.replyId },
         });
         if (targetReply.userId === req.session.user!.id) {
@@ -87,7 +87,7 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
                 if (req.body.text !== targetReply.text) {
                     await prisma.$extends(replyExtension).reply.update({
                         where: {
-                            id: targetReply.id
+                            id: targetReply.id,
                         },
                         data: {
                             text: req.body.text,
@@ -111,17 +111,16 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 
 router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) => {
     try {
-       
         await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
         const targetReply = await prisma.reply.findUniqueOrThrow({
-            include: { cheet: true},
+            include: { cheet: true },
             where: { uuid: req.params.replyId },
         });
         if (targetReply.userId === req.session.user!.id) {
             if (targetReply.cheet.uuid === req.params.cheetId) {
                 await prisma.reply.delete({
                     where: {
-                        id: targetReply.id
+                        id: targetReply.id,
                     },
                 });
                 const replies = await fetchReplies(req.params.cheetId);
