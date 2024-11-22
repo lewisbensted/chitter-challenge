@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { Message, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import prisma from "../../prisma/prismaClient.js";
 
 interface IConversation {

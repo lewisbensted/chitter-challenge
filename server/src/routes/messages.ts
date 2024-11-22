@@ -6,7 +6,6 @@ import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../schemas/message.schema.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
-
 const router = express.Router({ mergeParams: true });
 
 export const messageExtension = Prisma.defineExtension({
@@ -32,7 +31,8 @@ export const messageExtension = Prisma.defineExtension({
 
 export const fetchMessages = async (userId: string, interlocutorId: string) => {
     const messages = await prisma.message.findMany({
-        include: { sender: true, recipient: true },
+        omit: { id: true, senderId: true, recipientId: true },
+        include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
         where: {
             OR: [
                 { sender: { uuid: userId }, recipient: { uuid: interlocutorId } },
@@ -43,7 +43,6 @@ export const fetchMessages = async (userId: string, interlocutorId: string) => {
     messages.sort((messageA, messageB) => {
         return messageA.createdAt.valueOf() - messageB.createdAt.valueOf();
     });
-
     return messages;
 };
 
@@ -102,7 +101,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
             if (req.body.text !== targetMessage.text) {
                 await prisma.$extends(messageExtension).message.update({
                     where: {
-                        id: targetMessage.id
+                        id: targetMessage.id,
                     },
                     data: { text: req.body.text, updatedAt: date },
                 });
@@ -127,7 +126,7 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
         if (targetMessage.senderId === req.session.user!.id) {
             await prisma.message.delete({
                 where: {
-                    id: targetMessage.id
+                    id: targetMessage.id,
                 },
             });
             const messages = await fetchMessages(req.session.user!.uuid, req.params.recipientId);

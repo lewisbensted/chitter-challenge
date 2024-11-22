@@ -31,7 +31,8 @@ export const replyExtension = Prisma.defineExtension({
 
 export const fetchReplies = async (cheetId: string) => {
     const replies = await prisma.reply.findMany({
-        include: { cheet: true, user: true },
+        include: { cheet: { omit: { id: true, userId: true } }, user: { omit: { id: true } } },
+        omit: { id: true, cheetId: true, userId: true },
         where: {
             cheet: { uuid: cheetId },
         },

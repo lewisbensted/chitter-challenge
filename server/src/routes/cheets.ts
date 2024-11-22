@@ -31,7 +31,8 @@ export const cheetExtension = Prisma.defineExtension({
 
 export const fetchCheets = async (userId?: string) => {
     const cheets = await prisma.cheet.findMany({
-        include: { user: true },
+        include: { user: { omit: { id: true } } },
+        omit: { id: true, userId: true },
         where: {
             uuid: userId ? userId : undefined,
         },
