@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   id          Int         @id @default(autoincrement())
-  uuid        String      @default(uuid()) @db.Char(36) @unique
+  uuid        String      @default(uuid()) @db.VarChar(36) @unique
   firstName   String      @map(name: "first_name")
   lastName    String      @map(name: "last_name")
   email       String      @unique
@@ -27,13 +27,13 @@ model User {
   sender      Message[]   @relation("sender")
   recipient   Message[]   @relation("recipient")
 
-  @@unique([id, username])
+  @@unique([id, uuid, username])
   @@map("Users")
 }
 
 model Cheet {
   id          Int         @id @default(autoincrement())
-  uuid        String      @default(uuid()) @db.Char(36) @unique
+  uuid        String      @default(uuid()) @db.VarChar(36) @unique
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int         @map(name: "user_id")
   text        String      @db.VarChar(50)
@@ -47,7 +47,7 @@ model Cheet {
 
 model Reply {
   id          Int         @id @default(autoincrement())
-  uuid        String      @default(uuid()) @db.Char(36) @unique
+  uuid        String      @default(uuid()) @db.VarChar(36) @unique
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int         @map(name: "user_id")
   cheet       Cheet       @relation(fields: [cheetId], references: [id], onDelete: Cascade)
@@ -61,7 +61,7 @@ model Reply {
 
 model Message {
   id                  Int         @id @default(autoincrement())
-  uuid                String      @default(uuid()) @db.Char(36) @unique
+  uuid                String      @default(uuid()) @db.VarChar(36) @unique
   sender              User        @relation(name: "sender", fields: [senderId], references: [id], onDelete: Cascade)
   senderId            Int         @map(name: "sender_id")
   recipient           User        @relation(name:"recipient", fields: [recipientId], references: [id], onDelete: Cascade)
