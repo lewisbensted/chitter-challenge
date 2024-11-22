@@ -2,7 +2,7 @@ import "express-session";
 
 interface SessionUser {
 	id: number;
-	username: string;
+	uuid: string;
 }
 
 declare module "express-session" {

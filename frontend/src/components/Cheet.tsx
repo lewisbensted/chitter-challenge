@@ -10,11 +10,10 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import OpenInNew from "@mui/icons-material/OpenInNew";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import Delete  from "@mui/icons-material/Delete";
-
+import Delete from "@mui/icons-material/Delete";
 
 interface Props {
-    userId?: number;
+    userId?: string;
     cheet: ICheet;
     setErrors: (arg: string[]) => void;
     setCheets: (arg: ICheet[]) => void;
@@ -53,7 +52,7 @@ const Cheet: React.FC<Props> = ({
                     setComponentLoading={setComponentLoading}
                 />
             )}
-            <Link to={`/users/${cheet.userId}`}>{cheet.username}</Link> &nbsp;
+            <Link to={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link> &nbsp;
             <EditCheet
                 cheet={cheet}
                 isDisabled={isComponentLoading}
@@ -73,7 +72,7 @@ const Cheet: React.FC<Props> = ({
                 </IconButton>
             )}
             &nbsp;
-            {userId === cheet.userId ? (
+            {userId === cheet.user.uuid ? (
                 isCheetLoading ? (
                     <CircularProgress />
                 ) : (
@@ -82,7 +81,7 @@ const Cheet: React.FC<Props> = ({
                             setCheetLoading(true);
                             setComponentLoading(true);
                             await axios
-                                .delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.id}`, {
+                                .delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, {
                                     withCredentials: true,
                                 })
                                 .then((res: { data: ICheet[] }) => {

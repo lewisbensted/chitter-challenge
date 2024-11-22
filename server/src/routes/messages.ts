@@ -1,16 +1,12 @@
 import express, { Request, Response } from "express";
-
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
 import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../schemas/message.schema.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { checkUser } from "../utils/checkUser.js";
-import { checkMessage } from "../utils/checkMessage.js";
 
 const router = express.Router({ mergeParams: true });
-
 
 export const messageExtension = Prisma.defineExtension({
     query: {
@@ -35,6 +31,8 @@ export const messageExtension = Prisma.defineExtension({
 
 export const fetchMessages = async (userId: number, interlocutorId: number) => {
     const messages = await prisma.message.findMany({
+        omit: { id: true, senderId: true, recipientId: true },
+        include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
         where: {
             OR: [
                 { senderId: userId, recipientId: interlocutorId },
@@ -45,15 +43,14 @@ export const fetchMessages = async (userId: number, interlocutorId: number) => {
     messages.sort((messageA, messageB) => {
         return messageA.createdAt.valueOf() - messageB.createdAt.valueOf();
     });
-
     return messages;
 };
 
 export const readMessages = async (userId: number, interlocutorId: number) => {
     const readMessages = await prisma.message.updateMany({
         where: {
-            recipientId: userId,
-            senderId: interlocutorId,
+            recipientId: userId ,
+            senderId: interlocutorId 
         },
         data: { isRead: true },
     });
@@ -62,10 +59,10 @@ export const readMessages = async (userId: number, interlocutorId: number) => {
 
 router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        await checkUser(req.params.recipientId, "recipient");
-        const messages = await fetchMessages(req.session.user!.id, Number(req.params.recipientId));
+        const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+        const messages = await fetchMessages(req.session.user!.id, recipient.id);
         res.status(200).send(messages);
-        await readMessages(req.session.user!.id, Number(req.params.recipientId));
+        await readMessages(req.session.user!.id, recipient.id);
     } catch (error) {
         console.error("Error retrieving messages from the database:\n" + logError(error));
         sendErrorResponse(error, res);
@@ -75,19 +72,17 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 router.post("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
     const date = new Date();
     try {
-        const recipientUser = await checkUser(req.params.recipientId, "recipient");
+        const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
         await prisma.$extends(messageExtension).message.create({
             data: {
                 senderId: req.session.user!.id,
-                senderUsername: req.session.user!.username,
-                recipientId: Number(req.params.recipientId),
-                recipientUsername: recipientUser!.username,
+                recipientId: recipient.id,
                 text: req.body.text,
                 createdAt: date,
                 updatedAt: date,
             },
         });
-        const messages = await fetchMessages(req.session.user!.id, Number(req.params.recipientId));
+        const messages = await fetchMessages(req.session.user!.id, recipient.id);
         res.status(201).send(messages);
     } catch (error) {
         console.error("Error adding message to the database:\n" + logError(error));
@@ -98,18 +93,20 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Request, res: Response) => {
     const date = new Date();
     try {
-        await checkUser(req.params.recipientId, "recipient");
-        const targetMessage = await checkMessage(req.params.messageId);
+        const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+        const targetMessage = await prisma.message.findUniqueOrThrow({
+            where: { uuid: req.params.messageId },
+        });
         if (targetMessage.senderId === req.session.user!.id) {
             if (req.body.text !== targetMessage.text) {
                 await prisma.$extends(messageExtension).message.update({
                     where: {
-                        id: Number(req.params.messageId),
+                        id: targetMessage.id,
                     },
                     data: { text: req.body.text, updatedAt: date },
                 });
             }
-            const messages = await fetchMessages(req.session.user!.id, Number(req.params.recipientId));
+            const messages = await fetchMessages(req.session.user!.id, recipient.id);
             res.status(200).send(messages);
         } else {
             res.status(403).send(["Cannot update someone else's message."]);
@@ -122,15 +119,17 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 
 router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        await checkUser(req.params.recipientId, "recipient");
-        const targetMessage = await checkMessage(req.params.messageId);
+        const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+        const targetMessage = await prisma.message.findUniqueOrThrow({
+            where: { uuid: req.params.messageId },
+        });
         if (targetMessage.senderId === req.session.user!.id) {
             await prisma.message.delete({
                 where: {
-                    id: Number(req.params.messageId),
+                    id: targetMessage.id,
                 },
             });
-            const messages = await fetchMessages(req.session.user!.id, Number(req.params.recipientId));
+            const messages = await fetchMessages(req.session.user!.id, recipient.id);
             res.status(200).send(messages);
         } else {
             res.status(403).send(["Cannot delete someone else's message."]);

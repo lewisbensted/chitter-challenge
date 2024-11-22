@@ -2,13 +2,12 @@ import express, { Request, Response } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { checkUser } from "../utils/checkUser.js";
-import { Message, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import prisma from "../../prisma/prismaClient.js";
 
 interface IConversation {
     interlocutorUsername: string;
-    interlocutorId: number;
+    interlocutorId: string;
     unread: number;
 }
 
@@ -16,6 +15,7 @@ const router = express.Router({ mergeParams: true });
 
 export const fetchConversations = async (userId: number, interlocutor?: User) => {
     const messages = await prisma.message.findMany({
+        include: {sender: true, recipient:true},
         where: {
             OR: [
                 { senderId: userId, recipientId: interlocutor ? interlocutor.id : undefined },
@@ -29,21 +29,21 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
     });
 
     const conversations = messages.reduce(
-        (result: IConversation[], message: Message) => {
+        (result: IConversation[], message) => {
             if (message.senderId === userId) {
-                if (!interlocutor && !result.find((item) => item.interlocutorId == message.recipientId)) {
+                if (!interlocutor && !result.find((item) => item.interlocutorId == message.recipient.uuid)) {
                     result.push({
-                        interlocutorId: message.recipientId,
-                        interlocutorUsername: message.recipientUsername,
+                        interlocutorId: message.recipient.uuid,
+                        interlocutorUsername: message.recipient.username,
                         unread: 0,
                     });
                 }
             } else {
-                let target = result.find((item) => item.interlocutorId == message.senderId);
+                let target = result.find((item) => item.interlocutorId == message.sender.uuid);
                 if (!target) {
                     target = {
-                        interlocutorId: message.senderId,
-                        interlocutorUsername: message.senderUsername,
+                        interlocutorId: message.sender.uuid,
+                        interlocutorUsername: message.sender.username,
                         unread: 0,
                     };
                     result.push(target);
@@ -55,7 +55,7 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
             return result;
         },
         interlocutor
-            ? [{ interlocutorId: interlocutor.id, interlocutorUsername: interlocutor.username, unread: 0 }]
+            ? [{ interlocutorId: interlocutor.uuid, interlocutorUsername: interlocutor.username, unread: 0 }]
             : []
     );
 
@@ -86,7 +86,7 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 
 router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
     try {
-        const user = await checkUser(req.params.userId);
+        const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
         const conversation = await fetchConversations(req.session.user!.id, user);
         res.status(200).send(conversation);
     } catch (error) {

@@ -26,7 +26,7 @@ describe("Logout a user at route: [DELETE] /logout.", async () => {
         const sessionApp = express();
         sessionApp.use(session({ secret: "secret-key" }));
         sessionApp.all("*", (req, res, next) => {
-            req.session.user = { id: 1, username: "testuser1" };
+            req.session.user = { id: 1, uuid: "testuseruuid1" };
             next();
         });
         sessionApp.use(testApp);

@@ -11,8 +11,8 @@ import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
 
 interface Props {
-    userId?: number;
-    interlocutorId: number;
+    userId?: string;
+    interlocutorId: string;
     isOpen: boolean;
     isComponentLoading: boolean;
     closeModal: () => void;

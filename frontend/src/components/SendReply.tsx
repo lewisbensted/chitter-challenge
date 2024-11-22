@@ -9,7 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
 
 interface Props {
-    cheetId: number;
+    cheetId: string;
     isDisabled: boolean;
     setReplies: (arg: IReply[]) => void;
     setErrors: (arg: string[]) => void;

@@ -18,9 +18,9 @@ import { useNavigate } from "react-router-dom";
 
 interface Props {
     isComponentLoading: boolean;
-    userId?: number;
+    userId?: string;
     setPageLoading: (arg: boolean) => void;
-    setUserId: (arg?: number) => void;
+    setUserId: (arg?: string) => void;
     isPageLoading: boolean;
     children: JSX.Element;
     isUnreadMessages?: boolean;

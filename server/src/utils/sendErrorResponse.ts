@@ -3,9 +3,7 @@ import { Response } from "express";
 import { ZodError } from "zod";
 
 export const sendErrorResponse = (error: unknown, res: Response) => {
-	if (error instanceof TypeError) {
-		res.status(400).send([error.message]);
-	} else if (
+	if (
 		error instanceof PrismaClientKnownRequestError &&
 		error.code == "P2025"
 	) {

@@ -3,7 +3,7 @@ import { serverURL } from "./serverURL";
 
 const logout = async (
     setPageLoading: (arg: boolean) => void,
-    setUserId: (arg?: number) => void,
+    setUserId: (arg?: string) => void,
 ) => {
     setPageLoading(true);
     await axios

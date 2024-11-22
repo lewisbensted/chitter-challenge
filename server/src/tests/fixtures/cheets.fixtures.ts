@@ -3,7 +3,7 @@ import { Cheet } from "@prisma/client";
 export const testCheets: Cheet[] = [
 	{
 		id: 1,
-		username: "testuser1",
+		uuid: 'testcheetuuid1',
 		text: "test cheet 1",
 		userId: 1,
 		createdAt: new Date(2000, 0, 1, 0, 0, 4),
@@ -11,7 +11,7 @@ export const testCheets: Cheet[] = [
 	},
 	{
 		id: 2,
-		username: "testuser2",
+		uuid: 'testcheetuuid2',
 		text: "test cheet 2",
 		userId: 2,
 		createdAt: new Date(2000, 0, 1, 0, 0, 2),
@@ -19,7 +19,7 @@ export const testCheets: Cheet[] = [
 	},
 	{
 		id: 3,
-		username: "testuser1",
+		uuid: 'testcheetuuid3',
 		text: "test cheet 3",
 		userId: 1,
 		createdAt: new Date(2000, 0, 1, 0, 0, 0),
@@ -27,7 +27,7 @@ export const testCheets: Cheet[] = [
 	},
 	{
 		id: 4,
-		username: "testuser1",
+		uuid: 'testcheetuuid4',
 		text: "test cheet 4",
 		userId: 1,
 		createdAt: new Date(2000, 0, 1, 0, 0, 1),
@@ -35,7 +35,7 @@ export const testCheets: Cheet[] = [
 	},
 	{
 		id: 5,
-		username: "testuser2",
+		uuid: 'testcheetuuid5',
 		text: "test cheet 5",
 		userId: 2,
 		createdAt: new Date(2000, 0, 1, 0, 0, 3),

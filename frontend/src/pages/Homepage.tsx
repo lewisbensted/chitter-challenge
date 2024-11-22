@@ -11,7 +11,7 @@ import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 
 const Homepage: React.FC = () => {
-    const [userId, setUserId] = useState<number>();
+    const [userId, setUserId] = useState<string>();
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
@@ -23,8 +23,8 @@ const Homepage: React.FC = () => {
     useEffect(() => {
         axios
             .get(`${serverURL}/validate`, { withCredentials: true })
-            .then(async (res: { data: IUser }) => {
-                setUserId(res.data.id);
+            .then(async (res: { data: string }) => {
+                setUserId(res.data);
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
@@ -66,6 +66,7 @@ const Homepage: React.FC = () => {
             })();
         }
     }, [userId]);
+
 
     return (
         <Layout
