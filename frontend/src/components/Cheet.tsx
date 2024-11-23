@@ -31,7 +31,6 @@ const Cheet: React.FC<Props> = ({
     setComponentLoading,
     isComponentLoading,
     isModalView,
-    closeModal,
 }) => {
     const { id } = useParams();
     const [isModalOpen, setModalOpen] = useState<boolean>(false);
@@ -72,7 +71,7 @@ const Cheet: React.FC<Props> = ({
                 </IconButton>
             )}
             &nbsp;
-            {userId === cheet.user.uuid ? (
+            {userId === cheet.user.uuid && !isModalView ? (
                 isCheetLoading ? (
                     <CircularProgress />
                 ) : (
@@ -86,7 +85,7 @@ const Cheet: React.FC<Props> = ({
                                 })
                                 .then((res: { data: ICheet[] }) => {
                                     setCheets(res.data);
-                                    closeModal ? closeModal() : null;
+                                    setModalOpen(false)
                                 })
                                 .catch((error: unknown) => {
                                     handleErrors(error, "deleting the cheet", setErrors);

@@ -68,8 +68,9 @@ describe("test message functionality.", () => {
         });
         test("Fetch messages between testuser2 and testuser4.", async () => {
             const messages = await fetchMessages(2, 4);
-            expect(messages).length(1);
+            expect(messages).length(2);
             expect(messages[0].text).toEqual("test message from testuser4 to testuser2");
+            expect(messages[1].text).toEqual("test message from testuser2 to testuser4");
         });
         test("Fetch messages between testuser2 and testuser3.", async () => {
             const messages = await fetchMessages(3, 4);
@@ -190,7 +191,7 @@ describe("test message functionality.", () => {
         });
         test("testuser4 reads all messages from testuser2.", async () => {
             const read = await readMessages(4, 2);
-            expect(read.count).toEqual(0);
+            expect(read.count).toEqual(1);
             const updatedMessages = await prisma.message.findMany({
                 where: {
                     recipientId: 4,
@@ -345,7 +346,7 @@ describe("test message functionality.", () => {
         });
         test("Responds with HTTP status 404 if the message ID provided does not correspond to a message in the database.", async () => {
             const { status, body } = await request(sessionApp)
-                .put("/messages/testuseruuid2/message/testmessageuuid15")
+                .put("/messages/testuseruuid2/message/testmessageuuid16")
                 .send({ text: "update nonexistant message" });
             expect(status).toEqual(404);
             expect(body).toEqual(["No Message found with ID provided."]);
@@ -372,7 +373,7 @@ describe("test message functionality.", () => {
             expect(body).toEqual(["No User found with ID provided."]);
         });
         test("Responds with HTTP status 404 if the message ID provided does not correspond to a message in the database.", async () => {
-            const { status, body } = await request(sessionApp).delete("/messages/testuseruuid2/message/testmessageuuid15");
+            const { status, body } = await request(sessionApp).delete("/messages/testuseruuid2/message/testmessageuuid16");
             expect(status).toEqual(404);
             expect(body).toEqual(["No Message found with ID provided."]);
         });
