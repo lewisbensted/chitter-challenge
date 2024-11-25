@@ -20,7 +20,7 @@ interface Props {
 const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, setErrors, setComponentLoading }) => {
     const { id } = useParams();
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
-    const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
+    const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setSubmitLoading(true);

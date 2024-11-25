@@ -27,7 +27,7 @@ const Register: React.FC = () => {
     const [isFormLoading, setFormLoading] = useState<boolean>(false);
     const [userId, setUserId] = useState<string>();
     const [errors, setErrors] = useState<string[]>([]);
-    const [success, setSuccess] = useState<boolean>(false);
+    const [isSuccessOpen, setSuccessOpen] = useState<boolean>(false);
 
     useEffect(() => {
         axios
@@ -51,7 +51,7 @@ const Register: React.FC = () => {
         await axios
             .post(`${serverURL}/register`, data)
             .then(() => {
-                setSuccess(true);
+                setSuccessOpen(true);
             })
             .catch((error: unknown) => {
                 handleErrors(error, "registering the user", setErrors);
@@ -70,10 +70,10 @@ const Register: React.FC = () => {
             <div>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <SuccessModal
-                    success={success}
+                    isOpen={isSuccessOpen}
                     message="Account created."
                     closeModal={() => {
-                        setSuccess(false);
+                        setSuccessOpen(false);
                     }}
                 />
                 <h1>Registration Page</h1>

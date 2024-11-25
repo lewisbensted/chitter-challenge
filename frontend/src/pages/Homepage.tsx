@@ -15,10 +15,10 @@ const Homepage: React.FC = () => {
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-    const [cheets, setCheets] = useState<ICheet[]>([]);
+    const [cheets, setCheets] = useState<ICheet[]>();
     const [errors, setErrors] = useState<string[]>([]);
-    const [cheetsError, setCheetsError] = useState<string>("");
-    const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
+    const [cheetsError, setCheetsError] = useState<string>();
+    const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 
     useEffect(() => {
         axios
@@ -91,7 +91,7 @@ const Homepage: React.FC = () => {
                         ) : cheetsError ? (
                             cheetsError
                         ) : (
-                            cheets.map((cheet, key) => (
+                            cheets!.map((cheet, key) => (
                                 <Cheet
                                     cheet={cheet}
                                     userId={userId}

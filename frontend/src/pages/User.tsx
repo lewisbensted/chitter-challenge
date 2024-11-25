@@ -16,12 +16,12 @@ const User: React.FC = () => {
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-    const [conversation, setConversation] = useState<IConversation[]>([]);
-    const [cheets, setCheets] = useState<ICheet[]>([]);
+    const [conversation, setConversation] = useState<IConversation[]>();
+    const [cheets, setCheets] = useState<ICheet[]>();
     const [errors, setErrors] = useState<string[]>([]);
-    const [cheetsError, setCheetsError] = useState<string>("");
+    const [cheetsError, setCheetsError] = useState<string>();
     const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
-    const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
+    const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -108,7 +108,7 @@ const User: React.FC = () => {
                 {isPageLoading ? (
                     <CircularProgress />
                 ) : userId ? (
-                    conversation[0] ? (
+                    conversation ? (
                         <Fragment>
                             <div>
                                 {conversation[0].interlocutorUsername}
@@ -130,7 +130,7 @@ const User: React.FC = () => {
                                 ) : cheetsError ? (
                                     cheetsError
                                 ) : (
-                                    cheets.map((cheet, key) => (
+                                    cheets!.map((cheet, key) => (
                                         <Cheet
                                             cheet={cheet}
                                             userId={userId}

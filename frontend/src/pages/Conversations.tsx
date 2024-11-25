@@ -13,11 +13,11 @@ const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<string>();
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-    const [conversations, setConversations] = useState<IConversation[]>([]);
+    const [conversations, setConversations] = useState<IConversation[]>();
     const [errors, setErrors] = useState<string[]>([]);
-    const [conversationsError, setConversationsError] = useState<string>("");
+    const [conversationsError, setConversationsError] = useState<string>();
     const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
-    const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
+    const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -81,7 +81,7 @@ const Conversations: React.FC = () => {
                     <div>
                         {conversationsError
                             ? conversationsError
-                            : conversations.map((conversation, key) => (
+                            : conversations!.map((conversation, key) => (
                                   <div key={key}>
                                       <span>{conversation.interlocutorUsername}</span>
                                       <Conversation

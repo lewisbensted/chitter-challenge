@@ -18,7 +18,7 @@ interface Props {
 
 const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setComponentLoading }) => {
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
-    const [isSubmitLoading, setSubmitLoading] = useState<boolean>();
+    const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setSubmitLoading(true);

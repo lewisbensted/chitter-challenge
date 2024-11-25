@@ -23,7 +23,7 @@ const EditCheet: React.FC<Props> = ({ cheet, isDisabled, setComponentLoading, se
     const { id } = useParams();
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
-    const [isCheetLoading, setCheetLoading] = useState<boolean>();
+    const [isCheetLoading, setCheetLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setCheetLoading(true);

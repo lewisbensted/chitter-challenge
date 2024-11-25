@@ -31,8 +31,8 @@ const CheetModal: React.FC<Props> = ({
     isComponentLoading,
 }) => {
     const [errors, setErrors] = useState<string[]>([]);
-    const [replies, setReplies] = useState<IReply[]>([]);
-    const [repliesError, setRepliesError] = useState<string>("");
+    const [replies, setReplies] = useState<IReply[]>();
+    const [repliesError, setRepliesError] = useState<string>();
     const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const CheetModal: React.FC<Props> = ({
                 ) : repliesError ? (
                     repliesError
                 ) : (
-                    replies.map((reply, key) => (
+                    replies!.map((reply, key) => (
                         <Reply
                             isComponentLoading={isComponentLoading}
                             userId={userId}

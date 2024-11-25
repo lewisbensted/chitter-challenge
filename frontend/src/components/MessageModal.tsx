@@ -33,8 +33,8 @@ const MessageModal: React.FC<Props> = ({
     toggleReloadTrigger,
 }) => {
     const [errors, setErrors] = useState<string[]>([]);
-    const [messages, setMessages] = useState<IMessage[]>([]);
-    const [messagesError, setMessagesError] = useState<string>("");
+    const [messages, setMessages] = useState<IMessage[]>();
+    const [messagesError, setMessagesError] = useState<string>();
     const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -67,7 +67,7 @@ const MessageModal: React.FC<Props> = ({
                 ) : messagesError ? (
                     messagesError
                 ) : (
-                    messages.map((message, key) => (
+                    messages!.map((message, key) => (
                         <Message
                             key={key}
                             userId={userId}

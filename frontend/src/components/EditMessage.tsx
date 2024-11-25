@@ -21,7 +21,7 @@ interface Props {
 const EditMessage: React.FC<Props> = ({ message, isDisabled, setComponentLoading, setMessages, setErrors, userId }) => {
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
-    const [isMessageLoading, setMessageLoading] = useState<boolean>();
+    const [isMessageLoading, setMessageLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
         setMessageLoading(true);

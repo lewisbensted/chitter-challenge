@@ -5,14 +5,14 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import { Box, Button, Typography } from "@mui/material";
 
 interface Props {
-    success: boolean;
+    isOpen: boolean;
     message: string;
     closeModal: () => void;
 }
 
-const SuccessModal: React.FC<Props> = ({ success, message, closeModal }) => {
+const SuccessModal: React.FC<Props> = ({ isOpen, message, closeModal }) => {
     return (
-        <Dialog open={success}>
+        <Dialog open={isOpen}>
             <Typography variant="h5" sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
                 Success!
             </Typography>
