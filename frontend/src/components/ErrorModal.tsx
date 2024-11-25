@@ -1,7 +1,6 @@
 import React from "react";
-import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import IconButton from "@mui/material/IconButton/IconButton";
+import { Box, Button, Typography } from "@mui/material";
 
 interface Props {
     errors: string[];
@@ -11,13 +10,23 @@ interface Props {
 const ErrorModal: React.FC<Props> = ({ errors, closeModal }) => {
     return (
         <Dialog open={errors.length ? true : false}>
-            <h2>Something went wrong!</h2>
-            {errors.map((e, key) => (
-                <div key={key}>{e}</div>
+            <Typography variant="h5" sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
+                Something went wrong!
+            </Typography>
+            {errors.map((error, key) => (
+                <Typography
+                    variant="body1"
+                    key={key}
+                    sx={{ display: "flex", justifyContent: "center", textAlign: "center", padding: "10px" }}
+                >
+                    {error}
+                </Typography>
             ))}
-            <IconButton onClick={closeModal}>
-                <Close />
-            </IconButton>
+            <Box sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
+                <Button onClick={closeModal} variant="contained" sx={{ maxWidth: "30px" }}>
+                    Ok
+                </Button>
+            </Box>
         </Dialog>
     );
 };

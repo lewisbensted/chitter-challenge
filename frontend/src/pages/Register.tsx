@@ -71,6 +71,7 @@ const Register: React.FC = () => {
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <SuccessModal
                     success={success}
+                    message="Account created."
                     closeModal={() => {
                         setSuccess(false);
                     }}

@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { Fragment, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICheet, IConversation, IUser } from "../utils/interfaces";
+import { ICheet, IConversation } from "../utils/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import Cheet from "../components/Cheet";
@@ -79,17 +79,19 @@ const User: React.FC = () => {
     }, [userId, reloadTrigger]);
 
     useEffect(() => {
-        (async () => {
-            await axios
-                .get(`${serverURL}/conversations/unread`, { withCredentials: true })
-                .then((res: { data: boolean }) => {
-                    setUnreadMessages(res.data);
-                })
-                .catch((error) => {
-                    handleErrors(error, "loading user information", setErrors);
-                });
-            setPageLoading(false);
-        })();
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                    .then((res: { data: boolean }) => {
+                        setUnreadMessages(res.data);
+                    })
+                    .catch((error) => {
+                        handleErrors(error, "loading user information", setErrors);
+                    });
+                setPageLoading(false);
+            })();
+        }
     }, [conversation]);
 
     return (
@@ -103,7 +105,6 @@ const User: React.FC = () => {
         >
             <Fragment>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                {/* {userId ? ( */}
                 {isPageLoading ? (
                     <CircularProgress />
                 ) : userId ? (

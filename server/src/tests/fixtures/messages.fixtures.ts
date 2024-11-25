@@ -141,4 +141,14 @@ export const testMessages: Message[] = [
         updatedAt: new Date(2000, 0, 1, 0, 0, 11),
         isRead: false,
     },
+    {
+        id: 15,
+        uuid: 'testmessageuuid15',
+        senderId: 2,
+        recipientId: 4,
+        text: "test message from testuser2 to testuser4",
+        createdAt: new Date(2000, 0, 1, 0, 0, 14),
+        updatedAt: new Date(2000, 0, 1, 0, 0, 14),
+        isRead: true,
+    },
 ];

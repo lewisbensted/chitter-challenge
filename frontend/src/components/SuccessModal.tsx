@@ -2,21 +2,31 @@ import React from "react";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
 import IconButton from "@mui/material/IconButton/IconButton";
-
+import { Box, Button, Typography } from "@mui/material";
 
 interface Props {
     success: boolean;
+    message: string;
     closeModal: () => void;
 }
 
-const SuccessModal: React.FC<Props> = ({ success, closeModal }) => {
+const SuccessModal: React.FC<Props> = ({ success, message, closeModal }) => {
     return (
         <Dialog open={success}>
-            <h2>Success</h2>
-            <p>Account created.</p>
-            <IconButton onClick={closeModal}>
-                <Close />
-            </IconButton>
+            <Typography variant="h5" sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
+                Success!
+            </Typography>
+            <Typography
+                variant="body1"
+                sx={{ display: "flex", justifyContent: "center", textAlign: "center", padding: "10px" }}
+            >
+                {message}
+            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
+                <Button onClick={closeModal} variant="contained" sx={{ maxWidth: "30px" }}>
+                    Ok
+                </Button>
+            </Box>
         </Dialog>
     );
 };

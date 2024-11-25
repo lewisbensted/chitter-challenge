@@ -57,18 +57,18 @@ describe("Test conversations functionality.", () => {
             const conversations = await fetchConversations(2);
             expect(conversations).length(3);
             expect(conversations[0]).toEqual({
+                interlocutorId: "testuseruuid4",
+                interlocutorUsername: "testuser4",
+                unread: 1,
+            });
+            expect(conversations[1]).toEqual({
                 interlocutorId: "testuseruuid3",
                 interlocutorUsername: "testuser3",
                 unread: 3,
             });
-            expect(conversations[1]).toEqual({
+            expect(conversations[2]).toEqual({
                 interlocutorId: "testuseruuid1",
                 interlocutorUsername: "testuser1",
-                unread: 1,
-            });
-            expect(conversations[2]).toEqual({
-                interlocutorId: "testuseruuid4",
-                interlocutorUsername: "testuser4",
                 unread: 1,
             });
         });
@@ -161,8 +161,14 @@ describe("Test conversations functionality.", () => {
         });
 
         test("Responds with HTTP status 200 and false if there are no unread messages", async () => {
-            await prisma.message.updateMany({ where: { recipientId: 1 }, data: { isRead: true } });
-            const { status, body } = await request(sessionApp).get("/conversations/unread");
+            const sessionAppUser4 = express();
+            sessionAppUser4.use(session({ secret: "secret-key" }));
+            sessionAppUser4.all("*", (req, res, next) => {
+                req.session.user = { id: 4, uuid: "testuseruuid4" };
+                next();
+            });
+            sessionAppUser4.use(testApp);
+            const { status, body } = await request(sessionAppUser4).get("/conversations/unread");
             expect(status).toEqual(200);
             expect(body).toEqual(false);
         });

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
-import { IConversation, IUser } from "../utils/interfaces";
+import { IConversation } from "../utils/interfaces";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
@@ -52,14 +52,16 @@ const Conversations: React.FC = () => {
     }, [userId, reloadTrigger]);
 
     useEffect(() => {
-        (async () => {
-            await axios
-                .get(`${serverURL}/conversations/unread`, { withCredentials: true })
-                .then((res: { data: boolean }) => {
-                    setUnreadMessages(res.data);
-                });
-            setPageLoading(false);
-        })();
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                    .then((res: { data: boolean }) => {
+                        setUnreadMessages(res.data);
+                    });
+                setPageLoading(false);
+            })();
+        }
     }, [conversations]);
 
     return (
@@ -94,7 +96,9 @@ const Conversations: React.FC = () => {
                                   </div>
                               ))}
                     </div>
-                ) : 'Error loading conversations.'}
+                ) : (
+                    "Error loading conversations."
+                )}
             </div>
         </Layout>
     );
