@@ -1,7 +1,7 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
-import { ICheet, IUser } from "../utils/interfaces";
+import { ICheet } from "../utils/interfaces";
 import SubmitCheet from "../components/SendCheet";
 import Cheet from "../components/Cheet";
 import ErrorModal from "../components/ErrorModal";
@@ -37,17 +37,19 @@ const Homepage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        (async () => {
-            await axios
-                .get(`${serverURL}/conversations/unread`, { withCredentials: true })
-                .then((res: { data: boolean }) => {
-                    setUnreadMessages(res.data);
-                })
-                .catch((error) => {
-                    handleErrors(error, "loading user information", setErrors);
-                });
-            setPageLoading(false);
-        })();
+        if (userId) {
+            (async () => {
+                await axios
+                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                    .then((res: { data: boolean }) => {
+                        setUnreadMessages(res.data);
+                    })
+                    .catch((error) => {
+                        handleErrors(error, "loading user information", setErrors);
+                    });
+                setPageLoading(false);
+            })();
+        }
     }, [userId]);
 
     useEffect(() => {
@@ -66,7 +68,6 @@ const Homepage: React.FC = () => {
             })();
         }
     }, [userId]);
-
 
     return (
         <Layout
