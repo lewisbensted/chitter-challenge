@@ -39,6 +39,7 @@ const Conversations: React.FC = () => {
     useEffect(() => {
         if (userId) {
             (async () => {
+                setComponentLoading(true);
                 await axios
                     .get(`${serverURL}/conversations`, { withCredentials: true })
                     .then((res: { data: IConversation[] }) => {
@@ -59,6 +60,7 @@ const Conversations: React.FC = () => {
                     .then((res: { data: boolean }) => {
                         setUnreadMessages(res.data);
                     });
+                setComponentLoading(false);
                 setPageLoading(false);
             })();
         }

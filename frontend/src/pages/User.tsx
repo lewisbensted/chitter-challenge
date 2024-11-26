@@ -62,6 +62,7 @@ const User: React.FC = () => {
     useEffect(() => {
         if (userId) {
             (async () => {
+                setComponentLoading(true);
                 await axios
                     .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
                     .then((res: { data: IConversation }) => {
@@ -90,6 +91,7 @@ const User: React.FC = () => {
                         handleErrors(error, "loading user information", setErrors);
                     });
                 setPageLoading(false);
+                setComponentLoading(false);
             })();
         }
     }, [conversation]);

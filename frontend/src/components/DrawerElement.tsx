@@ -20,8 +20,8 @@ interface Props {
 const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDrawerOpen, onClick, text }) => {
     return (
         <ListItem>
-            <Link to={link}>
-                <ListItemButton onClick={onClick} style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
+            <Link to={link} style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
+                <ListItemButton onClick={onClick}>
                     <ListItemIcon>
                         <IconButton>{icon}</IconButton>
                     </ListItemIcon>
