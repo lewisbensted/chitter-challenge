@@ -16,7 +16,7 @@ const User: React.FC = () => {
     const [isPageLoading, setPageLoading] = useState<boolean>(true);
     const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-    const [conversation, setConversation] = useState<IConversation[]>();
+    const [conversation, setConversation] = useState<IConversation>();
     const [cheets, setCheets] = useState<ICheet[]>();
     const [errors, setErrors] = useState<string[]>([]);
     const [cheetsError, setCheetsError] = useState<string>();
@@ -64,7 +64,7 @@ const User: React.FC = () => {
             (async () => {
                 await axios
                     .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
-                    .then((res: { data: IConversation[] }) => {
+                    .then((res: { data: IConversation }) => {
                         setConversation(res.data);
                     })
                     .catch((error: unknown) => {
@@ -111,14 +111,14 @@ const User: React.FC = () => {
                     conversation ? (
                         <Fragment>
                             <div>
-                                {conversation[0].interlocutorUsername}
+                                {conversation.interlocutorUsername}
                                 {userId == id ? null : (
                                     <Conversation
                                         userId={userId}
-                                        conversation={conversation[0]}
+                                        conversation={conversation}
                                         isComponentLoading={isComponentLoading}
                                         setComponentLoading={setComponentLoading}
-                                        setConversations={setConversation}
+                                        setConversations={() => setConversation(conversation)}
                                         reloadTrigger={reloadTrigger}
                                         toggleReloadTrigger={toggleReloadTrigger}
                                     />

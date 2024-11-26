@@ -16,9 +16,18 @@ interface Props {
     setMessages: (arg: IMessage[]) => void;
     isComponentLoading: boolean;
     setComponentLoading: (arg: boolean) => void;
+    setReloadWhenClosed: (arg: boolean) => void;
 }
 
-const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isComponentLoading, setComponentLoading }) => {
+const Message: React.FC<Props> = ({
+    userId,
+    message,
+    setErrors,
+    setMessages,
+    isComponentLoading,
+    setComponentLoading,
+    setReloadWhenClosed,
+}) => {
     const [isMessageLoading, setMessageLoading] = useState<boolean>(false);
 
     return (
@@ -36,7 +45,7 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
             {new Date(message.updatedAt) > new Date(message.createdAt) ? (
                 <span>{`Edited at ${format(message.updatedAt, "HH:mm dd/MM/yy")}`} &nbsp;</span>
             ) : null}
-            <span>{!message.isRead && message.recipient.uuid == userId ? 'New!' : null}</span>
+            <span>{!message.isRead && message.recipient.uuid == userId ? "New!" : null}</span>
             {userId === message.sender.uuid ? (
                 isMessageLoading ? (
                     <CircularProgress />
@@ -52,15 +61,16 @@ const Message: React.FC<Props> = ({ userId, message, setErrors, setMessages, isC
                                 })
                                 .then((res: { data: IMessage[] }) => {
                                     setMessages(res.data);
+                                    setReloadWhenClosed(true);
                                 })
                                 .catch((error: unknown) => {
-                                    handleErrors(error, 'deleting the message', setErrors)
+                                    handleErrors(error, "deleting the message", setErrors);
                                 });
                             setMessageLoading(false);
                             setComponentLoading(false);
                         }}
                     >
-                        <Delete/>
+                        <Delete />
                     </IconButton>
                 )
             ) : null}

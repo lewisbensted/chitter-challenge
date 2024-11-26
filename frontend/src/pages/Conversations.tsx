@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { IConversation } from "../utils/interfaces";
@@ -7,7 +7,7 @@ import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Link, Typography } from "@mui/material";
 
 const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<string>();
@@ -73,17 +73,24 @@ const Conversations: React.FC = () => {
             setUserId={setUserId}
             isUnreadMessages={isUnreadMessages}
         >
-            <div>
+            <Box sx={{ display: "grid" }}>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
+
+                <Typography variant="h3" sx={{ padding: "20px" }}>
+                    Messages
+                </Typography>
+
                 {isPageLoading ? (
                     <CircularProgress />
                 ) : userId ? (
-                    <div>
+                    <Box sx={{ padding: "20px" }}>
                         {conversationsError
                             ? conversationsError
                             : conversations!.map((conversation, key) => (
-                                  <div key={key}>
-                                      <span>{conversation.interlocutorUsername}</span>
+                                  <Box key={key}>
+                                      <Link href={`/users/${conversation.interlocutorId}`}>
+                                          {conversation.interlocutorUsername}
+                                      </Link>
                                       <Conversation
                                           userId={userId}
                                           conversation={conversation}
@@ -93,13 +100,13 @@ const Conversations: React.FC = () => {
                                           reloadTrigger={reloadTrigger}
                                           toggleReloadTrigger={toggleReloadTrigger}
                                       />
-                                  </div>
+                                  </Box>
                               ))}
-                    </div>
+                    </Box>
                 ) : (
                     "Error loading conversations."
                 )}
-            </div>
+            </Box>
         </Layout>
     );
 };

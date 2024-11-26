@@ -26,6 +26,7 @@ const Conversation: React.FC<Props> = ({
     toggleReloadTrigger,
 }) => {
     const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
+    const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
 
     return (
         <span>
@@ -37,11 +38,16 @@ const Conversation: React.FC<Props> = ({
                 setComponentLoading={setComponentLoading}
                 closeModal={() => {
                     setMessageModalOpen(false);
-                    toggleReloadTrigger(!reloadTrigger);
+                    if (reloadWhenClosed) {
+                        toggleReloadTrigger(!reloadTrigger);
+                        setReloadWhenClosed(false)
+                    }
                 }}
                 setConversations={setConversations}
                 reloadTrigger={reloadTrigger}
                 toggleReloadTrigger={toggleReloadTrigger}
+                setReloadWhenClosed = {setReloadWhenClosed}
+                unread = {conversation.unread}
             />
             <IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading}>
                 {conversation.unread > 0 ? <MarkUnreadChatAlt /> : <Chat />}

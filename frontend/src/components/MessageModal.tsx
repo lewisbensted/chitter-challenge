@@ -20,6 +20,8 @@ interface Props {
     setConversations: (arg: IConversation[]) => void;
     reloadTrigger: boolean;
     toggleReloadTrigger: (arg: boolean) => void;
+    setReloadWhenClosed: (arg: boolean) => void;
+    unread: number;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -31,6 +33,8 @@ const MessageModal: React.FC<Props> = ({
     setComponentLoading,
     reloadTrigger,
     toggleReloadTrigger,
+    setReloadWhenClosed,
+    unread,
 }) => {
     const [errors, setErrors] = useState<string[]>([]);
     const [messages, setMessages] = useState<IMessage[]>();
@@ -48,7 +52,9 @@ const MessageModal: React.FC<Props> = ({
                     setMessages(res.data);
                     setMessagesLoading(false);
                     setComponentLoading(false);
-                    toggleReloadTrigger(!reloadTrigger);
+                    if (unread > 0) {
+                        toggleReloadTrigger(!reloadTrigger);
+                    }
                 })
                 .catch(() => {
                     setMessagesError("An unexpected error occured while loading messages.");
@@ -76,6 +82,7 @@ const MessageModal: React.FC<Props> = ({
                             isComponentLoading={isComponentLoading}
                             setComponentLoading={setComponentLoading}
                             setErrors={setErrors}
+                            setReloadWhenClosed={setReloadWhenClosed}
                         />
                     ))
                 )}
@@ -86,6 +93,7 @@ const MessageModal: React.FC<Props> = ({
                 setMessages={setMessages}
                 setErrors={setErrors}
                 setComponentLoading={setComponentLoading}
+                setReloadWhenClosed={setReloadWhenClosed}
             />
             <IconButton onClick={closeModal} disabled={isComponentLoading}>
                 <Close />

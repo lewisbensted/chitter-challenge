@@ -23,9 +23,9 @@ export interface IReply {
 }
 
 export interface IMessage {
-    uuid: string
-    sender: IUser
-    recipient: IUser
+    uuid: string;
+    sender: IUser;
+    recipient: IUser;
     text: string;
     createdAt: string;
     updatedAt: string;
@@ -36,4 +36,5 @@ export interface IConversation {
     interlocutorId: string;
     interlocutorUsername: string;
     unread: number;
+    latestMessage?: { text: string; senderId: string; isRead: boolean };
 }
