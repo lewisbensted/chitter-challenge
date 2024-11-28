@@ -43,7 +43,7 @@ export const fetchReplies = async (cheetId: number) => {
     return replies;
 };
 
-router.get("/", authMiddleware, async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
     try {
         const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
         const replies = await fetchReplies(cheet.id);

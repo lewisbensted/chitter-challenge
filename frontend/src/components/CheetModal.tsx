@@ -88,13 +88,15 @@ const CheetModal: React.FC<Props> = ({
                     ))
                 )}
             </div>
-            <SubmitReply
-                cheetId={cheet.uuid}
-                isDisabled={isComponentLoading}
-                setReplies={setReplies}
-                setErrors={setErrors}
-                setComponentLoading={setComponentLoading}
-            />
+            {userId ? (
+                <SubmitReply
+                    cheetId={cheet.uuid}
+                    isDisabled={isComponentLoading}
+                    setReplies={setReplies}
+                    setErrors={setErrors}
+                    setComponentLoading={setComponentLoading}
+                />
+            ) : null}
             <div>
                 <IconButton onClick={closeModal} disabled={isComponentLoading}>
                     <Close />

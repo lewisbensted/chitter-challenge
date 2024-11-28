@@ -10,6 +10,7 @@ import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import { Typography } from "@mui/material";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<string>();
@@ -18,6 +19,7 @@ const User: React.FC = () => {
     const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
     const [conversation, setConversation] = useState<IConversation>();
     const [cheets, setCheets] = useState<ICheet[]>();
+    const [username, setUsername] = useState<string>();
     const [errors, setErrors] = useState<string[]>([]);
     const [cheetsError, setCheetsError] = useState<string>();
     const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
@@ -34,7 +36,7 @@ const User: React.FC = () => {
             })
             .catch((error: unknown) => {
                 if (axios.isAxiosError(error) && error.response?.status == 401) {
-                    navigate("/");
+                    setUserId(undefined);
                 } else {
                     handleErrors(error, "authenticating the user", setErrors);
                 }
@@ -43,40 +45,37 @@ const User: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (userId) {
-            (async () => {
-                setCheetsLoading(true);
-                await axios
-                    .get(`${serverURL}/users/${id}/cheets`, { withCredentials: true })
-                    .then((res: { data: ICheet[] }) => {
-                        setCheets(res.data);
-                    })
-                    .catch(() => {
-                        setCheetsError("An unexpected error occured while loading cheets.");
-                    });
-                setCheetsLoading(false);
-            })();
-        }
-    }, [userId]);
+        (async () => {
+            setCheetsLoading(true);
+            await axios
+                .get(`${serverURL}/users/${id}/cheets`, { withCredentials: true })
+                .then((res: { data: ICheet[] }) => {
+                    setCheets(res.data);
+                })
+                .catch(() => {
+                    setCheetsError("An unexpected error occured while loading cheets.");
+                });
+            setCheetsLoading(false);
+        })();
+    }, []);
 
     useEffect(() => {
-        if (userId) {
-            (async () => {
-                setComponentLoading(true);
-                await axios
-                    .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
-                    .then((res: { data: IConversation }) => {
-                        setConversation(res.data);
-                    })
-                    .catch((error: unknown) => {
-                        if (axios.isAxiosError(error) && error.response?.status == 404) {
-                            navigate("/");
-                        } else {
-                            handleErrors(error, "loading the page", setErrors);
-                        }
-                    });
-            })();
-        }
+        (async () => {
+            setComponentLoading(true);
+            await axios
+                .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
+                .then((res: { data: { conversation: IConversation; username: string } }) => {
+                    setUsername(res.data.username);
+                    setConversation(res.data.conversation);
+                })
+                .catch((error: unknown) => {
+                    if (axios.isAxiosError(error) && error.response?.status == 404) {
+                        navigate("/");
+                    } else {
+                        handleErrors(error, "loading the page", setErrors);
+                    }
+                });
+        })();
     }, [userId, reloadTrigger]);
 
     useEffect(() => {
@@ -93,6 +92,8 @@ const User: React.FC = () => {
                 setPageLoading(false);
                 setComponentLoading(false);
             })();
+        } else {
+            setComponentLoading(false);
         }
     }, [conversation]);
 
@@ -109,62 +110,54 @@ const User: React.FC = () => {
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 {isPageLoading ? (
                     <CircularProgress />
-                ) : userId ? (
-                    conversation ? (
-                        <Fragment>
-                            <div>
-                                {conversation.interlocutorUsername}
-                                {userId == id ? null : (
-                                    <Conversation
+                ) : (
+                    <Fragment>
+                        <Typography variant="h5">
+                            {username}
+                            {!conversation || userId == id ? null : (
+                                <Conversation
+                                    userId={userId}
+                                    conversation={conversation}
+                                    isComponentLoading={isComponentLoading || isCheetsLoading}
+                                    setComponentLoading={setComponentLoading}
+                                    setConversations={() => setConversation(conversation)}
+                                    reloadTrigger={reloadTrigger}
+                                    toggleReloadTrigger={toggleReloadTrigger}
+                                />
+                            )}
+                        </Typography>
+
+                        <div>
+                            {isCheetsLoading ? (
+                                <CircularProgress />
+                            ) : cheetsError ? (
+                                cheetsError
+                            ) : (
+                                cheets!.map((cheet, key) => (
+                                    <Cheet
+                                        cheet={cheet}
                                         userId={userId}
-                                        conversation={conversation}
-                                        isComponentLoading={isComponentLoading}
-                                        setComponentLoading={setComponentLoading}
-                                        setConversations={() => setConversation(conversation)}
-                                        reloadTrigger={reloadTrigger}
-                                        toggleReloadTrigger={toggleReloadTrigger}
-                                    />
-                                )}
-                            </div>
-                            <div>
-                                {isCheetsLoading ? (
-                                    <CircularProgress />
-                                ) : cheetsError ? (
-                                    cheetsError
-                                ) : (
-                                    cheets!.map((cheet, key) => (
-                                        <Cheet
-                                            cheet={cheet}
-                                            userId={userId}
-                                            setCheets={setCheets}
-                                            setErrors={setErrors}
-                                            key={key}
-                                            setComponentLoading={setComponentLoading}
-                                            isComponentLoading={isComponentLoading}
-                                            isModalView={false}
-                                        />
-                                    ))
-                                )}
-                                {userId === id ? (
-                                    <SubmitCheet
-                                        setCheetsError={setCheetsError}
-                                        isDisabled={isComponentLoading || isCheetsLoading}
                                         setCheets={setCheets}
                                         setErrors={setErrors}
+                                        key={key}
                                         setComponentLoading={setComponentLoading}
+                                        isComponentLoading={isComponentLoading}
+                                        isModalView={false}
                                     />
-                                ) : null}
-                            </div>
-                        </Fragment>
-                    ) : (
-                        "Error loading user."
-                    )
-                ) : (
-                    "Error loading user."
+                                ))
+                            )}
+                            {userId === id ? (
+                                <SubmitCheet
+                                    setCheetsError={setCheetsError}
+                                    isDisabled={isComponentLoading || isCheetsLoading}
+                                    setCheets={setCheets}
+                                    setErrors={setErrors}
+                                    setComponentLoading={setComponentLoading}
+                                />
+                            ) : null}
+                        </div>
+                    </Fragment>
                 )}
-                {/* ) : (
-                    isPageLoading?'loading':'error'
-                )} */}
             </Fragment>
         </Layout>
     );

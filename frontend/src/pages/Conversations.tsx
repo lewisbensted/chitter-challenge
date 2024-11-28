@@ -85,24 +85,20 @@ const Conversations: React.FC = () => {
                 {isPageLoading ? (
                     <CircularProgress />
                 ) : userId ? (
-                    <Box sx={{ padding: "20px" }}>
+                    <Box sx={{ paddingLeft: "20px" }}>
                         {conversationsError
                             ? conversationsError
-                            : conversations!.map((conversation, key) => (
-                                  <Box key={key}>
-                                      <Link href={`/users/${conversation.interlocutorId}`}>
-                                          {conversation.interlocutorUsername}
-                                      </Link>
-                                      <Conversation
-                                          userId={userId}
-                                          conversation={conversation}
-                                          isComponentLoading={isComponentLoading}
-                                          setComponentLoading={setComponentLoading}
-                                          setConversations={setConversations}
-                                          reloadTrigger={reloadTrigger}
-                                          toggleReloadTrigger={toggleReloadTrigger}
-                                      />
-                                  </Box>
+                            : conversations!.map((conversation) => (
+                                  <Conversation
+                                      key={conversation.interlocutorId}
+                                      userId={userId}
+                                      conversation={conversation}
+                                      isComponentLoading={isComponentLoading}
+                                      setComponentLoading={setComponentLoading}
+                                      setConversations={setConversations}
+                                      reloadTrigger={reloadTrigger}
+                                      toggleReloadTrigger={toggleReloadTrigger}
+                                  />
                               ))}
                     </Box>
                 ) : (

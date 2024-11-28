@@ -53,21 +53,19 @@ const Homepage: React.FC = () => {
     }, [userId]);
 
     useEffect(() => {
-        if (userId) {
-            (async () => {
-                setCheetsLoading(true);
-                await axios
-                    .get(`${serverURL}/cheets`, { withCredentials: true })
-                    .then((res: { data: ICheet[] }) => {
-                        setCheets(res.data);
-                    })
-                    .catch(() => {
-                        setCheetsError("An unexpected error occured while loading cheets.");
-                    });
-                setCheetsLoading(false);
-            })();
-        }
-    }, [userId]);
+        (async () => {
+            setCheetsLoading(true);
+            await axios
+                .get(`${serverURL}/cheets`, { withCredentials: true })
+                .then((res: { data: ICheet[] }) => {
+                    setCheets(res.data);
+                })
+                .catch(() => {
+                    setCheetsError("An unexpected error occured while loading cheets.");
+                });
+            setCheetsLoading(false);
+        })();
+    }, []);
 
     return (
         <Layout
@@ -84,7 +82,7 @@ const Homepage: React.FC = () => {
 
                 {isPageLoading ? (
                     <CircularProgress />
-                ) : userId ? (
+                ) : (
                     <Box>
                         {isCheetsLoading ? (
                             <CircularProgress />
@@ -104,15 +102,17 @@ const Homepage: React.FC = () => {
                                 />
                             ))
                         )}
-                        <SubmitCheet
-                            isDisabled={isComponentLoading || isCheetsLoading}
-                            setCheets={setCheets}
-                            setCheetsError={setCheetsError}
-                            setErrors={setErrors}
-                            setComponentLoading={setComponentLoading}
-                        />
+                        {userId ? (
+                            <SubmitCheet
+                                isDisabled={isComponentLoading || isCheetsLoading}
+                                setCheets={setCheets}
+                                setCheetsError={setCheetsError}
+                                setErrors={setErrors}
+                                setComponentLoading={setComponentLoading}
+                            />
+                        ) : null}
                     </Box>
-                ) : null}
+                )}
             </Box>
         </Layout>
     );

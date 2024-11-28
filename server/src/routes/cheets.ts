@@ -43,7 +43,7 @@ export const fetchCheets = async (userId?: number) => {
     return cheets;
 };
 
-router.get("/", authMiddleware, async (req: Request, res: Response) => {
+router.get("/",  async (req: Request, res: Response) => {
     try {
         let user;
         if (req.params.userId) {

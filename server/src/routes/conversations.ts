@@ -4,12 +4,13 @@ import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { User } from "@prisma/client";
 import prisma from "../../prisma/prismaClient.js";
+import { authenticate } from "../utils/authenticate.js";
 
 interface IConversation {
     interlocutorUsername: string;
     interlocutorId: string;
     unread: number;
-    latestMessage?: {text:string, senderId:string, isRead:boolean};
+    latestMessage?: { text: string; senderId: string; isRead: boolean };
 }
 
 const router = express.Router({ mergeParams: true });
@@ -64,7 +65,7 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
             ? [{ interlocutorId: interlocutor.uuid, interlocutorUsername: interlocutor.username, unread: 0 }]
             : []
     );
-    
+
     return conversations;
 };
 
@@ -90,11 +91,14 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
     }
 });
 
-router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
+router.get("/:userId", async (req: Request, res: Response) => {
     try {
+        let conversation;
         const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-        const conversation = await fetchConversations(req.session.user!.id, user);
-        res.status(200).send(conversation[0]);
+        if (authenticate(req)) {
+            conversation = await fetchConversations(req.session.user!.id, user);
+        }
+        res.status(200).send({ username: user.username, conversation: conversation ? conversation[0] : undefined });
     } catch (error) {
         console.error("Error retrieving user from the database:\n" + logError(error));
         sendErrorResponse(error, res);
