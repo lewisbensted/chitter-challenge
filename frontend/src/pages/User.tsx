@@ -7,10 +7,10 @@ import ErrorModal from "../components/ErrorModal";
 import Cheet from "../components/Cheet";
 import SubmitCheet from "../components/SendCheet";
 import { serverURL } from "../utils/serverURL";
-import Conversation from "../components/Conversation";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Typography } from "@mui/material";
+import ConversationIcon from "../components/ConversationIcon";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<string>();
@@ -65,6 +65,7 @@ const User: React.FC = () => {
             await axios
                 .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
                 .then((res: { data: { conversation: IConversation; username: string } }) => {
+                    console.log(res.data)
                     setUsername(res.data.username);
                     setConversation(res.data.conversation);
                 })
@@ -115,7 +116,7 @@ const User: React.FC = () => {
                         <Typography variant="h5">
                             {username}
                             {!conversation || userId == id ? null : (
-                                <Conversation
+                                <ConversationIcon
                                     userId={userId}
                                     conversation={conversation}
                                     isComponentLoading={isComponentLoading || isCheetsLoading}
@@ -133,13 +134,13 @@ const User: React.FC = () => {
                             ) : cheetsError ? (
                                 cheetsError
                             ) : (
-                                cheets!.map((cheet, key) => (
+                                cheets!.map((cheet) => (
                                     <Cheet
+                                        key={cheet.uuid}
                                         cheet={cheet}
                                         userId={userId}
                                         setCheets={setCheets}
                                         setErrors={setErrors}
-                                        key={key}
                                         setComponentLoading={setComponentLoading}
                                         isComponentLoading={isComponentLoading}
                                         isModalView={false}

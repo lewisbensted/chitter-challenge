@@ -74,13 +74,14 @@ const CheetModal: React.FC<Props> = ({
                 ) : repliesError ? (
                     repliesError
                 ) : (
-                    replies!.map((reply, key) => (
+                    replies!.map((reply) => (
                         <Reply
+                            key={reply.uuid}
                             isComponentLoading={isComponentLoading}
                             userId={userId}
                             cheetId={cheet.uuid}
                             reply={reply}
-                            key={key}
+                            
                             setReplies={setReplies}
                             setErrors={setErrors}
                             setComponentLoading={setComponentLoading}

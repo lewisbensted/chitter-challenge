@@ -10,7 +10,6 @@ interface Props {
     isComponentLoading: boolean;
     setComponentLoading: (arg: boolean) => void;
     setConversations: (arg: IConversation[]) => void;
-    isUserPage?: boolean;
     reloadTrigger: boolean;
     toggleReloadTrigger: (arg: boolean) => void;
 }

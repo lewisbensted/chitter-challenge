@@ -89,13 +89,13 @@ const Homepage: React.FC = () => {
                         ) : cheetsError ? (
                             cheetsError
                         ) : (
-                            cheets!.map((cheet, key) => (
+                            cheets!.map((cheet) => (
                                 <Cheet
+                                    key={cheet.uuid}
                                     cheet={cheet}
                                     userId={userId}
                                     setCheets={setCheets}
                                     setErrors={setErrors}
-                                    key={key}
                                     setComponentLoading={setComponentLoading}
                                     isComponentLoading={isComponentLoading}
                                     isModalView={false}

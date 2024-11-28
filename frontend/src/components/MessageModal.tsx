@@ -73,9 +73,9 @@ const MessageModal: React.FC<Props> = ({
                 ) : messagesError ? (
                     messagesError
                 ) : (
-                    messages!.map((message, key) => (
+                    messages!.map((message) => (
                         <Message
-                            key={key}
+                            key={message.uuid}
                             userId={userId}
                             message={message}
                             setMessages={setMessages}
