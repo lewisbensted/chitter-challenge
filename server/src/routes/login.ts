@@ -23,8 +23,7 @@ router.post("/", async (req: Request, res: Response) => {
             if (user) {
                 if (bcrypt.compareSync(password, user.password)) {
                     req.session.user = { id: user.id, uuid: user.uuid};
-                    res.cookie("session_id", req.sessionID);
-                    res.cookie("user_id", req.session.user.id);
+                    res.cookie("user_id", req.session.user.uuid);
                     res.status(200).send(user);
                 } else {
                     res.status(401).send(["Incorrect password."]);

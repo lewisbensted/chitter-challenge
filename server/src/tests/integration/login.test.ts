@@ -30,7 +30,7 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
     const testApp = express();
     testApp.use("/login", express.json(), login);
     const sessionApp = express();
-    sessionApp.use(session({ secret: "secret-key" }));
+    sessionApp.use(session({ secret: "secret-key", name: "session" }));
     sessionApp.use(testApp);
 
     test("Responds with HTTP status 200 if the password and username provided match their respective values in the database.", async () => {
@@ -43,7 +43,7 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
         let cookies = headers["set-cookie"] as unknown as string[];
         cookies = cookies.map((cookie) => cookie.split("=")[0]);
         expect(cookies).toContain("user_id");
-        expect(cookies).toContain("session_id");
+        expect(cookies).toContain("session");
     });
     test("Responds with HTTP status 400 if username is not provided as a parameter.", async () => {
         const { status, body } = await request(sessionApp).post("/login").send({ password: "password1!" });

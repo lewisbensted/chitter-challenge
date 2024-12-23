@@ -66,6 +66,7 @@ prisma
         app.use(
             session({
                 secret: "secret-key",
+                name: "session",
                 saveUninitialized: false,
                 resave: false,
                 store: new SessionStore(sessionStoreOptions),

@@ -1,14 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { resetDB } from "../resetDB";
-import { registerExtension } from "../../routes/register";
 import prisma from "../../../prisma/prismaClient";
 import { testMessages } from "../fixtures/messages.fixtures";
 import { testUser1, testUser2, testUser3, testUser4 } from "../fixtures/users.fixtures";
-import messages, { fetchMessages } from "../../routes/messages";
 import session from "express-session";
 import request from "supertest";
 import express from "express";
-import { Message } from "@prisma/client";
 import conversations, { fetchConversations } from "../../routes/conversations";
 
 describe("Test conversations functionality.", () => {
@@ -45,11 +42,21 @@ describe("Test conversations functionality.", () => {
                 interlocutorId: "testuseruuid2",
                 interlocutorUsername: "testuser2",
                 unread: 2,
+                latestMessage: {
+                    text: "second test message from testuser2 to testuser1",
+                    isRead: false,
+                    senderId: "testuseruuid2",
+                },
             });
             expect(conversations[1]).toEqual({
                 interlocutorId: "testuseruuid3",
                 interlocutorUsername: "testuser3",
                 unread: 1,
+                latestMessage: {
+                    text: "third test message from testuser3 to testuser1",
+                    isRead: false,
+                    senderId: "testuseruuid3",
+                },
             });
         });
 
@@ -60,16 +67,31 @@ describe("Test conversations functionality.", () => {
                 interlocutorId: "testuseruuid4",
                 interlocutorUsername: "testuser4",
                 unread: 1,
+                latestMessage: {
+                    text: "test message from testuser2 to testuser4",
+                    isRead: true,
+                    senderId: "testuseruuid2",
+                },
             });
             expect(conversations[1]).toEqual({
                 interlocutorId: "testuseruuid3",
                 interlocutorUsername: "testuser3",
                 unread: 3,
+                latestMessage: {
+                    text: "third test message from testuser3 to testuser2",
+                    isRead: false,
+                    senderId: "testuseruuid3",
+                },
             });
             expect(conversations[2]).toEqual({
                 interlocutorId: "testuseruuid1",
                 interlocutorUsername: "testuser1",
                 unread: 1,
+                latestMessage: {
+                    text: "second test message from testuser2 to testuser1",
+                    isRead: false,
+                    senderId: "testuseruuid2",
+                },
             });
         });
         test("Fetch all testuser3 conversations.", async () => {
@@ -79,11 +101,21 @@ describe("Test conversations functionality.", () => {
                 interlocutorId: "testuseruuid2",
                 interlocutorUsername: "testuser2",
                 unread: 1,
+                latestMessage: {
+                    text: "third test message from testuser3 to testuser2",
+                    isRead: false,
+                    senderId: "testuseruuid3",
+                },
             });
             expect(conversations[1]).toEqual({
                 interlocutorId: "testuseruuid1",
                 interlocutorUsername: "testuser1",
                 unread: 0,
+                latestMessage: {
+                    text: "third test message from testuser3 to testuser1",
+                    isRead: false,
+                    senderId: "testuseruuid3",
+                },
             });
         });
         test("Fetch all testuser4 conversations.", async () => {
@@ -93,6 +125,11 @@ describe("Test conversations functionality.", () => {
                 interlocutorId: "testuseruuid2",
                 interlocutorUsername: "testuser2",
                 unread: 0,
+                latestMessage: {
+                    text: "test message from testuser2 to testuser4",
+                    isRead: true,
+                    senderId: "testuseruuid2",
+                },
             });
         });
         test("Fetch testuser1 individual conversations.", async () => {

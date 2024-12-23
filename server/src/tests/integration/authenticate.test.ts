@@ -7,57 +7,57 @@ describe("authenticates the user by comparing information stored on the request'
     describe("Test authenticate function.", () => {
         test("Respective sessionIDs and userIDs match.", () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 1234 } },
-                cookies: { session_id: "testID", user_id: 1234 },
+                sessionID: "testsessionid",
+                session: { user: { uuid: "testuuid" } },
+                cookies: { session: "s:testsessionid.", user_id: "testuuid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(true);
         });
         test("Session IDs match but userID's do not.", async () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 200 } },
-                cookies: { session_id: "testID", user_id: 202 },
+                sessionID: "testsessionid",
+                session: { user: { uuid: "testuuid1" } },
+                cookies: { session: "s:testsessionid.", user_id: "testuuid2" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
         test("User IDs match but sessionID's do not.", async () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 200 } },
-                cookies: { session_id: "testID_2", user_id: 200 },
+                sessionID: "testsessionid1",
+                session: { user: { uuid: "testuuid" } },
+                cookies: { session: "s:testsessionid2.", user_id: "testuuid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
         test("Neither User IDs nor sessionID's match.", async () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 200 } },
-                cookies: { session_id: "testID_2", user_id: 202 },
+                sessionID: "testsessionid1",
+                session: { user: { uuid: "testuuid1" } },
+                cookies: { session: "s:testsessionid2.", user_id: "testuuid2" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
         test("Session IDs match but user cookie is missing.", async () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 200 } },
-                cookies: { session_id: "testID" },
+                sessionID: "testsessionid",
+                session: { user: { uuid: "testuuid" } },
+                cookies: { session: "s:testsessionid." },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
         test("User IDs match but session cookie is missing.", async () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 200 } },
-                cookies: { user_id: 200 },
+                sessionID: "testsessionid",
+                session: { user: { uuid: "testuuid" } },
+                cookies: { user_id: "testuuid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
         test("Session IDs match but user is missing on the session and cookies.", async () => {
             const req = {
-                sessionID: "testID",
+                sessionID: "testsessionid",
                 session: {},
-                cookies: { session_id: "testID" },
+                cookies: { session: "s:testsessionid." },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
@@ -73,9 +73,9 @@ describe("authenticates the user by comparing information stored on the request'
     describe("Test authenticate middleware.", () => {
         test("Successful authentication.", async () => {
             const req = {
-                sessionID: "testID",
-                session: { user: { id: 1234 } },
-                cookies: { session_id: "testID", user_id: 1234 },
+                sessionID: "testsessionid",
+                session: { user: { uuid: "testuuid" } },
+                cookies: { session: "s:testsessionid.", user_id: "testuuid" },
             } as unknown as Request;
             const res = { status: vi.fn(() => res), send: vi.fn(() => res) } as unknown as Response;
             const next = vi.fn() as unknown as NextFunction;
@@ -88,9 +88,9 @@ describe("authenticates the user by comparing information stored on the request'
 
     test("Unsuccessful authentication.", async () => {
         const req = {
-            sessionID: "testID",
-            session: { user: { id: 123 } },
-            cookies: { session_id: "testID", user_id: 1234 },
+            sessionID: "testsessionid",
+                session: { user: { uuid: "testuuid1" } },
+                cookies: { session: "s:testsessionid.", user_id: "testuuid2" },
         } as unknown as Request;
         const res = { status: vi.fn(() => res), send: vi.fn(() => res) } as unknown as Response;
         const next = vi.fn() as unknown as NextFunction;
