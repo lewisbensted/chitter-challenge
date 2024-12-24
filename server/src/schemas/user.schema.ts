@@ -11,7 +11,8 @@ export const passwordExp2 = /^\S*$/;
 
 
 export const UserSchema = z.object({
-    id: z.number().optional(),
+    id: z.number().optional(),                 // id and uuid only allowed to be provided in schema for testing purposes                                         
+    uuid: z.string().optional(),              
     firstName: z
         .string({ required_error: "First name not provided." })
         .min(2, "First name too short. Must be at least 2 characters.")

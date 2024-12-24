@@ -25,9 +25,22 @@ describe("Register a new user at route: [POST] /register.", async () => {
         const newUser = await prisma.user.findFirst();
         expect(status).toEqual(201);
         expect(newUser).not.toBeNull();
-        expect(newUser).toStrictEqual(body);
-        expect(newUser!.firstName).toEqual("Test");
-        expect(newUser!.lastName).toEqual("User");
+
+        if (newUser) {
+            const { firstName, lastName, uuid, email, username } = newUser
+            expect(firstName).toEqual("Test");
+            expect(lastName).toEqual("User");
+            expect(uuid).toEqual("testuseruuid1");
+            expect(username).toEqual("testuser1");
+            expect(email).toEqual("testuser1@test.com");
+            expect({
+                firstName: firstName,
+                lastName: lastName,
+                username: username,
+                uuid: uuid,
+                email: email,
+            }).toStrictEqual(body);
+        }
     });
     test("Responds with HTTP status 400 if a user already exists with the provided email address.", async () => {
         await prisma.user.create({ data: testUser1 });

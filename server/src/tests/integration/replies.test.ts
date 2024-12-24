@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { resetDB } from "../resetDB";
 import { testUser1, testUser2 } from "../fixtures/users.fixtures";
 import prisma from "../../../prisma/prismaClient";
-import { registerExtension } from "../../routes/register";
 import { testCheets } from "../fixtures/cheets.fixtures";
 import { testReplies } from "../fixtures/replies.fixtures";
 import replies, { fetchReplies } from "../../routes/replies";

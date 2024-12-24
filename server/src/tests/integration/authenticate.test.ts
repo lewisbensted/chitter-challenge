@@ -9,7 +9,7 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid",
                 session: { user: { uuid: "testuuid" } },
-                cookies: { session: "s:testsessionid.", user_id: "testuuid" },
+                cookies: { session_id: "testsessionid", user_id: "testuuid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(true);
         });
@@ -17,7 +17,7 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid",
                 session: { user: { uuid: "testuuid1" } },
-                cookies: { session: "s:testsessionid.", user_id: "testuuid2" },
+                cookies: { session_id: "testsessionid", user_id: "testuuid2" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
@@ -25,7 +25,7 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid1",
                 session: { user: { uuid: "testuuid" } },
-                cookies: { session: "s:testsessionid2.", user_id: "testuuid" },
+                cookies: { session_id: "testsessionid2", user_id: "testuuid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
@@ -33,7 +33,7 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid1",
                 session: { user: { uuid: "testuuid1" } },
-                cookies: { session: "s:testsessionid2.", user_id: "testuuid2" },
+                cookies: { session_id: "testsessionid2", user_id: "testuuid2" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
@@ -41,7 +41,7 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid",
                 session: { user: { uuid: "testuuid" } },
-                cookies: { session: "s:testsessionid." },
+                cookies: { session_id: "testsessionid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
@@ -57,15 +57,15 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid",
                 session: {},
-                cookies: { session: "s:testsessionid." },
+                cookies: { session_id: "testsessionid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
         test("Session IDs match but user ID is missing on the session and cookies.", async () => {
             const req = {
-                sessionID: "testID",
+                sessionID: "testsessionid",
                 session: { user: {} },
-                cookies: { session_id: "testID" },
+                cookies: { session_id: "testsessionid" },
             } as unknown as Request;
             expect(authenticate(req)).toEqual(false);
         });
@@ -75,7 +75,7 @@ describe("authenticates the user by comparing information stored on the request'
             const req = {
                 sessionID: "testsessionid",
                 session: { user: { uuid: "testuuid" } },
-                cookies: { session: "s:testsessionid.", user_id: "testuuid" },
+                cookies: { session_id: "testsessionid", user_id: "testuuid" },
             } as unknown as Request;
             const res = { status: vi.fn(() => res), send: vi.fn(() => res) } as unknown as Response;
             const next = vi.fn() as unknown as NextFunction;
@@ -90,7 +90,7 @@ describe("authenticates the user by comparing information stored on the request'
         const req = {
             sessionID: "testsessionid",
                 session: { user: { uuid: "testuuid1" } },
-                cookies: { session: "s:testsessionid.", user_id: "testuuid2" },
+                cookies: { session: "testsessionid", user_id: "testuuid2" },
         } as unknown as Request;
         const res = { status: vi.fn(() => res), send: vi.fn(() => res) } as unknown as Response;
         const next = vi.fn() as unknown as NextFunction;

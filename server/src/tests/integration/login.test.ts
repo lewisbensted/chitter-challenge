@@ -24,7 +24,7 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
 
     beforeEach(async () => {
         await resetDB();
-        await prisma.$extends(registerExtension).user.create({ data: testUser1 });
+        await prisma.$extends(registerExtension).user.create({ data: testUser1 });     // user extension needed to check hashed password
     });
 
     const testApp = express();
@@ -34,16 +34,17 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
     sessionApp.use(testApp);
 
     test("Responds with HTTP status 200 if the password and username provided match their respective values in the database.", async () => {
-        const { status, body, headers } = await request(sessionApp)
+        const { status, text, headers } = await request(sessionApp)
             .post("/login")
             .send({ username: "testuser1", password: "password1!" });
         expect(status).toEqual(200);
-        const dbUser = await prisma.user.findFirst();
-        expect(body).toStrictEqual(dbUser);
+        expect(text).toEqual("testuseruuid1");
         let cookies = headers["set-cookie"] as unknown as string[];
+        cookies = cookies.map((cookie) => cookie.split(";")[0]);
+        expect(cookies).toContain("user_id=testuseruuid1");
         cookies = cookies.map((cookie) => cookie.split("=")[0]);
-        expect(cookies).toContain("user_id");
         expect(cookies).toContain("session");
+        expect(cookies).toContain("session_id");
     });
     test("Responds with HTTP status 400 if username is not provided as a parameter.", async () => {
         const { status, body } = await request(sessionApp).post("/login").send({ password: "password1!" });

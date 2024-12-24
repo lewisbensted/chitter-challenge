@@ -24,7 +24,7 @@ describe("Logout a user at route: [DELETE] /logout.", async () => {
 
     test("Responds with HTTP status 200 when a user is successfully logged out.", async () => {
         const sessionApp = express();
-        sessionApp.use(session({ secret: "secret-key" }));
+        sessionApp.use(session({ secret: "secret-key", cookie:{maxAge:1000} }));
         sessionApp.all("*", (req, res, next) => {
             req.session.user = { id: 1, uuid: "testuseruuid1" };
             next();
