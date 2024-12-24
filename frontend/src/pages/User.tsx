@@ -65,7 +65,6 @@ const User: React.FC = () => {
             await axios
                 .get(`${serverURL}/conversations/${id}`, { withCredentials: true })
                 .then((res: { data: { conversation: IConversation; username: string } }) => {
-                    console.log(res.data)
                     setUsername(res.data.username);
                     setConversation(res.data.conversation);
                 })
