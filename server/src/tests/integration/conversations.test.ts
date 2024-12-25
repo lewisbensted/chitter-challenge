@@ -7,10 +7,11 @@ import session from "express-session";
 import request from "supertest";
 import express from "express";
 import conversations, { fetchConversations } from "../../routes/conversations";
+import messages from "../../routes/messages";
 
 describe("Test conversations functionality.", () => {
     vi.mock("./../../middleware/authMiddleware", () => ({
-        authMiddleware: vi.fn((req, _res, next) => {
+        authMiddleware: vi.fn((_req, _res, next) => {
             next();
         }),
     }));
@@ -28,7 +29,7 @@ describe("Test conversations functionality.", () => {
     testApp.use("/conversations", express.json(), conversations);
     const sessionApp = express();
     sessionApp.use(session({ secret: "secret-key" }));
-    sessionApp.all("*", (req, res, next) => {
+    sessionApp.all("*", (req, _res, next) => {
         req.session.user = { id: 1, uuid: "testuseruuid1" };
         next();
     });
@@ -187,27 +188,6 @@ describe("Test conversations functionality.", () => {
             expect(await fetchConversations(4, testUser4)).toEqual([
                 { interlocutorId: "testuseruuid4", interlocutorUsername: "testuser4", unread: 0 },
             ]);
-        });
-    });
-
-    describe("Fetch unread conversations boolean at route: [GET] /unread.", async () => {
-        test("Responds with HTTP status 200 and true if there are any unread messages", async () => {
-            const { status, body } = await request(sessionApp).get("/conversations/unread");
-            expect(status).toEqual(200);
-            expect(body).toEqual(true);
-        });
-
-        test("Responds with HTTP status 200 and false if there are no unread messages", async () => {
-            const sessionAppUser4 = express();
-            sessionAppUser4.use(session({ secret: "secret-key" }));
-            sessionAppUser4.all("*", (req, res, next) => {
-                req.session.user = { id: 4, uuid: "testuseruuid4" };
-                next();
-            });
-            sessionAppUser4.use(testApp);
-            const { status, body } = await request(sessionAppUser4).get("/conversations/unread");
-            expect(status).toEqual(200);
-            expect(body).toEqual(false);
         });
     });
 

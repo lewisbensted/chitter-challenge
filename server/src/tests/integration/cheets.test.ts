@@ -29,7 +29,7 @@ describe("Test cheets routes.", () => {
     testApp.use("/users/:userId/cheets", express.json(), cheets);
     const sessionApp = express();
     sessionApp.use(session({ secret: "secret-key" }));
-    sessionApp.all("*", (req, res, next) => {
+    sessionApp.all("*", (req, _res, next) => {
         req.session.user = { id: 1, uuid: "testuseruuid1" };
         next();
     });

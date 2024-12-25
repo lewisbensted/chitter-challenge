@@ -48,7 +48,7 @@ const Conversation: React.FC<Props> = ({
                 >
                     {conversation.latestMessage!.text}
                     {conversation.latestMessage!.isRead && conversation.latestMessage?.senderId == userId ? (
-                        <IconButton>
+                        <IconButton style={{ pointerEvents: "none" }}>
                             <Done fontSize="small" />
                         </IconButton>
                     ) : null}

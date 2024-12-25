@@ -69,18 +69,6 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
     return conversations;
 };
 
-router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
-    try {
-        const unreadMessages = await prisma.message.findFirst({
-            where: { recipientId: req.session.user!.id, isRead: false },
-        });
-        res.status(200).send(unreadMessages ? true : false);
-    } catch (error) {
-        console.error("Error retrieving messages from the database:\n" + logError(error));
-        sendErrorResponse(error, res);
-    }
-});
-
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
     try {
         const conversations = await fetchConversations(req.session.user!.id);

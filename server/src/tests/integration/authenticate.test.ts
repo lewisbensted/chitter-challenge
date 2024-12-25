@@ -89,8 +89,8 @@ describe("authenticates the user by comparing information stored on the request'
     test("Unsuccessful authentication.", async () => {
         const req = {
             sessionID: "testsessionid",
-                session: { user: { uuid: "testuuid1" } },
-                cookies: { session: "testsessionid", user_id: "testuuid2" },
+            session: { user: { uuid: "testuuid1" } },
+            cookies: { session: "testsessionid", user_id: "testuuid2" },
         } as unknown as Request;
         const res = { status: vi.fn(() => res), send: vi.fn(() => res) } as unknown as Response;
         const next = vi.fn() as unknown as NextFunction;

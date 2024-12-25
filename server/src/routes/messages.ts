@@ -57,6 +57,18 @@ export const readMessages = async (userId: number, interlocutorId: number) => {
     return readMessages;
 };
 
+router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const unreadMessages = await prisma.message.findFirst({
+            where: { recipientId: req.session.user!.id, isRead: false },
+        });
+        res.status(200).send(unreadMessages ? true : false);
+    } catch (error) {
+        console.error("Error retrieving messages from the database:\n" + logError(error));
+        sendErrorResponse(error, res);
+    }
+});
+
 router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
     try {
         const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });

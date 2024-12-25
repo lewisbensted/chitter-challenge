@@ -12,19 +12,13 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
     vi.mock("./../../utils/authenticate", () => ({
         authenticate: vi
             .fn()
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => false)
-            .mockImplementationOnce(() => true),
+            .mockImplementationOnce(() => true)
+            .mockImplementation(() => false),
     }));
 
     beforeEach(async () => {
         await resetDB();
-        await prisma.$extends(registerExtension).user.create({ data: testUser1 });     // user extension needed to check hashed password
+        await prisma.$extends(registerExtension).user.create({ data: testUser1 }); // user extension needed to check hashed password
     });
 
     const testApp = express();
@@ -33,6 +27,13 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
     sessionApp.use(session({ secret: "secret-key", name: "session" }));
     sessionApp.use(testApp);
 
+    test("Responds with HTTP status 403 if the user already exist on the session object (is already logged in).", async () => {
+        const { status, body } = await request(sessionApp)
+            .post("/login")
+            .send({ username: "testuser1", password: "password1!" });
+        expect(status).toEqual(403);
+        expect(body).toEqual(["Already logged in."]);
+    });
     test("Responds with HTTP status 200 if the password and username provided match their respective values in the database.", async () => {
         const { status, text, headers } = await request(sessionApp)
             .post("/login")
@@ -81,13 +82,5 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
             .send({ username: "testuser", password: "password1!" });
         expect(status).toEqual(404);
         expect(body).toEqual(["User does not exist."]);
-    });
-    test("Responds with HTTP status 403 if the user already exist on the session object (is already logged in).", async () => {
-        sessionApp.use(testApp);
-        const { status, body } = await request(sessionApp)
-            .post("/login")
-            .send({ username: "testuser1", password: "password1!" });
-        expect(status).toEqual(403);
-        expect(body).toEqual(["Already logged in."]);
     });
 });

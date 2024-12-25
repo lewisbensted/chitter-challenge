@@ -56,7 +56,7 @@ const Conversations: React.FC = () => {
         if (userId) {
             (async () => {
                 await axios
-                    .get(`${serverURL}/conversations/unread`, { withCredentials: true })
+                    .get(`${serverURL}/messages/unread`, { withCredentials: true })
                     .then((res: { data: boolean }) => {
                         setUnreadMessages(res.data);
                     });

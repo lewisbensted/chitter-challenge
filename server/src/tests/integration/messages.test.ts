@@ -11,7 +11,7 @@ import { Message } from "@prisma/client";
 
 describe("test message functionality.", () => {
     vi.mock("./../../middleware/authMiddleware", () => ({
-        authMiddleware: vi.fn((req, _res, next) => {
+        authMiddleware: vi.fn((_req, _res, next) => {
             next();
         }),
     }));
@@ -29,7 +29,7 @@ describe("test message functionality.", () => {
     testApp.use("/messages", express.json(), messages);
     const sessionApp = express();
     sessionApp.use(session({ secret: "secret-key" }));
-    sessionApp.all("*", (req, res, next) => {
+    sessionApp.all("*", (req, _res, next) => {
         req.session.user = { id: 1, uuid: "testuseruuid1" };
         next();
     });
@@ -212,6 +212,22 @@ describe("test message functionality.", () => {
         });
     });
 
+    describe("Fetch unread messages boolean at route: [GET] /unread.", async () => {
+        test("Responds with HTTP status 200 and true if there are any unread messages", async () => {
+            const { status, body } = await request(sessionApp).get("/messages/unread");
+            expect(status).toEqual(200);
+            expect(body).toEqual(true);
+        });
+
+        test("Reads relevant messages then responds with HTTP status 200 and false.", async () => {
+            await request(sessionApp).get("/messages/testuseruuid2");
+            await request(sessionApp).get("/messages/testuseruuid3");
+            const { status, body } = await request(sessionApp).get("/messages/unread");
+            expect(status).toEqual(200);
+            expect(body).toEqual(false);
+        });
+    });
+
     describe("Fetch messages at route: [GET] /messages.", async () => {
         test("Responds with HTTP status 200 and all messages between the session user (testuser1) and the user with ID provided as a parameter.", async () => {
             const request1 = await request(sessionApp).get("/messages/testuseruuid2");
@@ -306,7 +322,7 @@ describe("test message functionality.", () => {
                 .send({ text: "test message from testuser1 to testuser2 - updated" });
             expect(status).toEqual(200);
             expect(body).length(4);
-            const updatedMessage = body.filter((message: Message) => message.uuid == 'testmessageuuid1');
+            const updatedMessage = body.filter((message: Message) => message.uuid == "testmessageuuid1");
             expect(updatedMessage).length(1);
             expect(updatedMessage[0].text).toEqual("test message from testuser1 to testuser2 - updated");
             expect(updatedMessage[0].updatedAt > updatedMessage[0].createdAt).toBe(true);
@@ -317,7 +333,7 @@ describe("test message functionality.", () => {
                 .send({ text: "test message from testuser1 to testuser2" });
             expect(status).toEqual(200);
             expect(body).length(4);
-            const updatedMessage = body.filter((message: Message) => message.uuid == 'testmessageuuid1');
+            const updatedMessage = body.filter((message: Message) => message.uuid == "testmessageuuid1");
             expect(updatedMessage).length(1);
             expect(updatedMessage[0].text).toEqual("test message from testuser1 to testuser2");
             expect(updatedMessage[0].updatedAt).toEqual(updatedMessage[0].createdAt);
@@ -361,23 +377,31 @@ describe("test message functionality.", () => {
 
     describe("deletes an existing message at route: [DELETE] /messages.", async () => {
         test("Responds with HTTP status 200 and all relevant messages when a message is deleted.", async () => {
-            const { status, body } = await request(sessionApp).delete("/messages/testuseruuid2/message/testmessageuuid1");
+            const { status, body } = await request(sessionApp).delete(
+                "/messages/testuseruuid2/message/testmessageuuid1"
+            );
             expect(status).toEqual(200);
             expect(body).length(3);
             expect(body.map((message: Message) => message.id)).not.toContain(1);
         });
         test("Responds with HTTP status 404 if the recipient ID provided does not correspond to a user in the database.", async () => {
-            const { status, body } = await request(sessionApp).delete("/messages/testuseruuid5/message/testmessageuuid1");
+            const { status, body } = await request(sessionApp).delete(
+                "/messages/testuseruuid5/message/testmessageuuid1"
+            );
             expect(status).toEqual(404);
             expect(body).toEqual(["No User found with ID provided."]);
         });
         test("Responds with HTTP status 404 if the message ID provided does not correspond to a message in the database.", async () => {
-            const { status, body } = await request(sessionApp).delete("/messages/testuseruuid2/message/testmessageuuid16");
+            const { status, body } = await request(sessionApp).delete(
+                "/messages/testuseruuid2/message/testmessageuuid16"
+            );
             expect(status).toEqual(404);
             expect(body).toEqual(["No Message found with ID provided."]);
         });
         test("Responds with HTTP status 403 if message's sender ID does not match the session's userID (trying to delete someone else's message).", async () => {
-            const { status, body } = await request(sessionApp).delete("/messages/testuseruuid2/message/testmessageuuid4");
+            const { status, body } = await request(sessionApp).delete(
+                "/messages/testuseruuid2/message/testmessageuuid4"
+            );
             expect(status).toEqual(403);
             expect(body).toEqual(["Cannot delete someone else's message."]);
         });
