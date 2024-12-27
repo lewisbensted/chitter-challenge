@@ -7,13 +7,10 @@ import session from "express-session";
 import request from "supertest";
 import express from "express";
 import conversations, { fetchConversations } from "../../routes/conversations";
-import messages from "../../routes/messages";
 
 describe("Test conversations functionality.", () => {
-    vi.mock("./../../middleware/authMiddleware", () => ({
-        authMiddleware: vi.fn((_req, _res, next) => {
-            next();
-        }),
+    vi.mock("./../../utils/authenticate", () => ({
+        authenticate: vi.fn().mockImplementation(() => true),
     }));
 
     beforeEach(async () => {
@@ -26,14 +23,12 @@ describe("Test conversations functionality.", () => {
     });
 
     const testApp = express();
-    testApp.use("/conversations", express.json(), conversations);
-    const sessionApp = express();
-    sessionApp.use(session({ secret: "secret-key" }));
-    sessionApp.all("*", (req, _res, next) => {
+    testApp.use(session({ secret: "secret-key" }));
+    testApp.all("*", (req, _res, next) => {
         req.session.user = { id: 1, uuid: "testuseruuid1" };
         next();
     });
-    sessionApp.use(testApp);
+    testApp.use("/conversations", express.json(), conversations);
 
     describe("Test fetchConversations function which fetches conversation threads from the database and sorts based on most recent messages.", async () => {
         test("Fetch all testuser1 conversations.", async () => {
@@ -191,42 +186,65 @@ describe("Test conversations functionality.", () => {
         });
     });
 
-    describe("Fetch conversations at route: [GET] /messages.", async () => {
+    describe("Fetch conversations at route: [GET] /conversations.", async () => {
         test("Responds with HTTP status 200 and all conversations of the session user when no request parameter provided", async () => {
-            const { status, body } = await request(sessionApp).get("/conversations");
+            const { status, body } = await request(testApp).get("/conversations");
             expect(status).toEqual(200);
             expect(body).length(2);
-            expect(body[0]).toEqual({ interlocutorUsername: "testuser2", interlocutorId: "testuseruuid2", unread: 2 });
-            expect(body[1]).toEqual({ interlocutorUsername: "testuser3", interlocutorId: "testuseruuid3", unread: 1 });
+            expect(body[0]).toEqual({
+                interlocutorUsername: "testuser2",
+                interlocutorId: "testuseruuid2",
+                unread: 2,
+                latestMessage: {
+                    text: "second test message from testuser2 to testuser1",
+                    isRead: false,
+                    senderId: "testuseruuid2",
+                },
+            });
+            expect(body[1]).toEqual({
+                interlocutorUsername: "testuser3",
+                interlocutorId: "testuseruuid3",
+                unread: 1,
+                latestMessage: {
+                    text: "third test message from testuser3 to testuser1",
+                    isRead: false,
+                    senderId: "testuseruuid3",
+                },
+            });
         });
         test("Responds with HTTP status 200 and individual conversation when user ID provdied as a parameter.", async () => {
-            const request1 = await request(sessionApp).get("/conversations/testuseruuid1");
+            const request1 = await request(testApp).get("/conversations/testuseruuid1");
             expect(request1.status).toEqual(200);
-            expect(request1.body).toEqual([
-                { interlocutorUsername: "testuser1", interlocutorId: "testuseruuid1", unread: 0 },
-            ]);
+            console.log(request1.body);
+            expect(request1.body).toEqual({
+                conversation: { interlocutorUsername: "testuser1", interlocutorId: "testuseruuid1", unread: 0 },
+                username: "testuser1",
+            });
 
-            const request2 = await request(sessionApp).get("/conversations/testuseruuid2");
+            const request2 = await request(testApp).get("/conversations/testuseruuid2");
             expect(request2.status).toEqual(200);
-            expect(request2.body).toEqual([
-                { interlocutorUsername: "testuser2", interlocutorId: "testuseruuid2", unread: 2 },
-            ]);
+            expect(request2.body).toEqual({
+                conversation: { interlocutorUsername: "testuser2", interlocutorId: "testuseruuid2", unread: 2 },
+                username: "testuser2",
+            });
 
-            const request3 = await request(sessionApp).get("/conversations/testuseruuid3");
+            const request3 = await request(testApp).get("/conversations/testuseruuid3");
             expect(request3.status).toEqual(200);
-            expect(request3.body).toEqual([
-                { interlocutorUsername: "testuser3", interlocutorId: "testuseruuid3", unread: 1 },
-            ]);
+            expect(request3.body).toEqual({
+                conversation: { interlocutorUsername: "testuser3", interlocutorId: "testuseruuid3", unread: 1 },
+                username: "testuser3",
+            });
 
-            const request4 = await request(sessionApp).get("/conversations/testuseruuid4");
+            const request4 = await request(testApp).get("/conversations/testuseruuid4");
             expect(request4.status).toEqual(200);
-            expect(request4.body).toEqual([
-                { interlocutorUsername: "testuser4", interlocutorId: "testuseruuid4", unread: 0 },
-            ]);
+            expect(request4.body).toEqual({
+                conversation: { interlocutorUsername: "testuser4", interlocutorId: "testuseruuid4", unread: 0 },
+                username: "testuser4",
+            });
         });
 
         test("Responds with HTTP status 404 when the user ID provided does not match a user in the database.", async () => {
-            const { status, body } = await request(sessionApp).get("/conversations/testuseruuid5");
+            const { status, body } = await request(testApp).get("/conversations/testuseruuid5");
             expect(status).toEqual(404);
             expect(body).toEqual(["No User found with ID provided."]);
         });

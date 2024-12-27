@@ -10,27 +10,24 @@ describe("Logout a user at route: [DELETE] /logout.", async () => {
         await resetDB();
     });
 
-    const testApp = express();
-    testApp.use("/logout", logout);
-
     test("Responds with HTTP status 403 if a user does not exist on the session object (is not logged in).", async () => {
-        const sessionApp = express();
-        sessionApp.use(session({ secret: "secret-key" }));
-        sessionApp.use(testApp);
-        const { status, body } = await request(sessionApp).delete("/logout");
+        const testApp1 = express();
+        testApp1.use(session({ secret: "secret-key" }));
+        testApp1.use("/logout", logout);
+        const { status, body } = await request(testApp1).delete("/logout");
         expect(status).toEqual(403);
         expect(body).toEqual(["Not logged in."]);
     });
 
     test("Responds with HTTP status 200 when a user is successfully logged out.", async () => {
-        const sessionApp = express();
-        sessionApp.use(session({ secret: "secret-key" }));
-        sessionApp.all("*", (req, _res, next) => {
+        const testApp2 = express();
+        testApp2.use(session({ secret: "secret-key" }));
+        testApp2.all("*", (req, _res, next) => {
             req.session.user = { id: 1, uuid: "testuseruuid1" };
             next();
         });
-        sessionApp.use(testApp);
-        const { status, text, headers } = await request(sessionApp).delete("/logout");
+        testApp2.use("/logout", logout);
+        const { status, text, headers } = await request(testApp2).delete("/logout");
         expect(headers["set-cookie"]).not.toBeDefined();
         expect(status).toEqual(200);
         expect(text).toEqual("Logout successful.");

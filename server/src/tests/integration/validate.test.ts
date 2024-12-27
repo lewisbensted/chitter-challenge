@@ -11,19 +11,17 @@ describe("Return information about the session's user at route: [GET] /validate.
             next();
         }),
     }));
-    
+
     const testApp = express();
-    testApp.use("/validate", validate);
-    const sessionApp = express();
-    sessionApp.use(session({ secret: "secret-key" }));
-    sessionApp.all("*", (req, res, next) => {
+    testApp.use(session({ secret: "secret-key" }));
+    testApp.all("*", (req, _res, next) => {
         req.session.user = { id: 1, uuid: "testuseruuid1" };
         next();
     });
-    sessionApp.use(testApp);
+    testApp.use("/validate", validate);
 
     test("Responds with HTTP status 200 and session's user information.", async () => {
-        const { status, text } = await request(sessionApp).get("/validate");
+        const { status, text } = await request(testApp).get("/validate");
         expect(authMiddleware).toHaveBeenCalledTimes(1);
         expect(status).toEqual(200);
         expect(text).toEqual("testuseruuid1");
