@@ -1,8 +1,8 @@
 import React from "react";
-import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import IconButton from "@mui/material/IconButton/IconButton";
-import { Box, Button, Typography } from "@mui/material";
+import { Button, Typography, ThemeProvider } from "@mui/material";
+import StyledBox from "./StyledBox";
+import theme from "../styles/theme";
 
 interface Props {
     isOpen: boolean;
@@ -12,22 +12,17 @@ interface Props {
 
 const SuccessModal: React.FC<Props> = ({ isOpen, message, closeModal }) => {
     return (
-        <Dialog open={isOpen}>
-            <Typography variant="h5" sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
-                Success!
-            </Typography>
-            <Typography
-                variant="body1"
-                sx={{ display: "flex", justifyContent: "center", textAlign: "center", padding: "10px" }}
-            >
-                {message}
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
-                <Button onClick={closeModal} variant="contained" sx={{ maxWidth: "30px" }}>
-                    Ok
-                </Button>
-            </Box>
-        </Dialog>
+        <ThemeProvider theme={theme}>
+            <Dialog open={isOpen}>
+                <Typography variant="h5">Success!</Typography>
+                <Typography variant="body1">{message}</Typography>
+                <StyledBox>
+                    <Button onClick={closeModal} variant="contained">
+                        Ok
+                    </Button>
+                </StyledBox>
+            </Dialog>
+        </ThemeProvider>
     );
 };
 
