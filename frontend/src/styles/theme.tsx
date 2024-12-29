@@ -3,17 +3,23 @@ import { blue } from "@mui/material/colors";
 
 const theme = createTheme({
     palette: { primary: blue },
-    components: {    
+    components: {
         MuiButton: { styleOverrides: { root: { maxWidth: 50 } } },
         MuiTypography: {
-            styleOverrides: { root: { justifyContent: "center", display: "flex", paddingInline: 30 } },
             variants: [
-                { props: { variant: "h5" }, style: { paddingBlock: 30 } },
-                { props: { variant: "body1" }, style: { paddingBlock: 10 } },
+                {
+                    props: { variant: "h5" },
+                    style: { marginBlock: 30, justifyContent: "center", display: "flex", marginInline: 30 },
+                },
+                {
+                    props: { variant: "subtitle1" },
+                    style: { marginBlock: 10, justifyContent: "center", display: "flex", marginInline: 30 },
+                },
+                { props: { variant: "body1" }, style: { justifyContent: "left", display: "flex" } },
             ],
         },
-        
+        MuiTextField: { styleOverrides: { root: { width: 300 } } },
     },
 });
 
-export default theme
+export default theme;

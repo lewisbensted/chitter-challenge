@@ -1,7 +1,7 @@
 import React from "react";
 import Dialog from "@mui/material/Dialog/Dialog";
 import { Button, Typography, ThemeProvider } from "@mui/material";
-import StyledBox from "./StyledBox";
+import StyledBox from "../styles/MarginBox";
 import theme from "../styles/theme";
 
 interface Props {
@@ -15,10 +15,10 @@ const SuccessModal: React.FC<Props> = ({ isOpen, message, closeModal }) => {
         <ThemeProvider theme={theme}>
             <Dialog open={isOpen}>
                 <Typography variant="h5">Success!</Typography>
-                <Typography variant="body1">{message}</Typography>
+                <Typography variant="subtitle1">{message}</Typography>
                 <StyledBox>
                     <Button onClick={closeModal} variant="contained">
-                        Ok
+                        <Typography variant="button">Ok</Typography>
                     </Button>
                 </StyledBox>
             </Dialog>

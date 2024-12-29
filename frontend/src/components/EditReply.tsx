@@ -5,12 +5,15 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
-import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Edit from "@mui/icons-material/Edit";
 import Done from "@mui/icons-material/Done";
+import { Box, CircularProgress, Grid2, Input, Link, TextField, ThemeProvider, Typography } from "@mui/material";
+import { format } from "date-fns";
+import theme from "../styles/theme";
+import Delete from "@mui/icons-material/Delete";
 
 interface Props {
-    isDisabled: boolean;
+    isComponentLoading: boolean;
     setComponentLoading: (arg: boolean) => void;
     setReplies: (arg: IReply[]) => void;
     setErrors: (arg: string[]) => void;
@@ -22,7 +25,7 @@ interface Props {
 const EditReply: React.FC<Props> = ({
     reply,
     cheetId,
-    isDisabled,
+    isComponentLoading,
     setComponentLoading,
     setReplies,
     setErrors,
@@ -51,31 +54,94 @@ const EditReply: React.FC<Props> = ({
     };
 
     return (
-        <span>
-            {userId === reply.user.uuid ? (
-                isEditing ? (
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <input {...register("text")} type="text" defaultValue={reply.text} />
-                        {isReplyLoading ? (
-                            <CircularProgress />
-                        ) : (
-                            <IconButton type="submit" disabled={isDisabled}>
-                                <Done />
-                            </IconButton>
-                        )}
-                    </form>
-                ) : (
-                    <span>
-                        {reply.text} &nbsp;
-                        <IconButton onClick={() => setEditing(true)}>
-                            <Edit />
-                        </IconButton>
-                    </span>
-                )
-            ) : (
-                <span>{reply.text}&nbsp;</span>
-            )}
-        </span>
+        <ThemeProvider theme={theme}>
+            <Box>
+                <Grid2 container columnSpacing={1}>
+                    <Grid2 container size={10}>
+                        <Grid2 size={6}>
+                            <Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>{" "}
+                        </Grid2>
+                        <Grid2 size={6}>
+                            <Box display="flex" justifyContent="flex-end">
+                                <Typography variant="body2">{format(reply.createdAt, "HH:mm dd/MM/yy")}</Typography>
+                            </Box>
+                        </Grid2>
+                        <Grid2>
+                            {isEditing ? (
+                                <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-form">
+                                    <TextField
+                                        {...register("text")}
+                                        type="text"
+                                        defaultValue={reply.text}
+                                        variant="standard"
+                                    />
+                                </Box>
+                            ) : (
+                                <Typography>{reply.text}</Typography>
+                            )}
+                        </Grid2>
+                    </Grid2>
+                    <Grid2 size='grow'>
+                        <Box margin={1.2}>
+                            {userId === reply.user.uuid ? (
+                                isReplyLoading ? (
+                                    <CircularProgress color="primary" size="1.7rem" thickness={5} />
+                                ) : isEditing ? (
+                                    <IconButton
+                                        type="submit"
+                                        disabled={isComponentLoading}
+                                        form="edit-form"
+                                        key="edit-form"
+                                        color="primary"
+                                    >
+                                        <Done />
+                                    </IconButton>
+                                ) : (
+                                    <IconButton onClick={() => setEditing(true)} color="primary">
+                                        <Edit />
+                                    </IconButton>
+                                )
+                            ) : null}
+                        </Box>
+                    </Grid2>
+                    <Grid2 size='grow'>
+                        <Box margin={1.2}>
+                            {userId === reply.user.uuid ? (
+                                isReplyLoading ? (
+                                    <CircularProgress color="primary" size="1.7rem" thickness={5} />
+                                ) : (
+                                    <IconButton
+                                        color="primary"
+                                        disabled={isComponentLoading}
+                                        onClick={async () => {
+                                            setReplyLoading(true);
+                                            setComponentLoading(true);
+                                            await axios
+                                                .delete(
+                                                    `${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`,
+                                                    {
+                                                        withCredentials: true,
+                                                    }
+                                                )
+                                                .then((res: { data: IReply[] }) => {
+                                                    setReplies(res.data);
+                                                })
+                                                .catch((error: unknown) => {
+                                                    handleErrors(error, "deleting the reply", setErrors);
+                                                });
+                                            setReplyLoading(false);
+                                            setComponentLoading(false);
+                                        }}
+                                    >
+                                        <Delete />
+                                    </IconButton>
+                                )
+                            ) : null}
+                        </Box>
+                    </Grid2>
+                </Grid2>
+            </Box>
+        </ThemeProvider>
     );
 };
 

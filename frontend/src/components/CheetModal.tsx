@@ -10,6 +10,8 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
+import { Box, Grid2 } from "@mui/material";
+import MarginBox from "../styles/MarginBox";
 
 interface Props {
     userId?: string;
@@ -74,19 +76,22 @@ const CheetModal: React.FC<Props> = ({
                 ) : repliesError ? (
                     repliesError
                 ) : (
-                    replies!.map((reply) => (
-                        <Reply
-                            key={reply.uuid}
-                            isComponentLoading={isComponentLoading}
-                            userId={userId}
-                            cheetId={cheet.uuid}
-                            reply={reply}
-                            
-                            setReplies={setReplies}
-                            setErrors={setErrors}
-                            setComponentLoading={setComponentLoading}
-                        />
-                    ))
+                    <Box>
+                       
+                            {replies!.map((reply) => (
+                                <Reply
+                                    key={reply.uuid}
+                                    isComponentLoading={isComponentLoading}
+                                    userId={userId}
+                                    cheetId={cheet.uuid}
+                                    reply={reply}
+                                    setReplies={setReplies}
+                                    setErrors={setErrors}
+                                    setComponentLoading={setComponentLoading}
+                                />
+                            ))}
+                       
+                    </Box>
                 )}
             </div>
             {userId ? (

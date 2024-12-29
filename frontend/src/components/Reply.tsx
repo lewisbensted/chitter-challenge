@@ -9,6 +9,7 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Delete from "@mui/icons-material/Delete";
+import { Box, Grid2 } from "@mui/material";
 
 interface Props {
     userId?: string;
@@ -32,49 +33,55 @@ const Reply: React.FC<Props> = ({
     const [isReplyLoading, setReplyLoading] = useState<boolean>(false);
 
     return (
-        <div>
-            <Link to={`/users/${reply.user.uuid}`}>{reply.user.username}</Link> &nbsp;
-            <EditReply
-                cheetId={cheetId}
-                reply={reply}
-                isDisabled={isComponentLoading}
-                setComponentLoading={setComponentLoading}
-                setReplies={setReplies}
-                setErrors={setErrors}
-                userId={userId}
-            />
-            <span>{format(reply.createdAt, "HH:mm dd/MM/yy")}&nbsp;</span>
-            {new Date(reply.updatedAt) > new Date(reply.createdAt) ? (
+        <Box>
+            <Grid2 container>
+                <Grid2 size={10}>
+                    <EditReply
+                        cheetId={cheetId}
+                        reply={reply}
+                        isComponentLoading={isComponentLoading}
+                        setComponentLoading={setComponentLoading}
+                        setReplies={setReplies}
+                        setErrors={setErrors}
+                        userId={userId}
+                    />
+                </Grid2>
+
+                {/* {new Date(reply.updatedAt) > new Date(reply.createdAt) ? (
                 <span>{`Edited at ${format(reply.updatedAt, "HH:mm dd/MM/yy")}`} &nbsp;</span>
-            ) : null}
-            {userId === reply.user.uuid ? (
-                isReplyLoading ? (
-                    <CircularProgress />
-                ) : (
-                    <IconButton
-                        disabled={isComponentLoading}
-                        onClick={async () => {
-                            setReplyLoading(true);
-                            setComponentLoading(true);
-                            await axios
-                                .delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
-                                    withCredentials: true,
-                                })
-                                .then((res: { data: IReply[] }) => {
-                                    setReplies(res.data);
-                                })
-                                .catch((error: unknown) => {
-                                    handleErrors(error, "deleting the reply", setErrors);
-                                });
-                            setReplyLoading(false);
-                            setComponentLoading(false);
-                        }}
-                    >
-                        <Delete />
-                    </IconButton>
-                )
-            ) : null}
-        </div>
+            ) : null} */}
+                {/* <Box margin={1.2}>
+                    {userId === reply.user.uuid ? (
+                        isReplyLoading ? (
+                            <CircularProgress color="primary" size="1.7rem" thickness={5} />
+                        ) : (
+                            <IconButton
+                                color="primary"
+                                disabled={isComponentLoading}
+                                onClick={async () => {
+                                    setReplyLoading(true);
+                                    setComponentLoading(true);
+                                    await axios
+                                        .delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
+                                            withCredentials: true,
+                                        })
+                                        .then((res: { data: IReply[] }) => {
+                                            setReplies(res.data);
+                                        })
+                                        .catch((error: unknown) => {
+                                            handleErrors(error, "deleting the reply", setErrors);
+                                        });
+                                    setReplyLoading(false);
+                                    setComponentLoading(false);
+                                }}
+                            >
+                                <Delete />
+                            </IconButton>
+                        )
+                    ) : null}
+                </Box> */}
+            </Grid2>
+        </Box>
     );
 };
 

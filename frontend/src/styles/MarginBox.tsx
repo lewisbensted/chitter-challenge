@@ -1,9 +1,9 @@
 import { Box, styled } from "@mui/material";
 
-const StyledBox = styled(Box)(() => ({
+const MarginBox = styled(Box)(() => ({
     display: "flex",
     justifyContent: "center",
-    padding: 30,
+    margin: 30,
 }));
 
-export default StyledBox;
+export default MarginBox;
