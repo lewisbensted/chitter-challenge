@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { IConversation } from "../utils/interfaces";
@@ -7,7 +7,7 @@ import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
-import { Box, CircularProgress, Link, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<string>();

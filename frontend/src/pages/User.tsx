@@ -4,13 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ICheet, IConversation } from "../utils/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
-import Cheet from "../components/Cheet";
 import SubmitCheet from "../components/SendCheet";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
+import Cheet from "../components/Cheet";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<string>();

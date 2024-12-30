@@ -3,12 +3,12 @@ import axios from "axios";
 import Layout from "./Layout";
 import { ICheet } from "../utils/interfaces";
 import SubmitCheet from "../components/SendCheet";
-import Cheet from "../components/Cheet";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
+import Cheet from "../components/Cheet";
 
 const Homepage: React.FC = () => {
     const [userId, setUserId] = useState<string>();
