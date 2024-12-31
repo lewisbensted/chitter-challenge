@@ -7,9 +7,9 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Box, Input, TextField, ThemeProvider, Typography } from "@mui/material";
-import MarginBox from "../styles/MarginBox";
+import { Box, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
+import FlexBox from "../styles/FlexBox";
 
 interface Props {
     cheetId: string;
@@ -42,10 +42,10 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
     };
     return (
         <ThemeProvider theme={theme}>
-            <MarginBox>
+            <FlexBox>
                 <Box component="form" onSubmit={handleSubmit(onSubmit)}>
                     <Typography variant="body1">Send a Reply:</Typography>
-                    <TextField {...register("text")} type="text" variant='standard'/>
+                    <TextField {...register("text")} type="text" variant="standard" />
                     {isSubmitLoading ? (
                         <CircularProgress />
                     ) : (
@@ -54,7 +54,7 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
                         </IconButton>
                     )}
                 </Box>
-            </MarginBox>
+            </FlexBox>
         </ThemeProvider>
     );
 };

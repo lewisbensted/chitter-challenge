@@ -13,7 +13,7 @@ const theme = createTheme({
                 },
                 {
                     props: { variant: "subtitle1" },
-                    style: { marginBlock: 10, justifyContent: "center", display: "flex", marginInline: 30 },
+                    style: { marginBlock: 10, justifyContent: "center", display: "flex", marginInline: 30, textAlign: "center" },
                 },
                 { props: { variant: "body1" }, style: { justifyContent: "left", display: "flex" } },
             ],

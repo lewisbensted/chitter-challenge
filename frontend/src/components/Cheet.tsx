@@ -93,14 +93,18 @@ const Cheet: React.FC<Props> = ({
                                 />
                             </Box>
                         ) : (
-                            <Typography>{cheet.text}</Typography>
+                            <Typography fontWeight={isModalView ? "bold" : ""}>{cheet.text}</Typography>
                         )}
                     </Grid2>
                 </Grid2>
                 {isModalView ? null : (
                     <Grid2 size={1}>
                         <Box margin={1.2}>
-                            <IconButton onClick={() => setModalOpen(true)} disabled={isComponentLoading}>
+                            <IconButton
+                                color="primary"
+                                onClick={() => setModalOpen(true)}
+                                disabled={isComponentLoading}
+                            >
                                 <OpenInNew />
                             </IconButton>
                         </Box>
@@ -136,6 +140,8 @@ const Cheet: React.FC<Props> = ({
                                 <CircularProgress />
                             ) : (
                                 <IconButton
+                                    color="primary"
+                                    disabled={isComponentLoading}
                                     onClick={async () => {
                                         setCheetLoading(true);
                                         setComponentLoading(true);
@@ -153,7 +159,6 @@ const Cheet: React.FC<Props> = ({
                                         setCheetLoading(false);
                                         setComponentLoading(false);
                                     }}
-                                    disabled={isComponentLoading}
                                 >
                                     <Delete />
                                 </IconButton>

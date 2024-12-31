@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { ICheet, IReply } from "../utils/interfaces";
 import axios from "axios";
 import ErrorModal from "./ErrorModal";
-import SubmitReply from "./SendReply";
 import { serverURL } from "../utils/serverURL";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -12,6 +11,7 @@ import { Box, Divider, Grid2, ThemeProvider } from "@mui/material";
 import Reply from "./Reply";
 import theme from "../styles/theme";
 import Cheet from "./Cheet";
+import SendReply from "./SendReply";
 
 interface Props {
     userId?: string;
@@ -61,9 +61,9 @@ const CheetModal: React.FC<Props> = ({
         <ThemeProvider theme={theme}>
             <Dialog open={isOpen}>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <Grid2 container width={600}>
+                <Grid2 container marginInline={2} marginTop={1}>
                     <Grid2 size={11}></Grid2>
-                    <Grid2 size={1}>
+                    <Grid2 size={1} display="flex" justifyContent="center">
                         <Box margin={1.2}>
                             <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
                                 <Close />
@@ -71,24 +71,25 @@ const CheetModal: React.FC<Props> = ({
                         </Box>
                     </Grid2>
                 </Grid2>
-                <Cheet
-                    cheet={cheet}
-                    userId={userId}
-                    setCheets={setCheets}
-                    setErrors={setErrors}
-                    setComponentLoading={setComponentLoading}
-                    isComponentLoading={isComponentLoading}
-                    isModalView={true}
-                    closeModal={closeModal}
-                />
-                <Divider />
-                <div>
+                <Box marginInline={5}>
+                    <Cheet
+                        cheet={cheet}
+                        userId={userId}
+                        setCheets={setCheets}
+                        setErrors={setErrors}
+                        setComponentLoading={setComponentLoading}
+                        isComponentLoading={isComponentLoading}
+                        isModalView={true}
+                        closeModal={closeModal}
+                    />
+                    <Divider />
+
                     {isRepliesLoading ? (
                         <CircularProgress />
                     ) : repliesError ? (
                         repliesError
                     ) : (
-                        <Box>
+                        <Box marginTop={1}>
                             {replies!.map((reply) => (
                                 <Reply
                                     key={reply.uuid}
@@ -103,16 +104,16 @@ const CheetModal: React.FC<Props> = ({
                             ))}
                         </Box>
                     )}
-                </div>
-                {userId ? (
-                    <SubmitReply
-                        cheetId={cheet.uuid}
-                        isDisabled={isComponentLoading}
-                        setReplies={setReplies}
-                        setErrors={setErrors}
-                        setComponentLoading={setComponentLoading}
-                    />
-                ) : null}
+                    {userId ? (
+                        <SendReply
+                            cheetId={cheet.uuid}
+                            isDisabled={isComponentLoading}
+                            setReplies={setReplies}
+                            setErrors={setErrors}
+                            setComponentLoading={setComponentLoading}
+                        />
+                    ) : null}
+                </Box>
             </Dialog>
         </ThemeProvider>
     );

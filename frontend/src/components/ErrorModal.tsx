@@ -1,6 +1,8 @@
 import React from "react";
 import Dialog from "@mui/material/Dialog/Dialog";
-import { Box, Button, Typography } from "@mui/material";
+import { Button, ThemeProvider, Typography } from "@mui/material";
+import theme from "../styles/theme";
+import FlexBox from "../styles/FlexBox";
 
 interface Props {
     errors: string[];
@@ -9,25 +11,23 @@ interface Props {
 
 const ErrorModal: React.FC<Props> = ({ errors, closeModal }) => {
     return (
-        <Dialog open={errors.length ? true : false}>
-            <Typography variant="h5" sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
-                Something went wrong!
-            </Typography>
-            {errors.map((error, key) => (
-                <Typography
-                    variant="body1"
-                    key={key}
-                    sx={{ display: "flex", justifyContent: "center", textAlign: "center", padding: "10px" }}
-                >
-                    {error}
+        <ThemeProvider theme={theme}>
+            <Dialog open={errors.length ? true : false}>
+                <Typography variant="h5">
+                    Something went wrong!
                 </Typography>
-            ))}
-            <Box sx={{ display: "flex", justifyContent: "center", padding: "20px" }}>
-                <Button onClick={closeModal} variant="contained" sx={{ maxWidth: "30px" }}>
-                    Ok
-                </Button>
-            </Box>
-        </Dialog>
+                {errors.map((error, key) => (
+                    <Typography variant="subtitle1" key={key}>
+                        {error}
+                    </Typography>
+                ))}
+                <FlexBox>
+                    <Button onClick={closeModal} variant="contained" sx={{ maxWidth: "30px" }}>
+                        <Typography variant="button">Ok</Typography>
+                    </Button>
+                </FlexBox>
+            </Dialog>
+        </ThemeProvider>
     );
 };
 
