@@ -115,7 +115,9 @@ const Cheet: React.FC<Props> = ({
                     <IconBox>
                         {userId === cheet.user.uuid ? (
                             isCheetLoading ? (
-                                <CircularProgress color="primary" size="1.7rem" thickness={5} />
+                                <Box paddingTop={1.3}>
+                                    <CircularProgress size="1.5rem" thickness={6} />
+                                </Box>
                             ) : isEditing ? (
                                 <IconButton
                                     type="submit"
@@ -138,7 +140,9 @@ const Cheet: React.FC<Props> = ({
                     <IconBox>
                         {userId === cheet.user.uuid && !isModalView ? (
                             isCheetLoading ? (
-                                <CircularProgress />
+                                <Box paddingTop={1.3}>
+                                    <CircularProgress size="1.5rem" thickness={6} />
+                                </Box>
                             ) : (
                                 <IconButton
                                     color="primary"

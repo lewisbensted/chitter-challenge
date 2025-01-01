@@ -44,8 +44,8 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
     return (
         <ThemeProvider theme={theme}>
             <FlexBox>
-                <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)} >
-                    <Grid2 container>
+                <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+                    <Grid2 container size={8}>
                         <Grid2 size={12}>
                             <Typography variant="body1">Send a Reply:</Typography>
                         </Grid2>
@@ -53,16 +53,16 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
                             <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
-                    <Grid2 size={1}>
-                        {isSubmitLoading ? (
-                            <CircularProgress />
-                        ) : (
-                            <IconBox>
+                    <Grid2 size={3}>
+                        <IconBox paddingTop={1}>
+                            {isSubmitLoading ? (
+                                <CircularProgress size="2rem" thickness={5} />
+                            ) : (
                                 <IconButton type="submit" disabled={isDisabled} color="primary">
                                     <Reply />
                                 </IconButton>
-                            </IconBox>
-                        )}
+                            )}
+                        </IconBox>
                     </Grid2>
                 </Grid2>
             </FlexBox>

@@ -81,11 +81,13 @@ const Reply: React.FC<Props> = ({
                         )}
                     </Grid2>
                 </Grid2>
-                <Grid2 size ={1}>
+                <Grid2 size={1}>
                     <IconBox>
                         {userId === reply.user.uuid ? (
                             isReplyLoading ? (
-                                <CircularProgress color="primary" size="1.7rem" thickness={5} />
+                                <Box paddingTop={1.3}>
+                                    <CircularProgress size="1.5rem" thickness={6} />
+                                </Box>
                             ) : isEditing ? (
                                 <IconButton
                                     type="submit"
@@ -104,11 +106,13 @@ const Reply: React.FC<Props> = ({
                         ) : null}
                     </IconBox>
                 </Grid2>
-                <Grid2 size = {1}>
+                <Grid2 size={1}>
                     <IconBox>
                         {userId === reply.user.uuid ? (
                             isReplyLoading ? (
-                                <CircularProgress color="primary" size="1.7rem" thickness={5} />
+                                <Box paddingTop={1.3}>
+                                    <CircularProgress size="1.5rem" thickness={6} />
+                                </Box>
                             ) : (
                                 <IconButton
                                     color="primary"
