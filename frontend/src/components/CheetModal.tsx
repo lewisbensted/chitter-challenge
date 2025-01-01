@@ -12,6 +12,8 @@ import Reply from "./Reply";
 import theme from "../styles/theme";
 import Cheet from "./Cheet";
 import SendReply from "./SendReply";
+import FlexBox from "../styles/FlexBox";
+import IconBox from "../styles/IconBox";
 
 interface Props {
     userId?: string;
@@ -63,12 +65,12 @@ const CheetModal: React.FC<Props> = ({
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <Grid2 container marginInline={2} marginTop={1}>
                     <Grid2 size={11}></Grid2>
-                    <Grid2 size={1} display="flex" justifyContent="center">
-                        <Box margin={1.2}>
+                    <Grid2 size={1}>
+                        <IconBox>
                             <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
                                 <Close />
                             </IconButton>
-                        </Box>
+                        </IconBox>
                     </Grid2>
                 </Grid2>
                 <Box marginInline={5}>
@@ -85,11 +87,13 @@ const CheetModal: React.FC<Props> = ({
                     <Divider />
 
                     {isRepliesLoading ? (
-                        <CircularProgress />
+                        <FlexBox>
+                            <CircularProgress />
+                        </FlexBox>
                     ) : repliesError ? (
-                        repliesError
+                        <FlexBox>{repliesError}</FlexBox>
                     ) : (
-                        <Box marginTop={1}>
+                        <Box marginBlock={2}>
                             {replies!.map((reply) => (
                                 <Reply
                                     key={reply.uuid}
@@ -104,6 +108,7 @@ const CheetModal: React.FC<Props> = ({
                             ))}
                         </Box>
                     )}
+
                     {userId ? (
                         <SendReply
                             cheetId={cheet.uuid}

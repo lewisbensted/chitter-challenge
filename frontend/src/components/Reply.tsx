@@ -11,6 +11,7 @@ import { Box, CircularProgress, Grid2, Input, Link, TextField, ThemeProvider, Ty
 import { format } from "date-fns";
 import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
+import IconBox from "../styles/IconBox";
 
 interface Props {
     isComponentLoading: boolean;
@@ -55,7 +56,7 @@ const Reply: React.FC<Props> = ({
 
     return (
         <ThemeProvider theme={theme}>
-            <Grid2 container columnSpacing={1}>
+            <Grid2 container>
                 <Grid2 container size={10}>
                     <Grid2 size={6}>
                         <Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
@@ -81,7 +82,7 @@ const Reply: React.FC<Props> = ({
                     </Grid2>
                 </Grid2>
                 <Grid2 size ={1}>
-                    <Box margin={1.2}>
+                    <IconBox>
                         {userId === reply.user.uuid ? (
                             isReplyLoading ? (
                                 <CircularProgress color="primary" size="1.7rem" thickness={5} />
@@ -101,10 +102,10 @@ const Reply: React.FC<Props> = ({
                                 </IconButton>
                             )
                         ) : null}
-                    </Box>
+                    </IconBox>
                 </Grid2>
                 <Grid2 size = {1}>
-                    <Box margin={1.2}>
+                    <IconBox>
                         {userId === reply.user.uuid ? (
                             isReplyLoading ? (
                                 <CircularProgress color="primary" size="1.7rem" thickness={5} />
@@ -133,7 +134,7 @@ const Reply: React.FC<Props> = ({
                                 </IconButton>
                             )
                         ) : null}
-                    </Box>
+                    </IconBox>
                 </Grid2>
             </Grid2>
         </ThemeProvider>

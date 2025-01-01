@@ -11,6 +11,7 @@ import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import CheetModal from "./CheetModal";
+import IconBox from "../styles/IconBox";
 
 interface Props {
     userId?: string;
@@ -99,7 +100,7 @@ const Cheet: React.FC<Props> = ({
                 </Grid2>
                 {isModalView ? null : (
                     <Grid2 size={1}>
-                        <Box margin={1.2}>
+                        <IconBox>
                             <IconButton
                                 color="primary"
                                 onClick={() => setModalOpen(true)}
@@ -107,11 +108,11 @@ const Cheet: React.FC<Props> = ({
                             >
                                 <OpenInNew />
                             </IconButton>
-                        </Box>
+                        </IconBox>
                     </Grid2>
                 )}
                 <Grid2 size={1}>
-                    <Box margin={1.2}>
+                    <IconBox>
                         {userId === cheet.user.uuid ? (
                             isCheetLoading ? (
                                 <CircularProgress color="primary" size="1.7rem" thickness={5} />
@@ -131,10 +132,10 @@ const Cheet: React.FC<Props> = ({
                                 </IconButton>
                             )
                         ) : null}
-                    </Box>
+                    </IconBox>
                 </Grid2>
                 <Grid2 size={1}>
-                    <Box margin={1.2}>
+                    <IconBox>
                         {userId === cheet.user.uuid && !isModalView ? (
                             isCheetLoading ? (
                                 <CircularProgress />
@@ -164,7 +165,7 @@ const Cheet: React.FC<Props> = ({
                                 </IconButton>
                             )
                         ) : null}
-                    </Box>
+                    </IconBox>
                 </Grid2>
             </Grid2>
         </ThemeProvider>

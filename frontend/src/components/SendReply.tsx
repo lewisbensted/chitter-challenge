@@ -7,9 +7,10 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Box, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
+import IconBox from "../styles/IconBox";
 
 interface Props {
     cheetId: string;
@@ -43,17 +44,27 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
     return (
         <ThemeProvider theme={theme}>
             <FlexBox>
-                <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-                    <Typography variant="body1">Send a Reply:</Typography>
-                    <TextField {...register("text")} type="text" variant="standard" />
-                    {isSubmitLoading ? (
-                        <CircularProgress />
-                    ) : (
-                        <IconButton type="submit" disabled={isDisabled} color="primary">
-                            <Reply />
-                        </IconButton>
-                    )}
-                </Box>
+                <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)} >
+                    <Grid2 container>
+                        <Grid2 size={12}>
+                            <Typography variant="body1">Send a Reply:</Typography>
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <TextField {...register("text")} type="text" variant="standard" />
+                        </Grid2>
+                    </Grid2>
+                    <Grid2 size={1}>
+                        {isSubmitLoading ? (
+                            <CircularProgress />
+                        ) : (
+                            <IconBox>
+                                <IconButton type="submit" disabled={isDisabled} color="primary">
+                                    <Reply />
+                                </IconButton>
+                            </IconBox>
+                        )}
+                    </Grid2>
+                </Grid2>
             </FlexBox>
         </ThemeProvider>
     );
