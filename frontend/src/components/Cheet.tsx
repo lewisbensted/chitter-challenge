@@ -78,19 +78,20 @@ const Cheet: React.FC<Props> = ({
                         <Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
                     </Grid2>
                     <Grid2 size={6}>
-                        <Box display="flex" justifyContent="flex-end">
-                            <Typography variant="body2">{format(cheet.createdAt, "HH:mm dd/MM/yy")}</Typography>
-                        </Box>
+                        <Typography display="flex" justifyContent="flex-end" variant="body2">
+                            {format(cheet.createdAt, "HH:mm dd/MM/yy")}
+                        </Typography>
                     </Grid2>
 
                     <Grid2>
                         {isEditing ? (
-                            <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-reply">
+                            <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-cheet">
                                 <TextField
                                     {...register("text")}
                                     type="text"
                                     defaultValue={cheet.text}
                                     variant="standard"
+                                    sx={{ width: "200%" }}
                                 />
                             </Box>
                         ) : (
@@ -122,8 +123,8 @@ const Cheet: React.FC<Props> = ({
                                 <IconButton
                                     type="submit"
                                     disabled={isComponentLoading}
-                                    form="edit-reply"
-                                    key="edit-reply"
+                                    form="edit-cheet"
+                                    key="edit-cheet"
                                     color="primary"
                                 >
                                     <Done />

@@ -7,6 +7,10 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
+import { Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import theme from "../styles/theme";
+import FlexBox from "../styles/FlexBox";
+import IconBox from "../styles/IconBox";
 
 interface Props {
     recipientId: string;
@@ -41,19 +45,31 @@ const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, se
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                Send a Message: &nbsp;
-                <input {...register("text")} type="text" /> &nbsp;
-                {isSubmitLoading ? (
-                    <CircularProgress />
-                ) : (
-                    <IconButton type="submit" disabled={isDisabled}>
-                        <Send />
-                    </IconButton>
-                )}
-            </form>
-        </div>
+        <ThemeProvider theme={theme}>
+            <FlexBox>
+                <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+                    <Grid2 container size={10}>
+                        <Grid2 size={12}>
+                            <Typography variant="body1">Send a Message:</Typography>
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <TextField {...register("text")} type="text" variant="standard"/>
+                        </Grid2>
+                    </Grid2>
+                    <Grid2 size={2}>
+                        <IconBox paddingTop={1}>
+                            {isSubmitLoading ? (
+                                <CircularProgress size="2rem" thickness={5} />
+                            ) : (
+                                <IconButton type="submit" disabled={isDisabled} color="primary">
+                                    <Send />
+                                </IconButton>
+                            )}
+                        </IconBox>
+                    </Grid2>
+                </Grid2>
+            </FlexBox>
+        </ThemeProvider>
     );
 };
 

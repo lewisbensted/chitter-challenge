@@ -62,9 +62,9 @@ const Reply: React.FC<Props> = ({
                         <Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
                     </Grid2>
                     <Grid2 size={6}>
-                        <Box display="flex" justifyContent="flex-end">
-                            <Typography variant="body2">{format(reply.createdAt, "HH:mm dd/MM/yy")}</Typography>
-                        </Box>
+                        <Typography display="flex" justifyContent="flex-end" variant="body2">
+                            {format(reply.createdAt, "HH:mm dd/MM/yy")}
+                        </Typography>
                     </Grid2>
                     <Grid2>
                         {isEditing ? (
@@ -74,6 +74,7 @@ const Reply: React.FC<Props> = ({
                                     type="text"
                                     defaultValue={reply.text}
                                     variant="standard"
+                                    sx={{ width: "200%" }}
                                 />
                             </Box>
                         ) : (

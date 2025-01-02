@@ -18,7 +18,7 @@ const theme = createTheme({
                 { props: { variant: "body1" }, style: { justifyContent: "left", display: "flex" } },
             ],
         },
-        MuiTextField: { styleOverrides: { root: { width: 300 } } },
+        MuiTextField: { styleOverrides: { root: { width: '100%' } } },
     },
 });
 

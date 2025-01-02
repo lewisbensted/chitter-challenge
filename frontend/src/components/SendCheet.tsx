@@ -48,7 +48,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, set
         <ThemeProvider theme={theme}>
             <FlexBox>
                 <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-                    <Grid2 container size={8}>
+                    <Grid2 container size={10}>
                         <Grid2 size={12}>
                             <Typography variant="body1">Send a Cheet:</Typography>
                         </Grid2>
@@ -56,7 +56,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, set
                             <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
-                    <Grid2 size={3}>
+                    <Grid2 size={2}>
                         <IconBox paddingTop={1}>
                             {isSubmitLoading ? (
                                 <CircularProgress size="2rem" thickness={6} />
