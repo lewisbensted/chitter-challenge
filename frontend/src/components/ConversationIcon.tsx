@@ -40,16 +40,16 @@ const ConversationIcon: React.FC<Props> = ({
                     setMessageModalOpen(false);
                     if (reloadWhenClosed) {
                         toggleReloadTrigger(!reloadTrigger);
-                        setReloadWhenClosed(false)
+                        setReloadWhenClosed(false);
                     }
                 }}
                 setConversations={setConversations}
                 reloadTrigger={reloadTrigger}
                 toggleReloadTrigger={toggleReloadTrigger}
-                setReloadWhenClosed = {setReloadWhenClosed}
-                unread = {conversation.unread}
+                setReloadWhenClosed={setReloadWhenClosed}
+                unread={conversation.unread}
             />
-            <IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading} >
+            <IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading} color="primary">
                 {conversation.unread > 0 ? <MarkUnreadChatAlt /> : <Chat />}
             </IconButton>
         </Fragment>

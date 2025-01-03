@@ -85,7 +85,7 @@ const Message: React.FC<Props> = ({
                                 {userId === message.sender.uuid ? (
                                     isMessageLoading ? (
                                         <Box paddingTop={1.3}>
-                                            <CircularProgress size="1.5rem" thickness={6} />
+                                            <CircularProgress size="1.5rem" thickness={5} />
                                         </Box>
                                     ) : isEditing ? (
                                         <IconButton
@@ -110,7 +110,7 @@ const Message: React.FC<Props> = ({
                                 {userId === message.sender.uuid ? (
                                     isMessageLoading ? (
                                         <Box paddingTop={1.3}>
-                                            <CircularProgress size="1.5rem" thickness={6} />
+                                            <CircularProgress size="1.5rem" thickness={5} />
                                         </Box>
                                     ) : (
                                         <IconButton

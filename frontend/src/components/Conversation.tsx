@@ -1,8 +1,12 @@
 import React, { Fragment, useState } from "react";
 import { IConversation } from "../utils/interfaces";
 import ConversationIcon from "./ConversationIcon";
-import { Box, IconButton, Link, Typography } from "@mui/material";
+import { Box, Card, Grid2, IconButton, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
+import { ThemeProvider } from "@emotion/react";
+import theme from "../styles/theme";
+import { MarkUnreadChatAlt } from "@mui/icons-material";
+import MessageModal from "./MessageModal";
 
 interface Props {
     userId?: string;
@@ -23,38 +27,75 @@ const Conversation: React.FC<Props> = ({
     reloadTrigger,
     toggleReloadTrigger,
 }) => {
+    const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
+    const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
+
     return (
-        <Box sx={{ display: "flex", paddingTop: "10px" }}>
-            <Box>
-                <Link href={`/users/${conversation.interlocutorId}`} variant="h6">
-                    {conversation.interlocutorUsername}
-                </Link>
-                <ConversationIcon
-                    userId={userId}
-                    conversation={conversation}
-                    isComponentLoading={isComponentLoading}
-                    setComponentLoading={setComponentLoading}
-                    setConversations={setConversations}
-                    reloadTrigger={reloadTrigger}
-                    toggleReloadTrigger={toggleReloadTrigger}
-                />
-                <Typography
-                    sx={{
-                        fontWeight:
+        <ThemeProvider theme={theme}>
+            <MessageModal
+                userId={userId}
+                interlocutorId={conversation.interlocutorId}
+                isOpen={messageModalOpen}
+                isComponentLoading={isComponentLoading}
+                setComponentLoading={setComponentLoading}
+                closeModal={() => {
+                    setMessageModalOpen(false);
+                    if (reloadWhenClosed) {
+                        toggleReloadTrigger(!reloadTrigger);
+                        setReloadWhenClosed(false);
+                    }
+                }}
+                setConversations={setConversations}
+                reloadTrigger={reloadTrigger}
+                toggleReloadTrigger={toggleReloadTrigger}
+                setReloadWhenClosed={setReloadWhenClosed}
+                unread={conversation.unread}
+            />
+            <Grid2
+                container
+                onClick={isComponentLoading ? () => {} : () => setMessageModalOpen(true)}
+                sx={{ cursor: isComponentLoading ? null : "pointer" }}
+            >
+                <Grid2 size={12}>
+                    <Link href={`/users/${conversation.interlocutorId}`} variant="h6">
+                        {conversation.interlocutorUsername}
+                    </Link>
+                </Grid2>
+
+                <Grid2 size={11}>
+                    <Typography
+                        fontWeight={
                             !conversation.latestMessage!.isRead && conversation.latestMessage?.senderId != userId
                                 ? "bold"
-                                : "medium",
-                    }}
-                >
-                    {conversation.latestMessage!.text}
+                                : ""
+                        }
+                    >
+                        {conversation.latestMessage!.text}
+                    </Typography>
+                </Grid2>
+
+                <Grid2 size={1}>
                     {conversation.latestMessage!.isRead && conversation.latestMessage?.senderId == userId ? (
-                        <IconButton style={{ pointerEvents: "none" }}>
-                            <Done fontSize="small" />
-                        </IconButton>
+                        <Done fontSize="small" color="primary" />
                     ) : null}
-                </Typography>
-            </Box>
-        </Box>
+                    {!conversation.latestMessage!.isRead && conversation.latestMessage?.senderId != userId ? (
+                        <MarkUnreadChatAlt fontSize="small" color="primary" />
+                    ) : null}
+                </Grid2>
+
+                {/* <Grid2 size={1}>
+                    <ConversationIcon
+                        userId={userId}
+                        conversation={conversation}
+                        isComponentLoading={isComponentLoading}
+                        setComponentLoading={setComponentLoading}
+                        setConversations={setConversations}
+                        reloadTrigger={reloadTrigger}
+                        toggleReloadTrigger={toggleReloadTrigger}
+                    />
+                </Grid2> */}
+            </Grid2>
+        </ThemeProvider>
     );
 };
 

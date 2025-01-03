@@ -72,7 +72,7 @@ const Cheet: React.FC<Props> = ({
                     setComponentLoading={setComponentLoading}
                 />
             )}
-            <Grid2 container columnSpacing={1}>
+            <Grid2 container>
                 <Grid2 container size={isModalView ? 10 : 9}>
                     <Grid2 size={6}>
                         <Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
@@ -117,7 +117,7 @@ const Cheet: React.FC<Props> = ({
                         {userId === cheet.user.uuid ? (
                             isCheetLoading ? (
                                 <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={6} />
+                                    <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
                             ) : isEditing ? (
                                 <IconButton
@@ -142,7 +142,7 @@ const Cheet: React.FC<Props> = ({
                         {userId === cheet.user.uuid && !isModalView ? (
                             isCheetLoading ? (
                                 <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={6} />
+                                    <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
                             ) : (
                                 <IconButton

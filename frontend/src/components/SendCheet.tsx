@@ -59,7 +59,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, set
                     <Grid2 size={2}>
                         <IconBox paddingTop={1}>
                             {isSubmitLoading ? (
-                                <CircularProgress size="2rem" thickness={6} />
+                                <CircularProgress size="2rem" thickness={5} />
                             ) : (
                                 <IconButton type="submit" disabled={isDisabled} color="primary">
                                     <Send />

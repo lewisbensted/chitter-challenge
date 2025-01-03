@@ -9,6 +9,10 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
+import { Box, Grid2, ThemeProvider } from "@mui/material";
+import theme from "../styles/theme";
+import IconBox from "../styles/IconBox";
+import FlexBox from "../styles/FlexBox";
 
 interface Props {
     userId?: string;
@@ -65,40 +69,53 @@ const MessageModal: React.FC<Props> = ({
     }, [isOpen]);
 
     return (
-        <Dialog open={isOpen}>
-            <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-            <div>
-                {isMessagesLoading ? (
-                    <CircularProgress />
-                ) : messagesError ? (
-                    messagesError
-                ) : (
-                    messages!.map((message) => (
-                        <Message
-                            key={message.uuid}
-                            userId={userId}
-                            message={message}
-                            setMessages={setMessages}
-                            isComponentLoading={isComponentLoading}
-                            setComponentLoading={setComponentLoading}
-                            setErrors={setErrors}
-                            setReloadWhenClosed={setReloadWhenClosed}
-                        />
-                    ))
-                )}
-            </div>
-            <SendMessage
-                recipientId={interlocutorId}
-                isDisabled={isComponentLoading}
-                setMessages={setMessages}
-                setErrors={setErrors}
-                setComponentLoading={setComponentLoading}
-                setReloadWhenClosed={setReloadWhenClosed}
-            />
-            <IconButton onClick={closeModal} disabled={isComponentLoading}>
-                <Close />
-            </IconButton>
-        </Dialog>
+        <ThemeProvider theme={theme}>
+            <Dialog open={isOpen}>
+                <ErrorModal errors={errors} closeModal={() => setErrors([])} />
+                <Grid2 container marginInline={2} marginTop={1} minWidth={550}>
+                    <Grid2 size={11}></Grid2>
+                    <Grid2 size={1}>
+                        <IconBox>
+                            <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
+                                <Close />
+                            </IconButton>
+                        </IconBox>
+                    </Grid2>
+                </Grid2>
+                <Box marginInline={5}>
+                    {isMessagesLoading ? (
+                        <FlexBox>
+                            <CircularProgress thickness={5} />
+                        </FlexBox>
+                    ) : messagesError ? (
+                        <FlexBox>{messagesError}</FlexBox>
+                    ) : (
+                        <Box marginBlock={2}>
+                            {messages!.map((message) => (
+                                <Message
+                                    key={message.uuid}
+                                    userId={userId}
+                                    message={message}
+                                    setMessages={setMessages}
+                                    isComponentLoading={isComponentLoading}
+                                    setComponentLoading={setComponentLoading}
+                                    setErrors={setErrors}
+                                    setReloadWhenClosed={setReloadWhenClosed}
+                                />
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+                <SendMessage
+                    recipientId={interlocutorId}
+                    isDisabled={isComponentLoading}
+                    setMessages={setMessages}
+                    setErrors={setErrors}
+                    setComponentLoading={setComponentLoading}
+                    setReloadWhenClosed={setReloadWhenClosed}
+                />
+            </Dialog>
+        </ThemeProvider>
     );
 };
 

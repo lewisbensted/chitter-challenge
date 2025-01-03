@@ -87,7 +87,7 @@ const Reply: React.FC<Props> = ({
                         {userId === reply.user.uuid ? (
                             isReplyLoading ? (
                                 <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={6} />
+                                    <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
                             ) : isEditing ? (
                                 <IconButton
@@ -112,7 +112,7 @@ const Reply: React.FC<Props> = ({
                         {userId === reply.user.uuid ? (
                             isReplyLoading ? (
                                 <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={6} />
+                                    <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
                             ) : (
                                 <IconButton

@@ -63,7 +63,7 @@ const CheetModal: React.FC<Props> = ({
         <ThemeProvider theme={theme}>
             <Dialog open={isOpen}>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <Grid2 container marginInline={2} marginTop={1}>
+                <Grid2 container marginInline={2} marginTop={1} minWidth={550}>
                     <Grid2 size={11}></Grid2>
                     <Grid2 size={1}>
                         <IconBox>
@@ -88,7 +88,7 @@ const CheetModal: React.FC<Props> = ({
 
                     {isRepliesLoading ? (
                         <FlexBox>
-                            <CircularProgress />
+                            <CircularProgress thickness={5}/>
                         </FlexBox>
                     ) : repliesError ? (
                         <FlexBox>{repliesError}</FlexBox>
