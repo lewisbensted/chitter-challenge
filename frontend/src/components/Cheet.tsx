@@ -37,10 +37,11 @@ const Cheet: React.FC<Props> = ({
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
     const [isModalOpen, setModalOpen] = useState<boolean>(false);
-    const [isCheetLoading, setCheetLoading] = useState<boolean>(false);
+    const [isEditLoading, setEditLoading] = useState<boolean>(false);
+    const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-        setCheetLoading(true);
+        setEditLoading(true);
         setComponentLoading(true);
         await axios
             .put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, data, {
@@ -53,7 +54,7 @@ const Cheet: React.FC<Props> = ({
                 handleErrors(error, "editing the cheet", setErrors);
             });
         setEditing(false);
-        setCheetLoading(false);
+        setEditLoading(false);
         setComponentLoading(false);
     };
 
@@ -115,7 +116,7 @@ const Cheet: React.FC<Props> = ({
                 <Grid2 size={1}>
                     <IconBox>
                         {userId === cheet.user.uuid ? (
-                            isCheetLoading ? (
+                            isEditLoading ? (
                                 <Box paddingTop={1.3}>
                                     <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
@@ -140,7 +141,7 @@ const Cheet: React.FC<Props> = ({
                 <Grid2 size={1}>
                     <IconBox>
                         {userId === cheet.user.uuid && !isModalView ? (
-                            isCheetLoading ? (
+                            isDeleteLoading ? (
                                 <Box paddingTop={1.3}>
                                     <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
@@ -149,7 +150,7 @@ const Cheet: React.FC<Props> = ({
                                     color="primary"
                                     disabled={isComponentLoading}
                                     onClick={async () => {
-                                        setCheetLoading(true);
+                                        setDeleteLoading(true);
                                         setComponentLoading(true);
                                         await axios
                                             .delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, {
@@ -162,7 +163,7 @@ const Cheet: React.FC<Props> = ({
                                             .catch((error: unknown) => {
                                                 handleErrors(error, "deleting the cheet", setErrors);
                                             });
-                                        setCheetLoading(false);
+                                        setDeleteLoading(false);
                                         setComponentLoading(false);
                                     }}
                                 >

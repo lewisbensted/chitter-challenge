@@ -16,7 +16,12 @@ const logout = async (
             redirect();
         })
         .catch((error) => {
-            handleErrors(error, "logging out", setErrors);
+            if (error.response.status == 403) {
+                setUserId(undefined);
+                redirect();
+            } else {
+                handleErrors(error, "logging out", setErrors);
+            }
         });
     setPageLoading(false);
 };

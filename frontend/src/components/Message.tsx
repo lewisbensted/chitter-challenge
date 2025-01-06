@@ -30,11 +30,12 @@ const Message: React.FC<Props> = ({
     setReloadWhenClosed,
 }) => {
     const { register, handleSubmit } = useForm<{ text: string }>();
-    const [isMessageLoading, setMessageLoading] = useState<boolean>(false);
+    const [isEditLoading, setEditLoading] = useState<boolean>(false);
+    const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
     const [isEditing, setEditing] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-        setMessageLoading(true);
+        setEditLoading(true);
         setComponentLoading(true);
         await axios
             .put(`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`, data, {
@@ -47,7 +48,7 @@ const Message: React.FC<Props> = ({
                 handleErrors(error, "editing the message", setErrors);
             });
         setEditing(false);
-        setMessageLoading(false);
+        setEditLoading(false);
         setComponentLoading(false);
     };
     return (
@@ -83,11 +84,11 @@ const Message: React.FC<Props> = ({
                         <Grid2 size={1}>
                             <IconBox>
                                 {userId === message.sender.uuid ? (
-                                    isMessageLoading ? (
+                                    isEditLoading ? (
                                         <Box paddingTop={1.3}>
                                             <CircularProgress size="1.5rem" thickness={5} />
                                         </Box>
-                                    ) : isEditing ? (
+                                    ) : message.isRead ? null : isEditing ? (
                                         <IconButton
                                             type="submit"
                                             disabled={isComponentLoading}
@@ -108,16 +109,16 @@ const Message: React.FC<Props> = ({
                         <Grid2 size={1}>
                             <IconBox>
                                 {userId === message.sender.uuid ? (
-                                    isMessageLoading ? (
+                                    isDeleteLoading ? (
                                         <Box paddingTop={1.3}>
                                             <CircularProgress size="1.5rem" thickness={5} />
                                         </Box>
-                                    ) : (
+                                    ) : message.isRead ? null : (
                                         <IconButton
                                             color="primary"
                                             disabled={isComponentLoading}
                                             onClick={async () => {
-                                                setMessageLoading(true);
+                                                setDeleteLoading(true);
                                                 setComponentLoading(true);
                                                 await axios
                                                     .delete(
@@ -133,7 +134,7 @@ const Message: React.FC<Props> = ({
                                                     .catch((error: unknown) => {
                                                         handleErrors(error, "deleting the message", setErrors);
                                                     });
-                                                setMessageLoading(false);
+                                                setDeleteLoading(false);
                                                 setComponentLoading(false);
                                             }}
                                         >

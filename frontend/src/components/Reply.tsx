@@ -34,10 +34,11 @@ const Reply: React.FC<Props> = ({
 }) => {
     const { register, handleSubmit } = useForm<{ text: string }>();
     const [isEditing, setEditing] = useState<boolean>(false);
-    const [isReplyLoading, setReplyLoading] = useState<boolean>(false);
+    const [isEditLoading, setEditLoading] = useState<boolean>(false);
+    const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
     const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-        setReplyLoading(true);
+        setEditLoading(true);
         setComponentLoading(true);
         await axios
             .put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}`, data, {
@@ -49,7 +50,7 @@ const Reply: React.FC<Props> = ({
             .catch((error: unknown) => {
                 handleErrors(error, "editing the reply", setErrors);
             });
-        setReplyLoading(false);
+        setEditLoading(false);
         setComponentLoading(false);
         setEditing(false);
     };
@@ -85,7 +86,7 @@ const Reply: React.FC<Props> = ({
                 <Grid2 size={1}>
                     <IconBox>
                         {userId === reply.user.uuid ? (
-                            isReplyLoading ? (
+                            isEditLoading ? (
                                 <Box paddingTop={1.3}>
                                     <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
@@ -110,7 +111,7 @@ const Reply: React.FC<Props> = ({
                 <Grid2 size={1}>
                     <IconBox>
                         {userId === reply.user.uuid ? (
-                            isReplyLoading ? (
+                            isDeleteLoading ? (
                                 <Box paddingTop={1.3}>
                                     <CircularProgress size="1.5rem" thickness={5} />
                                 </Box>
@@ -119,7 +120,7 @@ const Reply: React.FC<Props> = ({
                                     color="primary"
                                     disabled={isComponentLoading}
                                     onClick={async () => {
-                                        setReplyLoading(true);
+                                        setDeleteLoading(true);
                                         setComponentLoading(true);
                                         await axios
                                             .delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
@@ -131,7 +132,7 @@ const Reply: React.FC<Props> = ({
                                             .catch((error: unknown) => {
                                                 handleErrors(error, "deleting the reply", setErrors);
                                             });
-                                        setReplyLoading(false);
+                                        setDeleteLoading(false);
                                         setComponentLoading(false);
                                     }}
                                 >
