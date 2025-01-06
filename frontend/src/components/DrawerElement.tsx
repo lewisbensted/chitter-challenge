@@ -10,7 +10,7 @@ import { Link, ThemeProvider } from "@mui/material";
 import IconBox from "../styles/IconBox";
 
 interface Props {
-    link: string;
+    link?: string;
     icon: ReactNode;
     text: string;
     isComponentLoading: boolean;

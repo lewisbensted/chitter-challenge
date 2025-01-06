@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import IconBox from "../styles/IconBox";
+import ErrorModal from "../components/ErrorModal";
 
 interface Props {
     isComponentLoading: boolean;
@@ -41,10 +42,12 @@ const Layout: React.FC<Props> = ({
     isUnreadMessages,
 }) => {
     const [isDrawerOpen, setDrawerOpen] = useState(false);
+    const [errors, setErrors] = useState<string[]>([]);
     const navigate = useNavigate();
 
     return (
         <ThemeProvider theme={theme}>
+            <ErrorModal errors={errors} closeModal={() => setErrors([])} />
             <Box sx={{ display: "flex" }}>
                 <Drawer
                     open={isDrawerOpen}
@@ -72,16 +75,12 @@ const Layout: React.FC<Props> = ({
                                     isDrawerOpen={isDrawerOpen}
                                 />
                                 <DrawerElement
-                                    link="/"
                                     text="Log out"
                                     icon={<Logout />}
                                     isComponentLoading={isComponentLoading}
                                     isDrawerOpen={isDrawerOpen}
                                     onClick={async () => {
-                                        {
-                                            await logout(setPageLoading, setUserId);
-                                            navigate("/login");
-                                        }
+                                        await logout(setPageLoading, setUserId, setErrors, () => navigate("/login"));
                                     }}
                                 />
                             </Fragment>
