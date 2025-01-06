@@ -1,7 +1,6 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { IConversation } from "../utils/interfaces";
-import ConversationIcon from "./ConversationIcon";
-import { Box, Card, Grid2, IconButton, Link, Typography } from "@mui/material";
+import { Grid2, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
 import { ThemeProvider } from "@emotion/react";
 import theme from "../styles/theme";

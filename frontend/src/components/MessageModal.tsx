@@ -81,39 +81,39 @@ const MessageModal: React.FC<Props> = ({
                             </IconButton>
                         </IconBox>
                     </Grid2>
+                    <Grid2 marginInline={3} size={12}>
+                        {isMessagesLoading ? (
+                            <FlexBox>
+                                <CircularProgress thickness={5} />
+                            </FlexBox>
+                        ) : messagesError ? (
+                            <FlexBox>{messagesError}</FlexBox>
+                        ) : (
+                            <Grid2 marginBlock={2}>
+                                {messages!.map((message) => (
+                                    <Message
+                                        key={message.uuid}
+                                        userId={userId}
+                                        message={message}
+                                        setMessages={setMessages}
+                                        isComponentLoading={isComponentLoading}
+                                        setComponentLoading={setComponentLoading}
+                                        setErrors={setErrors}
+                                        setReloadWhenClosed={setReloadWhenClosed}
+                                    />
+                                ))}
+                            </Grid2>
+                        )}
+                        <SendMessage
+                            recipientId={interlocutorId}
+                            isDisabled={isComponentLoading}
+                            setMessages={setMessages}
+                            setErrors={setErrors}
+                            setComponentLoading={setComponentLoading}
+                            setReloadWhenClosed={setReloadWhenClosed}
+                        />
+                    </Grid2>
                 </Grid2>
-                <Box marginInline={5}>
-                    {isMessagesLoading ? (
-                        <FlexBox>
-                            <CircularProgress thickness={5} />
-                        </FlexBox>
-                    ) : messagesError ? (
-                        <FlexBox>{messagesError}</FlexBox>
-                    ) : (
-                        <Box marginBlock={2}>
-                            {messages!.map((message) => (
-                                <Message
-                                    key={message.uuid}
-                                    userId={userId}
-                                    message={message}
-                                    setMessages={setMessages}
-                                    isComponentLoading={isComponentLoading}
-                                    setComponentLoading={setComponentLoading}
-                                    setErrors={setErrors}
-                                    setReloadWhenClosed={setReloadWhenClosed}
-                                />
-                            ))}
-                        </Box>
-                    )}
-                </Box>
-                <SendMessage
-                    recipientId={interlocutorId}
-                    isDisabled={isComponentLoading}
-                    setMessages={setMessages}
-                    setErrors={setErrors}
-                    setComponentLoading={setComponentLoading}
-                    setReloadWhenClosed={setReloadWhenClosed}
-                />
             </Dialog>
         </ThemeProvider>
     );

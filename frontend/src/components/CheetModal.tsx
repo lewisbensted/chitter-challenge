@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import { Box, Divider, Grid2, ThemeProvider } from "@mui/material";
+import { Divider, Grid2, ThemeProvider } from "@mui/material";
 import Reply from "./Reply";
 import theme from "../styles/theme";
 import Cheet from "./Cheet";
@@ -72,53 +72,53 @@ const CheetModal: React.FC<Props> = ({
                             </IconButton>
                         </IconBox>
                     </Grid2>
-                </Grid2>
-                <Box marginInline={5}>
-                    <Cheet
-                        cheet={cheet}
-                        userId={userId}
-                        setCheets={setCheets}
-                        setErrors={setErrors}
-                        setComponentLoading={setComponentLoading}
-                        isComponentLoading={isComponentLoading}
-                        isModalView={true}
-                        closeModal={closeModal}
-                    />
-                    <Divider />
-
-                    {isRepliesLoading ? (
-                        <FlexBox>
-                            <CircularProgress thickness={5}/>
-                        </FlexBox>
-                    ) : repliesError ? (
-                        <FlexBox>{repliesError}</FlexBox>
-                    ) : (
-                        <Box marginBlock={2}>
-                            {replies!.map((reply) => (
-                                <Reply
-                                    key={reply.uuid}
-                                    isComponentLoading={isComponentLoading}
-                                    userId={userId}
-                                    cheetId={cheet.uuid}
-                                    reply={reply}
-                                    setReplies={setReplies}
-                                    setErrors={setErrors}
-                                    setComponentLoading={setComponentLoading}
-                                />
-                            ))}
-                        </Box>
-                    )}
-
-                    {userId ? (
-                        <SendReply
-                            cheetId={cheet.uuid}
-                            isDisabled={isComponentLoading}
-                            setReplies={setReplies}
+                    <Grid2 marginInline={3} size={12}>
+                        <Cheet
+                            cheet={cheet}
+                            userId={userId}
+                            setCheets={setCheets}
                             setErrors={setErrors}
                             setComponentLoading={setComponentLoading}
+                            isComponentLoading={isComponentLoading}
+                            isModalView={true}
+                            closeModal={closeModal}
                         />
-                    ) : null}
-                </Box>
+                        <Divider />
+
+                        {isRepliesLoading ? (
+                            <FlexBox>
+                                <CircularProgress thickness={5} />
+                            </FlexBox>
+                        ) : repliesError ? (
+                            <FlexBox>{repliesError}</FlexBox>
+                        ) : (
+                            <Grid2 marginBlock={2}>
+                                {replies!.map((reply) => (
+                                    <Reply
+                                        key={reply.uuid}
+                                        isComponentLoading={isComponentLoading}
+                                        userId={userId}
+                                        cheetId={cheet.uuid}
+                                        reply={reply}
+                                        setReplies={setReplies}
+                                        setErrors={setErrors}
+                                        setComponentLoading={setComponentLoading}
+                                    />
+                                ))}
+                            </Grid2>
+                        )}
+
+                        {userId ? (
+                            <SendReply
+                                cheetId={cheet.uuid}
+                                isDisabled={isComponentLoading}
+                                setReplies={setReplies}
+                                setErrors={setErrors}
+                                setComponentLoading={setComponentLoading}
+                            />
+                        ) : null}
+                    </Grid2>
+                </Grid2>
             </Dialog>
         </ThemeProvider>
     );

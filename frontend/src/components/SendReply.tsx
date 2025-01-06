@@ -7,7 +7,7 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import IconBox from "../styles/IconBox";

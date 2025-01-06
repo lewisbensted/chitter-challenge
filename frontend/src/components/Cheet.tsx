@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { ICheet } from "../utils/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
-
 import theme from "../styles/theme";
 import { Box, CircularProgress, Grid2, IconButton, Link, TextField, ThemeProvider, Typography } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";

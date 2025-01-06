@@ -9,7 +9,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 import FlexBox from "../styles/FlexBox";
-import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import IconBox from "../styles/IconBox";
 
