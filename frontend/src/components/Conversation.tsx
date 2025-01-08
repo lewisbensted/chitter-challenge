@@ -50,52 +50,49 @@ const Conversation: React.FC<Props> = ({
                 setReloadWhenClosed={setReloadWhenClosed}
                 unread={conversation.unread}
             />
-            
-                <Card>
-                    <Grid2>
-                    <CardActionArea
-                        disabled={isComponentLoading}
-                        onClick={isComponentLoading ? () => {} : () => setMessageModalOpen(true)}
-                    >
-                        <CardContent>
-                            <Grid2 container>
-                                <Grid2 size={12}>
-                                    <Link
-                                        onClick={(event) => event.stopPropagation()}
-                                        href={`/users/${conversation.interlocutorId}`}
-                                        variant="h4"
-                                    >
-                                        {conversation.interlocutorUsername}
-                                    </Link>
-                                </Grid2>
-                                <Grid2 size={11}>
-                                    <Typography
-                                        fontWeight={
-                                            !conversation.latestMessage!.isRead &&
-                                            conversation.latestMessage?.senderId != userId
-                                                ? "bold"
-                                                : ""
-                                        }
-                                    >
-                                        {conversation.latestMessage!.text}
-                                    </Typography>
-                                </Grid2>
-                                <Grid2 size={1}>
-                                    {conversation.latestMessage!.isRead &&
-                                    conversation.latestMessage?.senderId == userId ? (
-                                        <Done fontSize="small" color="primary" />
-                                    ) : null}
-                                    {!conversation.latestMessage!.isRead &&
-                                    conversation.latestMessage?.senderId != userId ? (
-                                        <MarkUnreadChatAlt fontSize="small" color="primary" />
-                                    ) : null}
-                                </Grid2>
+
+            <Card>
+                <CardActionArea
+                    disabled={isComponentLoading}
+                    onClick={isComponentLoading ? () => {} : () => setMessageModalOpen(true)}
+                >
+                    <CardContent>
+                        <Grid2 container>
+                            <Grid2 size={12}>
+                                <Link
+                                    onClick={(event) => event.stopPropagation()}
+                                    href={`/users/${conversation.interlocutorId}`}
+                                    variant="h4"
+                                >
+                                    {conversation.interlocutorUsername}
+                                </Link>
                             </Grid2>
-                        </CardContent>
-                    </CardActionArea>
-                    </Grid2>
-                </Card>
-            
+                            <Grid2 size={11}>
+                                <Typography
+                                    fontWeight={
+                                        !conversation.latestMessage!.isRead &&
+                                        conversation.latestMessage?.senderId != userId
+                                            ? "bold"
+                                            : ""
+                                    }
+                                >
+                                    {conversation.latestMessage!.text}
+                                </Typography>
+                            </Grid2>
+                            <Grid2 size={1}>
+                                {conversation.latestMessage!.isRead &&
+                                conversation.latestMessage?.senderId == userId ? (
+                                    <Done fontSize="small" color="primary" />
+                                ) : null}
+                                {!conversation.latestMessage!.isRead &&
+                                conversation.latestMessage?.senderId != userId ? (
+                                    <MarkUnreadChatAlt fontSize="small" color="primary" />
+                                ) : null}
+                            </Grid2>
+                        </Grid2>
+                    </CardContent>
+                </CardActionArea>
+            </Card>
         </ThemeProvider>
     );
 };
