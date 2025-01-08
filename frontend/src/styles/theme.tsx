@@ -12,6 +12,10 @@ const theme = createTheme({
                     style: { marginBlock: 30, justifyContent: "center", display: "flex", marginInline: 30 },
                 },
                 {
+                    props: { variant: "h6" },
+                    style: { justifyContent: "center", display: "flex", marginInline: 30 },
+                },
+                {
                     props: { variant: "subtitle1" },
                     style: { marginBlock: 10, justifyContent: "center", display: "flex", marginInline: 30, textAlign: "center" },
                 },

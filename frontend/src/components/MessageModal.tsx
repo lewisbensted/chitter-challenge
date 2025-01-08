@@ -9,14 +9,14 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Box, Grid2, ThemeProvider } from "@mui/material";
+import { Box, Grid2, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import IconBox from "../styles/IconBox";
 import FlexBox from "../styles/FlexBox";
 
 interface Props {
     userId?: string;
-    interlocutorId: string;
+    conversation: IConversation;
     isOpen: boolean;
     isComponentLoading: boolean;
     closeModal: () => void;
@@ -30,7 +30,7 @@ interface Props {
 
 const MessageModal: React.FC<Props> = ({
     userId,
-    interlocutorId,
+    conversation,
     isOpen,
     isComponentLoading,
     closeModal,
@@ -49,7 +49,7 @@ const MessageModal: React.FC<Props> = ({
         if (isOpen) {
             setComponentLoading(true);
             axios
-                .get(`${serverURL}/messages/${interlocutorId}`, {
+                .get(`${serverURL}/messages/${conversation.interlocutorId}`, {
                     withCredentials: true,
                 })
                 .then((res: { data: IMessage[] }) => {
@@ -82,6 +82,7 @@ const MessageModal: React.FC<Props> = ({
                         </IconBox>
                     </Grid2>
                     <Grid2 marginInline={3} size={12}>
+                    <Typography variant='h6'>{conversation.interlocutorUsername}</Typography>
                         {isMessagesLoading ? (
                             <FlexBox>
                                 <CircularProgress thickness={5} />
@@ -105,7 +106,7 @@ const MessageModal: React.FC<Props> = ({
                             </Grid2>
                         )}
                         <SendMessage
-                            recipientId={interlocutorId}
+                            recipientId={conversation.interlocutorId}
                             isDisabled={isComponentLoading}
                             setMessages={setMessages}
                             setErrors={setErrors}

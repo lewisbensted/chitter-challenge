@@ -32,7 +32,7 @@ const ConversationIcon: React.FC<Props> = ({
         <Fragment>
             <MessageModal
                 userId={userId}
-                interlocutorId={conversation.interlocutorId}
+                conversation={conversation}
                 isOpen={messageModalOpen}
                 isComponentLoading={isComponentLoading}
                 setComponentLoading={setComponentLoading}
