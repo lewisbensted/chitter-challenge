@@ -82,7 +82,7 @@ const MessageModal: React.FC<Props> = ({
                         </IconBox>
                     </Grid2>
                     <Grid2 marginInline={3} size={12}>
-                    <Typography variant='h6'>{conversation.interlocutorUsername}</Typography>
+                        <Typography variant="h6">{conversation.interlocutorUsername}</Typography>
                         {isMessagesLoading ? (
                             <FlexBox>
                                 <CircularProgress thickness={5} />
@@ -90,20 +90,18 @@ const MessageModal: React.FC<Props> = ({
                         ) : messagesError ? (
                             <FlexBox>{messagesError}</FlexBox>
                         ) : (
-                            <Grid2 marginBlock={2}>
-                                {messages!.map((message) => (
-                                    <Message
-                                        key={message.uuid}
-                                        userId={userId}
-                                        message={message}
-                                        setMessages={setMessages}
-                                        isComponentLoading={isComponentLoading}
-                                        setComponentLoading={setComponentLoading}
-                                        setErrors={setErrors}
-                                        setReloadWhenClosed={setReloadWhenClosed}
-                                    />
-                                ))}
-                            </Grid2>
+                            messages!.map((message) => (
+                                <Message
+                                    key={message.uuid}
+                                    userId={userId}
+                                    message={message}
+                                    setMessages={setMessages}
+                                    isComponentLoading={isComponentLoading}
+                                    setComponentLoading={setComponentLoading}
+                                    setErrors={setErrors}
+                                    setReloadWhenClosed={setReloadWhenClosed}
+                                />
+                            ))
                         )}
                         <SendMessage
                             recipientId={conversation.interlocutorId}

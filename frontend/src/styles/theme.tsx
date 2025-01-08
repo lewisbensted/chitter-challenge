@@ -19,7 +19,7 @@ const theme = createTheme({
                     props: { variant: "subtitle1" },
                     style: { marginBlock: 10, justifyContent: "center", display: "flex", marginInline: 30, textAlign: "center" },
                 },
-                { props: { variant: "body1" }, style: { justifyContent: "left", display: "flex" } },
+                { props: { variant: "body1" }, style: { justifyContent: "left", display: "flex", wordBreak: "break-word"  } },
             ],
         },
         MuiTextField: { styleOverrides: { root: { width: '100%' } } },

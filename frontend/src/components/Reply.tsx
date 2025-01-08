@@ -80,7 +80,7 @@ const Reply: React.FC<Props> = ({
                                         {format(reply.createdAt, "HH:mm dd/MM/yy")}
                                     </Typography>
                                 </Grid2>
-                                <Grid2>
+                                <Grid2 size={12}>
                                     {isEditing ? (
                                         <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-reply">
                                             <TextField
@@ -88,7 +88,6 @@ const Reply: React.FC<Props> = ({
                                                 type="text"
                                                 defaultValue={reply.text}
                                                 variant="standard"
-                                                sx={{ width: "200%" }}
                                             />
                                         </Box>
                                     ) : (

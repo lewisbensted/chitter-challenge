@@ -63,7 +63,7 @@ const CheetModal: React.FC<Props> = ({
         <ThemeProvider theme={theme}>
             <Dialog open={isOpen}>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <Grid2 container marginInline={2} marginTop={1} minWidth={550}>
+                <Grid2 container marginInline={2} marginTop={1}>
                     <Grid2 size={11}></Grid2>
                     <Grid2 size={1}>
                         <IconBox>
@@ -92,20 +92,18 @@ const CheetModal: React.FC<Props> = ({
                         ) : repliesError ? (
                             <FlexBox>{repliesError}</FlexBox>
                         ) : (
-                            <Grid2 marginBlock={2}>
-                                {replies!.map((reply) => (
-                                    <Reply
-                                        key={reply.uuid}
-                                        isComponentLoading={isComponentLoading}
-                                        userId={userId}
-                                        cheetId={cheet.uuid}
-                                        reply={reply}
-                                        setReplies={setReplies}
-                                        setErrors={setErrors}
-                                        setComponentLoading={setComponentLoading}
-                                    />
-                                ))}
-                            </Grid2>
+                            replies!.map((reply) => (
+                                <Reply
+                                    key={reply.uuid}
+                                    isComponentLoading={isComponentLoading}
+                                    userId={userId}
+                                    cheetId={cheet.uuid}
+                                    reply={reply}
+                                    setReplies={setReplies}
+                                    setErrors={setErrors}
+                                    setComponentLoading={setComponentLoading}
+                                />
+                            ))
                         )}
 
                         {userId ? (

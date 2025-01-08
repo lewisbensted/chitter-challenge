@@ -96,7 +96,7 @@ const Cheet: React.FC<Props> = ({
                                         {format(cheet.createdAt, "HH:mm dd/MM/yy")}
                                     </Typography>
                                 </Grid2>
-                                <Grid2>
+                                <Grid2 size={12}>
                                     {isEditing ? (
                                         <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-cheet">
                                             <TextField
@@ -104,11 +104,14 @@ const Cheet: React.FC<Props> = ({
                                                 type="text"
                                                 defaultValue={cheet.text}
                                                 variant="standard"
-                                                sx={{ width: "200%" }}
                                             />
                                         </Box>
                                     ) : (
-                                        <Typography fontWeight={isModalView ? "bold" : ""}>{cheet.text}</Typography>
+                                        <Typography
+                                            fontWeight={isModalView ? "bold" : ""}
+                                        >
+                                            {cheet.text}
+                                        </Typography>
                                     )}
                                 </Grid2>
                             </Grid2>
