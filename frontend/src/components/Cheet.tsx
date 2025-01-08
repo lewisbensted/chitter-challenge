@@ -3,7 +3,19 @@ import { ICheet } from "../utils/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
 import theme from "../styles/theme";
-import { Box, CircularProgress, Grid2, IconButton, Link, TextField, ThemeProvider, Typography } from "@mui/material";
+import {
+    Box,
+    Card,
+    CardActions,
+    CardContent,
+    CircularProgress,
+    Grid2,
+    IconButton,
+    Link,
+    TextField,
+    ThemeProvider,
+    Typography,
+} from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
@@ -72,107 +84,133 @@ const Cheet: React.FC<Props> = ({
                     setComponentLoading={setComponentLoading}
                 />
             )}
-            <Grid2 container>
-                <Grid2 container size={isModalView ? 10 : 9}>
-                    <Grid2 size={6}>
-                        <Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
-                    </Grid2>
-                    <Grid2 size={6}>
-                        <Typography display="flex" justifyContent="flex-end" variant="body2">
-                            {format(cheet.createdAt, "HH:mm dd/MM/yy")}
-                        </Typography>
-                    </Grid2>
+            <Card>
+                <Grid2 container>
+                    <Grid2 size={isModalView ? 10 : 9}>
+                        <CardContent>
+                            <Grid2 container>
+                                <Grid2 size={6}>
+                                    <Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
+                                </Grid2>
+                                <Grid2 size={6}>
+                                    <Typography display="flex" justifyContent="flex-end" variant="body2">
+                                        {format(cheet.createdAt, "HH:mm dd/MM/yy")}
+                                    </Typography>
+                                </Grid2>
 
-                    <Grid2>
-                        {isEditing ? (
-                            <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-cheet">
-                                <TextField
-                                    {...register("text")}
-                                    type="text"
-                                    defaultValue={cheet.text}
-                                    variant="standard"
-                                    sx={{ width: "200%" }}
-                                />
-                            </Box>
-                        ) : (
-                            <Typography fontWeight={isModalView ? "bold" : ""}>{cheet.text}</Typography>
-                        )}
+                                <Grid2>
+                                    {isEditing ? (
+                                        <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-cheet">
+                                            <TextField
+                                                {...register("text")}
+                                                type="text"
+                                                defaultValue={cheet.text}
+                                                variant="standard"
+                                                sx={{ width: "200%" }}
+                                            />
+                                        </Box>
+                                    ) : (
+                                        <Typography fontWeight={isModalView ? "bold" : ""}>{cheet.text}</Typography>
+                                    )}
+                                </Grid2>
+                            </Grid2>
+                        </CardContent>
+                    </Grid2>
+                    <Grid2
+                        container
+                        size={isModalView ? 2 : 3}
+                        display="flex"
+                        justifyContent={isModalView ? "center" : ""}
+                    >
+                        <CardActions>
+                            <Grid2 container columns={isModalView ? 1 : 3}>
+                                {isModalView ? null : (
+                                    <Grid2 size={1}>
+                                        <IconBox>
+                                            <IconButton
+                                                color="primary"
+                                                onClick={() => setModalOpen(true)}
+                                                disabled={isComponentLoading}
+                                            >
+                                                <OpenInNew />
+                                            </IconButton>
+                                        </IconBox>
+                                    </Grid2>
+                                )}
+
+                                <Grid2 size={1}>
+                                    {userId === cheet.user.uuid ? (
+                                        isEditLoading ? (
+                                            <IconBox paddingTop={1.3}>
+                                                <CircularProgress size="1.5rem" thickness={5} />
+                                            </IconBox>
+                                        ) : isEditing ? (
+                                            <IconBox>
+                                                <IconButton
+                                                    type="submit"
+                                                    disabled={isComponentLoading}
+                                                    form="edit-cheet"
+                                                    key="edit-cheet"
+                                                    color="primary"
+                                                >
+                                                    <Done />
+                                                </IconButton>
+                                            </IconBox>
+                                        ) : (
+                                            <IconBox>
+                                                <IconButton onClick={() => setEditing(true)} color="primary">
+                                                    <Edit />
+                                                </IconButton>
+                                            </IconBox>
+                                        )
+                                    ) : 
+                                        null
+                                    }
+                                </Grid2>
+
+                                <Grid2 size={1}>
+                                    {userId === cheet.user.uuid && !isModalView ? (
+                                        isDeleteLoading ? (
+                                            <IconBox paddingTop={1.3}>
+                                                <CircularProgress size="1.5rem" thickness={5} />
+                                            </IconBox>
+                                        ) : (
+                                            <IconBox>
+                                                <IconButton
+                                                    color="primary"
+                                                    disabled={isComponentLoading}
+                                                    onClick={async () => {
+                                                        setDeleteLoading(true);
+                                                        setComponentLoading(true);
+                                                        await axios
+                                                            .delete(
+                                                                `${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`,
+                                                                {
+                                                                    withCredentials: true,
+                                                                }
+                                                            )
+                                                            .then((res: { data: ICheet[] }) => {
+                                                                setCheets(res.data);
+                                                                setModalOpen(false);
+                                                            })
+                                                            .catch((error: unknown) => {
+                                                                handleErrors(error, "deleting the cheet", setErrors);
+                                                            });
+                                                        setDeleteLoading(false);
+                                                        setComponentLoading(false);
+                                                    }}
+                                                >
+                                                    <Delete />
+                                                </IconButton>
+                                            </IconBox>
+                                        )
+                                    ) : null}
+                                </Grid2>
+                            </Grid2>
+                        </CardActions>
                     </Grid2>
                 </Grid2>
-                {isModalView ? null : (
-                    <Grid2 size={1}>
-                        <IconBox>
-                            <IconButton
-                                color="primary"
-                                onClick={() => setModalOpen(true)}
-                                disabled={isComponentLoading}
-                            >
-                                <OpenInNew />
-                            </IconButton>
-                        </IconBox>
-                    </Grid2>
-                )}
-                <Grid2 size={1}>
-                    <IconBox>
-                        {userId === cheet.user.uuid ? (
-                            isEditLoading ? (
-                                <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={5} />
-                                </Box>
-                            ) : isEditing ? (
-                                <IconButton
-                                    type="submit"
-                                    disabled={isComponentLoading}
-                                    form="edit-cheet"
-                                    key="edit-cheet"
-                                    color="primary"
-                                >
-                                    <Done />
-                                </IconButton>
-                            ) : (
-                                <IconButton onClick={() => setEditing(true)} color="primary">
-                                    <Edit />
-                                </IconButton>
-                            )
-                        ) : null}
-                    </IconBox>
-                </Grid2>
-                <Grid2 size={1}>
-                    <IconBox>
-                        {userId === cheet.user.uuid && !isModalView ? (
-                            isDeleteLoading ? (
-                                <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={5} />
-                                </Box>
-                            ) : (
-                                <IconButton
-                                    color="primary"
-                                    disabled={isComponentLoading}
-                                    onClick={async () => {
-                                        setDeleteLoading(true);
-                                        setComponentLoading(true);
-                                        await axios
-                                            .delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, {
-                                                withCredentials: true,
-                                            })
-                                            .then((res: { data: ICheet[] }) => {
-                                                setCheets(res.data);
-                                                setModalOpen(false);
-                                            })
-                                            .catch((error: unknown) => {
-                                                handleErrors(error, "deleting the cheet", setErrors);
-                                            });
-                                        setDeleteLoading(false);
-                                        setComponentLoading(false);
-                                    }}
-                                >
-                                    <Delete />
-                                </IconButton>
-                            )
-                        ) : null}
-                    </IconBox>
-                </Grid2>
-            </Grid2>
+            </Card>
         </ThemeProvider>
     );
 };

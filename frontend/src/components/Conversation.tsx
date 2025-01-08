@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IConversation } from "../utils/interfaces";
-import { Grid2, Link, Typography } from "@mui/material";
+import { Card, CardActionArea, CardContent, Grid2, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
 import { ThemeProvider } from "@emotion/react";
 import theme from "../styles/theme";
@@ -33,7 +33,7 @@ const Conversation: React.FC<Props> = ({
         <ThemeProvider theme={theme}>
             <MessageModal
                 userId={userId}
-                interlocutorId={conversation.interlocutorId}
+                conversation={conversation}
                 isOpen={messageModalOpen}
                 isComponentLoading={isComponentLoading}
                 setComponentLoading={setComponentLoading}
@@ -50,13 +50,55 @@ const Conversation: React.FC<Props> = ({
                 setReloadWhenClosed={setReloadWhenClosed}
                 unread={conversation.unread}
             />
-            <Grid2
+            <Card>
+                <CardActionArea
+                    disabled={isComponentLoading}
+                    onClick={isComponentLoading ? () => {} : () => setMessageModalOpen(true)}
+                >
+                    <CardContent>
+                        <Grid2 container>
+                            <Grid2 size={12}>
+                                <Link
+                                    onClick={(event) => event.stopPropagation()}
+                                    href={`/users/${conversation.interlocutorId}`}
+                                    variant="h4"
+                                >
+                                    {conversation.interlocutorUsername}
+                                </Link>
+                            </Grid2>
+                            <Grid2 size={11}>
+                                <Typography
+                                    fontWeight={
+                                        !conversation.latestMessage!.isRead &&
+                                        conversation.latestMessage?.senderId != userId
+                                            ? "bold"
+                                            : ""
+                                    }
+                                >
+                                    {conversation.latestMessage!.text}
+                                </Typography>
+                            </Grid2>
+                            <Grid2 size={1}>
+                                {conversation.latestMessage!.isRead &&
+                                conversation.latestMessage?.senderId == userId ? (
+                                    <Done fontSize="small" color="primary" />
+                                ) : null}
+                                {!conversation.latestMessage!.isRead &&
+                                conversation.latestMessage?.senderId != userId ? (
+                                    <MarkUnreadChatAlt fontSize="small" color="primary" />
+                                ) : null}
+                            </Grid2>
+                        </Grid2>
+                    </CardContent>
+                </CardActionArea>
+            </Card>
+            {/* <Grid2
                 container
                 onClick={isComponentLoading ? () => {} : () => setMessageModalOpen(true)}
                 sx={{ cursor: isComponentLoading ? null : "pointer" }}
             >
                 <Grid2 size={12}>
-                    <Link href={`/users/${conversation.interlocutorId}`} variant="h6">
+                    <Link href={`/users/${conversation.interlocutorId}`} variant="h4">
                         {conversation.interlocutorUsername}
                     </Link>
                 </Grid2>
@@ -80,9 +122,9 @@ const Conversation: React.FC<Props> = ({
                     {!conversation.latestMessage!.isRead && conversation.latestMessage?.senderId != userId ? (
                         <MarkUnreadChatAlt fontSize="small" color="primary" />
                     ) : null}
-                </Grid2>
+                </Grid2> */}
 
-                {/* <Grid2 size={1}>
+            {/* <Grid2 size={1}>
                     <ConversationIcon
                         userId={userId}
                         conversation={conversation}
@@ -93,7 +135,6 @@ const Conversation: React.FC<Props> = ({
                         toggleReloadTrigger={toggleReloadTrigger}
                     />
                 </Grid2> */}
-            </Grid2>
         </ThemeProvider>
     );
 };

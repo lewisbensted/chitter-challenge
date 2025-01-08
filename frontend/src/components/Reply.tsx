@@ -7,7 +7,18 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Edit from "@mui/icons-material/Edit";
 import Done from "@mui/icons-material/Done";
-import { Box, CircularProgress, Grid2, Input, Link, TextField, ThemeProvider, Typography } from "@mui/material";
+import {
+    Box,
+    Card,
+    CardActions,
+    CardContent,
+    CircularProgress,
+    Grid2,
+    Link,
+    TextField,
+    ThemeProvider,
+    Typography,
+} from "@mui/material";
 import { format } from "date-fns";
 import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
@@ -57,92 +68,107 @@ const Reply: React.FC<Props> = ({
 
     return (
         <ThemeProvider theme={theme}>
-            <Grid2 container>
-                <Grid2 container size={10}>
-                    <Grid2 size={6}>
-                        <Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
+            <Card>
+                <Grid2 container>
+                    <Grid2 size={10}>
+                        <CardContent>
+                            <Grid2 container>
+                                <Grid2 size={6}>
+                                    <Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
+                                </Grid2>
+                                <Grid2 size={6}>
+                                    <Typography display="flex" justifyContent="flex-end" variant="body2">
+                                        {format(reply.createdAt, "HH:mm dd/MM/yy")}
+                                    </Typography>
+                                </Grid2>
+                                <Grid2>
+                                    {isEditing ? (
+                                        <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-reply">
+                                            <TextField
+                                                {...register("text")}
+                                                type="text"
+                                                defaultValue={reply.text}
+                                                variant="standard"
+                                                sx={{ width: "200%" }}
+                                            />
+                                        </Box>
+                                    ) : (
+                                        <Typography>{reply.text}</Typography>
+                                    )}
+                                </Grid2>
+                            </Grid2>
+                        </CardContent>
                     </Grid2>
-                    <Grid2 size={6}>
-                        <Typography display="flex" justifyContent="flex-end" variant="body2">
-                            {format(reply.createdAt, "HH:mm dd/MM/yy")}
-                        </Typography>
-                    </Grid2>
-                    <Grid2>
-                        {isEditing ? (
-                            <Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-reply">
-                                <TextField
-                                    {...register("text")}
-                                    type="text"
-                                    defaultValue={reply.text}
-                                    variant="standard"
-                                    sx={{ width: "200%" }}
-                                />
-                            </Box>
-                        ) : (
-                            <Typography>{reply.text}</Typography>
-                        )}
+                    <Grid2 container size={2} >
+                        <CardActions>
+                            <Grid2 container columns={2}>
+                                <Grid2 size={1}>
+                                    <IconBox>
+                                        {userId === reply.user.uuid ? (
+                                            isEditLoading ? (
+                                                <Box paddingTop={1.3}>
+                                                    <CircularProgress size="1.5rem" thickness={5} />
+                                                </Box>
+                                            ) : isEditing ? (
+                                                <IconButton
+                                                    type="submit"
+                                                    disabled={isComponentLoading}
+                                                    form="edit-reply"
+                                                    key="edit-reply"
+                                                    color="primary"
+                                                >
+                                                    <Done />
+                                                </IconButton>
+                                            ) : (
+                                                <IconButton onClick={() => setEditing(true)} color="primary">
+                                                    <Edit />
+                                                </IconButton>
+                                            )
+                                        ) : null}
+                                    </IconBox>
+                                </Grid2>
+                                <Grid2 size={1}>
+                                <IconBox>
+                                    {userId === reply.user.uuid ? (
+                                        isDeleteLoading ? (
+                                            <Box paddingTop={1.3}>
+                                                <CircularProgress size="1.5rem" thickness={5} />
+                                            </Box>
+                                        ) : (
+                                            <IconButton
+                                                color="primary"
+                                                disabled={isComponentLoading}
+                                                onClick={async () => {
+                                                    setDeleteLoading(true);
+                                                    setComponentLoading(true);
+                                                    await axios
+                                                        .delete(
+                                                            `${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`,
+                                                            {
+                                                                withCredentials: true,
+                                                            }
+                                                        )
+                                                        .then((res: { data: IReply[] }) => {
+                                                            setReplies(res.data);
+                                                        })
+                                                        .catch((error: unknown) => {
+                                                            handleErrors(error, "deleting the reply", setErrors);
+                                                        });
+                                                    setDeleteLoading(false);
+                                                    setComponentLoading(false);
+                                                }}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        )
+                                    ) : null}
+                                </IconBox>
+                                </Grid2>
+                            </Grid2>
+                        </CardActions>
                     </Grid2>
                 </Grid2>
-                <Grid2 size={1}>
-                    <IconBox>
-                        {userId === reply.user.uuid ? (
-                            isEditLoading ? (
-                                <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={5} />
-                                </Box>
-                            ) : isEditing ? (
-                                <IconButton
-                                    type="submit"
-                                    disabled={isComponentLoading}
-                                    form="edit-reply"
-                                    key="edit-reply"
-                                    color="primary"
-                                >
-                                    <Done />
-                                </IconButton>
-                            ) : (
-                                <IconButton onClick={() => setEditing(true)} color="primary">
-                                    <Edit />
-                                </IconButton>
-                            )
-                        ) : null}
-                    </IconBox>
-                </Grid2>
-                <Grid2 size={1}>
-                    <IconBox>
-                        {userId === reply.user.uuid ? (
-                            isDeleteLoading ? (
-                                <Box paddingTop={1.3}>
-                                    <CircularProgress size="1.5rem" thickness={5} />
-                                </Box>
-                            ) : (
-                                <IconButton
-                                    color="primary"
-                                    disabled={isComponentLoading}
-                                    onClick={async () => {
-                                        setDeleteLoading(true);
-                                        setComponentLoading(true);
-                                        await axios
-                                            .delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
-                                                withCredentials: true,
-                                            })
-                                            .then((res: { data: IReply[] }) => {
-                                                setReplies(res.data);
-                                            })
-                                            .catch((error: unknown) => {
-                                                handleErrors(error, "deleting the reply", setErrors);
-                                            });
-                                        setDeleteLoading(false);
-                                        setComponentLoading(false);
-                                    }}
-                                >
-                                    <Delete />
-                                </IconButton>
-                            )
-                        ) : null}
-                    </IconBox>
-                </Grid2>
-            </Grid2>
+            </Card>
         </ThemeProvider>
     );
 };
