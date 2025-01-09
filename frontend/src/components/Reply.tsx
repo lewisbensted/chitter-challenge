@@ -76,7 +76,7 @@ const Reply: React.FC<Props> = ({
                                     <Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
                                 </Grid2>
                                 <Grid2 size={6}>
-                                    <Typography display="flex" justifyContent="flex-end" variant="body2">
+                                    <Typography variant='body2' justifyContent="flex-end">
                                         {format(reply.createdAt, "HH:mm dd/MM/yy")}
                                     </Typography>
                                 </Grid2>

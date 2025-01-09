@@ -7,10 +7,9 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
-import IconBox from "../styles/IconBox";
 
 interface Props {
     cheetId: string;
@@ -47,22 +46,22 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
                 <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
                     <Grid2 container size={10}>
                         <Grid2 size={12}>
-                            <Typography variant="body1">Send a Reply:</Typography>
+                            <Typography variant="subtitle1">Send a Reply:</Typography>
                         </Grid2>
                         <Grid2 size={12}>
-                            <TextField {...register("text")} type="text" variant="standard"/>
+                            <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
                     <Grid2 size={2}>
-                        <IconBox paddingTop={1}>
-                            {isSubmitLoading ? (
+                        {isSubmitLoading ? (
+                            <Box paddingTop={1.5} paddingLeft={1.5}>
                                 <CircularProgress size="2rem" thickness={5} />
-                            ) : (
-                                <IconButton type="submit" disabled={isDisabled} color="primary">
-                                    <Reply />
-                                </IconButton>
-                            )}
-                        </IconBox>
+                            </Box>
+                        ) : (
+                            <IconButton type="submit" disabled={isDisabled} color="primary">
+                                <Reply />
+                            </IconButton>
+                        )}
                     </Grid2>
                 </Grid2>
             </FlexBox>

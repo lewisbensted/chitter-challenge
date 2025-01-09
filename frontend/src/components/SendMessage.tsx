@@ -7,10 +7,9 @@ import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
-import { Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
-import IconBox from "../styles/IconBox";
 
 interface Props {
     recipientId: string;
@@ -21,7 +20,14 @@ interface Props {
     setReloadWhenClosed: (arg: boolean) => void;
 }
 
-const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, setErrors, setComponentLoading, setReloadWhenClosed }) => {
+const SendMessage: React.FC<Props> = ({
+    recipientId,
+    isDisabled,
+    setMessages,
+    setErrors,
+    setComponentLoading,
+    setReloadWhenClosed,
+}) => {
     const { register, handleSubmit, reset } = useForm<{ text: string }>();
     const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
@@ -50,22 +56,22 @@ const SendMessage: React.FC<Props> = ({ recipientId, isDisabled, setMessages, se
                 <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
                     <Grid2 container size={10}>
                         <Grid2 size={12}>
-                            <Typography variant="body1">Send a Message:</Typography>
+                            <Typography variant="subtitle1">Send a Message:</Typography>
                         </Grid2>
                         <Grid2 size={12}>
-                            <TextField {...register("text")} type="text" variant="standard"/>
+                            <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
                     <Grid2 size={2}>
-                        <IconBox paddingTop={1}>
-                            {isSubmitLoading ? (
+                        {isSubmitLoading ? (
+                            <Box paddingTop={1} paddingLeft={1}>
                                 <CircularProgress size="2rem" thickness={5} />
-                            ) : (
-                                <IconButton type="submit" disabled={isDisabled} color="primary">
-                                    <Send />
-                                </IconButton>
-                            )}
-                        </IconBox>
+                            </Box>
+                        ) : (
+                            <IconButton type="submit" disabled={isDisabled} color="primary">
+                                <Send />
+                            </IconButton>
+                        )}
                     </Grid2>
                 </Grid2>
             </FlexBox>

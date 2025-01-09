@@ -9,9 +9,8 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Box, Grid2, ThemeProvider, Typography } from "@mui/material";
+import { Grid2, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
-import IconBox from "../styles/IconBox";
 import FlexBox from "../styles/FlexBox";
 
 interface Props {
@@ -72,17 +71,15 @@ const MessageModal: React.FC<Props> = ({
         <ThemeProvider theme={theme}>
             <Dialog open={isOpen}>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <Grid2 container marginInline={2} marginTop={1} minWidth={550}>
+                <Grid2 container marginInline={2} marginTop={1}>
                     <Grid2 size={11}></Grid2>
                     <Grid2 size={1}>
-                        <IconBox>
-                            <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
-                                <Close />
-                            </IconButton>
-                        </IconBox>
+                        <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
+                            <Close />
+                        </IconButton>
                     </Grid2>
                     <Grid2 marginInline={3} size={12}>
-                        <Typography variant="h6">{conversation.interlocutorUsername}</Typography>
+                        <Typography variant="h5">{conversation.interlocutorUsername}</Typography>
                         {isMessagesLoading ? (
                             <FlexBox>
                                 <CircularProgress thickness={5} />

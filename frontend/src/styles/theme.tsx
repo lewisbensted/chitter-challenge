@@ -6,20 +6,21 @@ const theme = createTheme({
     components: {
         MuiButton: { styleOverrides: { root: { maxWidth: 50 } } },
         MuiTypography: {
+            styleOverrides: {root: {wordBreak: "break-word", display: "flex"}},
             variants: [
                 {
-                    props: { variant: "h5" },
-                    style: { marginBlock: 30, justifyContent: "center", display: "flex", marginInline: 30 },
+                    props: { variant: "h4" },
+                    style: { marginBlock: 30, justifyContent: "center",  marginInline: 30 },
                 },
                 {
-                    props: { variant: "h6" },
-                    style: { justifyContent: "center", display: "flex", marginInline: 30 },
+                    props: { variant: "h5" },
+                    style: { marginBlock: 30, justifyContent: "center",  marginInline: 30 },
                 },
                 {
                     props: { variant: "subtitle1" },
-                    style: { marginBlock: 10, justifyContent: "center", display: "flex", marginInline: 30, textAlign: "center" },
+                    style: { marginBlock: 10, justifyContent: "center", marginInline: 30, textAlign: "center" },
                 },
-                { props: { variant: "body1" }, style: { justifyContent: "left", display: "flex", wordBreak: "break-word"  } },
+              
             ],
         },
         MuiTextField: { styleOverrides: { root: { width: '100%' } } },

@@ -13,7 +13,6 @@ import theme from "../styles/theme";
 import Cheet from "./Cheet";
 import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
-import IconBox from "../styles/IconBox";
 
 interface Props {
     userId?: string;
@@ -66,11 +65,9 @@ const CheetModal: React.FC<Props> = ({
                 <Grid2 container marginInline={2} marginTop={1}>
                     <Grid2 size={11}></Grid2>
                     <Grid2 size={1}>
-                        <IconBox>
-                            <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
-                                <Close />
-                            </IconButton>
-                        </IconBox>
+                        <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
+                            <Close />
+                        </IconButton>
                     </Grid2>
                     <Grid2 marginInline={3} size={12}>
                         <Cheet

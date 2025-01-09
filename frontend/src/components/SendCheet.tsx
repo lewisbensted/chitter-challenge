@@ -9,9 +9,8 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 import FlexBox from "../styles/FlexBox";
-import { Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
-import IconBox from "../styles/IconBox";
 
 interface Props {
     isDisabled: boolean;
@@ -50,22 +49,22 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, set
                 <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
                     <Grid2 container size={10}>
                         <Grid2 size={12}>
-                            <Typography variant="body1">Send a Cheet:</Typography>
+                            <Typography variant="subtitle1">Send a Cheet:</Typography>
                         </Grid2>
                         <Grid2 size={12}>
                             <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
                     <Grid2 size={2}>
-                        <IconBox paddingTop={1}>
-                            {isSubmitLoading ? (
+                        {isSubmitLoading ? (
+                            <Box paddingTop={1.5} paddingLeft={1.5}>
                                 <CircularProgress size="2rem" thickness={5} />
-                            ) : (
-                                <IconButton type="submit" disabled={isDisabled} color="primary">
-                                    <Send />
-                                </IconButton>
-                            )}
-                        </IconBox>
+                            </Box>
+                        ) : (
+                            <IconButton type="submit" disabled={isDisabled} color="primary">
+                                <Send />
+                            </IconButton>
+                        )}
                     </Grid2>
                 </Grid2>
             </FlexBox>

@@ -92,7 +92,7 @@ const Cheet: React.FC<Props> = ({
                                     <Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
                                 </Grid2>
                                 <Grid2 size={6}>
-                                    <Typography display="flex" justifyContent="flex-end" variant="body2">
+                                    <Typography variant="body2" justifyContent="flex-end">
                                         {format(cheet.createdAt, "HH:mm dd/MM/yy")}
                                     </Typography>
                                 </Grid2>
@@ -107,11 +107,7 @@ const Cheet: React.FC<Props> = ({
                                             />
                                         </Box>
                                     ) : (
-                                        <Typography
-                                            fontWeight={isModalView ? "bold" : ""}
-                                        >
-                                            {cheet.text}
-                                        </Typography>
+                                        <Typography fontWeight={isModalView ? "bold" : ""}>{cheet.text}</Typography>
                                     )}
                                 </Grid2>
                             </Grid2>

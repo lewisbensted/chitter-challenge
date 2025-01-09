@@ -62,7 +62,7 @@ const Conversation: React.FC<Props> = ({
                                 <Link
                                     onClick={(event) => event.stopPropagation()}
                                     href={`/users/${conversation.interlocutorId}`}
-                                    variant="h4"
+                                    variant='h6'
                                 >
                                     {conversation.interlocutorUsername}
                                 </Link>
@@ -75,6 +75,7 @@ const Conversation: React.FC<Props> = ({
                                             ? "bold"
                                             : ""
                                     }
+                                    variant='body2'
                                 >
                                     {conversation.latestMessage!.text}
                                 </Typography>

@@ -17,7 +17,6 @@ import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
-import IconBox from "../styles/IconBox";
 import ErrorModal from "../components/ErrorModal";
 
 interface Props {
@@ -55,14 +54,13 @@ const Layout: React.FC<Props> = ({
                     sx={{ width: isDrawerOpen ? drawerWidth : drawerWidth / 2 }}
                     PaperProps={{ sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } }}
                 >
-                    <IconBox>
-                        <IconButton
-                            color="primary"
-                            onClick={isDrawerOpen ? () => setDrawerOpen(false) : () => setDrawerOpen(true)}
-                        >
-                            {isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
-                        </IconButton>
-                    </IconBox>
+                    <IconButton
+                        color="primary"
+                        onClick={isDrawerOpen ? () => setDrawerOpen(false) : () => setDrawerOpen(true)}
+                    >
+                        {isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
+                    </IconButton>
+
                     <Divider />
                     <List>
                         {isPageLoading ? null : userId ? (
