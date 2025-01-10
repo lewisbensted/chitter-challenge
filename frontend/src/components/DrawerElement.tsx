@@ -11,7 +11,7 @@ import { Link, ThemeProvider } from "@mui/material";
 interface Props {
     link?: string;
     icon: ReactNode;
-    text: string;
+    text?: string;
     isComponentLoading: boolean;
     isDrawerOpen: boolean;
     onClick?: () => void;
@@ -21,14 +21,21 @@ const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDraw
     return (
         <ThemeProvider theme={theme}>
             <ListItem>
-                <Link href={link} style={{ pointerEvents: isComponentLoading ? "none" : undefined }}>
-                    <ListItemButton onClick={onClick}>
-                        <ListItemIcon>
-                            <IconButton color="primary">{icon}</IconButton>
-                        </ListItemIcon>
-                        {isDrawerOpen ? <ListItemText primary={text} /> : null}
-                    </ListItemButton>
-                </Link>
+                <ListItemButton
+                    onClick={onClick}
+                    href={link ? link : ""}
+                    style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
+                    sx={{ justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center" }}
+                >
+                    <ListItemIcon sx={{ justifyContent: "center" }}>
+                        <IconButton color="primary">{icon}</IconButton>
+                    </ListItemIcon>
+                    {isDrawerOpen ? (
+                        <Link>
+                            <ListItemText primary={text} />
+                        </Link>
+                    ) : null}
+                </ListItemButton>
             </ListItem>
         </ThemeProvider>
     );

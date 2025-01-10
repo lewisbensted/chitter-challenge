@@ -15,7 +15,7 @@ const ErrorModal: React.FC<Props> = ({ errors, closeModal }) => {
             <Dialog open={errors.length ? true : false}>
                 {errors.length ? (
                     <Fragment>
-                        <Typography variant="h5">Something went wrong!</Typography>
+                        <Typography variant="h4">Something went wrong!</Typography>
                         {errors.map((error, key) => (
                             <Typography variant="subtitle1" key={key}>
                                 {error}

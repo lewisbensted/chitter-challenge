@@ -47,22 +47,21 @@ const Layout: React.FC<Props> = ({
     return (
         <ThemeProvider theme={theme}>
             <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-            <Box sx={{ display: "flex" }}>
+            <Box display="flex">
                 <Drawer
                     open={isDrawerOpen}
                     variant="permanent"
                     sx={{ width: isDrawerOpen ? drawerWidth : drawerWidth / 2 }}
                     PaperProps={{ sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } }}
                 >
-                    <IconButton
-                        color="primary"
-                        onClick={isDrawerOpen ? () => setDrawerOpen(false) : () => setDrawerOpen(true)}
-                    >
-                        {isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
-                    </IconButton>
-
-                    <Divider />
                     <List>
+                        <DrawerElement
+                            isComponentLoading={false}
+                            onClick={isDrawerOpen ? () => setDrawerOpen(false) : () => setDrawerOpen(true)}
+                            icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
+                            isDrawerOpen={isDrawerOpen}
+                        ></DrawerElement>
+                        <Divider />
                         {isPageLoading ? null : userId ? (
                             <Fragment>
                                 <DrawerElement

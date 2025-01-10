@@ -14,7 +14,7 @@ const SuccessModal: React.FC<Props> = ({ isOpen, message, closeModal }) => {
     return (
         <ThemeProvider theme={theme}>
             <Dialog open={isOpen}>
-                <Typography variant="h5">Success!</Typography>
+                <Typography variant="h4">Success!</Typography>
                 <Typography variant="subtitle1">{message}</Typography>
                 <FlexBox>
                     <Button onClick={closeModal} variant="contained">

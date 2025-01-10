@@ -58,7 +58,7 @@ const Conversation: React.FC<Props> = ({
                 >
                     <CardContent>
                         <Grid2 container>
-                            <Grid2 size={12}>
+                            <Grid2>
                                 <Link
                                     onClick={(event) => event.stopPropagation()}
                                     href={`/users/${conversation.interlocutorId}`}
