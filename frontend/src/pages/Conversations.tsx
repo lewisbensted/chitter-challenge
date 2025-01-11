@@ -8,6 +8,7 @@ import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import FlexBox from "../styles/FlexBox";
 
 const Conversations: React.FC = () => {
     const [userId, setUserId] = useState<string>();
@@ -75,32 +76,30 @@ const Conversations: React.FC = () => {
             setUserId={setUserId}
             isUnreadMessages={isUnreadMessages}
         >
-            <Box sx={{ display: "grid" }}>
+            <Box>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-
-                <Typography variant="h3" sx={{ padding: "20px" }}>
-                    Messages
-                </Typography>
-
+                <Typography variant="h4">Messages</Typography>
                 {isPageLoading ? (
-                    <CircularProgress />
+                    <FlexBox>
+                        <CircularProgress thickness={5} />
+                    </FlexBox>
                 ) : userId ? (
-                    <Box sx={{ paddingLeft: "20px" }}>
-                        {conversationsError
-                            ? conversationsError
-                            : conversations!.map((conversation) => (
-                                  <Conversation
-                                      key={conversation.interlocutorId}
-                                      userId={userId}
-                                      conversation={conversation}
-                                      isComponentLoading={isComponentLoading}
-                                      setComponentLoading={setComponentLoading}
-                                      setConversations={setConversations}
-                                      reloadTrigger={reloadTrigger}
-                                      toggleReloadTrigger={toggleReloadTrigger}
-                                  />
-                              ))}
-                    </Box>
+                    conversationsError ? (
+                        conversationsError
+                    ) : (
+                        conversations!.map((conversation) => (
+                            <Conversation
+                                key={conversation.interlocutorId}
+                                userId={userId}
+                                conversation={conversation}
+                                isComponentLoading={isComponentLoading}
+                                setComponentLoading={setComponentLoading}
+                                setConversations={setConversations}
+                                reloadTrigger={reloadTrigger}
+                                toggleReloadTrigger={toggleReloadTrigger}
+                            />
+                        ))
+                    )
                 ) : (
                     "Error loading conversations."
                 )}

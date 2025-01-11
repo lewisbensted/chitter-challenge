@@ -21,9 +21,13 @@
     "license": "ISC",
     "homepage": "https://github.com/lewisbensted/chitter#readme",
     "dependencies": {
+        "@prisma/client": "^6.2.1",
         "concurrently": "^8.2.2",
         "date-fns-tz": "^3.2.0",
         "dotenv-cli": "^7.4.2",
         "dotenv-expand": "^11.0.6"
+    },
+    "devDependencies": {
+        "prisma": "^6.2.1"
     }
 }

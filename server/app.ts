@@ -16,6 +16,7 @@ import MySQLStore from "express-mysql-session";
 import path from "path";
 import cors from "cors";
 import conversations from "./src/routes/conversations.js";
+import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env.${process.env.NODE_ENV}` }));
 const SessionStore = MySQLStore(expressSession);
@@ -82,12 +83,13 @@ prisma
         app.use("/users/:userId/cheets", express.json(), cheets);
         app.use("/cheets/:cheetId/replies", replies);
         app.use("/messages", express.json(), messages);
-        app.listen(SERVER_PORT, () => console.log(`Server running on port ${SERVER_PORT}.`));
+        app.listen(SERVER_PORT, () => console.log(`Server running on port ${SERVER_PORT}.`)).on("error", (error) => {
+            console.error(error.message);
+        });
     })
     .catch((error: unknown) => {
         console.error(
-            error instanceof TypeError || error instanceof RangeError
-                ? error.message
-                : "Error initialising database connection:\n" + logError(error)
+            (error instanceof PrismaClientInitializationError ? "\nError initialising database connection:\n" : "") +
+                logError(error)
         );
     });

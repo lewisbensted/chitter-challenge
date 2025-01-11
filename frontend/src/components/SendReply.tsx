@@ -52,7 +52,7 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
                             <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
-                    <Grid2 size={2}>
+                    <Grid2 size={2} container>
                         {isSubmitLoading ? (
                             <Box paddingTop={1.5} paddingLeft={1.5}>
                                 <CircularProgress size="2rem" thickness={5} />

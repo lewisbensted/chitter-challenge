@@ -95,8 +95,8 @@ const Message: React.FC<Props> = ({
                             </Typography>
                         </CardContent>
                     </Grid2>
-                    {message.sender.uuid === userId ? (
-                        <Grid2 size={2}>
+                    <Grid2 size={2} container>
+                        {message.sender.uuid === userId ? (
                             <CardActions>
                                 <Grid2 container size={12} columns={2}>
                                     <Grid2 size={1}>
@@ -156,8 +156,8 @@ const Message: React.FC<Props> = ({
                                     </Grid2>
                                 </Grid2>
                             </CardActions>
-                        </Grid2>
-                    ) : null}
+                        ) : null}
+                    </Grid2>
                 </Grid2>
             </Card>
         </ThemeProvider>

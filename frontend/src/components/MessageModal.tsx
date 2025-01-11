@@ -72,7 +72,7 @@ const MessageModal: React.FC<Props> = ({
             <Dialog open={isOpen}>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 <Grid2 container marginInline={2} marginTop={1}>
-                    <Grid2 size={11}></Grid2>
+                    <Grid2 size={11} />
                     <Grid2 size={1}>
                         <IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
                             <Close />
@@ -85,7 +85,7 @@ const MessageModal: React.FC<Props> = ({
                                 <CircularProgress thickness={5} />
                             </FlexBox>
                         ) : messagesError ? (
-                            <FlexBox>{messagesError}</FlexBox>
+                            <Typography variant="subtitle1">{messagesError}</Typography>
                         ) : (
                             messages!.map((message) => (
                                 <Message

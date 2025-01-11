@@ -7,15 +7,17 @@ import Layout from "./Layout";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import IconButton from "@mui/material/IconButton/IconButton";
-import Send from "@mui/icons-material/Send";
+import FlexBox from "../styles/FlexBox";
+import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
+import theme from "../styles/theme";
+import Login from "@mui/icons-material/Login";
 
 interface LoginFormFields {
     username: string;
     password: string;
 }
 
-const Login: React.FC = () => {
+const SignIn: React.FC = () => {
     const { register, handleSubmit, reset } = useForm<LoginFormFields>();
     const navigate = useNavigate();
 
@@ -55,39 +57,48 @@ const Login: React.FC = () => {
     };
 
     return (
-        <Layout
-            isPageLoading={isPageLoading}
-            isComponentLoading={isFormLoading}
-            setPageLoading={setPageLoading}
-            userId={userId}
-            setUserId={setUserId}
-        >
-            <div>
-                <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <h1>Login Page</h1>
-                {isPageLoading ? (
-                    <CircularProgress />
-                ) : (
-                    <div>
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            Username:
-                            <input {...register("username")} type="text" />
-                            {"\n"}
-                            Password:
-                            <input {...register("password")} type="text" />
-                            {isFormLoading ? (
-                                <CircularProgress />
-                            ) : (
-                                <IconButton type="submit" disabled={!!userId}>
-                                    <Send />
-                                </IconButton>
-                            )}
-                        </form>
-                    </div>
-                )}
-            </div>
-        </Layout>
+        <ThemeProvider theme={theme}>
+            <Layout
+                isPageLoading={isPageLoading}
+                isComponentLoading={isFormLoading}
+                setPageLoading={setPageLoading}
+                userId={userId}
+                setUserId={setUserId}
+            >
+                <Box>
+                    <ErrorModal errors={errors} closeModal={() => setErrors([])} />
+                    <Typography variant="h4">Sign In</Typography>
+                    {isPageLoading ? (
+                        <FlexBox>
+                            <CircularProgress thickness={5} />
+                        </FlexBox>
+                    ) : (
+                        <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+                            <Grid2 size={12} container display="block">
+                                <Typography variant="subtitle1">Username:</Typography>
+                                <TextField type="text" {...register("username")}></TextField>
+
+                                <Typography variant="subtitle1">Password:</Typography>
+                                <TextField type="text" {...register("password")}></TextField>
+                            </Grid2>
+                            <Grid2 size={12}>
+                                <FlexBox>
+                                    <Button type="submit" disabled={!!userId} color="primary" variant="contained">
+                                        <Typography variant="button" color="secondary">
+                                            Sign in
+                                        </Typography>
+                                        <IconButton color="secondary">
+                                            <Login />
+                                        </IconButton>
+                                    </Button>
+                                </FlexBox>
+                            </Grid2>
+                        </Grid2>
+                    )}
+                </Box>
+            </Layout>
+        </ThemeProvider>
     );
 };
 
-export default Login;
+export default SignIn;

@@ -2,7 +2,6 @@ import React, { Fragment, useState } from "react";
 import logout from "../utils/logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import DrawerElement from "../components/DrawerElement";
-import IconButton from "@mui/material/IconButton/IconButton";
 import Divider from "@mui/material/Divider/Divider";
 import List from "@mui/material/List/List";
 import Drawer from "@mui/material/Drawer/Drawer";
@@ -47,7 +46,7 @@ const Layout: React.FC<Props> = ({
     return (
         <ThemeProvider theme={theme}>
             <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-            <Box display="flex">
+            <Box display="flex" justifyContent="center">
                 <Drawer
                     open={isDrawerOpen}
                     variant="permanent"

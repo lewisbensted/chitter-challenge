@@ -8,9 +8,10 @@ import SubmitCheet from "../components/SendCheet";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
+import FlexBox from "../styles/FlexBox";
 
 const User: React.FC = () => {
     const [userId, setUserId] = useState<string>();
@@ -106,13 +107,17 @@ const User: React.FC = () => {
             setPageLoading={setPageLoading}
             isUnreadMessages={isUnreadMessages}
         >
-            <Fragment>
+            <Box>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
                 {isPageLoading ? (
-                    <CircularProgress />
+                    <FlexBox>
+                        <FlexBox>
+                            <CircularProgress thickness={5} />
+                        </FlexBox>
+                    </FlexBox>
                 ) : (
                     <Fragment>
-                        <Typography variant="h5">
+                        <Typography variant="h4" display="flex">
                             {username}
                             {!conversation || userId == id ? null : (
                                 <ConversationIcon
@@ -127,38 +132,40 @@ const User: React.FC = () => {
                             )}
                         </Typography>
 
-                        <div>
-                            {isCheetsLoading ? (
-                                <CircularProgress />
-                            ) : cheetsError ? (
-                                cheetsError
-                            ) : (
-                                cheets!.map((cheet) => (
-                                    <Cheet
-                                        key={cheet.uuid}
-                                        cheet={cheet}
-                                        userId={userId}
-                                        setCheets={setCheets}
-                                        setErrors={setErrors}
-                                        setComponentLoading={setComponentLoading}
-                                        isComponentLoading={isComponentLoading}
-                                        isModalView={false}
-                                    />
-                                ))
-                            )}
-                            {userId === id ? (
-                                <SubmitCheet
-                                    setCheetsError={setCheetsError}
-                                    isDisabled={isComponentLoading || isCheetsLoading}
+                        {isCheetsLoading ? (
+                            <FlexBox>
+                                <FlexBox>
+                                    <CircularProgress thickness={5} />
+                                </FlexBox>
+                            </FlexBox>
+                        ) : cheetsError ? (
+                            cheetsError
+                        ) : (
+                            cheets!.map((cheet) => (
+                                <Cheet
+                                    key={cheet.uuid}
+                                    cheet={cheet}
+                                    userId={userId}
                                     setCheets={setCheets}
                                     setErrors={setErrors}
                                     setComponentLoading={setComponentLoading}
+                                    isComponentLoading={isComponentLoading}
+                                    isModalView={false}
                                 />
-                            ) : null}
-                        </div>
+                            ))
+                        )}
+                        {userId === id ? (
+                            <SubmitCheet
+                                setCheetsError={setCheetsError}
+                                isDisabled={isComponentLoading || isCheetsLoading}
+                                setCheets={setCheets}
+                                setErrors={setErrors}
+                                setComponentLoading={setComponentLoading}
+                            />
+                        ) : null}
                     </Fragment>
                 )}
-            </Fragment>
+            </Box>
         </Layout>
     );
 };

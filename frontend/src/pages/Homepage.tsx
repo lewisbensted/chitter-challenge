@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { ICheet } from "../utils/interfaces";
@@ -9,6 +9,8 @@ import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
+import { Typography } from "@mui/material";
+import FlexBox from "../styles/FlexBox";
 
 const Homepage: React.FC = () => {
     const [userId, setUserId] = useState<string>();
@@ -78,16 +80,22 @@ const Homepage: React.FC = () => {
         >
             <Box>
                 <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <h1>Welcome to Chitter</h1>
+                <Typography variant="h4">Welcome to Chitter</Typography>
 
                 {isPageLoading ? (
-                    <CircularProgress />
+                    <FlexBox>
+                        <CircularProgress thickness={5} />
+                    </FlexBox>
                 ) : (
-                    <Box>
+                    <Fragment>
                         {isCheetsLoading ? (
-                            <CircularProgress />
+                            <FlexBox>
+                                <CircularProgress thickness={5} />
+                            </FlexBox>
                         ) : cheetsError ? (
-                            cheetsError
+                            <Typography variant='subtitle1'>
+                                {cheetsError}
+                            </Typography>
                         ) : (
                             cheets!.map((cheet) => (
                                 <Cheet
@@ -111,7 +119,7 @@ const Homepage: React.FC = () => {
                                 setComponentLoading={setComponentLoading}
                             />
                         ) : null}
-                    </Box>
+                    </Fragment>
                 )}
             </Box>
         </Layout>

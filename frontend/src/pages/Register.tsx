@@ -10,6 +10,10 @@ import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import AppRegistration from "@mui/icons-material/AppRegistration";
 import IconButton from "@mui/material/IconButton/IconButton";
+import FlexBox from "../styles/FlexBox";
+import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
+import theme from "../styles/theme";
+import { Login } from "@mui/icons-material";
 
 interface RegisterFormFields {
     firstName: string;
@@ -60,48 +64,61 @@ const Register: React.FC = () => {
     };
 
     return (
-        <Layout
-            isPageLoading={isPageLoading}
-            isComponentLoading={isFormLoading}
-            setPageLoading={setPageLoading}
-            userId={userId}
-            setUserId={setUserId}
-        >
-            <div>
-                <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-                <SuccessModal
-                    isOpen={isSuccessOpen}
-                    message="Account created."
-                    closeModal={() => {
-                        setSuccessOpen(false);
-                    }}
-                />
-                <h1>Registration Page</h1>
-                {isPageLoading ? (
-                    <CircularProgress />
-                ) : (
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        First Name:
-                        <input {...register("firstName")} type="text" />
-                        Last Name:
-                        <input {...register("lastName")} type="text" />
-                        Username:
-                        <input {...register("username")} type="text" />
-                        Password:
-                        <input {...register("password")} type="text" />
-                        E-mail:
-                        <input {...register("email")} type="text" />
-                        {isFormLoading ? (
-                            <CircularProgress />
-                        ) : (
-                            <IconButton type="submit" disabled={!!userId}>
-                                <AppRegistration />
-                            </IconButton>
-                        )}
-                    </form>
-                )}
-            </div>
-        </Layout>
+        <ThemeProvider theme={theme}>
+            <Layout
+                isPageLoading={isPageLoading}
+                isComponentLoading={isFormLoading}
+                setPageLoading={setPageLoading}
+                userId={userId}
+                setUserId={setUserId}
+            >
+                <Box>
+                    <ErrorModal errors={errors} closeModal={() => setErrors([])} />
+                    <SuccessModal
+                        isOpen={isSuccessOpen}
+                        message="Account created."
+                        closeModal={() => {
+                            setSuccessOpen(false);
+                        }}
+                    />
+                    <Typography variant="h4">Register</Typography>
+                    {isPageLoading ? (
+                        <FlexBox>
+                            <CircularProgress thickness={5} />
+                        </FlexBox>
+                    ) : (
+                        <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+                            <Grid2 size={12} container display="block">
+                                <Typography variant="subtitle1">First Name:</Typography>
+                                <TextField type="text" {...register("firstName")}></TextField>
+                                <Typography variant="subtitle1">Last Name:</Typography>
+                                <TextField type="text" {...register("lastName")}></TextField>
+                                <Typography variant="subtitle1">Username:</Typography>
+                                <TextField type="text" {...register("username")}></TextField>
+                                <Typography variant="subtitle1">Password:</Typography>
+                                <TextField type="text" {...register("password")}></TextField>
+                                <Typography variant="subtitle1">E-mail Address:</Typography>
+                                <TextField type="text" {...register("email")}></TextField>
+                                {isFormLoading ? (
+                                    <CircularProgress />
+                                ) : (
+                                    <FlexBox>
+                                        <Button type="submit" disabled={!!userId} color="primary" variant="contained">
+                                            <Typography variant="button" color="secondary">
+                                                Register
+                                            </Typography>
+                                            <IconButton color="secondary">
+                                                <AppRegistration />
+                                            </IconButton>
+                                        </Button>
+                                    </FlexBox>
+                                )}
+                            </Grid2>
+                        </Grid2>
+                    )}
+                </Box>
+            </Layout>
+        </ThemeProvider>
     );
 };
 

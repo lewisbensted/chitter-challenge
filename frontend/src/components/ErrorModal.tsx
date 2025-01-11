@@ -22,7 +22,7 @@ const ErrorModal: React.FC<Props> = ({ errors, closeModal }) => {
                             </Typography>
                         ))}
                         <FlexBox>
-                            <Button onClick={closeModal} variant="contained" sx={{ maxWidth: "30px" }}>
+                            <Button onClick={closeModal} variant="contained">
                                 <Typography variant="button">Ok</Typography>
                             </Button>
                         </FlexBox>

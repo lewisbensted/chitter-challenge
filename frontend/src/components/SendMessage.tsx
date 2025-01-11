@@ -62,7 +62,7 @@ const SendMessage: React.FC<Props> = ({
                             <TextField {...register("text")} type="text" variant="standard" />
                         </Grid2>
                     </Grid2>
-                    <Grid2 size={2}>
+                    <Grid2 size={2} container>
                         {isSubmitLoading ? (
                             <Box paddingTop={1} paddingLeft={1}>
                                 <CircularProgress size="2rem" thickness={5} />

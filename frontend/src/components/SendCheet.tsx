@@ -52,18 +52,20 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, set
                             <Typography variant="subtitle1">Send a Cheet:</Typography>
                         </Grid2>
                         <Grid2 size={12}>
-                            <TextField {...register("text")} type="text" variant="standard" />
+                            <TextField {...register("text")} type="text" variant="standard"/>
                         </Grid2>
                     </Grid2>
-                    <Grid2 size={2}>
+                    <Grid2 size={2} container>
                         {isSubmitLoading ? (
                             <Box paddingTop={1.5} paddingLeft={1.5}>
                                 <CircularProgress size="2rem" thickness={5} />
                             </Box>
                         ) : (
-                            <IconButton type="submit" disabled={isDisabled} color="primary">
-                                <Send />
-                            </IconButton>
+                            <Box display="flex" justifyContent="center">
+                                <IconButton type="submit" disabled={isDisabled} color="primary">
+                                    <Send />
+                                </IconButton>
+                            </Box>
                         )}
                     </Grid2>
                 </Grid2>
