@@ -22,6 +22,7 @@ const theme = createTheme({
             ],
         },
         MuiTextField: { styleOverrides: { root: { width: "100%" } } },
+        MuiGrid2: {styleOverrides: { root: {  } }}
     },
 });
 

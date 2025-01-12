@@ -9,133 +9,133 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 const router = express.Router({ mergeParams: true });
 
 export const replyExtension = Prisma.defineExtension({
-    query: {
-        reply: {
-            async create({ args, query }) {
-                if (args.data.text) {
-                    args.data.text = args.data.text.trim();
-                }
-                args.data = await CreateReplySchema.parseAsync(args.data);
-                return query(args);
-            },
-            async update({ args, query }) {
-                if (args.data.text) {
-                    args.data.text = (args.data.text as string).trim();
-                }
-                args.data = await UpdateReplySchema.parseAsync(args.data);
-                return query(args);
-            },
-        },
-    },
+	query: {
+		reply: {
+			async create({ args, query }) {
+				if (args.data.text) {
+					args.data.text = args.data.text.trim();
+				}
+				args.data = await CreateReplySchema.parseAsync(args.data);
+				return query(args);
+			},
+			async update({ args, query }) {
+				if (args.data.text) {
+					args.data.text = (args.data.text as string).trim();
+				}
+				args.data = await UpdateReplySchema.parseAsync(args.data);
+				return query(args);
+			},
+		},
+	},
 });
 
 export const fetchReplies = async (cheetId: number) => {
-    const replies = await prisma.reply.findMany({
-        include: { cheet: { omit: { id: true, userId: true } }, user: { omit: { id: true } } },
-        omit: { id: true, cheetId: true, userId: true },
-        where: {
-            cheet: { id: cheetId },
-        },
-    });
-    replies.sort((replyA, replyB) => {
-        return replyA.createdAt.valueOf() - replyB.createdAt.valueOf();
-    });
-    return replies;
+	const replies = await prisma.reply.findMany({
+		include: { cheet: { omit: { id: true, userId: true } }, user: { omit: { id: true } } },
+		omit: { id: true, cheetId: true, userId: true },
+		where: {
+			cheet: { id: cheetId },
+		},
+	});
+	replies.sort((replyA, replyB) => {
+		return replyA.createdAt.valueOf() - replyB.createdAt.valueOf();
+	});
+	return replies;
 };
 
 router.get("/", async (req: Request, res: Response) => {
-    try {
-        const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-        const replies = await fetchReplies(cheet.id);
-        res.status(200).send(replies);
-    } catch (error) {
-        console.error("Error retrieving replies from the database:\n" + logError(error));
-        sendErrorResponse(error, res);
-    }
+	try {
+		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+		const replies = await fetchReplies(cheet.id);
+		res.status(200).send(replies);
+	} catch (error) {
+		console.error("Error retrieving replies from the database:\n" + logError(error));
+		sendErrorResponse(error, res);
+	}
 });
 
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
-    const date = new Date();
-    try {
-        const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-        await prisma.$extends(replyExtension).reply.create({
-            data: {
-                userId: req.session.user!.id,
-                text: req.body.text,
-                cheetId: cheet.id,
-                createdAt: date,
-                updatedAt: date,
-            },
-        });
-        const replies = await fetchReplies(cheet.id);
-        res.status(201).send(replies);
-    } catch (error) {
-        console.error("Error adding reply to the database:\n" + logError(error));
-        sendErrorResponse(error, res);
-    }
+	const date = new Date();
+	try {
+		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+		await prisma.$extends(replyExtension).reply.create({
+			data: {
+				userId: req.session.user!.id,
+				text: req.body.text,
+				cheetId: cheet.id,
+				createdAt: date,
+				updatedAt: date,
+			},
+		});
+		const replies = await fetchReplies(cheet.id);
+		res.status(201).send(replies);
+	} catch (error) {
+		console.error("Error adding reply to the database:\n" + logError(error));
+		sendErrorResponse(error, res);
+	}
 });
 
 router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
-    const date = new Date();
-    try {
-        const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-        const targetReply = await prisma.reply.findUniqueOrThrow({
-            include: { cheet: true },
-            where: { uuid: req.params.replyId },
-        });
-        if (targetReply.userId === req.session.user!.id) {
-            if (targetReply.cheet.uuid === req.params.cheetId) {
-                if (req.body.text !== targetReply.text) {
-                    await prisma.$extends(replyExtension).reply.update({
-                        where: {
-                            id: targetReply.id,
-                        },
-                        data: {
-                            text: req.body.text,
-                            updatedAt: date,
-                        },
-                    });
-                }
-                const replies = await fetchReplies(cheet.id);
-                res.status(200).send(replies);
-            } else {
-                res.status(403).send(["Cheet IDs do not match."]);
-            }
-        } else {
-            res.status(403).send(["Cannot update someone else's reply."]);
-        }
-    } catch (error) {
-        console.error("Error updating reply in the database:\n" + logError(error));
-        sendErrorResponse(error, res);
-    }
+	const date = new Date();
+	try {
+		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+		const targetReply = await prisma.reply.findUniqueOrThrow({
+			include: { cheet: true },
+			where: { uuid: req.params.replyId },
+		});
+		if (targetReply.userId === req.session.user!.id) {
+			if (targetReply.cheet.uuid === req.params.cheetId) {
+				if (req.body.text !== targetReply.text) {
+					await prisma.$extends(replyExtension).reply.update({
+						where: {
+							id: targetReply.id,
+						},
+						data: {
+							text: req.body.text,
+							updatedAt: date,
+						},
+					});
+				}
+				const replies = await fetchReplies(cheet.id);
+				res.status(200).send(replies);
+			} else {
+				res.status(403).send(["Cheet IDs do not match."]);
+			}
+		} else {
+			res.status(403).send(["Cannot update someone else's reply."]);
+		}
+	} catch (error) {
+		console.error("Error updating reply in the database:\n" + logError(error));
+		sendErrorResponse(error, res);
+	}
 });
 
 router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) => {
-    try {
-        const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-        const targetReply = await prisma.reply.findUniqueOrThrow({
-            include: { cheet: true },
-            where: { uuid: req.params.replyId },
-        });
-        if (targetReply.userId === req.session.user!.id) {
-            if (targetReply.cheet.uuid === req.params.cheetId) {
-                await prisma.reply.delete({
-                    where: {
-                        id: targetReply.id,
-                    },
-                });
-                const replies = await fetchReplies(cheet.id);
-                res.status(200).send(replies);
-            } else {
-                res.status(403).send(["Cheet IDs do not match."]);
-            }
-        } else {
-            res.status(403).send(["Cannot delete someone else's reply."]);
-        }
-    } catch (error) {
-        console.error("Error deleting reply from database:\n" + logError(error));
-        sendErrorResponse(error, res);
-    }
+	try {
+		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+		const targetReply = await prisma.reply.findUniqueOrThrow({
+			include: { cheet: true },
+			where: { uuid: req.params.replyId },
+		});
+		if (targetReply.userId === req.session.user!.id) {
+			if (targetReply.cheet.uuid === req.params.cheetId) {
+				await prisma.reply.delete({
+					where: {
+						id: targetReply.id,
+					},
+				});
+				const replies = await fetchReplies(cheet.id);
+				res.status(200).send(replies);
+			} else {
+				res.status(403).send(["Cheet IDs do not match."]);
+			}
+		} else {
+			res.status(403).send(["Cannot delete someone else's reply."]);
+		}
+	} catch (error) {
+		console.error("Error deleting reply from database:\n" + logError(error));
+		sendErrorResponse(error, res);
+	}
 });
 
 export default router;

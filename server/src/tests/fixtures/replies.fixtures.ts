@@ -3,7 +3,7 @@ import { Reply } from "@prisma/client";
 export const testReplies: Reply[] = [
 	{
 		id: 1,
-		uuid: 'testreplyuuid1',
+		uuid: "testreplyuuid1",
 		text: "test reply 1",
 		userId: 1,
 		cheetId: 1,
@@ -12,7 +12,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 2,
-		uuid: 'testreplyuuid2',
+		uuid: "testreplyuuid2",
 		text: "test reply 2",
 		userId: 1,
 		cheetId: 5,
@@ -21,7 +21,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 3,
-		uuid: 'testreplyuuid3',
+		uuid: "testreplyuuid3",
 		text: "test reply 3",
 		userId: 1,
 		cheetId: 2,
@@ -30,7 +30,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 4,
-		uuid: 'testreplyuuid4',
+		uuid: "testreplyuuid4",
 		text: "test reply 4",
 		userId: 1,
 		cheetId: 2,
@@ -39,7 +39,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 5,
-		uuid: 'testreplyuuid5',
+		uuid: "testreplyuuid5",
 		text: "test reply 5",
 		userId: 2,
 		cheetId: 3,
@@ -48,7 +48,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 6,
-		uuid: 'testreplyuuid6',
+		uuid: "testreplyuuid6",
 		text: "test reply 6",
 		userId: 2,
 		cheetId: 2,
@@ -57,7 +57,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 7,
-		uuid: 'testreplyuuid7',
+		uuid: "testreplyuuid7",
 		text: "test reply 7",
 		userId: 2,
 		cheetId: 3,
@@ -66,7 +66,7 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 8,
-		uuid: 'testreplyuuid8',
+		uuid: "testreplyuuid8",
 		text: "test reply 8",
 		userId: 2,
 		cheetId: 2,
@@ -76,7 +76,7 @@ export const testReplies: Reply[] = [
 
 	{
 		id: 9,
-		uuid: 'testreplyuuid9',
+		uuid: "testreplyuuid9",
 		text: "test reply 9",
 		userId: 2,
 		cheetId: 3,
@@ -85,11 +85,11 @@ export const testReplies: Reply[] = [
 	},
 	{
 		id: 10,
-		uuid: 'testreplyuuid10',
+		uuid: "testreplyuuid10",
 		text: "test reply 10",
 		userId: 2,
 		cheetId: 5,
 		createdAt: new Date(2000, 0, 1, 0, 0, 9),
 		updatedAt: new Date(2000, 0, 1, 0, 0, 9),
-	}
+	},
 ];

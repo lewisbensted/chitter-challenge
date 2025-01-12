@@ -12,71 +12,72 @@ import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 
 interface Props {
-    recipientId: string;
-    isDisabled: boolean;
-    setMessages: (arg: IMessage[]) => void;
-    setErrors: (arg: string[]) => void;
-    setComponentLoading: (arg: boolean) => void;
-    setReloadWhenClosed: (arg: boolean) => void;
+	recipientId: string;
+	isDisabled: boolean;
+	setMessages: (arg: IMessage[]) => void;
+	setErrors: (arg: string[]) => void;
+	setComponentLoading: (arg: boolean) => void;
+	setReloadWhenClosed: (arg: boolean) => void;
 }
 
 const SendMessage: React.FC<Props> = ({
-    recipientId,
-    isDisabled,
-    setMessages,
-    setErrors,
-    setComponentLoading,
-    setReloadWhenClosed,
+	recipientId,
+	isDisabled,
+	setMessages,
+	setErrors,
+	setComponentLoading,
+	setReloadWhenClosed,
 }) => {
-    const { register, handleSubmit, reset } = useForm<{ text: string }>();
-    const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
+	const { register, handleSubmit, reset } = useForm<{ text: string }>();
+	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
-    const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-        setSubmitLoading(true);
-        setComponentLoading(true);
-        reset();
-        await axios
-            .post(`${serverURL}/messages/${recipientId}`, data, {
-                withCredentials: true,
-            })
-            .then((res: { data: IMessage[] }) => {
-                setMessages(res.data);
-                setReloadWhenClosed(true);
-            })
-            .catch((error: unknown) => {
-                handleErrors(error, "sending message", setErrors);
-            });
-        setSubmitLoading(false);
-        setComponentLoading(false);
-    };
+	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
+		setSubmitLoading(true);
+		setComponentLoading(true);
+		reset();
+		await axios
+			.post(`${serverURL}/messages/${recipientId}`, data, {
+				withCredentials: true,
+			})
+			.then((res: { data: IMessage[] }) => {
+				setMessages(res.data);
+				setReloadWhenClosed(true);
+			})
+			.catch((error: unknown) => {
+				handleErrors(error, "sending message", setErrors);
+			});
+		setSubmitLoading(false);
+		setComponentLoading(false);
+	};
 
-    return (
-        <ThemeProvider theme={theme}>
-            <FlexBox>
-                <Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-                    <Grid2 container size={10}>
-                        <Grid2 size={12}>
-                            <Typography variant="subtitle1">Send a Message:</Typography>
-                        </Grid2>
-                        <Grid2 size={12}>
-                            <TextField {...register("text")} type="text" variant="standard" />
-                        </Grid2>
-                    </Grid2>
-                    <Grid2 size={2} container>
-                        {isSubmitLoading ? (
-                            <Box paddingTop={1} paddingLeft={1}>
-                                <CircularProgress size="2rem" thickness={5} />
-                            </Box>
-                        ) : (
-                            <IconButton type="submit" disabled={isDisabled} color="primary">
-                                <Send />
-                            </IconButton>
-                        )}
-                    </Grid2>
-                </Grid2>
-            </FlexBox>
-        </ThemeProvider>
-    );
+	return (
+		<ThemeProvider theme={theme}>
+			<FlexBox>
+				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+					<Grid2 size={2} />
+					<Grid2 container size={8}>
+						<Grid2 size={12}>
+							<Typography variant="subtitle1">Send a Message:</Typography>
+						</Grid2>
+						<Grid2 size={12}>
+							<TextField {...register("text")} type="text" variant="standard" />
+						</Grid2>
+					</Grid2>
+					<Grid2 size={2} container justifyContent="center">
+						{isSubmitLoading ? (
+							<Box paddingTop={3}>
+								<CircularProgress size="2.1rem" thickness={6} />
+							</Box>
+						) : (
+							<IconButton type="submit" disabled={isDisabled} color="primary">
+								<Send fontSize="large" />
+							</IconButton>
+						)}
+					</Grid2>
+				</Grid2>
+			</FlexBox>
+		</ThemeProvider>
+	);
 };
 
 export default SendMessage;

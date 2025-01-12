@@ -23,73 +23,76 @@ const SessionStore = MySQLStore(expressSession);
 const __dirname = import.meta.dirname;
 
 const sessionStoreOptions: MySQLStore.Options = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: Number(process.env.DB_PORT),
-    host: process.env.DB_HOST,
-    expiration: 86400,
-    schema: { tableName: "session_store" },
+	user: process.env.DB_USER,
+	password: process.env.DB_PASSWORD,
+	database: process.env.DB_NAME,
+	port: Number(process.env.DB_PORT),
+	host: process.env.DB_HOST,
+	expiration: 86400,
+	schema: { tableName: "session_store" },
 };
 
 const checkValidPort = (port: number, side: string) => {
-    if (Number.isNaN(port)) {
-        throw new TypeError(`Invalid ${side} port provided - must be a number between 0 and 65536.`);
-    } else if (port < 0 || port > 65535) {
-        throw new RangeError(`Invalid ${side} port provided - must be a number between 0 and 65536.`);
-    }
+	if (Number.isNaN(port)) {
+		throw new TypeError(`Invalid ${side} port provided - must be a number between 0 and 65536.`);
+	} else if (port < 0 || port > 65535) {
+		throw new RangeError(`Invalid ${side} port provided - must be a number between 0 and 65536.`);
+	}
 };
 
 prisma
-    .$connect()
-    .then(() => {
-        const app = express();
-        const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
-        const SERVER_PORT = Number(process.env.SERVER_PORT);
-        checkValidPort(Number(SERVER_PORT), "server");
+	.$connect()
+	.then(() => {
+		const app = express();
+		const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+		const SERVER_PORT = Number(process.env.SERVER_PORT);
+		checkValidPort(Number(SERVER_PORT), "server");
 
-        if (process.env.NODE_ENV === "production") {
-            app.use(express.static(path.join(__dirname, "../frontend/build")));
-            app.get("/", (req, res) => {
-                res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-            });
-        } else {
-            checkValidPort(Number(FRONTEND_PORT), "frontend");
-            app.use(
-                cors({
-                    origin: `http://localhost:${FRONTEND_PORT}`,
-                    credentials: true,
-                })
-            );
-        }
+		if (process.env.NODE_ENV === "production") {
+			app.use(express.static(path.join(__dirname, "../frontend/build")));
+			app.get("/", (req, res) => {
+				res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+			});
+		} else {
+			checkValidPort(Number(FRONTEND_PORT), "frontend");
+			app.use(
+				cors({
+					origin: `http://localhost:${FRONTEND_PORT}`,
+					credentials: true,
+				})
+			);
+		}
 
-        app.use(cookieParser());
-        app.use(
-            session({
-                secret: "secret-key",
-                name: "session",
-                saveUninitialized: false,
-                resave: false,
-                store: new SessionStore(sessionStoreOptions),
-            })
-        );
+		app.use(cookieParser());
+		app.use(
+			session({
+				secret: "secret-key",
+				name: "session",
+				saveUninitialized: false,
+				resave: false,
+				store: new SessionStore(sessionStoreOptions),
+			})
+		);
 
-        app.use("/register", express.json(), register);
-        app.use("/login", express.json(), login);
-        app.use("/validate", validate);
-        app.use("/logout", logout);
-        app.use("/cheets", express.json(), cheets);
-        app.use("/conversations", express.json(), conversations);
-        app.use("/users/:userId/cheets", express.json(), cheets);
-        app.use("/cheets/:cheetId/replies", replies);
-        app.use("/messages", express.json(), messages);
-        app.listen(SERVER_PORT, () => console.log(`Server running on port ${SERVER_PORT}.`)).on("error", (error) => {
-            console.error(error.message);
-        });
-    })
-    .catch((error: unknown) => {
-        console.error(
-            (error instanceof PrismaClientInitializationError ? "\nError initialising database connection:\n" : "") +
-                logError(error)
-        );
-    });
+		app.use("/register", express.json(), register);
+		app.use("/login", express.json(), login);
+		app.use("/validate", validate);
+		app.use("/logout", logout);
+		app.use("/cheets", express.json(), cheets);
+		app.use("/conversations", express.json(), conversations);
+		app.use("/users/:userId/cheets", express.json(), cheets);
+		app.use("/cheets/:cheetId/replies", replies);
+		app.use("/messages", express.json(), messages);
+		app.listen(SERVER_PORT, () => console.log(`\nServer running on port ${SERVER_PORT}.\n`)).on(
+			"error",
+			(error) => {
+				console.error(logError(error));
+			}
+		);
+	})
+	.catch((error: unknown) => {
+		console.error(
+			(error instanceof PrismaClientInitializationError ? "\nError initialising database connection:\n" : "") +
+				logError(error)
+		);
+	});

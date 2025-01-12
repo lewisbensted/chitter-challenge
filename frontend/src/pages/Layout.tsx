@@ -19,99 +19,99 @@ import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 
 interface Props {
-    isComponentLoading: boolean;
-    userId?: string;
-    setPageLoading: (arg: boolean) => void;
-    setUserId: (arg?: string) => void;
-    isPageLoading: boolean;
-    children: JSX.Element;
-    isUnreadMessages?: boolean;
+	isComponentLoading: boolean;
+	userId?: string;
+	setPageLoading: (arg: boolean) => void;
+	setUserId: (arg?: string) => void;
+	isPageLoading: boolean;
+	children: JSX.Element;
+	isUnreadMessages?: boolean;
 }
 
 const drawerWidth = 200;
 
 const Layout: React.FC<Props> = ({
-    children,
-    isComponentLoading,
-    setPageLoading,
-    userId,
-    setUserId,
-    isPageLoading,
-    isUnreadMessages,
+	children,
+	isComponentLoading,
+	setPageLoading,
+	userId,
+	setUserId,
+	isPageLoading,
+	isUnreadMessages,
 }) => {
-    const [isDrawerOpen, setDrawerOpen] = useState(false);
-    const [errors, setErrors] = useState<string[]>([]);
-    const navigate = useNavigate();
+	const [isDrawerOpen, setDrawerOpen] = useState(false);
+	const [errors, setErrors] = useState<string[]>([]);
+	const navigate = useNavigate();
 
-    return (
-        <ThemeProvider theme={theme}>
-            <ErrorModal errors={errors} closeModal={() => setErrors([])} />
-            <Box display="flex" justifyContent="center">
-                <Drawer
-                    open={isDrawerOpen}
-                    variant="permanent"
-                    sx={{ width: isDrawerOpen ? drawerWidth : drawerWidth / 2 }}
-                    PaperProps={{ sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } }}
-                >
-                    <List>
-                        <DrawerElement
-                            isComponentLoading={false}
-                            onClick={isDrawerOpen ? () => setDrawerOpen(false) : () => setDrawerOpen(true)}
-                            icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
-                            isDrawerOpen={isDrawerOpen}
-                        ></DrawerElement>
-                        <Divider />
-                        {isPageLoading ? null : userId ? (
-                            <Fragment>
-                                <DrawerElement
-                                    link="/conversations"
-                                    text="Messages"
-                                    icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
-                                    isComponentLoading={isComponentLoading}
-                                    isDrawerOpen={isDrawerOpen}
-                                />
-                                <DrawerElement
-                                    text="Log out"
-                                    icon={<Logout />}
-                                    isComponentLoading={isComponentLoading}
-                                    isDrawerOpen={isDrawerOpen}
-                                    onClick={async () => {
-                                        await logout(setPageLoading, setUserId, setErrors, () => navigate("/login"));
-                                    }}
-                                />
-                            </Fragment>
-                        ) : (
-                            <Fragment>
-                                <DrawerElement
-                                    link="/register"
-                                    text="Register"
-                                    icon={<AppRegistration />}
-                                    isComponentLoading={isComponentLoading}
-                                    isDrawerOpen={isDrawerOpen}
-                                />
-                                <DrawerElement
-                                    link="/login"
-                                    text="Log in"
-                                    icon={<Login />}
-                                    isComponentLoading={isComponentLoading}
-                                    isDrawerOpen={isDrawerOpen}
-                                />
-                            </Fragment>
-                        )}
-                        <Divider />
-                        <DrawerElement
-                            link="/"
-                            text="Home"
-                            icon={<Home />}
-                            isComponentLoading={isComponentLoading}
-                            isDrawerOpen={isDrawerOpen}
-                        />
-                    </List>
-                </Drawer>
-                {children}
-            </Box>
-        </ThemeProvider>
-    );
+	return (
+		<ThemeProvider theme={theme}>
+			<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+			<Box display="flex" justifyContent="center">
+				<Drawer
+					open={isDrawerOpen}
+					variant="permanent"
+					sx={{ width: isDrawerOpen ? drawerWidth : drawerWidth / 2 }}
+					PaperProps={{ sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } }}
+				>
+					<List>
+						<DrawerElement
+							isComponentLoading={false}
+							onClick={isDrawerOpen ? () => setDrawerOpen(false) : () => setDrawerOpen(true)}
+							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
+							isDrawerOpen={isDrawerOpen}
+						></DrawerElement>
+						<Divider />
+						{isPageLoading ? null : userId ? (
+							<Fragment>
+								<DrawerElement
+									link="/conversations"
+									text="Messages"
+									icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
+									isComponentLoading={isComponentLoading}
+									isDrawerOpen={isDrawerOpen}
+								/>
+								<DrawerElement
+									text="Log out"
+									icon={<Logout />}
+									isComponentLoading={isComponentLoading}
+									isDrawerOpen={isDrawerOpen}
+									onClick={async () => {
+										await logout(setPageLoading, setUserId, setErrors, () => navigate("/login"));
+									}}
+								/>
+							</Fragment>
+						) : (
+							<Fragment>
+								<DrawerElement
+									link="/register"
+									text="Register"
+									icon={<AppRegistration />}
+									isComponentLoading={isComponentLoading}
+									isDrawerOpen={isDrawerOpen}
+								/>
+								<DrawerElement
+									link="/login"
+									text="Log in"
+									icon={<Login />}
+									isComponentLoading={isComponentLoading}
+									isDrawerOpen={isDrawerOpen}
+								/>
+							</Fragment>
+						)}
+						<Divider />
+						<DrawerElement
+							link="/"
+							text="Home"
+							icon={<Home />}
+							isComponentLoading={isComponentLoading}
+							isDrawerOpen={isDrawerOpen}
+						/>
+					</List>
+				</Drawer>
+				{children}
+			</Box>
+		</ThemeProvider>
+	);
 };
 
 export default Layout;

@@ -1,6 +1,6 @@
 export const testUser1 = {
 	id: 1,
-	uuid:'testuseruuid1',
+	uuid: "testuseruuid1",
 	email: "testuser1@test.com",
 	firstName: "Test",
 	lastName: "User",
@@ -10,7 +10,7 @@ export const testUser1 = {
 
 export const testUser2 = {
 	id: 2,
-	uuid:'testuseruuid2',
+	uuid: "testuseruuid2",
 	email: "testuser2@test.com",
 	firstName: "Test",
 	lastName: "User",
@@ -20,7 +20,7 @@ export const testUser2 = {
 
 export const testUser3 = {
 	id: 3,
-	uuid:'testuseruuid3',
+	uuid: "testuseruuid3",
 	email: "testuser3@test.com",
 	firstName: "Test",
 	lastName: "User",
@@ -30,7 +30,7 @@ export const testUser3 = {
 
 export const testUser4 = {
 	id: 4,
-	uuid:'testuseruuid4',
+	uuid: "testuseruuid4",
 	email: "testuser4@test.com",
 	firstName: "Test",
 	lastName: "User",
@@ -40,7 +40,7 @@ export const testUser4 = {
 
 export const testUserDuplicateEmail = {
 	id: 5,
-	uuid:'testuseruuid5',
+	uuid: "testuseruuid5",
 	email: "testuser1@test.com",
 	firstName: "Test",
 	lastName: "User",
@@ -50,7 +50,7 @@ export const testUserDuplicateEmail = {
 
 export const testUserDuplicateUsername = {
 	id: 6,
-	uuid:'testuseruuid6',
+	uuid: "testuseruuid6",
 	email: "testuser6@test.com",
 	firstName: "Test",
 	lastName: "User",
@@ -60,7 +60,7 @@ export const testUserDuplicateUsername = {
 
 export const testUserMissingField = {
 	id: 7,
-	uuid:'testuseruuid7',
+	uuid: "testuseruuid7",
 	email: "testuser7@test.com",
 	firstName: "Test",
 	password: "password7!",
@@ -69,7 +69,7 @@ export const testUserMissingField = {
 
 export const testUserBadRegex = {
 	id: 8,
-	uuid:'testuseruuid8',
+	uuid: "testuseruuid8",
 	email: "testuser8@test.com",
 	firstName: "Test8",
 	lastName: "Use'r8",
@@ -79,10 +79,9 @@ export const testUserBadRegex = {
 
 export const testUserMultipleFailures = {
 	id: 9,
-	uuid:'testuseruuid9',
+	uuid: "testuseruuid9",
 	email: "testuser9@test",
 	lastName: "User9",
 	password: "password9!",
 	username: "testuser1",
 };
-
