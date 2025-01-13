@@ -28,7 +28,7 @@ const Conversations: React.FC = () => {
 				setUserId(res.data);
 			})
 			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status == 401) {
+				if (axios.isAxiosError(error) && error.response?.status === 401) {
 					navigate("/");
 				} else {
 					handleErrors(error, "authenticating the user", setErrors);

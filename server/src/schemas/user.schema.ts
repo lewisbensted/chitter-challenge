@@ -6,7 +6,7 @@ export const firstNameExp2 = /^([^- ]*|[^- ]{2,}(( |-)[^- ]{2,})?)$/; // Maximum
 export const lastNameExp1 = /^[a-zA-Z' -]*$/;
 export const lastNameExp2 = /^(([^-' ]')?[^-' ]*|([^-' ]')?[^-' ]{2,}(( |-)([^-' ]')?[^-' ]{2,}){0,2})$/; // Maximum of 3 words separated by a hyphen or a space,
 // allow an apostrophe after the first letter of each word.
-export const passwordExp1 = /^(?=.*?[a-zA-Z])(?=.*?[0-9])(?=.*?[$&+,:;=?@#|'<>.^\*\.()%!-/\\]).+$/;
+export const passwordExp1 = /^(?=.*?[a-zA-Z])(?=.*?[0-9])(?=.*?[$&+,:;=?@#|'<>.^*.()%!-/\\]).+$/;
 export const passwordExp2 = /^\S*$/;
 
 export const UserSchema = z.object({

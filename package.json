@@ -11,7 +11,8 @@
         "start:test": "concurrently --names Backend,Frontend \"cd server && npm run start:test\" \"cd frontend && npm start\"",
         "seed:test": "cd server && npm run seed:test",
         "migrate:prod": "cd server && npm run migrate:prod",
-        "start:prod": "cd frontend && npm run build && cd ../server && npm run start:prod"
+        "start:prod": "cd frontend && npm run build && cd ../server && npm run start:prod",
+        "lint" : "concurrently --names Backend,Frontend \"cd server && npx eslint src/**/*.ts\" \"cd frontend && npx eslint src/**/*.tsx src/**/*.ts\""
     },
     "repository": {
         "type": "git",
@@ -29,10 +30,9 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.19.1",
         "@typescript-eslint/parser": "^8.19.1",
-        "eslint": "^8.56.0",
-        "eslint-config-prettier": "^9.1.0",
+        "eslint": "^8.57.1",
+        "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-only-warn": "^1.1.0",
-        "eslint-plugin-react": "^7.37.3",
-        "eslint-plugin-react-hooks": "^5.1.0"
+        "eslint-plugin-prettier": "^5.2.1"
     }
 }

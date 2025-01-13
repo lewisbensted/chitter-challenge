@@ -37,9 +37,7 @@ export const fetchCheets = async (userId?: number) => {
 			userId: userId ? userId : undefined,
 		},
 	});
-	cheets.sort((cheetA, cheetB) => {
-		return cheetA.createdAt.valueOf() - cheetB.createdAt.valueOf();
-	});
+	cheets.sort((cheetA, cheetB) => cheetA.createdAt.valueOf() - cheetB.createdAt.valueOf());
 	return cheets;
 };
 

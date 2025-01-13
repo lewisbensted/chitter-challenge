@@ -39,7 +39,7 @@ const Register: React.FC = () => {
 				navigate("/");
 			})
 			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status == 401) {
+				if (axios.isAxiosError(error) && error.response?.status === 401) {
 					setUserId(undefined);
 				} else {
 					handleErrors(error, "authenticating the user", setErrors);

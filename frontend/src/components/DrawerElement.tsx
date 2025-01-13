@@ -17,28 +17,26 @@ interface Props {
 	onClick?: () => void;
 }
 
-const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDrawerOpen, onClick, text }) => {
-	return (
-		<ThemeProvider theme={theme}>
-			<ListItem>
-				<ListItemButton
-					onClick={onClick}
-					href={link ? link : ""}
-					style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
-					sx={{ justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center" }}
-				>
-					<ListItemIcon sx={{ justifyContent: "center" }}>
-						<IconButton color="primary">{icon}</IconButton>
-					</ListItemIcon>
-					{isDrawerOpen ? (
-						<Link>
-							<ListItemText primary={text} />
-						</Link>
-					) : null}
-				</ListItemButton>
-			</ListItem>
-		</ThemeProvider>
-	);
-};
+const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDrawerOpen, onClick, text }) => (
+	<ThemeProvider theme={theme}>
+		<ListItem>
+			<ListItemButton
+				onClick={onClick}
+				href={link ? link : ""}
+				style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
+				sx={{ justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center" }}
+			>
+				<ListItemIcon sx={{ justifyContent: "center" }}>
+					<IconButton color="primary">{icon}</IconButton>
+				</ListItemIcon>
+				{isDrawerOpen ? (
+					<Link>
+						<ListItemText primary={text} />
+					</Link>
+				) : null}
+			</ListItemButton>
+		</ListItem>
+	</ThemeProvider>
+);
 
 export default DrawerElement;

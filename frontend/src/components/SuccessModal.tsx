@@ -10,20 +10,18 @@ interface Props {
 	closeModal: () => void;
 }
 
-const SuccessModal: React.FC<Props> = ({ isOpen, message, closeModal }) => {
-	return (
-		<ThemeProvider theme={theme}>
-			<Dialog open={isOpen}>
-				<Typography variant="h4">Success!</Typography>
-				<Typography variant="subtitle1">{message}</Typography>
-				<FlexBox>
-					<Button onClick={closeModal} variant="contained">
-						<Typography variant="button">Ok</Typography>
-					</Button>
-				</FlexBox>
-			</Dialog>
-		</ThemeProvider>
-	);
-};
+const SuccessModal: React.FC<Props> = ({ isOpen, message, closeModal }) => (
+	<ThemeProvider theme={theme}>
+		<Dialog open={isOpen}>
+			<Typography variant="h4">Success!</Typography>
+			<Typography variant="subtitle1">{message}</Typography>
+			<FlexBox>
+				<Button onClick={closeModal} variant="contained">
+					<Typography variant="button">Ok</Typography>
+				</Button>
+			</FlexBox>
+		</Dialog>
+	</ThemeProvider>
+);
 
 export default SuccessModal;

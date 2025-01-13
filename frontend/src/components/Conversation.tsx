@@ -71,7 +71,7 @@ const Conversation: React.FC<Props> = ({
 								<Typography
 									fontWeight={
 										!conversation.latestMessage!.isRead &&
-										conversation.latestMessage?.senderId != userId
+										conversation.latestMessage?.senderId !== userId
 											? "bold"
 											: ""
 									}
@@ -82,13 +82,13 @@ const Conversation: React.FC<Props> = ({
 							</Grid2>
 							<Grid2 size={1}>
 								{conversation.latestMessage!.isRead &&
-								conversation.latestMessage?.senderId == userId ? (
-									<Done fontSize="small" color="primary" />
-								) : null}
+								conversation.latestMessage?.senderId === userId ? (
+										<Done fontSize="small" color="primary" />
+									) : null}
 								{!conversation.latestMessage!.isRead &&
-								conversation.latestMessage?.senderId != userId ? (
-									<MarkUnreadChatAlt fontSize="small" color="primary" />
-								) : null}
+								conversation.latestMessage?.senderId !== userId ? (
+										<MarkUnreadChatAlt fontSize="small" color="primary" />
+									) : null}
 							</Grid2>
 						</Grid2>
 					</CardContent>

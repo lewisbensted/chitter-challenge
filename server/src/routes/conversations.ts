@@ -26,16 +26,14 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 		},
 	});
 
-	messages.sort((messageA, messageB) => {
-		return messageB.createdAt.valueOf() - messageA.createdAt.valueOf();
-	});
+	messages.sort((messageA, messageB) => messageB.createdAt.valueOf() - messageA.createdAt.valueOf());
 
 	const conversations = messages.reduce(
 		(result: IConversation[], message) => {
 			if (message.senderId === userId) {
 				if (
 					!interlocutor &&
-					!result.find((conversation) => conversation.interlocutorId == message.recipient.uuid)
+					!result.find((conversation) => conversation.interlocutorId === message.recipient.uuid)
 				) {
 					result.push({
 						interlocutorId: message.recipient.uuid,
@@ -45,7 +43,7 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 					});
 				}
 			} else {
-				let target = result.find((conversation) => conversation.interlocutorId == message.sender.uuid);
+				let target = result.find((conversation) => conversation.interlocutorId === message.sender.uuid);
 				if (!target) {
 					target = {
 						interlocutorId: message.sender.uuid,

@@ -36,7 +36,7 @@ const User: React.FC = () => {
 				setUserId(res.data);
 			})
 			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status == 401) {
+				if (axios.isAxiosError(error) && error.response?.status === 401) {
 					setUserId(undefined);
 				} else {
 					handleErrors(error, "authenticating the user", setErrors);
@@ -70,7 +70,7 @@ const User: React.FC = () => {
 					setConversation(res.data.conversation);
 				})
 				.catch((error: unknown) => {
-					if (axios.isAxiosError(error) && error.response?.status == 404) {
+					if (axios.isAxiosError(error) && error.response?.status === 404) {
 						navigate("/");
 					} else {
 						handleErrors(error, "loading the page", setErrors);
@@ -119,7 +119,7 @@ const User: React.FC = () => {
 					<Fragment>
 						<Typography variant="h4" display="flex">
 							{username}
-							{!conversation || userId == id ? null : (
+							{!conversation || userId === id ? null : (
 								<ConversationIcon
 									userId={userId}
 									conversation={conversation}

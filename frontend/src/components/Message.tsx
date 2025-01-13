@@ -83,7 +83,7 @@ const Message: React.FC<Props> = ({
 							) : (
 								<Typography
 									justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
-									fontWeight={!message.isRead && message.recipient.uuid == userId ? "bold" : ""}
+									fontWeight={!message.isRead && message.recipient.uuid === userId ? "bold" : ""}
 								>
 									{message.text}
 								</Typography>

@@ -7,7 +7,7 @@
     "scripts": {
         "migrate:dev": "dotenv -e ../.env.development -r dotenv-expand/config -- npx prisma migrate dev --name inititalise",
         "seed:dev": "set NODE_ENV=development&& node --loader ts-node/esm prisma/seed.ts",
-        "start:dev": "set NODE_ENV=development&& nodemon app.ts",
+        "start:dev": "set NODE_ENV=development&& nodemon src/app.ts",
         "migrate:test": "dotenv -e ../.env.test -r dotenv-expand/config -- npx prisma migrate deploy",
         "seed:test": "set NODE_ENV=test&& node --loader ts-node/esm prisma/seed.ts",
         "start:test": "set NODE_ENV=test&& nodemon app.ts",
