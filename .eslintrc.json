@@ -1,7 +1,8 @@
 {
 	"env": {
-		"browser": true,
-		"es2021": true
+		"es2021": true,
+		"node": true,
+		"browser": true
 	},
 	"settings": {
 		"react": {
@@ -20,6 +21,6 @@
 		"linebreak-style": ["warn", "windows"],
 		"quotes": ["warn", "double"],
 		"semi": ["warn", "always"]
-	}
+	},
+	"root": true
 }
-
