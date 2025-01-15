@@ -15,8 +15,8 @@ const logout = async (
 			setUserId(undefined);
 			redirect();
 		})
-		.catch((error) => {
-			if (error.response.status === 403) {
+		.catch((error: unknown) => {
+			if (axios.isAxiosError(error) && error.response?.status === 403) {
 				setUserId(undefined);
 				redirect();
 			} else {

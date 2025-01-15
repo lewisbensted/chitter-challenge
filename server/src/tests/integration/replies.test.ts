@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction } from "express";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { resetDB } from "../resetDB";
 import { testUser1, testUser2 } from "../fixtures/users.fixtures";
@@ -8,11 +8,20 @@ import { testReplies } from "../fixtures/replies.fixtures";
 import replies, { fetchReplies } from "../../routes/replies";
 import session from "express-session";
 import request from "supertest";
-import { Reply } from "@prisma/client";
+import { IReply } from "../../../types/responses";
+
+interface IResponse {
+	status: number;
+	body: IReply[] | string[];
+}
+
+function isReply(body: IReply | string): body is IReply {
+	return (body as IReply).uuid ? true : false;
+}
 
 describe("Test replies routes.", () => {
 	vi.mock("./../../middleware/authMiddleware", () => ({
-		authMiddleware: vi.fn((req, _res, next) => {
+		authMiddleware: vi.fn((_req, _res, next: NextFunction) => {
 			next();
 		}),
 	}));
@@ -27,13 +36,13 @@ describe("Test replies routes.", () => {
 
 	const testApp = express();
 	testApp.use(session({ secret: "secret-key" }));
-	testApp.all("*", (req, res, next) => {
+	testApp.all("*", (req, _res, next) => {
 		req.session.user = { id: 1, uuid: "testuseruuid1" };
 		next();
 	});
 	testApp.use("/cheets/:cheetId/replies", express.json(), replies);
 
-	describe("Test fetchReplies function which fetches relevant replies from the database and sorts them in chronological order.", async () => {
+	describe("Test fetchReplies function which fetches relevant replies from the database and sorts them in chronological order.", () => {
 		test("Test different cheet IDs.", async () => {
 			const replies1 = await fetchReplies(1);
 			expect(replies1).length(1);
@@ -101,7 +110,7 @@ describe("Test replies routes.", () => {
 			]);
 		});
 
-		describe("Fetch replies at route: [GET] /replies.", async () => {
+		describe("Fetch replies at route: [GET] /replies.", () => {
 			test("Responds with HTTP status 200 and all replies relevant to the cheet specified in the request params.", async () => {
 				const request1 = await request(testApp).get("/cheets/testcheetuuid1/replies");
 				expect(request1.status).toEqual(200);
@@ -124,116 +133,137 @@ describe("Test replies routes.", () => {
 				expect(request5.body).length(2);
 			});
 			test("Responds with HTTP status 404 if reply's target cheet does not exist in the database.", async () => {
-				const { status, body } = await request(testApp).get("/cheets/testcheetuuid6/replies");
+				const { status, body } = (await request(testApp).get("/cheets/testcheetuuid6/replies")) as IResponse;
 				expect(status).toEqual(404);
 				expect(body).toEqual(["No Cheet found with ID provided."]);
 			});
 		});
-		describe("Post a new reply at route: [POST] /replies.", async () => {
+		describe("Post a new reply at route: [POST] /replies.", () => {
 			test("Responds with HTTP status 201 and all relevant replies when a new reply is created.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.post("/cheets/testcheetuuid1/replies")
-					.send({ text: "new test reply" });
+					.send({ text: "new test reply" })) as IResponse;
 				expect(status).toEqual(201);
 				expect(body).length(2);
-				expect([body[1].user.username, body[1].text]).toEqual(["testuser1", "new test reply"]);
+				expect(body[1]).toMatchObject({
+					user: { uuid: "testuseruuid1" },
+					cheet: { uuid: "testcheetuuid1" },
+					text: "new test reply",
+				});
 			});
 			test("Responds with HTTP status 400 if reply validation fails - text too short.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.post("/cheets/testcheetuuid1/replies")
-					.send({ text: "test" });
+					.send({ text: "test" })) as IResponse;
 				expect(status).toEqual(400);
 				expect(body).toEqual(["Reply too short - must be between 5 and 50 characters."]);
 			});
 			test("Responds with HTTP status 400 if reply validation fails - no text field.", async () => {
-				const { status, body } = await request(testApp).post("/cheets/testcheetuuid1/replies");
+				const { status, body } = (await request(testApp).post("/cheets/testcheetuuid1/replies")) as IResponse;
 				expect(status).toEqual(400);
 				expect(body).toEqual(["Text not provided."]);
 			});
 			test("Responds with HTTP status 404 if reply's target cheet does not exist in the database.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.post("/cheets/testcheetuuid6/replies")
-					.send({ text: "new test reply" });
+					.send({ text: "new test reply" })) as IResponse;
 				expect(status).toEqual(404);
 				expect(body).toEqual(["No Cheet found with ID provided."]);
 			});
 		});
 
-		describe("Updates an existing reply at route: [PUT] /replies.", async () => {
+		describe("Updates an existing reply at route: [PUT] /replies.", () => {
 			test("Responds with HTTP status 200 and all relevant replies when a reply is updated.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.put("/cheets/testcheetuuid1/replies/testreplyuuid1")
-					.send({ text: "test reply 1 - updated" });
+					.send({ text: "test reply 1 - updated" })) as IResponse;
 				expect(status).toEqual(200);
 				expect(body).length(1);
-				expect([body[0].user.username, body[0].text]).toEqual(["testuser1", "test reply 1 - updated"]);
+				expect(body[0]).toMatchObject({
+					user: { uuid: "testuseruuid1" },
+					cheet: { uuid: "testcheetuuid1" },
+					text: "test reply 1 - updated",
+				});
 			});
 			test("Responds with HTTP status 400 if reply validation fails - text too short.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.put("/cheets/testcheetuuid1/replies/testreplyuuid1")
-					.send({ text: "test" });
+					.send({ text: "test" })) as IResponse;
 				expect(status).toEqual(400);
 				expect(body).toEqual(["Reply too short - must be between 5 and 50 characters."]);
 			});
 			test("Responds with HTTP status 400 if reply validation fails - text parameter missing.", async () => {
-				const { status, body } = await request(testApp).put("/cheets/testcheetuuid1/replies/testreplyuuid1");
+				const { status, body } = (await request(testApp).put(
+					"/cheets/testcheetuuid1/replies/testreplyuuid1"
+				)) as IResponse;
 				expect(status).toEqual(400);
 				expect(body).toEqual(["Text not provided."]);
 			});
 			test("Responds with HTTP status 403 if reply's userID does not match the session's userID (trying to update someone else's cheet).", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.put("/cheets/testcheetuuid2/replies/testreplyuuid6")
-					.send({ text: "test reply 2 - updated" });
+					.send({ text: "test reply 2 - updated" })) as IResponse;
 				expect(status).toEqual(403);
 				expect(body).toEqual(["Cannot update someone else's reply."]);
 			});
 			test("Responds with HTTP status 404 if the reply to be updated does not exist in the database.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.put("/cheets/testcheetuuid1/replies/testreplyuuid11")
-					.send({ text: "test reply 1 - updated" });
+					.send({ text: "test reply 1 - updated" })) as IResponse;
 				expect(status).toEqual(404);
 				expect(body).toEqual(["No Reply found with ID provided."]);
 			});
 			test("Responds with HTTP status 404 if reply's target cheet does not exist in the database.", async () => {
-				const { status, body } = await request(testApp)
+				const { status, body } = (await request(testApp)
 					.put("/cheets/testcheetuuid6/replies/testreplyuuid1")
-					.send({ text: "test reply 1 - updated" });
+					.send({ text: "test reply 1 - updated" })) as IResponse;
 				expect(status).toEqual(404);
 				expect(body).toEqual(["No Cheet found with ID provided."]);
 			});
 			test("Responds with HTTP status 404 if reply's cheet ID does not match the cheet ID provided.", async () => {
-				const { status, body } = await request(testApp).put("/cheets/testcheetuuid2/replies/testreplyuuid1");
+				const { status, body } = (await request(testApp).put(
+					"/cheets/testcheetuuid2/replies/testreplyuuid1"
+				)) as IResponse;
 				expect(status).toEqual(403);
 				expect(body).toEqual(["Cheet IDs do not match."]);
 			});
 		});
 
-		describe("Deletes an existing reply at route: [DELETE] /replies.", async () => {
+		describe("Deletes an existing reply at route: [DELETE] /replies.", () => {
 			test("Responds with HTTP status 200 and all relevant replies when a reply is deleted.", async () => {
-				const { status, body } = await request(testApp).delete("/cheets/testcheetuuid2/replies/testreplyuuid4");
+				const { status, body } = (await request(testApp).delete(
+					"/cheets/testcheetuuid2/replies/testreplyuuid4"
+				)) as IResponse;
 				expect(status).toEqual(200);
-				expect(body).length(3);
-				expect(body.map((reply: Reply) => reply.id)).not.toContain(4);
+				const replies = body.filter((reply) => isReply(reply)).map((reply) => reply.uuid);
+				expect(replies).length(3);
+				expect(replies).not.toContain("testreplyuuid4");
 			});
 			test("Responds with HTTP status 403 if reply's userID does not match the session's userID (trying to update someone else's reply).", async () => {
-				const { status, body } = await request(testApp).delete("/cheets/testcheetuuid2/replies/testreplyuuid6");
+				const { status, body } = (await request(testApp).delete(
+					"/cheets/testcheetuuid2/replies/testreplyuuid6"
+				)) as IResponse;
 				expect(status).toEqual(403);
 				expect(body).toEqual(["Cannot delete someone else's reply."]);
 			});
 			test("Responds with HTTP status 404 if the reply to be updated does not exist in the database.", async () => {
-				const { status, body } = await request(testApp).delete(
+				const { status, body } = (await request(testApp).delete(
 					"/cheets/testcheetuuid1/replies/testreplyuuid11"
-				);
+				)) as IResponse;
 				expect(status).toEqual(404);
 				expect(body).toEqual(["No Reply found with ID provided."]);
 			});
 			test("Responds with HTTP status 404 if reply's target cheet does not exist in the database.", async () => {
-				const { status, body } = await request(testApp).delete("/cheets/testcheetuuid6/replies/testreplyuuid1");
+				const { status, body } = (await request(testApp).delete(
+					"/cheets/testcheetuuid6/replies/testreplyuuid1"
+				)) as IResponse;
 				expect(status).toEqual(404);
 				expect(body).toEqual(["No Cheet found with ID provided."]);
 			});
 			test("Responds with HTTP status 404 if reply's cheet ID does not match the cheet ID provided.", async () => {
-				const { status, body } = await request(testApp).delete("/cheets/testcheetuuid2/replies/testreplyuuid1");
+				const { status, body } = (await request(testApp).delete(
+					"/cheets/testcheetuuid2/replies/testreplyuuid1"
+				)) as IResponse;
 				expect(status).toEqual(403);
 				expect(body).toEqual(["Cheet IDs do not match."]);
 			});

@@ -59,7 +59,7 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 		await prisma.$extends(replyExtension).reply.create({
 			data: {
 				userId: req.session.user!.id,
-				text: req.body.text,
+				text: (req as { body: { text: string } }).body.text,
 				cheetId: cheet.id,
 				createdAt: date,
 				updatedAt: date,
@@ -83,13 +83,13 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 		});
 		if (targetReply.userId === req.session.user!.id) {
 			if (targetReply.cheet.uuid === req.params.cheetId) {
-				if (req.body.text !== targetReply.text) {
+				if ((req as { body: { text: string } }).body.text !== targetReply.text) {
 					await prisma.$extends(replyExtension).reply.update({
 						where: {
 							id: targetReply.id,
 						},
 						data: {
-							text: req.body.text,
+							text: (req as { body: { text: string } }).body.text,
 							updatedAt: date,
 						},
 					});

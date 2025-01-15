@@ -66,7 +66,7 @@ const SignIn: React.FC = () => {
 				setUserId={setUserId}
 			>
 				<Box>
-					<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+					<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
 					<Typography variant="h4">Sign In</Typography>
 					{isPageLoading ? (
 						<FlexBox>

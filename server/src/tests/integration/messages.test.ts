@@ -6,12 +6,21 @@ import { testUser1, testUser2, testUser3, testUser4 } from "../fixtures/users.fi
 import messages, { fetchMessages, readMessages } from "../../routes/messages";
 import session from "express-session";
 import request from "supertest";
-import express from "express";
-import { Message } from "@prisma/client";
+import express, { NextFunction } from "express";
+import { IMessage } from "../../../types/responses";
+
+interface IResponse {
+	status: number;
+	body: IMessage[] | string[];
+}
+
+function isMessage(body: IMessage | string): body is IMessage {
+	return (body as IMessage).uuid ? true : false;
+}
 
 describe("test message functionality.", () => {
 	vi.mock("./../../middleware/authMiddleware", () => ({
-		authMiddleware: vi.fn((_req, _res, next) => {
+		authMiddleware: vi.fn((_req, _res, next: NextFunction) => {
 			next();
 		}),
 	}));
@@ -27,13 +36,13 @@ describe("test message functionality.", () => {
 
 	const testApp = express();
 	testApp.use(session({ secret: "secret-key" }));
-	testApp.all("*", (req, _res, next) => {
+	testApp.all("*", (req, _res, next: NextFunction) => {
 		req.session.user = { id: 1, uuid: "testuseruuid1" };
 		next();
 	});
 	testApp.use("/messages", express.json(), messages);
 
-	describe("Test fetchMessages function which fetches relevant messages from the database and sorts them in chronological order.", async () => {
+	describe("Test fetchMessages function which fetches relevant messages from the database and sorts them in chronological order.", () => {
 		test("Fetch messages between testuser1 and testuser2.", async () => {
 			const messages = await fetchMessages(1, 2);
 			expect(messages).length(4);
@@ -75,7 +84,7 @@ describe("test message functionality.", () => {
 		});
 	});
 
-	describe("Test readMessages function which sets the read value of relevant messages to true.", async () => {
+	describe("Test readMessages function which sets the read value of relevant messages to true.", () => {
 		test("testuser1 reads all messages from testuser2.", async () => {
 			const read = await readMessages(1, 2);
 			expect(read.count).toEqual(2);
@@ -85,7 +94,7 @@ describe("test message functionality.", () => {
 					senderId: 2,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser1 reads all messages from testuser3.", async () => {
 			const read = await readMessages(1, 3);
@@ -96,7 +105,7 @@ describe("test message functionality.", () => {
 					senderId: 3,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser1 reads all messages from testuser4.", async () => {
 			const read = await readMessages(1, 4);
@@ -107,7 +116,7 @@ describe("test message functionality.", () => {
 					senderId: 4,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser2 reads all messages from testuser1.", async () => {
 			const read = await readMessages(2, 1);
@@ -118,7 +127,7 @@ describe("test message functionality.", () => {
 					senderId: 1,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser2 reads all messages from testuser3.", async () => {
 			const read = await readMessages(2, 3);
@@ -129,7 +138,7 @@ describe("test message functionality.", () => {
 					senderId: 3,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser2 reads all messages from testuser4.", async () => {
 			const read = await readMessages(2, 4);
@@ -140,7 +149,7 @@ describe("test message functionality.", () => {
 					senderId: 4,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser3 reads all messages from testuser1.", async () => {
 			const read = await readMessages(3, 1);
@@ -151,7 +160,7 @@ describe("test message functionality.", () => {
 					senderId: 1,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser3 reads all messages from testuser2.", async () => {
 			const read = await readMessages(3, 2);
@@ -162,7 +171,7 @@ describe("test message functionality.", () => {
 					senderId: 2,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser3 reads all messages from testuser4.", async () => {
 			const read = await readMessages(3, 4);
@@ -173,7 +182,7 @@ describe("test message functionality.", () => {
 					senderId: 4,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser4 reads all messages from testuser1.", async () => {
 			const read = await readMessages(4, 1);
@@ -184,7 +193,7 @@ describe("test message functionality.", () => {
 					senderId: 1,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser4 reads all messages from testuser2.", async () => {
 			const read = await readMessages(4, 2);
@@ -195,7 +204,7 @@ describe("test message functionality.", () => {
 					senderId: 2,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 		test("testuser4 reads all messages from testuser3.", async () => {
 			const read = await readMessages(4, 3);
@@ -206,13 +215,13 @@ describe("test message functionality.", () => {
 					senderId: 3,
 				},
 			});
-			expect(updatedMessages.filter((message) => message.isRead === false)).toEqual([]);
+			expect(updatedMessages.filter((message) => !message.isRead)).toEqual([]);
 		});
 	});
 
-	describe("Fetch unread messages boolean at route: [GET] /unread.", async () => {
+	describe("Fetch unread messages boolean at route: [GET] /unread.", () => {
 		test("Responds with HTTP status 200 and true if there are any unread messages", async () => {
-			const { status, body } = await request(testApp).get("/messages/unread");
+			const { status, body } = (await request(testApp).get("/messages/unread")) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).toEqual(true);
 		});
@@ -220,186 +229,202 @@ describe("test message functionality.", () => {
 		test("Reads relevant messages then responds with HTTP status 200 and false.", async () => {
 			await request(testApp).get("/messages/testuseruuid2");
 			await request(testApp).get("/messages/testuseruuid3");
-			const { status, body } = await request(testApp).get("/messages/unread");
+			const { status, body } = (await request(testApp).get("/messages/unread")) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).toEqual(false);
 		});
 	});
 
-	describe("Fetch messages at route: [GET] /messages.", async () => {
+	describe("Fetch messages at route: [GET] /messages.", () => {
 		test("Responds with HTTP status 200 and all messages between the session user (testuser1) and the user with ID provided as a parameter.", async () => {
-			const request1 = await request(testApp).get("/messages/testuseruuid2");
+			const request1 = (await request(testApp).get("/messages/testuseruuid2")) as IResponse;
 			expect(request1.status).toEqual(200);
 			expect(request1.body).length(4);
-			expect([request1.body[0].sender.uuid, request1.body[0].recipient.uuid]).toEqual([
-				"testuseruuid1",
-				"testuseruuid2",
-			]);
-			expect([request1.body[1].sender.uuid, request1.body[1].recipient.uuid]).toEqual([
-				"testuseruuid2",
-				"testuseruuid1",
-			]);
-			expect([request1.body[2].sender.uuid, request1.body[2].recipient.uuid]).toEqual([
-				"testuseruuid1",
-				"testuseruuid2",
-			]);
-			expect([request1.body[3].sender.uuid, request1.body[3].recipient.uuid]).toEqual([
-				"testuseruuid2",
-				"testuseruuid1",
-			]);
+			expect(request1.body[0]).toMatchObject({
+				sender: { uuid: "testuseruuid1" },
+				recipient: { uuid: "testuseruuid2" },
+				text: "test message from testuser1 to testuser2",
+			});
+			expect(request1.body[1]).toMatchObject({
+				sender: { uuid: "testuseruuid2" },
+				recipient: { uuid: "testuseruuid1" },
+				text: "test message from testuser2 to testuser1",
+			});
+			expect(request1.body[2]).toMatchObject({
+				sender: { uuid: "testuseruuid1" },
+				recipient: { uuid: "testuseruuid2" },
+				text: "second test message from testuser1 to testuser2",
+			});
+			expect(request1.body[3]).toMatchObject({
+				sender: { uuid: "testuseruuid2" },
+				recipient: { uuid: "testuseruuid1" },
+				text: "second test message from testuser2 to testuser1",
+			});
 
-			const request2 = await request(testApp).get("/messages/testuseruuid3");
+			const request2 = (await request(testApp).get("/messages/testuseruuid3")) as IResponse;
 			expect(request2.status).toEqual(200);
 			expect(request2.body).length(4);
-			expect([request2.body[0].sender.uuid, request2.body[0].recipient.uuid]).toEqual([
-				"testuseruuid3",
-				"testuseruuid1",
-			]);
-			expect([request2.body[1].sender.uuid, request2.body[1].recipient.uuid]).toEqual([
-				"testuseruuid1",
-				"testuseruuid3",
-			]);
-			expect([request2.body[2].sender.uuid, request2.body[2].recipient.uuid]).toEqual([
-				"testuseruuid3",
-				"testuseruuid1",
-			]);
-			expect([request2.body[3].sender.uuid, request2.body[3].recipient.uuid]).toEqual([
-				"testuseruuid3",
-				"testuseruuid1",
-			]);
+			expect(request2.body[0]).toMatchObject({
+				sender: { uuid: "testuseruuid3" },
+				recipient: { uuid: "testuseruuid1" },
+				text: "test message from testuser3 to testuser1",
+			});
+			expect(request2.body[1]).toMatchObject({
+				sender: { uuid: "testuseruuid1" },
+				recipient: { uuid: "testuseruuid3" },
+				text: "test message from testuser1 to testuser3",
+			});
+			expect(request2.body[2]).toMatchObject({
+				sender: { uuid: "testuseruuid3" },
+				recipient: { uuid: "testuseruuid1" },
+				text: "second test message from testuser3 to testuser1",
+			});
+			expect(request2.body[3]).toMatchObject({
+				sender: { uuid: "testuseruuid3" },
+				recipient: { uuid: "testuseruuid1" },
+				text: "third test message from testuser3 to testuser1",
+			});
 
-			const request3 = await request(testApp).get("/messages/testuseruuid1");
+			const request3 = (await request(testApp).get("/messages/testuseruuid1")) as IResponse;
 			expect(request3.status).toEqual(200);
 			expect(request3.body).length(0);
 
-			const request4 = await request(testApp).get("/messages/testuseruuid4");
+			const request4 = (await request(testApp).get("/messages/testuseruuid4")) as IResponse;
 			expect(request4.status).toEqual(200);
 			expect(request4.body).length(0);
 		});
 		test("Responds with HTTP status 404 when a recipient ID is provided with no corresponding user in the database.", async () => {
-			const { status, body } = await request(testApp).get("/messages/testuseruuid5");
+			const { status, body } = (await request(testApp).get("/messages/testuseruuid5")) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No User found with ID provided."]);
 		});
 	});
 
-	describe("Send a new message at route: [POST] /messages.", async () => {
+	describe("Send a new message at route: [POST] /messages.", () => {
 		test("Responds with HTTP status 201 and relevant messages when a new message is sent.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.post("/messages/testuseruuid2")
-				.send({ text: "New test message from from testuser1 to testuser2" });
+				.send({ text: "New test message from from testuser1 to testuser2" })) as IResponse;
 			expect(status).toEqual(201);
 			expect(body).length(5);
-			expect([body[4].sender.username, body[4].recipient.username, body[4].text]).toEqual([
-				"testuser1",
-				"testuser2",
-				"New test message from from testuser1 to testuser2",
-			]);
+			expect(body[4]).toMatchObject({
+				sender: { uuid: "testuseruuid1" },
+				recipient: { uuid: "testuseruuid2" },
+				text: "New test message from from testuser1 to testuser2",
+			});
 		});
 		test("Responds with HTTP status 400 if message validation fails - message too short.", async () => {
-			const { status, body } = await request(testApp).post("/messages/testuseruuid2").send({ text: "" });
+			const { status, body } = (await request(testApp)
+				.post("/messages/testuseruuid2")
+				.send({ text: "" })) as IResponse;
 			expect(status).toEqual(400);
 			expect(body).toEqual(["Message cannot be empty."]);
 		});
 		test("Responds with HTTP status 400 if message validation fails - text parameter missing.", async () => {
-			const { status, body } = await request(testApp).post("/messages/testuseruuid2");
+			const { status, body } = (await request(testApp).post("/messages/testuseruuid2")) as IResponse;
 			expect(status).toEqual(400);
 			expect(body).toEqual(["Message not provided."]);
 		});
 		test("Responds with HTTP status 404 when a user ID is provided with no corresponding user in the database.", async () => {
-			const { status, body } = await request(testApp).post("/messages/testuseruuid5");
+			const { status, body } = (await request(testApp).post("/messages/testuseruuid5")) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No User found with ID provided."]);
 		});
 	});
 
-	describe("Update an existing message at route: [PUT] /messages.", async () => {
+	describe("Update an existing message at route: [PUT] /messages.", () => {
 		test("Responds with HTTP status 200 and all relevant messages when an existing message is update.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid1")
-				.send({ text: "test message from testuser1 to testuser2 - updated" });
+				.send({ text: "test message from testuser1 to testuser2 - updated" })) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).length(4);
-			const updatedMessage = body.filter((message: Message) => message.uuid === "testmessageuuid1");
+			const updatedMessage = body
+				.filter((message) => isMessage(message))
+				.filter((message) => message.uuid === "testmessageuuid1");
 			expect(updatedMessage).length(1);
 			expect(updatedMessage[0].text).toEqual("test message from testuser1 to testuser2 - updated");
 			expect(updatedMessage[0].updatedAt > updatedMessage[0].createdAt).toBe(true);
 		});
 		test("Responds with HTTP status 200 and all relevant messages when an existing message is update but not changed.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid1")
-				.send({ text: "test message from testuser1 to testuser2" });
+				.send({ text: "test message from testuser1 to testuser2" })) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).length(4);
-			const updatedMessage = body.filter((message: Message) => message.uuid === "testmessageuuid1");
+			const updatedMessage = body
+				.filter((message) => isMessage(message))
+				.filter((message) => message.uuid === "testmessageuuid1");
 			expect(updatedMessage).length(1);
 			expect(updatedMessage[0].text).toEqual("test message from testuser1 to testuser2");
 			expect(updatedMessage[0].updatedAt).toEqual(updatedMessage[0].createdAt);
 		});
 		test("Responds with HTTP status 400 if message validation fails - message too short.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid1")
-				.send({ text: "" });
+				.send({ text: "" })) as IResponse;
 			expect(status).toEqual(400);
 			expect(body).toEqual(["Message cannot be empty."]);
 		});
 		test("Responds with HTTP status 400 if message validation fails - text parameter missing.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid1")
-				.send({});
+				.send({})) as IResponse;
 			expect(status).toEqual(400);
 			expect(body).toEqual(["Message not provided."]);
 		});
 		test("Responds with HTTP status 404 if the recipient ID provided does not correspond to a user in the database.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid5/message/testmessageuuid1")
-				.send({ text: "update nonexistent recipient" });
+				.send({ text: "update nonexistent recipient" })) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No User found with ID provided."]);
 		});
 		test("Responds with HTTP status 404 if the message ID provided does not correspond to a message in the database.", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid16")
-				.send({ text: "update nonexistant message" });
+				.send({ text: "update nonexistant message" })) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No Message found with ID provided."]);
 		});
 		test("Responds with HTTP status 403 if message's sender ID does not match the session's userID (trying to update someone else's message).", async () => {
-			const { status, body } = await request(testApp)
+			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid4")
-				.send({ text: "update someone else's message" });
+				.send({ text: "update someone else's message" })) as IResponse;
 			expect(status).toEqual(403);
 			expect(body).toEqual(["Cannot update someone else's message."]);
 		});
 	});
 
-	describe("deletes an existing message at route: [DELETE] /messages.", async () => {
+	describe("deletes an existing message at route: [DELETE] /messages.", () => {
 		test("Responds with HTTP status 200 and all relevant messages when a message is deleted.", async () => {
-			const { status, body } = await request(testApp).delete(
+			const { status, body } = (await request(testApp).delete(
 				"/messages/testuseruuid2/message/testmessageuuid1"
-			);
+			)) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).length(3);
-			expect(body.map((message: Message) => message.id)).not.toContain(1);
+			expect(body.filter((message) => isMessage(message)).map((message) => message.uuid)).not.toContain(
+				"testmessageuuid1"
+			);
 		});
 		test("Responds with HTTP status 404 if the recipient ID provided does not correspond to a user in the database.", async () => {
-			const { status, body } = await request(testApp).delete(
+			const { status, body } = (await request(testApp).delete(
 				"/messages/testuseruuid5/message/testmessageuuid1"
-			);
+			)) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No User found with ID provided."]);
 		});
 		test("Responds with HTTP status 404 if the message ID provided does not correspond to a message in the database.", async () => {
-			const { status, body } = await request(testApp).delete(
+			const { status, body } = (await request(testApp).delete(
 				"/messages/testuseruuid2/message/testmessageuuid16"
-			);
+			)) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No Message found with ID provided."]);
 		});
 		test("Responds with HTTP status 403 if message's sender ID does not match the session's userID (trying to delete someone else's message).", async () => {
-			const { status, body } = await request(testApp).delete(
+			const { status, body } = (await request(testApp).delete(
 				"/messages/testuseruuid2/message/testmessageuuid4"
-			);
+			)) as IResponse;
 			expect(status).toEqual(403);
 			expect(body).toEqual(["Cannot delete someone else's message."]);
 		});

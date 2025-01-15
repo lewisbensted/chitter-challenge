@@ -31,13 +31,6 @@
 		"build": "dotenv -e ../.env.production -r dotenv-expand/config -- react-scripts build",
 		"test": "react-scripts test"
 	},
-	"eslintConfig": {
-		"extends": [
-			"plugin:react/recommended",
-			"plugin:react-hooks/recommended",
-			"./../.eslintrc.json"
-		], "plugins": ["react", "react-hooks"]
-	},
 	"browserslist": {
 		"production": [
 			">0.2%",

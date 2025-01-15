@@ -8,9 +8,9 @@ import {
 	passwordExp2,
 } from "../../schemas/user.schema";
 
-describe("Test regex associated with registering a new user.", async () => {
-	describe("Test first name regex.", async () => {
-		test("Check permitted charachters.", async () => {
+describe("Test regex associated with registering a new user.", () => {
+	describe("Test first name regex.", () => {
+		test("Check permitted charachters.", () => {
 			expect("Testname").toMatch(firstNameExp1);
 			expect("TestNAME").toMatch(firstNameExp1);
 			expect("Test name").toMatch(firstNameExp1);
@@ -23,7 +23,7 @@ describe("Test regex associated with registering a new user.", async () => {
 			expect("Testname1").not.toMatch(firstNameExp1);
 			expect("Test'name").not.toMatch(firstNameExp1);
 		});
-		test("Check correct format.", async () => {
+		test("Check correct format.", () => {
 			expect("Testname").toMatch(firstNameExp2);
 			expect("TestNAME").toMatch(firstNameExp2);
 			expect("Test name").toMatch(firstNameExp2);
@@ -43,8 +43,8 @@ describe("Test regex associated with registering a new user.", async () => {
 			expect("T es").not.toMatch(firstNameExp2);
 		});
 
-		describe("Test last name regex.", async () => {
-			test("Check permitted charachters.", async () => {
+		describe("Test last name regex.", () => {
+			test("Check permitted charachters.", () => {
 				expect("Testname").toMatch(lastNameExp1);
 				expect("TestNAME").toMatch(lastNameExp1);
 				expect("Test name").toMatch(lastNameExp1);
@@ -58,7 +58,7 @@ describe("Test regex associated with registering a new user.", async () => {
 				expect("Test'name").toMatch(lastNameExp1);
 				expect("Te'st - na'me").toMatch(lastNameExp1);
 			});
-			test("Check correct format.", async () => {
+			test("Check correct format.", () => {
 				expect("Testname").toMatch(lastNameExp2);
 				expect("TestNAME").toMatch(lastNameExp2);
 				expect("Test name").toMatch(lastNameExp2);
@@ -91,7 +91,7 @@ describe("Test regex associated with registering a new user.", async () => {
 			});
 		});
 	});
-	describe("Test password regex.", async () => {
+	describe("Test password regex.", () => {
 		test("Check required charachters", () => {
 			expect("Testpassword1!").toMatch(passwordExp1);
 			expect("Testpassword1.").toMatch(passwordExp1);

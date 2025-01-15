@@ -5,8 +5,14 @@ import { testMessages } from "../fixtures/messages.fixtures";
 import { testUser1, testUser2, testUser3, testUser4 } from "../fixtures/users.fixtures";
 import session from "express-session";
 import request from "supertest";
-import express from "express";
+import express, { NextFunction } from "express";
 import conversations, { fetchConversations } from "../../routes/conversations";
+import { IConversation } from "../../../types/responses";
+
+interface IResponse {
+	status: number;
+	body: IConversation[];
+}
 
 describe("Test conversations functionality.", () => {
 	vi.mock("./../../utils/authenticate", () => ({
@@ -24,13 +30,13 @@ describe("Test conversations functionality.", () => {
 
 	const testApp = express();
 	testApp.use(session({ secret: "secret-key" }));
-	testApp.all("*", (req, _res, next) => {
+	testApp.all("*", (req, _res, next: NextFunction) => {
 		req.session.user = { id: 1, uuid: "testuseruuid1" };
 		next();
 	});
 	testApp.use("/conversations", express.json(), conversations);
 
-	describe("Test fetchConversations function which fetches conversation threads from the database and sorts based on most recent messages.", async () => {
+	describe("Test fetchConversations function which fetches conversation threads from the database and sorts based on most recent messages.", () => {
 		test("Fetch all testuser1 conversations.", async () => {
 			const conversations = await fetchConversations(1);
 			expect(conversations).length(2);
@@ -186,9 +192,9 @@ describe("Test conversations functionality.", () => {
 		});
 	});
 
-	describe("Fetch conversations at route: [GET] /conversations.", async () => {
+	describe("Fetch conversations at route: [GET] /conversations.", () => {
 		test("Responds with HTTP status 200 and all conversations of the session user when no request parameter provided", async () => {
-			const { status, body } = await request(testApp).get("/conversations");
+			const { status, body } = (await request(testApp).get("/conversations")) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).length(2);
 			expect(body[0]).toEqual({
@@ -213,29 +219,28 @@ describe("Test conversations functionality.", () => {
 			});
 		});
 		test("Responds with HTTP status 200 and individual conversation when user ID provdied as a parameter.", async () => {
-			const request1 = await request(testApp).get("/conversations/testuseruuid1");
+			const request1 = (await request(testApp).get("/conversations/testuseruuid1")) as IResponse;
 			expect(request1.status).toEqual(200);
-			console.log(request1.body);
 			expect(request1.body).toEqual({
 				conversation: { interlocutorUsername: "testuser1", interlocutorId: "testuseruuid1", unread: 0 },
 				username: "testuser1",
 			});
 
-			const request2 = await request(testApp).get("/conversations/testuseruuid2");
+			const request2 = await request(testApp).get("/conversations/testuseruuid2") as IResponse;
 			expect(request2.status).toEqual(200);
 			expect(request2.body).toEqual({
 				conversation: { interlocutorUsername: "testuser2", interlocutorId: "testuseruuid2", unread: 2 },
 				username: "testuser2",
 			});
 
-			const request3 = await request(testApp).get("/conversations/testuseruuid3");
+			const request3 = await request(testApp).get("/conversations/testuseruuid3") as IResponse;
 			expect(request3.status).toEqual(200);
 			expect(request3.body).toEqual({
 				conversation: { interlocutorUsername: "testuser3", interlocutorId: "testuseruuid3", unread: 1 },
 				username: "testuser3",
 			});
 
-			const request4 = await request(testApp).get("/conversations/testuseruuid4");
+			const request4 = await request(testApp).get("/conversations/testuseruuid4") as IResponse;
 			expect(request4.status).toEqual(200);
 			expect(request4.body).toEqual({
 				conversation: { interlocutorUsername: "testuser4", interlocutorId: "testuseruuid4", unread: 0 },
@@ -244,7 +249,7 @@ describe("Test conversations functionality.", () => {
 		});
 
 		test("Responds with HTTP status 404 when the user ID provided does not match a user in the database.", async () => {
-			const { status, body } = await request(testApp).get("/conversations/testuseruuid5");
+			const { status, body } = await request(testApp).get("/conversations/testuseruuid5") as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["No User found with ID provided."]);
 		});

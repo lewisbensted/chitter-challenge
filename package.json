@@ -11,8 +11,7 @@
         "start:test": "concurrently --names Backend,Frontend \"cd server && npm run start:test\" \"cd frontend && npm start\"",
         "seed:test": "cd server && npm run seed:test",
         "migrate:prod": "cd server && npm run migrate:prod",
-        "start:prod": "cd frontend && npm run build && cd ../server && npm run start:prod",
-        "lint" : "concurrently --names Backend,Frontend \"cd server && npx eslint src/**/*.ts\" \"cd frontend && npx eslint src/**/*.tsx src/**/*.ts\""
+        "start:prod": "cd frontend && npm run build && cd ../server && npm run start:prod"
     },
     "repository": {
         "type": "git",
@@ -25,14 +24,19 @@
         "concurrently": "^8.2.2",
         "date-fns-tz": "^3.2.0",
         "dotenv-cli": "^7.4.2",
-        "dotenv-expand": "^11.0.6"
+        "dotenv-expand": "^11.0.6",
+        "node": "^22.13.0"
     },
     "devDependencies": {
+        "@stylistic/eslint-plugin": "^2.13.0",
         "@typescript-eslint/eslint-plugin": "^8.19.1",
         "@typescript-eslint/parser": "^8.19.1",
         "eslint": "^8.57.1",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-only-warn": "^1.1.0",
-        "eslint-plugin-prettier": "^5.2.1"
+        "eslint-plugin-prettier": "^5.2.1",
+        "eslint-plugin-react": "^7.37.4",
+        "eslint-plugin-react-hooks": "^5.1.0",
+        "typescript-eslint": "^8.20.0"
     }
 }

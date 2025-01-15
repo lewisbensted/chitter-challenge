@@ -8,7 +8,12 @@ import session from "express-session";
 import { testUser1 } from "../fixtures/users.fixtures";
 import { registerExtension } from "../../routes/register";
 
-describe("Login with an existing user at route: [POST] /login.", async () => {
+interface IResponse {
+	status: number;
+	body: string | string[];
+}
+
+describe("Login with an existing user at route: [POST] /login.", () => {
 	vi.mock("./../../utils/authenticate", () => ({
 		authenticate: vi
 			.fn()
@@ -27,8 +32,8 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
 
 	test("Responds with HTTP status 403 if the user already exist on the session object (is already logged in).", async () => {
 		const { status, body } = await request(testApp)
-			.post("/login")
-			.send({ username: "testuser1", password: "password1!" });
+			.post("/login") 
+			.send({ username: "testuser1", password: "password1!" }) as IResponse;
 		expect(status).toEqual(403);
 		expect(body).toEqual(["Already logged in."]);
 	});
@@ -46,38 +51,38 @@ describe("Login with an existing user at route: [POST] /login.", async () => {
 		expect(cookies).toContain("session_id");
 	});
 	test("Responds with HTTP status 400 if username is not provided as a parameter.", async () => {
-		const { status, body } = await request(testApp).post("/login").send({ password: "password1!" });
+		const { status, body} = await request(testApp).post("/login").send({ password: "password1!" }) as IResponse;
 		expect(status).toEqual(400);
 		expect(body).toEqual(["Username not provided."]);
 	});
 	test("Responds with HTTP status 400 if username provided is empty string.", async () => {
 		const { status, body } = await request(testApp)
 			.post("/login")
-			.send({ username: "", password: "password1!" });
+			.send({ username: "", password: "password1!" }) as IResponse;
 		expect(status).toEqual(400);
 		expect(body).toEqual(["Username not provided."]);
 	});
 	test("Responds with HTTP status 400 if password is not provided as a parameter.", async () => {
-		const { status, body } = await request(testApp).post("/login").send({ username: "testuser1" });
+		const { status, body } = await request(testApp).post("/login").send({ username: "testuser1" }) as IResponse;
 		expect(status).toEqual(400);
 		expect(body).toEqual(["Password not provided."]);
 	});
 	test("Responds with HTTP status 400 if password provided is empty string.", async () => {
-		const { status, body } = await request(testApp).post("/login").send({ username: "testuser1", password: "" });
+		const { status, body } = await request(testApp).post("/login").send({ username: "testuser1", password: "" }) as IResponse;
 		expect(status).toEqual(400);
 		expect(body).toEqual(["Password not provided."]);
 	});
 	test("Responds with HTTP status 401 if the password provided in the params does not match the decrypted value from the database.", async () => {
 		const { status, body } = await request(testApp)
 			.post("/login")
-			.send({ username: "testuser1", password: "password1" });
+			.send({ username: "testuser1", password: "password1" }) as IResponse;
 		expect(status).toEqual(401);
 		expect(body).toEqual(["Incorrect password."]);
 	});
 	test("Responds with HTTP status 404 if user does not exist in the database.", async () => {
 		const { status, body } = await request(testApp)
 			.post("/login")
-			.send({ username: "testuser", password: "password1!" });
+			.send({ username: "testuser", password: "password1!" }) as IResponse;
 		expect(status).toEqual(404);
 		expect(body).toEqual(["User does not exist."]);
 	});

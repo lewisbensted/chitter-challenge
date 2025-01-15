@@ -117,7 +117,7 @@ const Reply: React.FC<Props> = ({
 												<Done />
 											</IconButton>
 										) : (
-											<IconButton onClick={() => setEditing(true)} color="primary">
+											<IconButton onClick={() => { setEditing(true); }} color="primary">
 												<Edit />
 											</IconButton>
 										)

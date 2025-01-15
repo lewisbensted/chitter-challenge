@@ -70,7 +70,7 @@ const MessageModal: React.FC<Props> = ({
 	return (
 		<ThemeProvider theme={theme}>
 			<Dialog open={isOpen}>
-				<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1}>

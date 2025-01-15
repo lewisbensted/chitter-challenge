@@ -83,7 +83,7 @@ prisma
 		app.use("/users/:userId/cheets", express.json(), cheets);
 		app.use("/cheets/:cheetId/replies", replies);
 		app.use("/messages", express.json(), messages);
-		app.listen(SERVER_PORT, () => console.log(`\nServer running on port ${SERVER_PORT}.\n`)).on(
+		app.listen(SERVER_PORT, () => { console.log(`\nServer running on port ${SERVER_PORT}.\n`); }).on(
 			"error",
 			(error) => {
 				console.error(logError(error));

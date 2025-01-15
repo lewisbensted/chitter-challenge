@@ -1,13 +1,13 @@
-import express from "express";
+import express, { NextFunction } from "express";
 import { test, describe, vi, expect } from "vitest";
 import validate from "../../routes/validate";
 import request from "supertest";
 import session from "express-session";
 import { authMiddleware } from "../../middleware/authMiddleware";
 
-describe("Return information about the session's user at route: [GET] /validate.", async () => {
+describe("Return information about the session's user at route: [GET] /validate.", () => {
 	vi.mock("./../../middleware/authMiddleware", () => ({
-		authMiddleware: vi.fn((req, _res, next) => {
+		authMiddleware: vi.fn((_req, _res, next: NextFunction) => {
 			next();
 		}),
 	}));

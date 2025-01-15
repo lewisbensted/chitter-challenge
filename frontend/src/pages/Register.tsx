@@ -72,7 +72,7 @@ const Register: React.FC = () => {
 				setUserId={setUserId}
 			>
 				<Box>
-					<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+					<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
 					<SuccessModal
 						isOpen={isSuccessOpen}
 						message="Account created."

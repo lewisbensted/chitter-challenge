@@ -3,7 +3,7 @@ import { authMiddleware } from "../../middleware/authMiddleware";
 import { Request, Response, NextFunction } from "express";
 import { authenticate } from "../../utils/authenticate";
 
-describe("authenticates the user by comparing information stored on the request's sessions and cookies.", async () => {
+describe("authenticates the user by comparing information stored on the request's sessions and cookies.",  () => {
 	describe("Test authenticate function.", () => {
 		test("Respective sessionIDs and userIDs match.", () => {
 			const req = {
@@ -13,7 +13,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(true);
 		});
-		test("Session IDs match but userID's do not.", async () => {
+		test("Session IDs match but userID's do not.",  () => {
 			const req = {
 				sessionID: "testsessionid",
 				session: { user: { uuid: "testuuid1" } },
@@ -21,7 +21,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(false);
 		});
-		test("User IDs match but sessionID's do not.", async () => {
+		test("User IDs match but sessionID's do not.",  () => {
 			const req = {
 				sessionID: "testsessionid1",
 				session: { user: { uuid: "testuuid" } },
@@ -29,7 +29,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(false);
 		});
-		test("Neither User IDs nor sessionID's match.", async () => {
+		test("Neither User IDs nor sessionID's match.",  () => {
 			const req = {
 				sessionID: "testsessionid1",
 				session: { user: { uuid: "testuuid1" } },
@@ -37,7 +37,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(false);
 		});
-		test("Session IDs match but user cookie is missing.", async () => {
+		test("Session IDs match but user cookie is missing.",  () => {
 			const req = {
 				sessionID: "testsessionid",
 				session: { user: { uuid: "testuuid" } },
@@ -45,7 +45,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(false);
 		});
-		test("User IDs match but session cookie is missing.", async () => {
+		test("User IDs match but session cookie is missing.",  () => {
 			const req = {
 				sessionID: "testsessionid",
 				session: { user: { uuid: "testuuid" } },
@@ -53,7 +53,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(false);
 		});
-		test("Session IDs match but user is missing on the session and cookies.", async () => {
+		test("Session IDs match but user is missing on the session and cookies.",  () => {
 			const req = {
 				sessionID: "testsessionid",
 				session: {},
@@ -61,7 +61,7 @@ describe("authenticates the user by comparing information stored on the request'
 			} as unknown as Request;
 			expect(authenticate(req)).toEqual(false);
 		});
-		test("Session IDs match but user ID is missing on the session and cookies.", async () => {
+		test("Session IDs match but user ID is missing on the session and cookies.",  () => {
 			const req = {
 				sessionID: "testsessionid",
 				session: { user: {} },
@@ -71,7 +71,7 @@ describe("authenticates the user by comparing information stored on the request'
 		});
 	});
 	describe("Test authenticate middleware.", () => {
-		test("Successful authentication.", async () => {
+		test("Successful authentication.",  () => {
 			const req = {
 				sessionID: "testsessionid",
 				session: { user: { uuid: "testuuid" } },
@@ -86,7 +86,7 @@ describe("authenticates the user by comparing information stored on the request'
 		});
 	});
 
-	test("Unsuccessful authentication.", async () => {
+	test("Unsuccessful authentication.",  () => {
 		const req = {
 			sessionID: "testsessionid",
 			session: { user: { uuid: "testuuid1" } },

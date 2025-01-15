@@ -49,7 +49,13 @@ const ConversationIcon: React.FC<Props> = ({
 				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
 			/>
-			<IconButton onClick={() => setMessageModalOpen(true)} disabled={isComponentLoading} color="primary">
+			<IconButton
+				onClick={() => {
+					setMessageModalOpen(true);
+				}}
+				disabled={isComponentLoading}
+				color="primary"
+			>
 				{conversation.unread > 0 ? <MarkUnreadChatAlt /> : <Chat />}
 			</IconButton>
 		</Fragment>

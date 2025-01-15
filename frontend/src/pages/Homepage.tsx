@@ -79,7 +79,7 @@ const Homepage: React.FC = () => {
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
-				<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
 				<Typography variant="h4">Welcome to Chitter</Typography>
 
 				{isPageLoading ? (

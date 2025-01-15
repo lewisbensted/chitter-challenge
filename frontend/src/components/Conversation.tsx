@@ -54,13 +54,13 @@ const Conversation: React.FC<Props> = ({
 			<Card>
 				<CardActionArea
 					disabled={isComponentLoading}
-					onClick={isComponentLoading ? () => {} : () => setMessageModalOpen(true)}
+					onClick={isComponentLoading ? () => {} : () => { setMessageModalOpen(true); }}
 				>
 					<CardContent>
 						<Grid2 container>
 							<Grid2>
 								<Link
-									onClick={(event) => event.stopPropagation()}
+									onClick={(event) => { event.stopPropagation(); }}
 									href={`/users/${conversation.interlocutorId}`}
 									variant="h6"
 								>

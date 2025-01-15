@@ -7,7 +7,7 @@ import { authenticate } from "../utils/authenticate.js";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
-	const { username, password } = req.body;
+	const { username, password } = req.body as { username: string; password: string };
 	try {
 		if (authenticate(req)) {
 			res.status(403).send(["Already logged in."]);

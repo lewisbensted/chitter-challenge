@@ -108,7 +108,7 @@ const User: React.FC = () => {
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
-				<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+				<ErrorModal errors={errors} closeModal={() => {setErrors([]);}} />
 				{isPageLoading ? (
 					<FlexBox>
 						<FlexBox>
@@ -125,7 +125,7 @@ const User: React.FC = () => {
 									conversation={conversation}
 									isComponentLoading={isComponentLoading || isCheetsLoading}
 									setComponentLoading={setComponentLoading}
-									setConversations={() => setConversation(conversation)}
+									setConversations={() => {setConversation(conversation);}}
 									reloadTrigger={reloadTrigger}
 									toggleReloadTrigger={toggleReloadTrigger}
 								/>

@@ -10,11 +10,9 @@ router.delete("/", (req: Request, res: Response) => {
 				console.error("Error logging out:\n" + logError(error));
 				res.status(500).send(["An unexpected error occured."]);
 			} else {
-				if (req.cookies) {
-					Object.keys(req.cookies).forEach((key) => {
-						res.clearCookie(key);
-					});
-				}
+				Object.keys(req.cookies).forEach((key) => {
+					res.clearCookie(key);
+				});
 				res.status(200).send("Logout successful.");
 			}
 		});

@@ -5,7 +5,7 @@ import request from "supertest";
 import session from "express-session";
 import { resetDB } from "../resetDB";
 
-describe("Logout a user at route: [DELETE] /logout.", async () => {
+describe("Logout a user at route: [DELETE] /logout.", () => {
 	beforeEach(async () => {
 		await resetDB();
 	});
@@ -14,7 +14,7 @@ describe("Logout a user at route: [DELETE] /logout.", async () => {
 		const testApp1 = express();
 		testApp1.use(session({ secret: "secret-key" }));
 		testApp1.use("/logout", logout);
-		const { status, body } = await request(testApp1).delete("/logout");
+		const { status, body } = (await request(testApp1).delete("/logout")) as { status: number; body: string[] };
 		expect(status).toEqual(403);
 		expect(body).toEqual(["Not logged in."]);
 	});

@@ -56,6 +56,7 @@ const Conversations: React.FC = () => {
 	useEffect(() => {
 		if (userId) {
 			(async () => {
+				const app="hi";
 				await axios
 					.get(`${serverURL}/messages/unread`, { withCredentials: true })
 					.then((res: { data: boolean }) => {
@@ -77,7 +78,7 @@ const Conversations: React.FC = () => {
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
-				<ErrorModal errors={errors} closeModal={() => setErrors([])} />
+				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
 				<Typography variant="h4">Messages</Typography>
 				{isPageLoading ? (
 					<FlexBox>

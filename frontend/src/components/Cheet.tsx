@@ -120,7 +120,7 @@ const Cheet: React.FC<Props> = ({
 									{isModalView ? null : (
 										<IconButton
 											color="primary"
-											onClick={() => setModalOpen(true)}
+											onClick={() => { setModalOpen(true); }}
 											disabled={isComponentLoading}
 										>
 											<OpenInNew />
@@ -145,7 +145,7 @@ const Cheet: React.FC<Props> = ({
 												<Done />
 											</IconButton>
 										) : (
-											<IconButton onClick={() => setEditing(true)} color="primary">
+											<IconButton onClick={() => { setEditing(true); }} color="primary">
 												<Edit />
 											</IconButton>
 										)
