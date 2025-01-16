@@ -81,8 +81,11 @@ prisma
 		app.use("/cheets", express.json(), cheets);
 		app.use("/conversations", express.json(), conversations);
 		app.use("/users/:userId/cheets", express.json(), cheets);
-		app.use("/cheets/:cheetId/replies", replies);
+		app.use("/cheets/:cheetId/replies", express.json(), replies);
 		app.use("/messages", express.json(), messages);
+		app.all('*', (_req, res) => {
+			res.status(404).send(['Invalid route provided.']);
+		  });
 		app.listen(SERVER_PORT, () => { console.log(`\nServer running on port ${SERVER_PORT}.\n`); }).on(
 			"error",
 			(error) => {

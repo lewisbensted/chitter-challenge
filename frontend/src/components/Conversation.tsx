@@ -54,7 +54,7 @@ const Conversation: React.FC<Props> = ({
 			<Card>
 				<CardActionArea
 					disabled={isComponentLoading}
-					onClick={isComponentLoading ? () => {} : () => { setMessageModalOpen(true); }}
+					onClick={isComponentLoading ? undefined : () => { setMessageModalOpen(true); }}
 				>
 					<CardContent>
 						<Grid2 container>
@@ -70,22 +70,22 @@ const Conversation: React.FC<Props> = ({
 							<Grid2 size={11}>
 								<Typography
 									fontWeight={
-										!conversation.latestMessage!.isRead &&
+										!conversation.latestMessage?.isRead &&
 										conversation.latestMessage?.senderId !== userId
 											? "bold"
 											: ""
 									}
 									variant="body2"
 								>
-									{conversation.latestMessage!.text}
+									{conversation.latestMessage?.text}
 								</Typography>
 							</Grid2>
 							<Grid2 size={1}>
-								{conversation.latestMessage!.isRead &&
-								conversation.latestMessage?.senderId === userId ? (
+								{conversation.latestMessage?.isRead &&
+								conversation.latestMessage.senderId === userId ? (
 										<Done fontSize="small" color="primary" />
 									) : null}
-								{!conversation.latestMessage!.isRead &&
+								{!conversation.latestMessage?.isRead &&
 								conversation.latestMessage?.senderId !== userId ? (
 										<MarkUnreadChatAlt fontSize="small" color="primary" />
 									) : null}

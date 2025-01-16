@@ -25,7 +25,7 @@ const Homepage: React.FC = () => {
 	useEffect(() => {
 		axios
 			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then(async (res: { data: string }) => {
+			.then((res: { data: string }) => {
 				setUserId(res.data);
 			})
 			.catch((error: unknown) => {
@@ -40,13 +40,13 @@ const Homepage: React.FC = () => {
 
 	useEffect(() => {
 		if (userId) {
-			(async () => {
+			void (async () => {
 				await axios
 					.get(`${serverURL}/messages/unread`, { withCredentials: true })
 					.then((res: { data: boolean }) => {
 						setUnreadMessages(res.data);
 					})
-					.catch((error) => {
+					.catch((error: unknown) => {
 						handleErrors(error, "loading user information", setErrors);
 					});
 				setPageLoading(false);
@@ -55,7 +55,7 @@ const Homepage: React.FC = () => {
 	}, [userId]);
 
 	useEffect(() => {
-		(async () => {
+		void (async () => {
 			setCheetsLoading(true);
 			await axios
 				.get(`${serverURL}/cheets`, { withCredentials: true })
@@ -79,7 +79,12 @@ const Homepage: React.FC = () => {
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
-				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
+				<ErrorModal
+					errors={errors}
+					closeModal={() => {
+						setErrors([]);
+					}}
+				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>
 
 				{isPageLoading ? (
@@ -95,7 +100,7 @@ const Homepage: React.FC = () => {
 						) : cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
-							cheets!.map((cheet) => (
+							cheets?.map((cheet) => (
 								<Cheet
 									key={cheet.uuid}
 									cheet={cheet}

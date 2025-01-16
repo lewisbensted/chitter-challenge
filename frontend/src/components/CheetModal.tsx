@@ -56,7 +56,7 @@ const CheetModal: React.FC<Props> = ({
 					setComponentLoading(false);
 				});
 		}
-	}, [isOpen]);
+	}, [isOpen, cheet.uuid, setComponentLoading]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -89,7 +89,7 @@ const CheetModal: React.FC<Props> = ({
 						) : repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							replies!.map((reply) => (
+							replies?.map((reply) => (
 								<Reply
 									key={reply.uuid}
 									isComponentLoading={isComponentLoading}

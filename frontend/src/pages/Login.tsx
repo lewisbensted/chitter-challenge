@@ -26,6 +26,8 @@ const SignIn: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 
+	console.log(serverURL)
+
 	useEffect(() => {
 		axios
 			.get(`${serverURL}/validate`, { withCredentials: true })
@@ -40,7 +42,7 @@ const SignIn: React.FC = () => {
 				}
 				setPageLoading(false);
 			});
-	}, []);
+	}, [navigate]);
 
 	const onSubmit: SubmitHandler<LoginFormFields> = (data) => {
 		setFormLoading(true);
@@ -66,7 +68,12 @@ const SignIn: React.FC = () => {
 				setUserId={setUserId}
 			>
 				<Box>
-					<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
+					<ErrorModal
+						errors={errors}
+						closeModal={() => {
+							setErrors([]);
+						}}
+					/>
 					<Typography variant="h4">Sign In</Typography>
 					{isPageLoading ? (
 						<FlexBox>

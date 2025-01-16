@@ -46,7 +46,7 @@ const Register: React.FC = () => {
 				}
 				setPageLoading(false);
 			});
-	}, []);
+	}, [navigate]);
 
 	const onSubmit: SubmitHandler<RegisterFormFields> = async (data) => {
 		setFormLoading(true);

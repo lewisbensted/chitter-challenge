@@ -24,7 +24,7 @@ const Conversations: React.FC = () => {
 	useEffect(() => {
 		axios
 			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then(async (res: { data: string }) => {
+			.then((res: { data: string }) => {
 				setUserId(res.data);
 			})
 			.catch((error: unknown) => {
@@ -35,11 +35,11 @@ const Conversations: React.FC = () => {
 				}
 				setPageLoading(false);
 			});
-	}, []);
+	}, [navigate]);
 
 	useEffect(() => {
 		if (userId) {
-			(async () => {
+			void (async () => {
 				setComponentLoading(true);
 				await axios
 					.get(`${serverURL}/conversations`, { withCredentials: true })
@@ -55,8 +55,7 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		if (userId) {
-			(async () => {
-				const app="hi";
+			void (async () => {
 				await axios
 					.get(`${serverURL}/messages/unread`, { withCredentials: true })
 					.then((res: { data: boolean }) => {
@@ -66,7 +65,7 @@ const Conversations: React.FC = () => {
 				setPageLoading(false);
 			})();
 		}
-	}, [conversations]);
+	}, [conversations, userId]);
 
 	return (
 		<Layout
@@ -78,7 +77,12 @@ const Conversations: React.FC = () => {
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
-				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
+				<ErrorModal
+					errors={errors}
+					closeModal={() => {
+						setErrors([]);
+					}}
+				/>
 				<Typography variant="h4">Messages</Typography>
 				{isPageLoading ? (
 					<FlexBox>
@@ -88,7 +92,7 @@ const Conversations: React.FC = () => {
 					conversationsError ? (
 						conversationsError
 					) : (
-						conversations!.map((conversation) => (
+						conversations?.map((conversation) => (
 							<Conversation
 								key={conversation.interlocutorId}
 								userId={userId}

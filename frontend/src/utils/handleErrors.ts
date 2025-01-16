@@ -3,10 +3,10 @@ import axios from "axios";
 export const handleErrors = (error: unknown, action: string, setErrors: (arg: string[]) => void) => {
 	if (
 		axios.isAxiosError(error) &&
-		[400, 401, 403, 404].includes(error.response?.status!) &&
-		(error.response?.status === 404 ? (typeof error.response.data === "object" ? true : false) : true)
+		error.response?.status &&
+		[400, 401, 403, 404].includes(error.response?.status) && typeof error.response.data === "object"
 	) {
-		setErrors(error.response?.data);
+		setErrors(error.response.data as string[]);
 	} else if (axios.isAxiosError(error) && error.code === "ERR_NETWORK") {
 		setErrors(["Network Error: Servers unreachable."]);
 	} else {

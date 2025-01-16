@@ -45,7 +45,12 @@ const Layout: React.FC<Props> = ({
 
 	return (
 		<ThemeProvider theme={theme}>
-			<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
+			<ErrorModal
+				errors={errors}
+				closeModal={() => {
+					setErrors([]);
+				}}
+			/>
 			<Box display="flex" justifyContent="center">
 				<Drawer
 					open={isDrawerOpen}
@@ -56,7 +61,15 @@ const Layout: React.FC<Props> = ({
 					<List>
 						<DrawerElement
 							isComponentLoading={false}
-							onClick={isDrawerOpen ? () => { setDrawerOpen(false); } : () => { setDrawerOpen(true); }}
+							onClick={
+								isDrawerOpen
+									? () => {
+										setDrawerOpen(false);
+									}
+									: () => {
+										setDrawerOpen(true);
+									}
+							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}
 						></DrawerElement>
@@ -75,9 +88,13 @@ const Layout: React.FC<Props> = ({
 									icon={<Logout />}
 									isComponentLoading={isComponentLoading}
 									isDrawerOpen={isDrawerOpen}
-									onClick={async () => {
-										await logout(setPageLoading, setUserId, setErrors, () => { navigate("/login"); });
-									}}
+									onClick={
+										(async () => {
+											await logout(setPageLoading, setUserId, setErrors, () => {
+												navigate("/login");
+											});
+										})
+									}
 								/>
 							</Fragment>
 						) : (

@@ -7,14 +7,6 @@ import onlyWarn from "eslint-plugin-only-warn";
 import stylistic from "@stylistic/eslint-plugin";
 
 /** @type {import('eslint').Linter.Config[]} */
-// export default [
-//   {files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"]},
-//   {languageOptions: { globals: globals.browser }},
-//   pluginJs.configs.recommended,
-//   ...tseslint.configs.recommended,
-//   pluginReact.configs.flat.recommended,
-// ];
-
 export default tseslint.config(
 	{ files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
 	{
@@ -49,7 +41,8 @@ export default tseslint.config(
 			"arrow-body-style": ["warn", "as-needed"],
 			...reactPlugin.configs.flat.recommended.rules,
 			...reactHooksPlugin.configs.recommended.rules,
-			"@typescript-eslint/restrict-template-expressions": ["warn"]
+			"@typescript-eslint/restrict-template-expressions": ["warn"],
+			"@typescript-eslint/no-misused-promises" : ["warn", {checksVoidReturn:false}]
 		},
 	}
 );
