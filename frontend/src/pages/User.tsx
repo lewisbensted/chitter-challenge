@@ -63,7 +63,7 @@ const User: React.FC = () => {
 	}, [id]);
 
 	useEffect(() => {
-		if (id){
+		if (id) {
 			void (async () => {
 				setComponentLoading(true);
 				await axios
@@ -80,25 +80,7 @@ const User: React.FC = () => {
 						}
 					});
 			})();
-
-
 		}
-		void (async () => {
-			setComponentLoading(true);
-			await axios
-				.get(`${serverURL}/conversations/${id}`, { withCredentials: true })
-				.then((res: { data: { conversation: IConversation; username: string } }) => {
-					setUsername(res.data.username);
-					setConversation(res.data.conversation);
-				})
-				.catch((error: unknown) => {
-					if (axios.isAxiosError(error) && error.response?.status === 404) {
-						navigate("/");
-					} else {
-						handleErrors(error, "loading the page", setErrors);
-					}
-				});
-		})();
 	}, [userId, reloadTrigger, id, navigate]);
 
 	useEffect(() => {

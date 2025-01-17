@@ -7,14 +7,18 @@ import { authenticate } from "../utils/authenticate.js";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
-	const { username, password } = req.body as { username: string; password: string };
+	const { username, password } = req.body as { username: string | undefined; password: string | undefined };
 	try {
 		if (authenticate(req)) {
 			res.status(403).send(["Already logged in."]);
 		} else if (!username || !password) {
 			const errors: string[] = [];
-			!username ? errors.push("Username not provided.") : null;
-			!password ? errors.push("Password not provided.") : null;
+			if (!username) {
+				errors.push("Username not provided.");
+			}
+			if (!password) {
+				errors.push("Password not provided.");
+			}
 			res.status(400).send(errors);
 		} else {
 			const user = await prisma.user.findUnique({

@@ -83,7 +83,7 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 		});
 		if (targetReply.userId === req.session.user!.id) {
 			if (targetReply.cheet.uuid === req.params.cheetId) {
-				if ((req as { body: { text: string } }).body.text !== targetReply.text) {
+				if ((req as { body: { text: string | undefined } }).body.text !== targetReply.text) {
 					await prisma.$extends(replyExtension).reply.update({
 						where: {
 							id: targetReply.id,

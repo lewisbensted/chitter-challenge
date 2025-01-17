@@ -65,12 +65,17 @@ const MessageModal: React.FC<Props> = ({
 					setComponentLoading(false);
 				});
 		}
-	}, [isOpen]);
+	}, [isOpen, conversation.interlocutorId, reloadTrigger, setComponentLoading, toggleReloadTrigger, unread]);
 
 	return (
 		<ThemeProvider theme={theme}>
 			<Dialog open={isOpen}>
-				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
+				<ErrorModal
+					errors={errors}
+					closeModal={() => {
+						setErrors([]);
+					}}
+				/>
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1}>
@@ -87,7 +92,7 @@ const MessageModal: React.FC<Props> = ({
 						) : messagesError ? (
 							<Typography variant="subtitle1">{messagesError}</Typography>
 						) : (
-							messages!.map((message) => (
+							messages?.map((message) => (
 								<Message
 									key={message.uuid}
 									userId={userId}

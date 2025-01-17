@@ -26,8 +26,6 @@ const SignIn: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 
-	console.log(serverURL)
-
 	useEffect(() => {
 		axios
 			.get(`${serverURL}/validate`, { withCredentials: true })

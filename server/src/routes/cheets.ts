@@ -89,7 +89,7 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 			where: { uuid: req.params.cheetId },
 		});
 		if (targetCheet.userId === req.session.user!.id) {
-			if ((req as { body: { text: string } }).body.text !== targetCheet.text) {
+			if ((req as { body: { text: string | undefined } }).body.text !== targetCheet.text) {
 				await prisma.$extends(cheetExtension).cheet.update({
 					where: {
 						id: targetCheet.id,

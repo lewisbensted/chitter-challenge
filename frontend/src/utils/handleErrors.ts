@@ -4,7 +4,8 @@ export const handleErrors = (error: unknown, action: string, setErrors: (arg: st
 	if (
 		axios.isAxiosError(error) &&
 		error.response?.status &&
-		[400, 401, 403, 404].includes(error.response?.status) && typeof error.response.data === "object"
+		[400, 401, 403, 404].includes(error.response.status) &&
+		typeof error.response.data === "object"
 	) {
 		setErrors(error.response.data as string[]);
 	} else if (axios.isAxiosError(error) && error.code === "ERR_NETWORK") {

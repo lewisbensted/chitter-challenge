@@ -18,7 +18,7 @@ import cors from "cors";
 import conversations from "./routes/conversations.js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 
-dotenvExpand.expand(dotenv.config({ path: `../.env.${process.env.NODE_ENV}` }));
+dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 const SessionStore = MySQLStore(expressSession);
 const __dirname = import.meta.dirname;
 
@@ -50,7 +50,7 @@ prisma
 
 		if (process.env.NODE_ENV === "production") {
 			app.use(express.static(path.join(__dirname, "../frontend/build")));
-			app.get("/", (req, res) => {
+			app.get("/", (_req, res) => {
 				res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 			});
 		} else {
@@ -83,15 +83,14 @@ prisma
 		app.use("/users/:userId/cheets", express.json(), cheets);
 		app.use("/cheets/:cheetId/replies", express.json(), replies);
 		app.use("/messages", express.json(), messages);
-		app.all('*', (_req, res) => {
-			res.status(404).send(['Invalid route provided.']);
-		  });
-		app.listen(SERVER_PORT, () => { console.log(`\nServer running on port ${SERVER_PORT}.\n`); }).on(
-			"error",
-			(error) => {
-				console.error(logError(error));
-			}
-		);
+		app.all("*", (_req, res) => {
+			res.status(404).send(["Invalid route provided."]);
+		});
+		app.listen(SERVER_PORT, () => {
+			console.log(`\nServer running on port ${SERVER_PORT}.\n`);
+		}).on("error", (error) => {
+			console.error(logError(error));
+		});
 	})
 	.catch((error: unknown) => {
 		console.error(

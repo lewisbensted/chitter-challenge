@@ -87,7 +87,7 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 			data: {
 				senderId: req.session.user!.id,
 				recipientId: recipient.id,
-				text: (req as { body: { text: string } }).body.text,
+				text: (req as { body: { text: string  } }).body.text,
 				createdAt: date,
 				updatedAt: date,
 			},
@@ -108,7 +108,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 			where: { uuid: req.params.messageId },
 		});
 		if (targetMessage.senderId === req.session.user!.id) {
-			if ((req as { body: { text: string } }).body.text !== targetMessage.text) {
+			if ((req as { body: { text: string | undefined } }).body.text !== targetMessage.text) {
 				await prisma.$extends(messageExtension).message.update({
 					where: {
 						id: targetMessage.id,

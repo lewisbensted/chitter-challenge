@@ -27,9 +27,14 @@ export const registerExtension = Prisma.defineExtension({
 
 router.post("/", async (req: Request, res: Response) => {
 	try {
-		const newUser = await prisma
-			.$extends(registerExtension)
-			.user.create({ data: req.body, omit: { id: true, password: true } });
+		const newUser = await prisma.$extends(registerExtension).user.create({
+			data: (
+				req as {
+					body: { firstName: string; lastName: string; username: string; email: string; password: string };
+				}
+			).body ,
+			omit: { id: true, password: true },
+		});
 		res.status(201).send(newUser);
 	} catch (error) {
 		console.error("Error saving user to the database:\n" + logError(error));
