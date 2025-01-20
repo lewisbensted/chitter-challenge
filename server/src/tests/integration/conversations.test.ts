@@ -251,7 +251,7 @@ describe("Test conversations functionality.", () => {
 		test("Responds with HTTP status 404 when the user ID provided does not match a user in the database.", async () => {
 			const { status, body } = await request(testApp).get("/conversations/testuseruuid5") as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No User found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 	});
 });

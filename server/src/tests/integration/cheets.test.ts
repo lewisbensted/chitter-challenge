@@ -45,18 +45,50 @@ describe("Test cheets routes.", () => {
 		test("No user ID provided as a parameter.", async () => {
 			const cheets = await fetchCheets();
 			expect(cheets).length(5);
-			expect([cheets[0].user.username, cheets[0].text]).toEqual(["testuser1", "test cheet 3"]);
-			expect([cheets[1].user.username, cheets[1].text]).toEqual(["testuser1", "test cheet 4"]);
-			expect([cheets[2].user.username, cheets[2].text]).toEqual(["testuser2", "test cheet 2"]);
-			expect([cheets[3].user.username, cheets[3].text]).toEqual(["testuser2", "test cheet 5"]);
-			expect([cheets[4].user.username, cheets[4].text]).toEqual(["testuser1", "test cheet 1"]);
+			expect(cheets[0]).toMatchObject({
+				user: { uuid: "testuseruuid1" },
+				uuid: "testcheetuuid3",
+				text: "test cheet 3",
+			});
+			expect(cheets[1]).toMatchObject({
+				user: { uuid: "testuseruuid1" },
+				uuid: "testcheetuuid4",
+				text: "test cheet 4",
+			});
+			expect(cheets[2]).toMatchObject({
+				user: { uuid: "testuseruuid2" },
+				uuid: "testcheetuuid2",
+				text: "test cheet 2",
+			});
+			expect(cheets[3]).toMatchObject({
+				user: { uuid: "testuseruuid2" },
+				uuid: "testcheetuuid5",
+				text: "test cheet 5",
+			});
+			expect(cheets[4]).toMatchObject({
+				user: { uuid: "testuseruuid1" },
+				uuid: "testcheetuuid1",
+				text: "test cheet 1",
+			});
 		});
 		test("User ID provided as a parameter.", async () => {
 			const cheets = await fetchCheets(1);
 			expect(cheets).length(3);
-			expect([cheets[0].user.username, cheets[0].text]).toEqual(["testuser1", "test cheet 3"]);
-			expect([cheets[1].user.username, cheets[1].text]).toEqual(["testuser1", "test cheet 4"]);
-			expect([cheets[2].user.username, cheets[2].text]).toEqual(["testuser1", "test cheet 1"]);
+			expect(cheets[0]).toMatchObject({
+				user: { uuid: "testuseruuid1" },
+				uuid: "testcheetuuid3",
+				text: "test cheet 3",
+			});
+			expect(cheets[1]).toMatchObject({
+				user: { uuid: "testuseruuid1" },
+				uuid: "testcheetuuid4",
+				text: "test cheet 4",
+			});
+			expect(cheets[2]).toMatchObject({
+				user: { uuid: "testuseruuid1" },
+				uuid: "testcheetuuid1",
+				text: "test cheet 1",
+			});
 		});
 	});
 
@@ -70,20 +102,20 @@ describe("Test cheets routes.", () => {
 			const request1 = (await request(testApp).get("/users/testuseruuid1/cheets")) as IResponse;
 			expect(request1.status).toEqual(200);
 			expect(request1.body).length(3);
-			expect(request1.body[0]).toMatchObject({ user: { uuid: "testuseruuid1" } });
-			expect(request1.body[1]).toMatchObject({ user: { uuid: "testuseruuid1" } });
-			expect(request1.body[2]).toMatchObject({ user: { uuid: "testuseruuid1" } });
+			expect(request1.body[0]).toMatchObject({ uuid: "testcheetuuid3" });
+			expect(request1.body[1]).toMatchObject({ uuid: "testcheetuuid4" });
+			expect(request1.body[2]).toMatchObject({ uuid: "testcheetuuid1" });
 
 			const request2 = (await request(testApp).get("/users/testuseruuid2/cheets")) as IResponse;
 			expect(request2.status).toEqual(200);
 			expect(request2.body).length(2);
-			expect(request2.body[0]).toMatchObject({ user: { uuid: "testuseruuid2" } });
-			expect(request2.body[1]).toMatchObject({ user: { uuid: "testuseruuid2" } });
+			expect(request2.body[0]).toMatchObject({ uuid: "testcheetuuid2" });
+			expect(request2.body[1]).toMatchObject({ uuid: "testcheetuuid5" });
 		});
 		test("Responds with HTTP status 404 when a user ID is provided with no corresponding user in the database.", async () => {
 			const { status, body } = (await request(testApp).get("/users/testuseruuid3/cheets")) as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No User found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 	});
 
@@ -102,7 +134,7 @@ describe("Test cheets routes.", () => {
 				.send({ text: "new test cheet 2" })) as IResponse;
 			expect(request1.status).toEqual(201);
 			expect(request1.body).length(4);
-			expect(request1.body[2]).toMatchObject({ text: "new test cheet 2", user: { uuid: "testuseruuid1" } });
+			expect(request1.body[3]).toMatchObject({ text: "new test cheet 2", user: { uuid: "testuseruuid1" } });
 
 			const request2 = (await request(testApp)
 				.post("/users/testuseruuid2/cheets")
@@ -126,7 +158,7 @@ describe("Test cheets routes.", () => {
 		test("Responds with HTTP status 404 when a user ID is provided with no corresponding user in the database.", async () => {
 			const { status, body } = (await request(testApp).post("/users/testuseruuid3/cheets")) as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No User found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 	});
 
@@ -141,24 +173,24 @@ describe("Test cheets routes.", () => {
 				.filter((cheet) => isCheet(cheet))
 				.filter((cheet) => cheet.uuid === "testcheetuuid1");
 			expect(updatedCheet).length(1);
-			expect(updatedCheet[0].text).toEqual("test cheet 1 - updated");
+			expect(updatedCheet[0]).toMatchObject({ text: "test cheet 1 - updated", uuid: "testcheetuuid1" });
 			expect(updatedCheet[0].updatedAt > updatedCheet[0].createdAt).toBe(true);
 		});
 		test("Responds with HTTP status 200 and relevant cheets when an existing cheet is updated with a user ID parameter.", async () => {
 			const request1 = (await request(testApp)
 				.put("/users/testuseruuid1/cheets/testcheetuuid1")
-				.send({ text: "test cheet 1 - updated" })) as IResponse;
+				.send({ text: "test cheet 1 - updated second" })) as IResponse;
 			expect(request1.status).toEqual(200);
 			expect(request1.body).length(3);
 			const updatedCheet1 = request1.body
 				.filter((cheet) => isCheet(cheet))
 				.filter((cheet) => cheet.uuid === "testcheetuuid1");
 			expect(updatedCheet1).length(1);
-			expect(updatedCheet1[0].text).toEqual("test cheet 1 - updated");
+			expect(updatedCheet1[0]).toMatchObject({ text: "test cheet 1 - updated second", uuid: "testcheetuuid1" });
 
 			const request2 = (await request(testApp)
 				.put("/users/testuseruuid2/cheets/testcheetuuid1")
-				.send({ text: "test cheet 1 - updated again" })) as IResponse;
+				.send({ text: "test cheet 1 - updated third" })) as IResponse;
 			expect(request2.status).toEqual(200);
 			expect(request2.body).length(2);
 			const updatedCheet2 = request2.body
@@ -190,14 +222,14 @@ describe("Test cheets routes.", () => {
 				.put("/users/testuseruuid3/cheets/testcheetuuid1")
 				.send({ text: "update cheet nonexistent user" })) as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No User found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 		test("Responds with HTTP status 404 if the cheet to be updated does not exist in the database.", async () => {
 			const { status, body } = (await request(testApp)
 				.put("/cheets/testcheetuuid6")
 				.send({ text: "update nonexistent cheet" })) as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No Cheet found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 	});
 
@@ -230,12 +262,12 @@ describe("Test cheets routes.", () => {
 				"/users/testuseruuid3/cheets/testcheetuuid1"
 			)) as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No User found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 		test("Responds with HTTP status 404 if the cheet to be deleted does not exist in the database.", async () => {
 			const { status, body } = (await request(testApp).delete("/cheets/6")) as IResponse;
 			expect(status).toEqual(404);
-			expect(body).toEqual(["No Cheet found with ID provided."]);
+			expect(body).toEqual(["Expected a record, found none."]);
 		});
 		test("Responds with HTTP status 403 if cheet's userID does not match the session's userID (trying to delete someone else's cheet).", async () => {
 			const { status, body } = (await request(testApp).delete("/cheets/testcheetuuid2")) as IResponse;
