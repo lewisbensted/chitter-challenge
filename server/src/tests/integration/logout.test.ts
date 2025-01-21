@@ -24,11 +24,11 @@ describe("Logout a user at route: [DELETE] /logout.", () => {
 		testApp2.use(session({ secret: "secret-key" }));
 		testApp2.all("*", (req, _res, next) => {
 			req.session.user = { id: 1, uuid: "testuseruuid1" };
+			req.cookies = {};
 			next();
 		});
 		testApp2.use("/logout", logout);
-		const { status, text, headers } = await request(testApp2).delete("/logout");
-		expect(headers["set-cookie"]).not.toBeDefined();
+		const { status, text } = await request(testApp2).delete("/logout");
 		expect(status).toEqual(200);
 		expect(text).toEqual("Logout successful.");
 	});

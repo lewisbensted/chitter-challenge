@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 
 export const sendErrorResponse = (error: unknown, res: Response) => {
 	if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
-		res.status(404).send([error?.meta?.cause]);
+		res.status(404).send([error.meta?.cause]);
 	} else if (error instanceof ZodError) {
 		const errors = error.errors.map((err) => err.message);
 		res.status(400).send(errors);

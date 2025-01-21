@@ -126,12 +126,12 @@ describe("Test replies routes.", () => {
 
 		describe("Fetch replies at route: [GET] /replies.", () => {
 			test("Responds with HTTP status 200 and all replies relevant to the cheet specified in the request params.", async () => {
-				const request1 = await request(testApp).get("/cheets/testcheetuuid1/replies");
+				const request1 = (await request(testApp).get("/cheets/testcheetuuid1/replies")) as IResponse;
 				expect(request1.status).toEqual(200);
 				expect(request1.body).length(1);
 				expect(request1.body[0]).toMatchObject({ uuid: "testreplyuuid1" });
 
-				const request2 = await request(testApp).get("/cheets/testcheetuuid2/replies");
+				const request2 = (await request(testApp).get("/cheets/testcheetuuid2/replies")) as IResponse;
 				expect(request2.status).toEqual(200);
 				expect(request2.body).length(4);
 				expect(request2.body[0]).toMatchObject({ uuid: "testreplyuuid3" });
@@ -139,18 +139,18 @@ describe("Test replies routes.", () => {
 				expect(request2.body[2]).toMatchObject({ uuid: "testreplyuuid6" });
 				expect(request2.body[3]).toMatchObject({ uuid: "testreplyuuid8" });
 
-				const request3 = await request(testApp).get("/cheets/testcheetuuid3/replies");
+				const request3 = (await request(testApp).get("/cheets/testcheetuuid3/replies")) as IResponse;
 				expect(request3.status).toEqual(200);
 				expect(request3.body).length(3);
 				expect(request3.body[0]).toMatchObject({ uuid: "testreplyuuid5" });
 				expect(request3.body[1]).toMatchObject({ uuid: "testreplyuuid7" });
 				expect(request3.body[2]).toMatchObject({ uuid: "testreplyuuid9" });
 
-				const request4 = await request(testApp).get("/cheets/testcheetuuid4/replies");
+				const request4 = await request(testApp).get("/cheets/testcheetuuid4/replies") as IResponse;
 				expect(request4.status).toEqual(200);
 				expect(request4.body).length(0);
 
-				const request5 = await request(testApp).get("/cheets/testcheetuuid5/replies");
+				const request5 = await request(testApp).get("/cheets/testcheetuuid5/replies") as IResponse;
 				expect(request5.status).toEqual(200);
 				expect(request5.body).length(2);
 				expect(request5.body[0]).toMatchObject({ uuid: "testreplyuuid2" });
