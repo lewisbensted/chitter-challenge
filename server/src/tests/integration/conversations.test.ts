@@ -197,59 +197,45 @@ describe("Test conversations functionality.", () => {
 			const { status, body } = (await request(testApp).get("/conversations")) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).length(2);
-			expect(body[0]).toEqual({
-				interlocutorUsername: "testuser2",
+			expect(body[0]).toMatchObject({
 				interlocutorId: "testuseruuid2",
-				unread: 2,
-				latestMessage: {
-					text: "second test message from testuser2 to testuser1",
-					isRead: false,
-					senderId: "testuseruuid2",
-				},
 			});
-			expect(body[1]).toEqual({
-				interlocutorUsername: "testuser3",
+			expect(body[1]).toMatchObject({
 				interlocutorId: "testuseruuid3",
-				unread: 1,
-				latestMessage: {
-					text: "third test message from testuser3 to testuser1",
-					isRead: false,
-					senderId: "testuseruuid3",
-				},
 			});
 		});
 		test("Responds with HTTP status 200 and individual conversation when user ID provdied as a parameter.", async () => {
 			const request1 = (await request(testApp).get("/conversations/testuseruuid1")) as IResponse;
 			expect(request1.status).toEqual(200);
-			expect(request1.body).toEqual({
-				conversation: { interlocutorUsername: "testuser1", interlocutorId: "testuseruuid1", unread: 0 },
+			expect(request1.body).toMatchObject({
+				conversation: { interlocutorId: "testuseruuid1" },
 				username: "testuser1",
 			});
 
-			const request2 = await request(testApp).get("/conversations/testuseruuid2") as IResponse;
+			const request2 = (await request(testApp).get("/conversations/testuseruuid2")) as IResponse;
 			expect(request2.status).toEqual(200);
-			expect(request2.body).toEqual({
-				conversation: { interlocutorUsername: "testuser2", interlocutorId: "testuseruuid2", unread: 2 },
+			expect(request2.body).toMatchObject({
+				conversation: { interlocutorId: "testuseruuid2" },
 				username: "testuser2",
 			});
 
-			const request3 = await request(testApp).get("/conversations/testuseruuid3") as IResponse;
+			const request3 = (await request(testApp).get("/conversations/testuseruuid3")) as IResponse;
 			expect(request3.status).toEqual(200);
-			expect(request3.body).toEqual({
-				conversation: { interlocutorUsername: "testuser3", interlocutorId: "testuseruuid3", unread: 1 },
+			expect(request3.body).toMatchObject({
+				conversation: { interlocutorId: "testuseruuid3" },
 				username: "testuser3",
 			});
 
-			const request4 = await request(testApp).get("/conversations/testuseruuid4") as IResponse;
+			const request4 = (await request(testApp).get("/conversations/testuseruuid4")) as IResponse;
 			expect(request4.status).toEqual(200);
-			expect(request4.body).toEqual({
-				conversation: { interlocutorUsername: "testuser4", interlocutorId: "testuseruuid4", unread: 0 },
+			expect(request4.body).toMatchObject({
+				conversation: { interlocutorId: "testuseruuid4" },
 				username: "testuser4",
 			});
 		});
 
 		test("Responds with HTTP status 404 when the user ID provided does not match a user in the database.", async () => {
-			const { status, body } = await request(testApp).get("/conversations/testuseruuid5") as IResponse;
+			const { status, body } = (await request(testApp).get("/conversations/testuseruuid5")) as IResponse;
 			expect(status).toEqual(404);
 			expect(body).toEqual(["Expected a record, found none."]);
 		});

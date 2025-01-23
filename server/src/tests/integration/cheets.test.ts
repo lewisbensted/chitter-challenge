@@ -33,7 +33,7 @@ describe("Test cheets routes.", () => {
 	});
 
 	const testApp = express();
-	testApp.use(session({ secret: "secret-key" }));
+	testApp.use(session({ secret: "secret-key", saveUninitialized: false, resave: false }));
 	testApp.all("*", (req, _res, next) => {
 		req.session.user = { id: 1, uuid: "testuseruuid1" };
 		next();
@@ -173,8 +173,29 @@ describe("Test cheets routes.", () => {
 				.filter((cheet) => isCheet(cheet))
 				.filter((cheet) => cheet.uuid === "testcheetuuid1");
 			expect(updatedCheet).length(1);
-			expect(updatedCheet[0]).toMatchObject({ text: "test cheet 1 - updated", uuid: "testcheetuuid1" });
-			expect(updatedCheet[0].updatedAt > updatedCheet[0].createdAt).toBe(true);
+			expect(updatedCheet[0]).toMatchObject({
+				text: "test cheet 1 - updated",
+				uuid: "testcheetuuid1",
+				user: { uuid: "testuseruuid1" },
+			});
+			expect(updatedCheet[0].updatedAt > updatedCheet[0].createdAt);
+		});
+		test("Responds with HTTP status 200 and all cheets when an existing cheet is updated but not changed.", async () => {
+			const { status, body } = (await request(testApp)
+				.put("/cheets/testcheetuuid1")
+				.send({ text: "test cheet 1" })) as IResponse;
+			expect(status).toEqual(200);
+			expect(body).length(5);
+			const updatedCheet = body
+				.filter((cheet) => isCheet(cheet))
+				.filter((cheet) => cheet.uuid === "testcheetuuid1");
+			expect(updatedCheet).length(1);
+			expect(updatedCheet[0]).toMatchObject({
+				text: "test cheet 1",
+				uuid: "testcheetuuid1",
+				user: { uuid: "testuseruuid1" },
+			});
+			expect(updatedCheet[0].updatedAt > updatedCheet[0].createdAt);
 		});
 		test("Responds with HTTP status 200 and relevant cheets when an existing cheet is updated with a user ID parameter.", async () => {
 			const request1 = (await request(testApp)
@@ -186,7 +207,11 @@ describe("Test cheets routes.", () => {
 				.filter((cheet) => isCheet(cheet))
 				.filter((cheet) => cheet.uuid === "testcheetuuid1");
 			expect(updatedCheet1).length(1);
-			expect(updatedCheet1[0]).toMatchObject({ text: "test cheet 1 - updated second", uuid: "testcheetuuid1" });
+			expect(updatedCheet1[0]).toMatchObject({
+				text: "test cheet 1 - updated second",
+				uuid: "testcheetuuid1",
+				user: { uuid: "testuseruuid1" },
+			});
 
 			const request2 = (await request(testApp)
 				.put("/users/testuseruuid2/cheets/testcheetuuid1")

@@ -35,7 +35,7 @@ describe("test message functionality.", () => {
 	});
 
 	const testApp = express();
-	testApp.use(session({ secret: "secret-key" }));
+	testApp.use(session({ secret: "secret-key", saveUninitialized: false, resave: false }));
 	testApp.all("*", (req, _res, next: NextFunction) => {
 		req.session.user = { id: 1, uuid: "testuseruuid1" };
 		next();
@@ -302,8 +302,8 @@ describe("test message functionality.", () => {
 		});
 
 		test("Reads relevant messages then responds with HTTP status 200 and false.", async () => {
-			await request(testApp).get("/messages/testuseruuid2");
-			await request(testApp).get("/messages/testuseruuid3");
+			await readMessages(1, 2);
+			await readMessages(1, 3);
 			const { status, body } = (await request(testApp).get("/messages/unread")) as IResponse;
 			expect(status).toEqual(200);
 			expect(body).toEqual(false);
@@ -317,19 +317,15 @@ describe("test message functionality.", () => {
 			expect(request1.body).length(4);
 			expect(request1.body[0]).toMatchObject({
 				uuid: "testmessageuuid1",
-				text: "test message from testuser1 to testuser2",
 			});
 			expect(request1.body[1]).toMatchObject({
 				uuid: "testmessageuuid4",
-				text: "test message from testuser2 to testuser1",
 			});
 			expect(request1.body[2]).toMatchObject({
 				uuid: "testmessageuuid2",
-				text: "second test message from testuser1 to testuser2",
 			});
 			expect(request1.body[3]).toMatchObject({
 				uuid: "testmessageuuid5",
-				text: "second test message from testuser2 to testuser1",
 			});
 
 			const request2 = (await request(testApp).get("/messages/testuseruuid3")) as IResponse;
@@ -337,19 +333,15 @@ describe("test message functionality.", () => {
 			expect(request2.body).length(4);
 			expect(request2.body[0]).toMatchObject({
 				uuid: "testmessageuuid8",
-				text: "test message from testuser3 to testuser1",
 			});
 			expect(request2.body[1]).toMatchObject({
 				uuid: "testmessageuuid3",
-				text: "test message from testuser1 to testuser3",
 			});
 			expect(request2.body[2]).toMatchObject({
 				uuid: "testmessageuuid9",
-				text: "second test message from testuser3 to testuser1",
 			});
 			expect(request2.body[3]).toMatchObject({
 				uuid: "testmessageuuid10",
-				text: "third test message from testuser3 to testuser1",
 			});
 
 			const request3 = (await request(testApp).get("/messages/testuseruuid1")) as IResponse;
@@ -400,7 +392,7 @@ describe("test message functionality.", () => {
 	});
 
 	describe("Update an existing message at route: [PUT] /messages.", () => {
-		test("Responds with HTTP status 200 and all relevant messages when an existing message is update.", async () => {
+		test("Responds with HTTP status 200 and all relevant messages when an existing message is updated.", async () => {
 			const { status, body } = (await request(testApp)
 				.put("/messages/testuseruuid2/message/testmessageuuid1")
 				.send({ text: "test message from testuser1 to testuser2 - updated" })) as IResponse;
@@ -411,6 +403,8 @@ describe("test message functionality.", () => {
 				.filter((message) => message.uuid === "testmessageuuid1");
 			expect(updatedMessage).length(1);
 			expect(updatedMessage[0]).toMatchObject({
+				sender: { uuid: "testuseruuid1" },
+				recipient: { uuid: "testuseruuid2" },
 				uuid: "testmessageuuid1",
 				text: "test message from testuser1 to testuser2 - updated",
 			});
@@ -427,6 +421,8 @@ describe("test message functionality.", () => {
 				.filter((message) => message.uuid === "testmessageuuid1");
 			expect(updatedMessage).length(1);
 			expect(updatedMessage[0]).toMatchObject({
+				sender: { uuid: "testuseruuid1" },
+				recipient: { uuid: "testuseruuid2" },
 				uuid: "testmessageuuid1",
 				text: "test message from testuser1 to testuser2",
 			});

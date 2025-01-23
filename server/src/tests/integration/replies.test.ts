@@ -35,7 +35,7 @@ describe("Test replies routes.", () => {
 	});
 
 	const testApp = express();
-	testApp.use(session({ secret: "secret-key" }));
+	testApp.use(session({ secret: "secret-key", saveUninitialized: false, resave: false }));
 	testApp.all("*", (req, _res, next) => {
 		req.session.user = { id: 1, uuid: "testuseruuid1" };
 		next();
@@ -146,11 +146,11 @@ describe("Test replies routes.", () => {
 				expect(request3.body[1]).toMatchObject({ uuid: "testreplyuuid7" });
 				expect(request3.body[2]).toMatchObject({ uuid: "testreplyuuid9" });
 
-				const request4 = await request(testApp).get("/cheets/testcheetuuid4/replies") as IResponse;
+				const request4 = (await request(testApp).get("/cheets/testcheetuuid4/replies")) as IResponse;
 				expect(request4.status).toEqual(200);
 				expect(request4.body).length(0);
 
-				const request5 = await request(testApp).get("/cheets/testcheetuuid5/replies") as IResponse;
+				const request5 = (await request(testApp).get("/cheets/testcheetuuid5/replies")) as IResponse;
 				expect(request5.status).toEqual(200);
 				expect(request5.body).length(2);
 				expect(request5.body[0]).toMatchObject({ uuid: "testreplyuuid2" });
@@ -204,8 +204,23 @@ describe("Test replies routes.", () => {
 				expect(status).toEqual(200);
 				expect(body).length(1);
 				expect(body[0]).toMatchObject({
+					user: { uuid: "testuseruuid1" },
+					cheet: { uuid: "testcheetuuid1" },
 					uuid: "testreplyuuid1",
 					text: "test reply 1 - updated",
+				});
+			});
+			test("Responds with HTTP status 200 and all relevant replies when a reply is updated but not changed.", async () => {
+				const { status, body } = (await request(testApp)
+					.put("/cheets/testcheetuuid1/replies/testreplyuuid1")
+					.send({ text: "test reply 1" })) as IResponse;
+				expect(status).toEqual(200);
+				expect(body).length(1);
+				expect(body[0]).toMatchObject({
+					user: { uuid: "testuseruuid1" },
+					cheet: { uuid: "testcheetuuid1" },
+					uuid: "testreplyuuid1",
+					text: "test reply 1",
 				});
 			});
 			test("Responds with HTTP status 400 if reply validation fails - text too short.", async () => {
