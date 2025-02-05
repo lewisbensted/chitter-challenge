@@ -82,7 +82,11 @@ const Reply: React.FC<Props> = ({
 								</Grid2>
 								<Grid2 size={12}>
 									{isEditing ? (
-										<Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-reply">
+										<Box
+											component="form"
+											onSubmit={handleSubmit(onSubmit)}
+											id={`edit-reply-${reply.uuid}`}
+										>
 											<TextField
 												{...register("text")}
 												type="text"
@@ -110,14 +114,19 @@ const Reply: React.FC<Props> = ({
 											<IconButton
 												type="submit"
 												disabled={isComponentLoading}
-												form="edit-reply"
-												key="edit-reply"
+												form={`edit-reply-${reply.uuid}`}
+												key={`edit-reply-${reply.uuid}`}
 												color="primary"
 											>
 												<Done />
 											</IconButton>
 										) : (
-											<IconButton onClick={() => { setEditing(true); }} color="primary">
+											<IconButton
+												onClick={() => {
+													setEditing(true);
+												}}
+												color="primary"
+											>
 												<Edit />
 											</IconButton>
 										)

@@ -37,7 +37,7 @@ export const fetchReplies = async (cheetId: number) => {
 			cheet: { id: cheetId },
 		},
 	});
-	replies.sort((replyA, replyB) => replyA.createdAt.valueOf() - replyB.createdAt.valueOf());
+	replies.sort((replyA, replyB) => replyB.createdAt.valueOf() - replyA.createdAt.valueOf());
 	return replies;
 };
 

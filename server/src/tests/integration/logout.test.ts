@@ -24,12 +24,16 @@ describe("Logout a user at route: [DELETE] /logout.", () => {
 		testApp2.use(session({ secret: "secret-key", saveUninitialized: false, resave: false }));
 		testApp2.all("*", (req, _res, next) => {
 			req.session.user = { id: 1, uuid: "testuseruuid1" };
-			req.cookies = {};
+			req.cookies = { user_id: "testuserid", session_id: "testsessionid" };
 			next();
 		});
 		testApp2.use("/logout", logout);
-		const { status, text } = await request(testApp2).delete("/logout");
+		const { status, text, headers } = await request(testApp2).delete("/logout");
 		expect(status).toEqual(200);
+		let cookies = headers["set-cookie"] as unknown as string[];
+		cookies = cookies.map((cookie) => cookie.split(";")[0]);
+		expect(cookies).toContain("user_id=");
+		expect(cookies).toContain("session_id=");
 		expect(text).toEqual("Logout successful.");
 	});
 });

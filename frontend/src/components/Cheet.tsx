@@ -68,6 +68,11 @@ const Cheet: React.FC<Props> = ({
 		setComponentLoading(false);
 	};
 
+	const currentDate = new Date();
+	const createdAt = new Date(cheet.createdAt);
+	const updatedAt = new Date(cheet.updatedAt);
+	const isEdited = updatedAt > createdAt;
+
 	return (
 		<ThemeProvider theme={theme}>
 			{isModalView ? null : (
@@ -84,8 +89,8 @@ const Cheet: React.FC<Props> = ({
 				/>
 			)}
 			<Card>
-				<Grid2 container>
-					<Grid2 size={isModalView ? 10 : 9}>
+				<Grid2 container width={isModalView ? "auto" : 750}>
+					<Grid2 size={isModalView ? (userId == cheet.user.uuid ? 11 : 12) : userId ? 10 : 11}>
 						<CardContent>
 							<Grid2 container>
 								<Grid2 size={6}>
@@ -93,12 +98,16 @@ const Cheet: React.FC<Props> = ({
 								</Grid2>
 								<Grid2 size={6}>
 									<Typography variant="body2" justifyContent="flex-end">
-										{format(cheet.createdAt, "HH:mm dd/MM/yy")}
+										{format(createdAt, "HH:mm dd/MM/yy")}
 									</Typography>
 								</Grid2>
-								<Grid2 size={12}>
+								<Grid2 size={isEdited ? 10 : 12}>
 									{isEditing ? (
-										<Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-cheet">
+										<Box
+											component="form"
+											onSubmit={handleSubmit(onSubmit)}
+											id={`edit-cheet-${cheet.uuid}`}
+										>
 											<TextField
 												{...register("text")}
 												type="text"
@@ -107,13 +116,33 @@ const Cheet: React.FC<Props> = ({
 											/>
 										</Box>
 									) : (
-										<Typography fontWeight={isModalView ? "bold" : ""}>{cheet.text}</Typography>
+										<Typography>{cheet.text}</Typography>
 									)}
 								</Grid2>
+								{isEdited ? (
+									<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
+										<Edit fontSize="small" color="primary" />
+										<Typography variant="body2" marginLeft={0.4}>
+											{format(
+												updatedAt,
+												currentDate.getFullYear() === updatedAt.getFullYear()
+													? currentDate.getMonth() === updatedAt.getMonth() &&
+														currentDate.getDate() === updatedAt.getDate()
+														? "HH:mm"
+														: "dd/MM"
+													: "dd/MM/yy"
+											)}
+										</Typography>
+									</Grid2>
+								) : null}
 							</Grid2>
 						</CardContent>
 					</Grid2>
-					<Grid2 size={isModalView ? 2 : 3} container justifyContent={isModalView ? "center" : ""}>
+					<Grid2
+						size={isModalView ? (userId == cheet.user.uuid ? 1 : 0) : userId ? 2 : 1}
+						container
+						justifyContent={isModalView ? "center" : "space-between"}
+					>
 						<CardActions>
 							<Grid2 container size={12} columns={isModalView ? 1 : 3}>
 								<Grid2 size={1}>
@@ -140,8 +169,8 @@ const Cheet: React.FC<Props> = ({
 											<IconButton
 												type="submit"
 												disabled={isComponentLoading}
-												form="edit-cheet"
-												key="edit-cheet"
+												form={`edit-cheet-${cheet.uuid}`}
+												key={`edit-cheet-${cheet.uuid}`}
 												color="primary"
 											>
 												<Done />

@@ -69,7 +69,7 @@ const Message: React.FC<Props> = ({
 					<Grid2 size={5}>
 						<CardContent>
 							{isEditing ? (
-								<Box component="form" onSubmit={handleSubmit(onSubmit)} id="edit-message">
+								<Box component="form" onSubmit={handleSubmit(onSubmit)} id={`edit-message-${message.uuid}`}>
 									<TextField
 										component="form"
 										onSubmit={handleSubmit(onSubmit)}
@@ -96,7 +96,8 @@ const Message: React.FC<Props> = ({
 							</Typography>
 						</CardContent>
 					</Grid2>
-					<Grid2 size={2} container>
+					
+					<Grid2 container>
 						{message.sender.uuid === userId ? (
 							<CardActions>
 								<Grid2 container size={12} columns={2}>
@@ -109,8 +110,8 @@ const Message: React.FC<Props> = ({
 											<IconButton
 												type="submit"
 												disabled={isComponentLoading}
-												form="edit-message"
-												key="edit-message"
+												form={`edit-message-${message.uuid}`}
+												key={`edit-message-${message.uuid}`}
 												color="primary"
 											>
 												<Done />
