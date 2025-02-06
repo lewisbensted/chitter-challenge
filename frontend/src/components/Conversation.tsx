@@ -6,6 +6,7 @@ import { ThemeProvider } from "@emotion/react";
 import theme from "../styles/theme";
 import { MarkUnreadChatAlt } from "@mui/icons-material";
 import MessageModal from "./MessageModal";
+import { formatDate } from "../utils/formatDate";
 
 interface Props {
 	userId?: string;
@@ -29,6 +30,8 @@ const Conversation: React.FC<Props> = ({
 	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
 	const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
 
+	const createdAt = new Date(conversation.latestMessage!.createdAt);
+
 	return (
 		<ThemeProvider theme={theme}>
 			<MessageModal
@@ -49,46 +52,50 @@ const Conversation: React.FC<Props> = ({
 				toggleReloadTrigger={toggleReloadTrigger}
 				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
+				onUserPage={false}
 			/>
 
 			<Card>
 				<CardActionArea
 					disabled={isComponentLoading}
-					onClick={isComponentLoading ? undefined : () => { setMessageModalOpen(true); }}
+					onClick={
+						isComponentLoading
+							? undefined
+							: () => {
+									setMessageModalOpen(true);
+								}
+					}
 				>
 					<CardContent>
-						<Grid2 container>
-							<Grid2>
-								<Link
-									onClick={(event) => { event.stopPropagation(); }}
-									href={`/users/${conversation.interlocutorId}`}
-									variant="h6"
-								>
-									{conversation.interlocutorUsername}
-								</Link>
-							</Grid2>
-							<Grid2 size={11}>
-								<Typography
-									fontWeight={
-										!conversation.latestMessage?.isRead &&
-										conversation.latestMessage?.senderId !== userId
-											? "bold"
-											: ""
-									}
-									variant="body2"
-								>
-									{conversation.latestMessage?.text}
+						<Grid2 container width={600}>
+							<Grid2 size={6}>
+								<Typography variant="h6">
+									<Link
+										onClick={(event) => {
+											event.stopPropagation();
+										}}
+										href={`/users/${conversation.interlocutorId}`}
+									>
+										{conversation.interlocutorUsername}
+									</Link>
 								</Typography>
 							</Grid2>
-							<Grid2 size={1}>
-								{conversation.latestMessage?.isRead &&
-								conversation.latestMessage.senderId === userId ? (
+							<Grid2 size={6}>
+								<Typography variant="body2" justifyContent="flex-end">
+									{formatDate(createdAt)}
+								</Typography>
+							</Grid2>
+							<Grid2 size={11}>
+								<Typography variant="body2">{conversation.latestMessage?.text}</Typography>
+							</Grid2>
+							<Grid2 size={1} display="flex" justifyContent="flex-end">
+								{conversation.latestMessage?.senderId === userId ? (
+									conversation.latestMessage?.isRead ? (
 										<Done fontSize="small" color="primary" />
-									) : null}
-								{!conversation.latestMessage?.isRead &&
-								conversation.latestMessage?.senderId !== userId ? (
-										<MarkUnreadChatAlt fontSize="small" color="primary" />
-									) : null}
+									) : null
+								) : conversation.latestMessage?.isRead ? null : (
+									<MarkUnreadChatAlt fontSize="small" color="primary" />
+								)}
 							</Grid2>
 						</Grid2>
 					</CardContent>

@@ -100,19 +100,22 @@ const Homepage: React.FC = () => {
 						) : cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
-							cheets?.map((cheet) => (
-								<Cheet
-									key={cheet.uuid}
-									cheet={cheet}
-									userId={userId}
-									setCheets={setCheets}
-									setErrors={setErrors}
-									setComponentLoading={setComponentLoading}
-									isComponentLoading={isComponentLoading}
-									isModalView={false}
-								/>
-							))
+							<Box sx={{ overflowY: "auto", maxHeight: 480 }}>
+								{cheets?.map((cheet) => (
+									<Cheet
+										key={cheet.uuid}
+										cheet={cheet}
+										userId={userId}
+										setCheets={setCheets}
+										setErrors={setErrors}
+										setComponentLoading={setComponentLoading}
+										isComponentLoading={isComponentLoading}
+										isModalView={false}
+									/>
+								))}
+							</Box>
 						)}
+
 						{userId ? (
 							<SubmitCheet
 								isDisabled={isComponentLoading || isCheetsLoading}

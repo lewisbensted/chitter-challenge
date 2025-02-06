@@ -1,8 +1,8 @@
 import { createTheme } from "@mui/material";
-import { blue } from "@mui/material/colors";
+import { blue, indigo } from "@mui/material/colors";
 
 const theme = createTheme({
-	palette: { primary: blue },
+	palette: { primary: blue},
 	components: {
 		MuiTypography: {
 			styleOverrides: { root: { wordBreak: "break-word", display: "flex" } },
@@ -22,7 +22,6 @@ const theme = createTheme({
 			],
 		},
 		MuiTextField: { styleOverrides: { root: { width: "100%" } } },
-		MuiGrid2: { styleOverrides: { root: {} } },
 	},
 });
 

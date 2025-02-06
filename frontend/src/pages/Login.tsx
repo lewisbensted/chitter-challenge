@@ -89,10 +89,10 @@ const SignIn: React.FC = () => {
 							<Grid2 size={12}>
 								<FlexBox>
 									<Button type="submit" disabled={!!userId} color="primary" variant="contained">
-										<Typography variant="button" color="secondary">
+										<Typography variant="button" color="inherit">
 											Sign in
 										</Typography>
-										<IconButton color="secondary">
+										<IconButton color="inherit">
 											<Login />
 										</IconButton>
 									</Button>

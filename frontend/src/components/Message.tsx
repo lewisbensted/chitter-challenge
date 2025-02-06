@@ -20,6 +20,7 @@ import {
 import { Delete, Done, Edit } from "@mui/icons-material";
 import theme from "../styles/theme";
 import { format } from "date-fns";
+import { formatDate } from "../utils/formatDate";
 
 interface Props {
 	userId?: string;
@@ -62,14 +63,23 @@ const Message: React.FC<Props> = ({
 		setEditLoading(false);
 		setComponentLoading(false);
 	};
+
+	const createdAt = new Date(message.createdAt);
+	const updatedAt = new Date(message.updatedAt);
+	const isEdited = updatedAt > createdAt;
+
 	return (
 		<ThemeProvider theme={theme}>
 			<Card>
 				<Grid2 container justifyContent={message.sender.uuid === userId ? "" : "flex-end"}>
-					<Grid2 size={5}>
+					<Grid2 size={6}>
 						<CardContent>
 							{isEditing ? (
-								<Box component="form" onSubmit={handleSubmit(onSubmit)} id={`edit-message-${message.uuid}`}>
+								<Box
+									component="form"
+									onSubmit={handleSubmit(onSubmit)}
+									id={`edit-message-${message.uuid}`}
+								>
 									<TextField
 										component="form"
 										onSubmit={handleSubmit(onSubmit)}
@@ -83,6 +93,7 @@ const Message: React.FC<Props> = ({
 							) : (
 								<Typography
 									justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
+									textAlign={message.sender.uuid === userId ? "left" : "right"}
 									fontWeight={!message.isRead && message.recipient.uuid === userId ? "bold" : ""}
 								>
 									{message.text}
@@ -91,14 +102,16 @@ const Message: React.FC<Props> = ({
 							<Typography
 								variant="body2"
 								justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
+								textAlign={message.sender.uuid === userId ? "left" : "right"}
 							>
-								{format(message.createdAt, "HH:mm dd/MM/yy")}
+								{isEdited ? <Edit fontSize="small" color="primary" /> : null}
+								{formatDate(isEdited ? updatedAt : createdAt)}
 							</Typography>
 						</CardContent>
 					</Grid2>
-					
-					<Grid2 container>
-						{message.sender.uuid === userId ? (
+
+					{message.sender.uuid === userId ? (
+						<Grid2 size={1.3} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>
 									<Grid2 size={1}>
@@ -117,7 +130,12 @@ const Message: React.FC<Props> = ({
 												<Done />
 											</IconButton>
 										) : (
-											<IconButton onClick={() => { setEditing(true); }} color="primary">
+											<IconButton
+												onClick={() => {
+													setEditing(true);
+												}}
+												color="primary"
+											>
 												<Edit />
 											</IconButton>
 										)}
@@ -158,8 +176,8 @@ const Message: React.FC<Props> = ({
 									</Grid2>
 								</Grid2>
 							</CardActions>
-						) : null}
-					</Grid2>
+						</Grid2>
+					) : null}
 				</Grid2>
 			</Card>
 		</ThemeProvider>

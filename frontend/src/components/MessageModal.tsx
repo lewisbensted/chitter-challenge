@@ -9,7 +9,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Grid2, ThemeProvider, Typography } from "@mui/material";
+import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 
@@ -25,6 +25,7 @@ interface Props {
 	toggleReloadTrigger: (arg: boolean) => void;
 	setReloadWhenClosed: (arg: boolean) => void;
 	unread: number;
+	onUserPage: boolean;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -38,6 +39,7 @@ const MessageModal: React.FC<Props> = ({
 	toggleReloadTrigger,
 	setReloadWhenClosed,
 	unread,
+	onUserPage,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [messages, setMessages] = useState<IMessage[]>();
@@ -65,11 +67,11 @@ const MessageModal: React.FC<Props> = ({
 					setComponentLoading(false);
 				});
 		}
-	}, [isOpen, conversation.interlocutorId, reloadTrigger, setComponentLoading, toggleReloadTrigger, unread]);
+	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Dialog open={isOpen}>
+			<Dialog open={isOpen} fullWidth maxWidth="md">
 				<ErrorModal
 					errors={errors}
 					closeModal={() => {
@@ -78,13 +80,21 @@ const MessageModal: React.FC<Props> = ({
 				/>
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
-					<Grid2 size={1}>
+					<Grid2 size={1} display="flex" justifyContent="flex-end">
 						<IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
 							<Close />
 						</IconButton>
 					</Grid2>
 					<Grid2 marginInline={3} size={12}>
-						<Typography variant="h5">{conversation.interlocutorUsername}</Typography>
+						<Typography variant="h5">
+							{onUserPage ? (
+								conversation.interlocutorUsername
+							) : (
+								<Link href={`/users/${conversation.interlocutorId}`}>
+									{conversation.interlocutorUsername}
+								</Link>
+							)}
+						</Typography>
 						{isMessagesLoading ? (
 							<FlexBox>
 								<CircularProgress thickness={5} />
@@ -92,18 +102,20 @@ const MessageModal: React.FC<Props> = ({
 						) : messagesError ? (
 							<Typography variant="subtitle1">{messagesError}</Typography>
 						) : (
-							messages?.map((message) => (
-								<Message
-									key={message.uuid}
-									userId={userId}
-									message={message}
-									setMessages={setMessages}
-									isComponentLoading={isComponentLoading}
-									setComponentLoading={setComponentLoading}
-									setErrors={setErrors}
-									setReloadWhenClosed={setReloadWhenClosed}
-								/>
-							))
+							<Box sx={{ overflowY: "auto", maxHeight: 400 }}>
+								{messages?.map((message) => (
+									<Message
+										key={message.uuid}
+										userId={userId}
+										message={message}
+										setMessages={setMessages}
+										isComponentLoading={isComponentLoading}
+										setComponentLoading={setComponentLoading}
+										setErrors={setErrors}
+										setReloadWhenClosed={setReloadWhenClosed}
+									/>
+								))}
+							</Box>
 						)}
 						<SendMessage
 							recipientId={conversation.interlocutorId}

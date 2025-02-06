@@ -36,7 +36,6 @@ export default tseslint.config(
 			"@stylistic/semi": "warn",
 			eqeqeq: ["warn", "smart"],
 			"arrow-body-style": ["warn", "as-needed"],
-			"@typescript-eslint/restrict-template-expressions": ["warn"],
 			"@typescript-eslint/no-misused-promises": ["warn", { checksVoidReturn: false }],
 			"@typescript-eslint/restrict-template-expressions": ["warn", { allowNumber: true }],
 		},

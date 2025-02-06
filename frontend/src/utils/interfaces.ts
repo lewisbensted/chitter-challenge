@@ -36,5 +36,5 @@ export interface IConversation {
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: number;
-	latestMessage?: { text: string; senderId: string; isRead: boolean };
+	latestMessage?: { text: string; senderId: string; isRead: boolean; createdAt: string };
 }

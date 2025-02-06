@@ -22,6 +22,7 @@ import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import CheetModal from "./CheetModal";
+import { formatDate } from "../utils/formatDate";
 
 interface Props {
 	userId?: string;
@@ -68,7 +69,6 @@ const Cheet: React.FC<Props> = ({
 		setComponentLoading(false);
 	};
 
-	const currentDate = new Date();
 	const createdAt = new Date(cheet.createdAt);
 	const updatedAt = new Date(cheet.updatedAt);
 	const isEdited = updatedAt > createdAt;
@@ -90,11 +90,13 @@ const Cheet: React.FC<Props> = ({
 			)}
 			<Card>
 				<Grid2 container width={isModalView ? "auto" : 750}>
-					<Grid2 size={isModalView ? (userId == cheet.user.uuid ? 11 : 12) : userId ? 10 : 11}>
+					<Grid2 size={isModalView ? (userId ? 10.5 : 12) : userId ? 10 : 11}>
 						<CardContent>
 							<Grid2 container>
 								<Grid2 size={6}>
-									<Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
+									<Typography>
+										<Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
+									</Typography>
 								</Grid2>
 								<Grid2 size={6}>
 									<Typography variant="body2" justifyContent="flex-end">
@@ -121,17 +123,9 @@ const Cheet: React.FC<Props> = ({
 								</Grid2>
 								{isEdited ? (
 									<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
-										<Edit fontSize="small" color="primary" />
-										<Typography variant="body2" marginLeft={0.4}>
-											{format(
-												updatedAt,
-												currentDate.getFullYear() === updatedAt.getFullYear()
-													? currentDate.getMonth() === updatedAt.getMonth() &&
-														currentDate.getDate() === updatedAt.getDate()
-														? "HH:mm"
-														: "dd/MM"
-													: "dd/MM/yy"
-											)}
+										<Typography variant="body2">
+											<Edit fontSize="small" color="primary" />
+											{formatDate(updatedAt)}
 										</Typography>
 									</Grid2>
 								) : null}
@@ -139,7 +133,7 @@ const Cheet: React.FC<Props> = ({
 						</CardContent>
 					</Grid2>
 					<Grid2
-						size={isModalView ? (userId == cheet.user.uuid ? 1 : 0) : userId ? 2 : 1}
+						size={isModalView ? (userId ? 1.5 : 0) : userId ? 2 : 1}
 						container
 						justifyContent={isModalView ? "center" : "space-between"}
 					>

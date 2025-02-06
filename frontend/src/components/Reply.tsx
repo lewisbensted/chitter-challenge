@@ -22,6 +22,7 @@ import {
 import { format } from "date-fns";
 import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
+import { formatDate } from "../utils/formatDate";
 
 interface Props {
 	isComponentLoading: boolean;
@@ -65,22 +66,28 @@ const Reply: React.FC<Props> = ({
 		setEditing(false);
 	};
 
+	const createdAt = new Date(reply.createdAt);
+	const updatedAt = new Date(reply.updatedAt);
+	const isEdited = updatedAt > createdAt;
+
 	return (
 		<ThemeProvider theme={theme}>
 			<Card>
 				<Grid2 container>
-					<Grid2 size={10}>
+					<Grid2 size={userId ? 10.5 : 12}>
 						<CardContent>
 							<Grid2 container>
 								<Grid2 size={6}>
-									<Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
+									<Typography>
+										<Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
+									</Typography>
 								</Grid2>
 								<Grid2 size={6}>
 									<Typography variant="body2" justifyContent="flex-end">
-										{format(reply.createdAt, "HH:mm dd/MM/yy")}
+										{format(createdAt, "HH:mm dd/MM/yy")}
 									</Typography>
 								</Grid2>
-								<Grid2 size={12}>
+								<Grid2 size={isEdited ? 10 : 12}>
 									{isEditing ? (
 										<Box
 											component="form"
@@ -98,12 +105,20 @@ const Reply: React.FC<Props> = ({
 										<Typography>{reply.text}</Typography>
 									)}
 								</Grid2>
+								{isEdited ? (
+									<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
+										<Typography variant="body2">
+											<Edit fontSize="small" color="primary" />
+											{formatDate(updatedAt)}
+										</Typography>
+									</Grid2>
+								) : null}
 							</Grid2>
 						</CardContent>
 					</Grid2>
-					<Grid2 size={2} container>
+					<Grid2 size={1.5} container justifyContent={"space-between"}>
 						<CardActions>
-							<Grid2 container size={12} columns={2}>
+							<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
 								<Grid2 size={1}>
 									{userId === reply.user.uuid ? (
 										isEditLoading ? (

@@ -48,6 +48,7 @@ const ConversationIcon: React.FC<Props> = ({
 				toggleReloadTrigger={toggleReloadTrigger}
 				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
+				onUserPage={true}
 			/>
 			<IconButton
 				onClick={() => {

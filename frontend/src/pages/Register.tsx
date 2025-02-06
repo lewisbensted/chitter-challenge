@@ -103,10 +103,10 @@ const Register: React.FC = () => {
 								) : (
 									<FlexBox>
 										<Button type="submit" disabled={!!userId} color="primary" variant="contained">
-											<Typography variant="button" color="secondary">
+											<Typography variant="button" color="inherit">
 												Register
 											</Typography>
-											<IconButton color="secondary">
+											<IconButton color="inherit">
 												<AppRegistration />
 											</IconButton>
 										</Button>

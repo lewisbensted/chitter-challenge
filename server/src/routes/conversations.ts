@@ -10,7 +10,7 @@ interface IConversation {
 	interlocutorUsername: string;
 	interlocutorId: string;
 	unread: number;
-	latestMessage?: { text: string; senderId: string; isRead: boolean };
+	latestMessage?: { text: string; senderId: string; isRead: boolean; createdAt: Date };
 }
 
 const router = express.Router({ mergeParams: true });
@@ -39,7 +39,12 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 						interlocutorId: message.recipient.uuid,
 						interlocutorUsername: message.recipient.username,
 						unread: 0,
-						latestMessage: { text: message.text, isRead: message.isRead, senderId: message.sender.uuid },
+						latestMessage: {
+							text: message.text,
+							isRead: message.isRead,
+							senderId: message.sender.uuid,
+							createdAt: message.createdAt,
+						},
 					});
 				}
 			} else {
@@ -49,7 +54,12 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 						interlocutorId: message.sender.uuid,
 						interlocutorUsername: message.sender.username,
 						unread: 0,
-						latestMessage: { text: message.text, isRead: message.isRead, senderId: message.sender.uuid },
+						latestMessage: {
+							text: message.text,
+							isRead: message.isRead,
+							senderId: message.sender.uuid,
+							createdAt: message.createdAt,
+						},
 					};
 					result.push(target);
 				}

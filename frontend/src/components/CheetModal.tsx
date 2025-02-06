@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import { Divider, Grid2, ThemeProvider, Typography } from "@mui/material";
+import { Box, Divider, Grid2, ThemeProvider, Typography } from "@mui/material";
 import Reply from "./Reply";
 import theme from "../styles/theme";
 import Cheet from "./Cheet";
@@ -60,11 +60,16 @@ const CheetModal: React.FC<Props> = ({
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Dialog open={isOpen}>
-				<ErrorModal errors={errors} closeModal={() => { setErrors([]); }} />
+			<Dialog open={isOpen} fullWidth maxWidth="md">
+				<ErrorModal
+					errors={errors}
+					closeModal={() => {
+						setErrors([]);
+					}}
+				/>
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
-					<Grid2 size={1}>
+					<Grid2 size={1} display='flex' justifyContent='flex-end'>
 						<IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
 							<Close />
 						</IconButton>
@@ -89,18 +94,20 @@ const CheetModal: React.FC<Props> = ({
 						) : repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							replies?.map((reply) => (
-								<Reply
-									key={reply.uuid}
-									isComponentLoading={isComponentLoading}
-									userId={userId}
-									cheetId={cheet.uuid}
-									reply={reply}
-									setReplies={setReplies}
-									setErrors={setErrors}
-									setComponentLoading={setComponentLoading}
-								/>
-							))
+							<Box sx={{ overflowY: "auto", maxHeight: 400 }}>
+								{replies?.map((reply) => (
+									<Reply
+										key={reply.uuid}
+										isComponentLoading={isComponentLoading}
+										userId={userId}
+										cheetId={cheet.uuid}
+										reply={reply}
+										setReplies={setReplies}
+										setErrors={setErrors}
+										setComponentLoading={setComponentLoading}
+									/>
+								))}
+							</Box>
 						)}
 
 						{userId ? (
