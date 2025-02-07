@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { ICheet, IConversation } from "../utils/interfaces";
@@ -8,7 +8,7 @@ import SubmitCheet from "../components/SendCheet";
 import { serverURL } from "../utils/serverURL";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Box, Typography } from "@mui/material";
+import { Box, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
@@ -28,6 +28,7 @@ const User: React.FC = () => {
 
 	const { id } = useParams();
 	const navigate = useNavigate();
+	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		axios
@@ -102,6 +103,10 @@ const User: React.FC = () => {
 		}
 	}, [conversation, userId]);
 
+	useEffect(() => {
+		ref.current?.firstElementChild?.scrollIntoView();
+	}, [cheets]);
+
 	return (
 		<Layout
 			userId={userId}
@@ -152,18 +157,20 @@ const User: React.FC = () => {
 						) : cheetsError ? (
 							cheetsError
 						) : (
-							cheets?.map((cheet) => (
-								<Cheet
-									key={cheet.uuid}
-									cheet={cheet}
-									userId={userId}
-									setCheets={setCheets}
-									setErrors={setErrors}
-									setComponentLoading={setComponentLoading}
-									isComponentLoading={isComponentLoading}
-									isModalView={false}
-								/>
-							))
+							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500 }}>
+								{cheets?.map((cheet) => (
+									<Cheet
+										key={cheet.uuid}
+										cheet={cheet}
+										userId={userId}
+										setCheets={setCheets}
+										setErrors={setErrors}
+										setComponentLoading={setComponentLoading}
+										isComponentLoading={isComponentLoading}
+										isModalView={false}
+									/>
+								))}
+							</Grid2>
 						)}
 						{userId === id ? (
 							<SubmitCheet

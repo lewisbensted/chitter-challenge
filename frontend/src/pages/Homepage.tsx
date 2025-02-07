@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { ICheet } from "../utils/interfaces";
@@ -9,7 +9,7 @@ import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
-import { Typography } from "@mui/material";
+import { Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 
 const Homepage: React.FC = () => {
@@ -21,6 +21,8 @@ const Homepage: React.FC = () => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [cheetsError, setCheetsError] = useState<string>();
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
+
+	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		axios
@@ -69,6 +71,10 @@ const Homepage: React.FC = () => {
 		})();
 	}, []);
 
+	useEffect(() => {
+		ref.current?.firstElementChild?.scrollIntoView();
+	}, [cheets]);
+
 	return (
 		<Layout
 			userId={userId}
@@ -100,7 +106,7 @@ const Homepage: React.FC = () => {
 						) : cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
-							<Box sx={{ overflowY: "auto", maxHeight: 480 }}>
+							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500 }}>
 								{cheets?.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
@@ -113,7 +119,7 @@ const Homepage: React.FC = () => {
 										isModalView={false}
 									/>
 								))}
-							</Box>
+							</Grid2>
 						)}
 
 						{userId ? (

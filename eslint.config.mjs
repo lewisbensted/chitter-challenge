@@ -38,6 +38,7 @@ export default tseslint.config(
 			"arrow-body-style": ["warn", "as-needed"],
 			"@typescript-eslint/no-misused-promises": ["warn", { checksVoidReturn: false }],
 			"@typescript-eslint/restrict-template-expressions": ["warn", { allowNumber: true }],
+			"@typescript-eslint/no-non-null-assertion": ["off"]
 		},
 	},
 	{

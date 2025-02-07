@@ -19,7 +19,6 @@ import {
 } from "@mui/material";
 import { Delete, Done, Edit } from "@mui/icons-material";
 import theme from "../styles/theme";
-import { format } from "date-fns";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {

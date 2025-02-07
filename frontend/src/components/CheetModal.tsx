@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ICheet, IReply } from "../utils/interfaces";
 import axios from "axios";
 import ErrorModal from "./ErrorModal";
@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import { Box, Divider, Grid2, ThemeProvider, Typography } from "@mui/material";
+import { Divider, Grid2, ThemeProvider, Typography } from "@mui/material";
 import Reply from "./Reply";
 import theme from "../styles/theme";
 import Cheet from "./Cheet";
@@ -38,6 +38,8 @@ const CheetModal: React.FC<Props> = ({
 	const [repliesError, setRepliesError] = useState<string>();
 	const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
 
+	const ref = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
 		if (isOpen) {
 			setComponentLoading(true);
@@ -57,6 +59,12 @@ const CheetModal: React.FC<Props> = ({
 				});
 		}
 	}, [isOpen, cheet.uuid, setComponentLoading]);
+
+	useEffect(() => {
+		if (isOpen) {
+			ref.current?.firstElementChild?.scrollIntoView();
+		}
+	}, [isOpen, replies]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -94,7 +102,7 @@ const CheetModal: React.FC<Props> = ({
 						) : repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							<Box sx={{ overflowY: "auto", maxHeight: 400 }}>
+							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 400 }}>
 								{replies?.map((reply) => (
 									<Reply
 										key={reply.uuid}
@@ -107,7 +115,7 @@ const CheetModal: React.FC<Props> = ({
 										setComponentLoading={setComponentLoading}
 									/>
 								))}
-							</Box>
+							</Grid2>
 						)}
 
 						{userId ? (

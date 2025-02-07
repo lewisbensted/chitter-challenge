@@ -62,8 +62,8 @@ const Conversation: React.FC<Props> = ({
 						isComponentLoading
 							? undefined
 							: () => {
-									setMessageModalOpen(true);
-								}
+								setMessageModalOpen(true);
+							}
 					}
 				>
 					<CardContent>

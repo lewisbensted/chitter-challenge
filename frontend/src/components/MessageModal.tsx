@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IConversation, IMessage } from "../utils/interfaces";
 import axios from "axios";
 import { serverURL } from "../utils/serverURL";
@@ -9,7 +9,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
+import { Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 
@@ -46,6 +46,8 @@ const MessageModal: React.FC<Props> = ({
 	const [messagesError, setMessagesError] = useState<string>();
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 
+	const ref = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
 		if (isOpen) {
 			setComponentLoading(true);
@@ -67,7 +69,13 @@ const MessageModal: React.FC<Props> = ({
 					setComponentLoading(false);
 				});
 		}
-	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
+	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]); //eslint-disable-line
+
+	useEffect(() => {
+		if (isOpen) {
+			ref.current?.lastElementChild?.scrollIntoView();
+		}
+	}, [isOpen, messages]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -102,7 +110,13 @@ const MessageModal: React.FC<Props> = ({
 						) : messagesError ? (
 							<Typography variant="subtitle1">{messagesError}</Typography>
 						) : (
-							<Box sx={{ overflowY: "auto", maxHeight: 400 }}>
+							<Grid2
+								ref={ref}
+								sx={{
+									overflowY: "auto",
+									maxHeight: 400,
+								}}
+							>
 								{messages?.map((message) => (
 									<Message
 										key={message.uuid}
@@ -115,7 +129,7 @@ const MessageModal: React.FC<Props> = ({
 										setReloadWhenClosed={setReloadWhenClosed}
 									/>
 								))}
-							</Box>
+							</Grid2>
 						)}
 						<SendMessage
 							recipientId={conversation.interlocutorId}
