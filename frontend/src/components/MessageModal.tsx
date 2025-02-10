@@ -45,6 +45,7 @@ const MessageModal: React.FC<Props> = ({
 	const [messages, setMessages] = useState<IMessage[]>();
 	const [messagesError, setMessagesError] = useState<string>();
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
+	const [scroll, setScroll] = useState<boolean>(false);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -57,6 +58,7 @@ const MessageModal: React.FC<Props> = ({
 				})
 				.then((res: { data: IMessage[] }) => {
 					setMessages(res.data);
+					setScroll(true);
 					setMessagesLoading(false);
 					setComponentLoading(false);
 					if (unread > 0) {
@@ -72,10 +74,11 @@ const MessageModal: React.FC<Props> = ({
 	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]); //eslint-disable-line
 
 	useEffect(() => {
-		if (isOpen) {
+		if (isOpen && scroll) {
 			ref.current?.lastElementChild?.scrollIntoView();
+			setScroll(false);
 		}
-	}, [isOpen, messages]);
+	}, [isOpen, messages, scroll]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -114,7 +117,8 @@ const MessageModal: React.FC<Props> = ({
 								ref={ref}
 								sx={{
 									overflowY: "auto",
-									maxHeight: 400,
+									maxHeight: 390,
+									scrollbarGutter: "stable" 
 								}}
 							>
 								{messages?.map((message) => (
@@ -138,6 +142,7 @@ const MessageModal: React.FC<Props> = ({
 							setErrors={setErrors}
 							setComponentLoading={setComponentLoading}
 							setReloadWhenClosed={setReloadWhenClosed}
+							setScroll={setScroll}
 						/>
 					</Grid2>
 				</Grid2>

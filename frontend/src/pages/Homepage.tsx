@@ -21,6 +21,7 @@ const Homepage: React.FC = () => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [cheetsError, setCheetsError] = useState<string>();
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
+	const [scroll, setScroll] = useState<boolean>(false);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -63,6 +64,7 @@ const Homepage: React.FC = () => {
 				.get(`${serverURL}/cheets`, { withCredentials: true })
 				.then((res: { data: ICheet[] }) => {
 					setCheets(res.data);
+					setScroll(true);
 				})
 				.catch(() => {
 					setCheetsError("An unexpected error occured while loading cheets.");
@@ -72,8 +74,11 @@ const Homepage: React.FC = () => {
 	}, []);
 
 	useEffect(() => {
-		ref.current?.firstElementChild?.scrollIntoView();
-	}, [cheets]);
+		if (scroll) {
+			ref.current?.firstElementChild?.scrollIntoView();
+			setScroll(false);
+		}
+	}, [cheets, scroll]);
 
 	return (
 		<Layout
@@ -106,7 +111,7 @@ const Homepage: React.FC = () => {
 						) : cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
-							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500 }}>
+							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
 								{cheets?.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
@@ -129,6 +134,7 @@ const Homepage: React.FC = () => {
 								setCheetsError={setCheetsError}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
+								setScroll = {setScroll}
 							/>
 						) : null}
 					</Fragment>

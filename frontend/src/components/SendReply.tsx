@@ -17,9 +17,10 @@ interface Props {
 	setReplies: (arg: IReply[]) => void;
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
+	setScroll: (arg: boolean) => void;
 }
 
-const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setComponentLoading }) => {
+const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors, setComponentLoading, setScroll }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
@@ -33,6 +34,7 @@ const SendReply: React.FC<Props> = ({ cheetId, isDisabled, setReplies, setErrors
 			})
 			.then((res: { data: IReply[] }) => {
 				setReplies(res.data);
+				setScroll(true);
 			})
 			.catch((error: unknown) => {
 				handleErrors(error, "sending the reply", setErrors);

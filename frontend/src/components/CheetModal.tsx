@@ -37,6 +37,7 @@ const CheetModal: React.FC<Props> = ({
 	const [replies, setReplies] = useState<IReply[]>();
 	const [repliesError, setRepliesError] = useState<string>();
 	const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
+	const [scroll, setScroll] = useState<boolean>(false);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -61,10 +62,11 @@ const CheetModal: React.FC<Props> = ({
 	}, [isOpen, cheet.uuid, setComponentLoading]);
 
 	useEffect(() => {
-		if (isOpen) {
+		if (isOpen && scroll) {
 			ref.current?.firstElementChild?.scrollIntoView();
+			setScroll(false);
 		}
-	}, [isOpen, replies]);
+	}, [isOpen, replies, scroll]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -102,7 +104,7 @@ const CheetModal: React.FC<Props> = ({
 						) : repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 400 }}>
+							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 390 }}>
 								{replies?.map((reply) => (
 									<Reply
 										key={reply.uuid}
@@ -125,6 +127,7 @@ const CheetModal: React.FC<Props> = ({
 								setReplies={setReplies}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
+								setScroll={setScroll}
 							/>
 						) : null}
 					</Grid2>

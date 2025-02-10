@@ -18,6 +18,7 @@ interface Props {
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
 	setReloadWhenClosed: (arg: boolean) => void;
+	setScroll: (arg: boolean) => void;
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -27,6 +28,7 @@ const SendMessage: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	setReloadWhenClosed,
+	setScroll
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -41,6 +43,7 @@ const SendMessage: React.FC<Props> = ({
 			})
 			.then((res: { data: IMessage[] }) => {
 				setMessages(res.data);
+				setScroll(true);
 				setReloadWhenClosed(true);
 			})
 			.catch((error: unknown) => {

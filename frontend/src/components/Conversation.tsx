@@ -4,7 +4,7 @@ import { Card, CardActionArea, CardContent, Grid2, Link, Typography } from "@mui
 import Done from "@mui/icons-material/Done";
 import { ThemeProvider } from "@emotion/react";
 import theme from "../styles/theme";
-import { MarkUnreadChatAlt } from "@mui/icons-material";
+import { PriorityHigh } from "@mui/icons-material";
 import MessageModal from "./MessageModal";
 import { formatDate } from "../utils/formatDate";
 
@@ -68,7 +68,7 @@ const Conversation: React.FC<Props> = ({
 				>
 					<CardContent>
 						<Grid2 container width={600}>
-							<Grid2 size={6}>
+							<Grid2 size={8}>
 								<Typography variant="h6">
 									<Link
 										onClick={(event) => {
@@ -80,7 +80,7 @@ const Conversation: React.FC<Props> = ({
 									</Link>
 								</Typography>
 							</Grid2>
-							<Grid2 size={6}>
+							<Grid2 size={4}>
 								<Typography variant="body2" justifyContent="flex-end">
 									{formatDate(createdAt)}
 								</Typography>
@@ -94,7 +94,7 @@ const Conversation: React.FC<Props> = ({
 										<Done fontSize="small" color="primary" />
 									) : null
 								) : conversation.latestMessage?.isRead ? null : (
-									<MarkUnreadChatAlt fontSize="small" color="primary" />
+									<PriorityHigh fontSize="small" color="primary" />
 								)}
 							</Grid2>
 						</Grid2>

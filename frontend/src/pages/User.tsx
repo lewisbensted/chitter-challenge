@@ -25,6 +25,7 @@ const User: React.FC = () => {
 	const [cheetsError, setCheetsError] = useState<string>();
 	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
+	const [scroll, setScroll] = useState<boolean>(false);
 
 	const { id } = useParams();
 	const navigate = useNavigate();
@@ -104,8 +105,11 @@ const User: React.FC = () => {
 	}, [conversation, userId]);
 
 	useEffect(() => {
-		ref.current?.firstElementChild?.scrollIntoView();
-	}, [cheets]);
+		if (scroll) {
+			ref.current?.firstElementChild?.scrollIntoView();
+			setScroll(false);
+		}
+	}, [cheets, scroll]);
 
 	return (
 		<Layout
@@ -157,7 +161,7 @@ const User: React.FC = () => {
 						) : cheetsError ? (
 							cheetsError
 						) : (
-							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500 }}>
+							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
 								{cheets?.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
@@ -179,6 +183,7 @@ const User: React.FC = () => {
 								setCheets={setCheets}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
+								setScroll={setScroll}
 							/>
 						) : null}
 					</Fragment>

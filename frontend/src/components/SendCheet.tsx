@@ -18,9 +18,17 @@ interface Props {
 	setCheetsError: (arg: string) => void;
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
+	setScroll: (arg: boolean) => void;
 }
 
-const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, setErrors, setComponentLoading }) => {
+const SendCheet: React.FC<Props> = ({
+	isDisabled,
+	setCheets,
+	setCheetsError,
+	setErrors,
+	setComponentLoading,
+	setScroll,
+}) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isLoading, setSubmitLoading] = useState<boolean>(false);
@@ -35,6 +43,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, set
 			})
 			.then((res: { data: ICheet[] }) => {
 				setCheets(res.data);
+				setScroll(true);
 				setCheetsError("");
 			})
 			.catch((error: unknown) => {

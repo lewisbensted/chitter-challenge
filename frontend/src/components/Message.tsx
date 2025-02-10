@@ -73,44 +73,57 @@ const Message: React.FC<Props> = ({
 				<Grid2 container justifyContent={message.sender.uuid === userId ? "" : "flex-end"}>
 					<Grid2 size={6}>
 						<CardContent>
-							{isEditing ? (
-								<Box
-									component="form"
-									onSubmit={handleSubmit(onSubmit)}
-									id={`edit-message-${message.uuid}`}
-								>
-									<TextField
-										component="form"
-										onSubmit={handleSubmit(onSubmit)}
-										id="edit-message"
-										{...register("text")}
-										type="text"
-										defaultValue={message.text}
-										variant="standard"
-									/>
-								</Box>
-							) : (
-								<Typography
-									justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
-									textAlign={message.sender.uuid === userId ? "left" : "right"}
-									fontWeight={!message.isRead && message.recipient.uuid === userId ? "bold" : ""}
-								>
-									{message.text}
-								</Typography>
-							)}
-							<Typography
-								variant="body2"
-								justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
-								textAlign={message.sender.uuid === userId ? "left" : "right"}
-							>
-								{isEdited ? <Edit fontSize="small" color="primary" /> : null}
-								{formatDate(isEdited ? updatedAt : createdAt)}
-							</Typography>
+							<Grid2 container>
+								<Grid2 size={message.isRead && userId == message.sender.uuid ? 11 : 12}>
+									{isEditing ? (
+										<Box
+											component="form"
+											onSubmit={handleSubmit(onSubmit)}
+											id={`edit-message-${message.uuid}`}
+										>
+											<TextField
+												component="form"
+												onSubmit={handleSubmit(onSubmit)}
+												id="edit-message"
+												{...register("text")}
+												type="text"
+												defaultValue={message.text}
+												variant="standard"
+											/>
+										</Box>
+									) : (
+										<Typography
+											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
+											textAlign={message.sender.uuid === userId ? "left" : "right"}
+											fontWeight={
+												!message.isRead && message.recipient.uuid === userId ? "bold" : ""
+											}
+										>
+											{message.text}
+										</Typography>
+									)}
+								</Grid2>
+								{message.sender.uuid === userId && message.isRead ? (
+									<Grid2 size={1} display="flex" justifyContent="center">
+										<Done fontSize="small" color="primary" />
+									</Grid2>
+								) : null}
+								<Grid2 size={12}>
+									<Typography
+										variant="body2"
+										justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
+										textAlign={message.sender.uuid === userId ? "left" : "right"}
+									>
+										{isEdited ? <Edit fontSize="small" color="primary" /> : null}
+										{formatDate(isEdited ? updatedAt : createdAt)}
+									</Typography>
+								</Grid2>
+							</Grid2>
 						</CardContent>
 					</Grid2>
 
 					{message.sender.uuid === userId ? (
-						<Grid2 size={1.3} container>
+						<Grid2 size={1.5} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>
 									<Grid2 size={1}>
