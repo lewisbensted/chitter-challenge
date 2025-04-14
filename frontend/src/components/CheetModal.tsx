@@ -22,6 +22,7 @@ interface Props {
 	setCheets: (arg: ICheet[]) => void;
 	isComponentLoading: boolean;
 	setComponentLoading: (arg: boolean) => void;
+	numberOfCheets: number
 }
 
 const CheetModal: React.FC<Props> = ({
@@ -32,6 +33,7 @@ const CheetModal: React.FC<Props> = ({
 	setCheets,
 	setComponentLoading,
 	isComponentLoading,
+	numberOfCheets
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [replies, setReplies] = useState<IReply[]>();
@@ -94,6 +96,7 @@ const CheetModal: React.FC<Props> = ({
 							isComponentLoading={isComponentLoading}
 							isModalView={true}
 							closeModal={closeModal}
+							numberOfCheets={numberOfCheets}
 						/>
 						<Divider />
 

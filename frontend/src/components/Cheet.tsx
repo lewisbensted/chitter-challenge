@@ -33,6 +33,7 @@ interface Props {
 	setComponentLoading: (arg: boolean) => void;
 	isModalView: boolean;
 	closeModal?: () => void;
+	numberOfCheets: number
 }
 
 const Cheet: React.FC<Props> = ({
@@ -43,6 +44,7 @@ const Cheet: React.FC<Props> = ({
 	setComponentLoading,
 	isComponentLoading,
 	isModalView,
+	numberOfCheets
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit } = useForm<{ text: string }>();
@@ -55,7 +57,7 @@ const Cheet: React.FC<Props> = ({
 		setEditLoading(true);
 		setComponentLoading(true);
 		await axios
-			.put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, data, {
+			.put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?page=0&take=${numberOfCheets}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: ICheet[] }) => {
@@ -86,6 +88,7 @@ const Cheet: React.FC<Props> = ({
 					setCheets={setCheets}
 					isComponentLoading={isComponentLoading}
 					setComponentLoading={setComponentLoading}
+					numberOfCheets={numberOfCheets}
 				/>
 			)}
 			<Card>
@@ -198,7 +201,7 @@ const Cheet: React.FC<Props> = ({
 														.delete(
 															`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${
 																cheet.uuid
-															}`,
+															}?page=0&take=${numberOfCheets}`,
 															{
 																withCredentials: true,
 															}

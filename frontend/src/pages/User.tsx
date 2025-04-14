@@ -19,7 +19,7 @@ const User: React.FC = () => {
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [conversation, setConversation] = useState<IConversation>();
-	const [cheets, setCheets] = useState<ICheet[]>();
+	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 	const [cheetsError, setCheetsError] = useState<string>();
@@ -172,6 +172,7 @@ const User: React.FC = () => {
 										setComponentLoading={setComponentLoading}
 										isComponentLoading={isComponentLoading}
 										isModalView={false}
+										numberOfCheets={cheets.length}
 									/>
 								))}
 							</Grid2>
@@ -184,6 +185,7 @@ const User: React.FC = () => {
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								setScroll={setScroll}
+								numberOfCheets={cheets.length}
 							/>
 						) : null}
 					</Fragment>
