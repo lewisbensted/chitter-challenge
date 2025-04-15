@@ -23,10 +23,9 @@ const Homepage: React.FC = () => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
+	const [page, setPage] = useState<number>(0);
 
 	const ref = useRef<HTMLDivElement>(null);
-
-	const [page, setPage] = useState<number>(0);
 
 	useEffect(() => {
 		axios

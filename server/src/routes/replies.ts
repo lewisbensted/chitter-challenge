@@ -29,22 +29,27 @@ export const replyExtension = Prisma.defineExtension({
 	},
 });
 
-export const fetchReplies = async (cheetId: number) => {
+export const fetchReplies = async (page: number, take: number, cheetId: number) => {
+	take = isNaN(take) ? 10 : take;
+	page = isNaN(page) ? 0 : page;
+
 	const replies = await prisma.reply.findMany({
 		include: { cheet: { omit: { id: true, userId: true } }, user: { omit: { id: true } } },
 		omit: { id: true, cheetId: true, userId: true },
 		where: {
 			cheet: { id: cheetId },
 		},
+		take: take,
+		skip: page * take,
+		orderBy: { createdAt: "desc" },
 	});
-	replies.sort((replyA, replyB) => replyB.createdAt.valueOf() - replyA.createdAt.valueOf());
 	return replies;
 };
 
 router.get("/", async (req: Request, res: Response) => {
 	try {
 		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-		const replies = await fetchReplies(cheet.id);
+		const replies = await fetchReplies(Number(req.query.page), Number(req.query.take), cheet.id);
 		res.status(200).send(replies);
 	} catch (error) {
 		console.error("Error retrieving replies from the database:\n" + logError(error));
@@ -55,7 +60,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
 	const date = new Date();
 	try {
-		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+		let cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		await prisma.$extends(replyExtension).reply.create({
 			data: {
 				userId: req.session.user!.id,
@@ -65,7 +70,16 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 				updatedAt: date,
 			},
 		});
-		const replies = await fetchReplies(cheet.id);
+		cheet = await prisma.cheet.update({
+			where: {
+				id: cheet.id,
+			},
+			data: {
+				hasReplies:true,
+				updatedAt: cheet.updatedAt
+			},
+		});
+		const replies = await fetchReplies(Number(req.query.page), Number(req.query.take), cheet.id);
 		res.status(201).send(replies);
 	} catch (error) {
 		console.error("Error adding reply to the database:\n" + logError(error));
@@ -94,7 +108,7 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 						},
 					});
 				}
-				const replies = await fetchReplies(cheet.id);
+				const replies = await fetchReplies(Number(req.query.page), Number(req.query.take), cheet.id);
 				res.status(200).send(replies);
 			} else {
 				res.status(403).send(["Cheet IDs do not match."]);
@@ -122,7 +136,7 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 						id: targetReply.id,
 					},
 				});
-				const replies = await fetchReplies(cheet.id);
+				const replies = await fetchReplies(Number(req.query.page), Number(req.query.take), cheet.id);
 				res.status(200).send(replies);
 			} else {
 				res.status(403).send(["Cheet IDs do not match."]);

@@ -11,6 +11,7 @@ export interface ICheet {
 	createdAt: string;
 	updatedAt: string;
 	user: IUser;
+	hasReplies: boolean;
 }
 
 export interface IReply {

@@ -39,6 +39,7 @@ model Cheet {
   text        String      @db.VarChar(50)
   createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
   updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
+  hasReplies  Boolean     @default(false) @map(name: "has_replies")
   replies     Reply[]
 
   @@unique([id, uuid])

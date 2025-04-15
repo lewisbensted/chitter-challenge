@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ICheet } from "../utils/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
@@ -33,7 +33,7 @@ interface Props {
 	setComponentLoading: (arg: boolean) => void;
 	isModalView: boolean;
 	closeModal?: () => void;
-	numberOfCheets: number
+	numberOfCheets: number;
 }
 
 const Cheet: React.FC<Props> = ({
@@ -44,7 +44,7 @@ const Cheet: React.FC<Props> = ({
 	setComponentLoading,
 	isComponentLoading,
 	isModalView,
-	numberOfCheets
+	numberOfCheets,
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit } = useForm<{ text: string }>();
@@ -52,14 +52,19 @@ const Cheet: React.FC<Props> = ({
 	const [isModalOpen, setModalOpen] = useState<boolean>(false);
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		setEditLoading(true);
 		setComponentLoading(true);
 		await axios
-			.put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?page=0&take=${numberOfCheets}`, data, {
-				withCredentials: true,
-			})
+			.put(
+				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?page=0&take=${numberOfCheets}`,
+				data,
+				{
+					withCredentials: true,
+				}
+			)
 			.then((res: { data: ICheet[] }) => {
 				setCheets(res.data);
 			})
@@ -75,6 +80,23 @@ const Cheet: React.FC<Props> = ({
 	const updatedAt = new Date(cheet.updatedAt);
 	const isEdited = updatedAt > createdAt;
 
+	useEffect(() => {
+		void (async () => {
+			setComponentLoading(true);
+			await axios
+				.get(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, {
+					withCredentials: true,
+				})
+				.then((res) => {
+					setCheets(res.data)
+				})
+				.catch((error: unknown) => {
+					handleErrors(error, "loading the cheet", setErrors);
+				});
+			setComponentLoading(false);
+		})();
+	}, [reloadTrigger]);
+
 	return (
 		<ThemeProvider theme={theme}>
 			{isModalView ? null : (
@@ -89,6 +111,8 @@ const Cheet: React.FC<Props> = ({
 					isComponentLoading={isComponentLoading}
 					setComponentLoading={setComponentLoading}
 					numberOfCheets={numberOfCheets}
+					reloadTrigger = {reloadTrigger}
+					toggleReloadTrigger={toggleReloadTrigger}
 				/>
 			)}
 			<Card>
@@ -165,7 +189,7 @@ const Cheet: React.FC<Props> = ({
 										) : isEditing ? (
 											<IconButton
 												type="submit"
-												disabled={isComponentLoading}
+												disabled={isComponentLoading || cheet.hasReplies}
 												form={`edit-cheet-${cheet.uuid}`}
 												key={`edit-cheet-${cheet.uuid}`}
 												color="primary"
@@ -178,6 +202,7 @@ const Cheet: React.FC<Props> = ({
 													setEditing(true);
 												}}
 												color="primary"
+												disabled={isComponentLoading || cheet.hasReplies}
 											>
 												<Edit />
 											</IconButton>

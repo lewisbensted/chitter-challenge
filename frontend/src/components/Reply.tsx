@@ -32,6 +32,7 @@ interface Props {
 	reply: IReply;
 	cheetId: string;
 	userId?: string;
+	numberOfReplies: number
 }
 
 const Reply: React.FC<Props> = ({
@@ -42,6 +43,7 @@ const Reply: React.FC<Props> = ({
 	setReplies,
 	setErrors,
 	userId,
+	numberOfReplies
 }) => {
 	const { register, handleSubmit } = useForm<{ text: string }>();
 	const [isEditing, setEditing] = useState<boolean>(false);
@@ -52,7 +54,7 @@ const Reply: React.FC<Props> = ({
 		setEditLoading(true);
 		setComponentLoading(true);
 		await axios
-			.put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}`, data, {
+			.put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}?page=0&take=${numberOfReplies}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: IReply[] }) => {
@@ -162,7 +164,7 @@ const Reply: React.FC<Props> = ({
 													setComponentLoading(true);
 													await axios
 														.delete(
-															`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`,
+															`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}?page=0&take=${numberOfReplies}`,
 															{
 																withCredentials: true,
 															}
