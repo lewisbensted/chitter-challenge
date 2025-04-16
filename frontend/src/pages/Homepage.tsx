@@ -9,7 +9,7 @@ import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
-import { Grid2, Typography } from "@mui/material";
+import { Button, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 
 const Homepage: React.FC = () => {
@@ -17,11 +17,13 @@ const Homepage: React.FC = () => {
 	const [isPageLoading, setPageLoading] = useState<boolean>(true);
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-	const [cheets, setCheets] = useState<ICheet[]>();
+	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [errors, setErrors] = useState<string[]>([]);
 	const [cheetsError, setCheetsError] = useState<string>();
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
-	const [scroll, setScroll] = useState<boolean>(false);
+	const [scrollUp, setScrollUp] = useState<boolean>(false);
+	const [scrollDown, setScrollDown] = useState<boolean>(false);
+	const [page, setPage] = useState<number>(0);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -61,24 +63,27 @@ const Homepage: React.FC = () => {
 		void (async () => {
 			setCheetsLoading(true);
 			await axios
-				.get(`${serverURL}/cheets`, { withCredentials: true })
+				.get(`${serverURL}/cheets?page=${page}&take=5`, { withCredentials: true })
 				.then((res: { data: ICheet[] }) => {
-					setCheets(res.data);
-					setScroll(true);
+					setCheets([...cheets, ...res.data]);
+					setScrollDown(true)
 				})
 				.catch(() => {
 					setCheetsError("An unexpected error occured while loading cheets.");
 				});
-			setCheetsLoading(false);
+			setCheetsLoading(false)
 		})();
-	}, []);
+	}, [page]);
 
 	useEffect(() => {
-		if (scroll) {
+		if (scrollUp) {
 			ref.current?.firstElementChild?.scrollIntoView();
-			setScroll(false);
+			setScrollUp(false);
+		} else if (scrollDown) {
+			ref.current?.lastElementChild?.scrollIntoView();
+			setScrollDown(false);
 		}
-	}, [cheets, scroll]);
+	}, [cheets, scrollUp, scrollDown]);
 
 	return (
 		<Layout
@@ -104,11 +109,7 @@ const Homepage: React.FC = () => {
 					</FlexBox>
 				) : (
 					<Fragment>
-						{isCheetsLoading ? (
-							<FlexBox>
-								<CircularProgress thickness={5} />
-							</FlexBox>
-						) : cheetsError ? (
+						{cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
@@ -122,11 +123,24 @@ const Homepage: React.FC = () => {
 										setComponentLoading={setComponentLoading}
 										isComponentLoading={isComponentLoading}
 										isModalView={false}
+										numberOfCheets={cheets.length}
 									/>
 								))}
+								{isCheetsLoading ? (
+									<FlexBox>
+										<CircularProgress thickness={5} />
+									</FlexBox>
+								) : null}
 							</Grid2>
 						)}
 
+						<Button
+							onClick={() => {
+								setPage(page + 1);
+							}}
+						>
+							LOAD MORE
+						</Button>
 						{userId ? (
 							<SubmitCheet
 								isDisabled={isComponentLoading || isCheetsLoading}
@@ -134,7 +148,8 @@ const Homepage: React.FC = () => {
 								setCheetsError={setCheetsError}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								setScroll = {setScroll}
+								setScroll={setScrollUp}
+								numberOfCheets={cheets.length}
 							/>
 						) : null}
 					</Fragment>

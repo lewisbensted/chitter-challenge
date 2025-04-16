@@ -19,6 +19,7 @@ interface Props {
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
 	setScroll: (arg: boolean) => void;
+	numberOfCheets: number;
 }
 
 const SendCheet: React.FC<Props> = ({
@@ -28,6 +29,7 @@ const SendCheet: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	setScroll,
+	numberOfCheets,
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
@@ -38,7 +40,7 @@ const SendCheet: React.FC<Props> = ({
 		setComponentLoading(true);
 		reset();
 		await axios
-			.post(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, data, {
+			.post(`${serverURL + (id ? `/users/${id}/` : "/")}cheets?page=0&take=${numberOfCheets + 1}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: ICheet[] }) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ICheet } from "../utils/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
@@ -33,6 +33,7 @@ interface Props {
 	setComponentLoading: (arg: boolean) => void;
 	isModalView: boolean;
 	closeModal?: () => void;
+	numberOfCheets: number;
 }
 
 const Cheet: React.FC<Props> = ({
@@ -43,6 +44,7 @@ const Cheet: React.FC<Props> = ({
 	setComponentLoading,
 	isComponentLoading,
 	isModalView,
+	numberOfCheets,
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit } = useForm<{ text: string }>();
@@ -50,14 +52,19 @@ const Cheet: React.FC<Props> = ({
 	const [isModalOpen, setModalOpen] = useState<boolean>(false);
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		setEditLoading(true);
 		setComponentLoading(true);
 		await axios
-			.put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, data, {
-				withCredentials: true,
-			})
+			.put(
+				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?page=0&take=${numberOfCheets}`,
+				data,
+				{
+					withCredentials: true,
+				}
+			)
 			.then((res: { data: ICheet[] }) => {
 				setCheets(res.data);
 			})
@@ -69,9 +76,29 @@ const Cheet: React.FC<Props> = ({
 		setComponentLoading(false);
 	};
 
+	const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 	const createdAt = new Date(cheet.createdAt);
 	const updatedAt = new Date(cheet.updatedAt);
 	const isEdited = updatedAt > createdAt;
+
+	const isEditDisabled = isComponentLoading || cheet.hasReplies || createdAt < oneHourAgo;
+
+	useEffect(() => {
+		void (async () => {
+			setComponentLoading(true);
+			await axios
+				.get(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, {
+					withCredentials: true,
+				})
+				.then((res) => {
+					setCheets(res.data);
+				})
+				.catch((error: unknown) => {
+					handleErrors(error, "loading the cheets", setErrors);
+				});
+			setComponentLoading(false);
+		})();
+	}, [reloadTrigger]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -86,6 +113,9 @@ const Cheet: React.FC<Props> = ({
 					setCheets={setCheets}
 					isComponentLoading={isComponentLoading}
 					setComponentLoading={setComponentLoading}
+					numberOfCheets={numberOfCheets}
+					reloadTrigger={reloadTrigger}
+					toggleReloadTrigger={toggleReloadTrigger}
 				/>
 			)}
 			<Card>
@@ -162,7 +192,7 @@ const Cheet: React.FC<Props> = ({
 										) : isEditing ? (
 											<IconButton
 												type="submit"
-												disabled={isComponentLoading}
+												disabled={isEditDisabled}
 												form={`edit-cheet-${cheet.uuid}`}
 												key={`edit-cheet-${cheet.uuid}`}
 												color="primary"
@@ -175,6 +205,7 @@ const Cheet: React.FC<Props> = ({
 													setEditing(true);
 												}}
 												color="primary"
+												disabled={isEditDisabled}
 											>
 												<Edit />
 											</IconButton>
@@ -198,7 +229,7 @@ const Cheet: React.FC<Props> = ({
 														.delete(
 															`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${
 																cheet.uuid
-															}`,
+															}?page=0&take=${numberOfCheets}`,
 															{
 																withCredentials: true,
 															}

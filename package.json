@@ -24,7 +24,8 @@
 		"date-fns-tz": "^3.2.0",
 		"dotenv-cli": "^7.4.2",
 		"dotenv-expand": "^11.0.6",
-		"node": "^22.13.0"
+		"node": "^23.11.0",
+		"npm": "^11.3.0"
 	},
 	"devDependencies": {
 		"@stylistic/eslint-plugin": "^2.13.0",
