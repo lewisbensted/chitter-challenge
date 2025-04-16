@@ -76,9 +76,12 @@ const Cheet: React.FC<Props> = ({
 		setComponentLoading(false);
 	};
 
+	const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 	const createdAt = new Date(cheet.createdAt);
 	const updatedAt = new Date(cheet.updatedAt);
 	const isEdited = updatedAt > createdAt;
+
+	const isEditDisabled = isComponentLoading || cheet.hasReplies || createdAt < oneHourAgo;
 
 	useEffect(() => {
 		void (async () => {
@@ -88,10 +91,10 @@ const Cheet: React.FC<Props> = ({
 					withCredentials: true,
 				})
 				.then((res) => {
-					setCheets(res.data)
+					setCheets(res.data);
 				})
 				.catch((error: unknown) => {
-					handleErrors(error, "loading the cheet", setErrors);
+					handleErrors(error, "loading the cheets", setErrors);
 				});
 			setComponentLoading(false);
 		})();
@@ -111,7 +114,7 @@ const Cheet: React.FC<Props> = ({
 					isComponentLoading={isComponentLoading}
 					setComponentLoading={setComponentLoading}
 					numberOfCheets={numberOfCheets}
-					reloadTrigger = {reloadTrigger}
+					reloadTrigger={reloadTrigger}
 					toggleReloadTrigger={toggleReloadTrigger}
 				/>
 			)}
@@ -189,7 +192,7 @@ const Cheet: React.FC<Props> = ({
 										) : isEditing ? (
 											<IconButton
 												type="submit"
-												disabled={isComponentLoading || cheet.hasReplies}
+												disabled={isEditDisabled}
 												form={`edit-cheet-${cheet.uuid}`}
 												key={`edit-cheet-${cheet.uuid}`}
 												color="primary"
@@ -202,7 +205,7 @@ const Cheet: React.FC<Props> = ({
 													setEditing(true);
 												}}
 												color="primary"
-												disabled={isComponentLoading || cheet.hasReplies}
+												disabled={isEditDisabled}
 											>
 												<Edit />
 											</IconButton>

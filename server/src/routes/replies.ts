@@ -70,15 +70,17 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 				updatedAt: date,
 			},
 		});
-		cheet = await prisma.cheet.update({
-			where: {
-				id: cheet.id,
-			},
-			data: {
-				hasReplies:true,
-				updatedAt: cheet.updatedAt
-			},
-		});
+		if (!cheet.hasReplies) {
+			await prisma.cheet.update({
+				where: {
+					id: cheet.id,
+				},
+				data: {
+					hasReplies: true,
+					updatedAt: cheet.updatedAt,
+				},
+			});
+		}
 		const replies = await fetchReplies(Number(req.query.page), Number(req.query.take), cheet.id);
 		res.status(201).send(replies);
 	} catch (error) {

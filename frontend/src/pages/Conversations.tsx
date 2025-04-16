@@ -7,7 +7,7 @@ import { serverURL } from "../utils/serverURL";
 import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 
 const Conversations: React.FC = () => {
@@ -92,18 +92,20 @@ const Conversations: React.FC = () => {
 					conversationsError ? (
 						conversationsError
 					) : (
-						conversations?.map((conversation) => (
-							<Conversation
-								key={conversation.interlocutorId}
-								userId={userId}
-								conversation={conversation}
-								isComponentLoading={isComponentLoading}
-								setComponentLoading={setComponentLoading}
-								setConversations={setConversations}
-								reloadTrigger={reloadTrigger}
-								toggleReloadTrigger={toggleReloadTrigger}
-							/>
-						))
+						<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+							{conversations?.map((conversation) => (
+								<Conversation
+									key={conversation.interlocutorId}
+									userId={userId}
+									conversation={conversation}
+									isComponentLoading={isComponentLoading}
+									setComponentLoading={setComponentLoading}
+									setConversations={setConversations}
+									reloadTrigger={reloadTrigger}
+									toggleReloadTrigger={toggleReloadTrigger}
+								/>
+							))}
+						</Grid2>
 					)
 				) : (
 					"Error loading conversations."
