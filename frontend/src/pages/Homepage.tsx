@@ -24,6 +24,7 @@ const Homepage: React.FC = () => {
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
+	const [cursor, setCursor] = useState<string>()
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -63,10 +64,13 @@ const Homepage: React.FC = () => {
 		void (async () => {
 			setCheetsLoading(true);
 			await axios
-				.get(`${serverURL}/cheets?page=${page}&take=5`, { withCredentials: true })
+				.get(`${serverURL}/cheets?cursor=${cursor?cursor:''}&take=5`, { withCredentials: true })
 				.then((res: { data: ICheet[] }) => {
 					setCheets([...cheets, ...res.data]);
 					setScrollDown(true)
+					if(res.data.length){
+						setCursor(res.data[res.data.length-1].uuid)
+					}
 				})
 				.catch(() => {
 					setCheetsError("An unexpected error occured while loading cheets.");

@@ -59,7 +59,7 @@ const Cheet: React.FC<Props> = ({
 		setComponentLoading(true);
 		await axios
 			.put(
-				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?page=0&take=${numberOfCheets}`,
+				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
 				data,
 				{
 					withCredentials: true,
@@ -241,7 +241,7 @@ const Cheet: React.FC<Props> = ({
 														.delete(
 															`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${
 																cheet.uuid
-															}?page=0&take=${numberOfCheets}`,
+															}?take=${numberOfCheets}`,
 															{
 																withCredentials: true,
 															}

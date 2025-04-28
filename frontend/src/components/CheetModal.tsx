@@ -46,6 +46,7 @@ const CheetModal: React.FC<Props> = ({
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
+	const [cursor, setCursor] = useState<string>()
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -53,7 +54,7 @@ const CheetModal: React.FC<Props> = ({
 		if (isOpen) {
 			setComponentLoading(true);
 			axios
-				.get(`${serverURL}/cheets/${cheet.uuid}/replies?page=${page}&take=5`, {
+				.get(`${serverURL}/cheets/${cheet.uuid}/replies?cursor=${cursor?cursor:''}&take=5`, {
 					withCredentials: true,
 				})
 				.then((res: { data: IReply[] }) => {
@@ -62,6 +63,9 @@ const CheetModal: React.FC<Props> = ({
 					setComponentLoading(false);
 					if (page > 0) {
 						setScrollDown(true);
+					}
+					if(res.data.length){
+						setCursor(res.data[res.data.length-1].uuid)
 					}
 				})
 				.catch(() => {
