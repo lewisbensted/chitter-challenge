@@ -24,9 +24,8 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 				{ recipientId: userId, senderId: interlocutor ? interlocutor.id : undefined },
 			],
 		},
+		orderBy: { createdAt: "desc" },
 	});
-
-	messages.sort((messageA, messageB) => messageB.createdAt.valueOf() - messageA.createdAt.valueOf());
 
 	const conversations = messages.reduce(
 		(result: IConversation[], message) => {

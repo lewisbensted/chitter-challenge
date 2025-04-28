@@ -39,8 +39,8 @@ export const fetchMessages = async (userId: number, interlocutorId: number) => {
 				{ senderId: interlocutorId, recipientId: userId },
 			],
 		},
+		orderBy: { createdAt: "asc" },
 	});
-	messages.sort((messageA, messageB) => messageA.createdAt.valueOf() - messageB.createdAt.valueOf());
 	return messages;
 };
 

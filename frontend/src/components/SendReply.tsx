@@ -42,7 +42,7 @@ const SendReply: React.FC<Props> = ({
 		setComponentLoading(true);
 		reset();
 		await axios
-			.post(`${serverURL}/cheets/${cheetId}/replies?page=0&take=${numberOfReplies + 1}`, data, {
+			.post(`${serverURL}/cheets/${cheetId}/replies?take=${numberOfReplies + 1}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: IReply[] }) => {

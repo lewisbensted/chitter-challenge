@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ICheet } from "../utils/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
@@ -59,7 +59,7 @@ const Cheet: React.FC<Props> = ({
 		setComponentLoading(true);
 		await axios
 			.put(
-				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?page=0&take=${numberOfCheets}`,
+				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
 				data,
 				{
 					withCredentials: true,
@@ -83,21 +83,33 @@ const Cheet: React.FC<Props> = ({
 
 	const isEditDisabled = isComponentLoading || cheet.hasReplies || createdAt < oneHourAgo;
 
+	const useFirstRender = () => {
+		const isFirstRender = useRef<boolean>(true);
+		useEffect(() => {
+			isFirstRender.current = false;
+		}, []);
+		return isFirstRender.current;
+	};
+
+	const isFirstRender= useFirstRender()
+
 	useEffect(() => {
-		void (async () => {
-			setComponentLoading(true);
-			await axios
-				.get(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, {
-					withCredentials: true,
-				})
-				.then((res) => {
-					setCheets(res.data);
-				})
-				.catch((error: unknown) => {
-					handleErrors(error, "loading the cheets", setErrors);
-				});
-			setComponentLoading(false);
-		})();
+		if (!isFirstRender) {
+			void (async () => {
+				setComponentLoading(true);
+				await axios
+					.get(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, {
+						withCredentials: true,
+					})
+					.then((res) => {
+						setCheets(res.data);
+					})
+					.catch((error: unknown) => {
+						handleErrors(error, "loading the cheets", setErrors);
+					});
+				setComponentLoading(false);
+			})();
+		}
 	}, [reloadTrigger]);
 
 	return (
@@ -229,7 +241,7 @@ const Cheet: React.FC<Props> = ({
 														.delete(
 															`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${
 																cheet.uuid
-															}?page=0&take=${numberOfCheets}`,
+															}?take=${numberOfCheets}`,
 															{
 																withCredentials: true,
 															}

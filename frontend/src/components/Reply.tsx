@@ -54,7 +54,7 @@ const Reply: React.FC<Props> = ({
 		setEditLoading(true);
 		setComponentLoading(true);
 		await axios
-			.put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}?page=0&take=${numberOfReplies}`, data, {
+			.put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}?&take=${numberOfReplies}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: IReply[] }) => {
@@ -164,7 +164,7 @@ const Reply: React.FC<Props> = ({
 													setComponentLoading(true);
 													await axios
 														.delete(
-															`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}?page=0&take=${numberOfReplies}`,
+															`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}?take=${numberOfReplies}`,
 															{
 																withCredentials: true,
 															}
