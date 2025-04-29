@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { ICheet } from "../utils/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
@@ -34,6 +34,8 @@ interface Props {
 	isModalView: boolean;
 	closeModal?: () => void;
 	numberOfCheets: number;
+	reloadTrigger: boolean;
+	toggleReloadTrigger: (arg: boolean) => void;
 }
 
 const Cheet: React.FC<Props> = ({
@@ -45,6 +47,8 @@ const Cheet: React.FC<Props> = ({
 	isComponentLoading,
 	isModalView,
 	numberOfCheets,
+	reloadTrigger,
+	toggleReloadTrigger
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit } = useForm<{ text: string }>();
@@ -52,19 +56,14 @@ const Cheet: React.FC<Props> = ({
 	const [isModalOpen, setModalOpen] = useState<boolean>(false);
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
-	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		setEditLoading(true);
 		setComponentLoading(true);
 		await axios
-			.put(
-				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
-				data,
-				{
-					withCredentials: true,
-				}
-			)
+			.put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`, data, {
+				withCredentials: true,
+			})
 			.then((res: { data: ICheet[] }) => {
 				setCheets(res.data);
 			})
@@ -80,37 +79,7 @@ const Cheet: React.FC<Props> = ({
 	const createdAt = new Date(cheet.createdAt);
 	const updatedAt = new Date(cheet.updatedAt);
 	const isEdited = updatedAt > createdAt;
-
 	const isEditDisabled = isComponentLoading || cheet.hasReplies || createdAt < oneHourAgo;
-
-	const useFirstRender = () => {
-		const isFirstRender = useRef<boolean>(true);
-		useEffect(() => {
-			isFirstRender.current = false;
-		}, []);
-		return isFirstRender.current;
-	};
-
-	const isFirstRender= useFirstRender()
-
-	useEffect(() => {
-		if (!isFirstRender) {
-			void (async () => {
-				setComponentLoading(true);
-				await axios
-					.get(`${serverURL + (id ? `/users/${id}/` : "/")}cheets`, {
-						withCredentials: true,
-					})
-					.then((res) => {
-						setCheets(res.data);
-					})
-					.catch((error: unknown) => {
-						handleErrors(error, "loading the cheets", setErrors);
-					});
-				setComponentLoading(false);
-			})();
-		}
-	}, [reloadTrigger]);
 
 	return (
 		<ThemeProvider theme={theme}>

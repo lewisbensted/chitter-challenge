@@ -20,7 +20,7 @@ interface Props {
 	setScroll: (arg: boolean) => void;
 	numberOfReplies: number;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: (arg:boolean) => void
+	toggleReloadTrigger: (arg: boolean) => void;
 }
 
 const SendReply: React.FC<Props> = ({
@@ -32,7 +32,7 @@ const SendReply: React.FC<Props> = ({
 	setScroll,
 	numberOfReplies,
 	reloadTrigger,
-	toggleReloadTrigger
+	toggleReloadTrigger,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -48,8 +48,8 @@ const SendReply: React.FC<Props> = ({
 			.then((res: { data: IReply[] }) => {
 				setReplies(res.data);
 				setScroll(true);
-				if (numberOfReplies == 0){
-					toggleReloadTrigger(!reloadTrigger)
+				if (numberOfReplies === 0) {
+					toggleReloadTrigger(!reloadTrigger);
 				}
 			})
 			.catch((error: unknown) => {

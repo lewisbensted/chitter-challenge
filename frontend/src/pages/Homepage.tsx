@@ -24,7 +24,8 @@ const Homepage: React.FC = () => {
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
-	const [cursor, setCursor] = useState<string>()
+	const [cursor, setCursor] = useState<string>();
+	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -64,20 +65,40 @@ const Homepage: React.FC = () => {
 		void (async () => {
 			setCheetsLoading(true);
 			await axios
-				.get(`${serverURL}/cheets?cursor=${cursor?cursor:''}&take=5`, { withCredentials: true })
+				.get(`${serverURL}/cheets?${cursor ? `cursor=${cursor}` : ""}&take=5`, { withCredentials: true })
 				.then((res: { data: ICheet[] }) => {
 					setCheets([...cheets, ...res.data]);
-					setScrollDown(true)
-					if(res.data.length){
-						setCursor(res.data[res.data.length-1].uuid)
+					setScrollDown(true);
+					if (res.data.length) {
+						setCursor(res.data[res.data.length - 1].uuid);
 					}
 				})
 				.catch(() => {
 					setCheetsError("An unexpected error occured while loading cheets.");
 				});
-			setCheetsLoading(false)
+			setCheetsLoading(false);
 		})();
 	}, [page]);
+
+	const isMounted = useRef(false);
+	useEffect(() => {
+		if (!isMounted.current) {
+			isMounted.current = true;
+			return;
+		}
+		void (async () => {
+			setComponentLoading(true);
+			await axios
+				.get(`${serverURL}/cheets?&take=${cheets.length}`, { withCredentials: true })
+				.then((res: { data: ICheet[] }) => {
+					setCheets(res.data);
+				})
+				.catch((error: unknown) => {
+					handleErrors(error, "loading the cheets", setErrors);
+				});
+			setComponentLoading(false);
+		})();
+	}, [reloadTrigger, cheets.length]);
 
 	useEffect(() => {
 		if (scrollUp) {
@@ -117,7 +138,7 @@ const Homepage: React.FC = () => {
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets?.map((cheet) => (
+								{cheets.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
 										cheet={cheet}
@@ -128,6 +149,8 @@ const Homepage: React.FC = () => {
 										isComponentLoading={isComponentLoading}
 										isModalView={false}
 										numberOfCheets={cheets.length}
+										reloadTrigger={reloadTrigger}
+										toggleReloadTrigger={toggleReloadTrigger}
 									/>
 								))}
 								{isCheetsLoading ? (

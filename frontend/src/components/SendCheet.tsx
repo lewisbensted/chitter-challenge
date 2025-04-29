@@ -54,6 +54,7 @@ const SendCheet: React.FC<Props> = ({
 		setSubmitLoading(false);
 		setComponentLoading(false);
 	};
+	
 	return (
 		<ThemeProvider theme={theme}>
 			<FlexBox>

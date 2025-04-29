@@ -74,7 +74,7 @@ const Message: React.FC<Props> = ({
 					<Grid2 size={6}>
 						<CardContent>
 							<Grid2 container>
-								<Grid2 size={message.isRead && userId == message.sender.uuid ? 11 : 12}>
+								<Grid2 size={message.isRead && userId === message.sender.uuid ? 11 : 12}>
 									{isEditing ? (
 										<Box
 											component="form"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
 import { IConversation } from "../utils/interfaces";
@@ -37,7 +37,12 @@ const Conversations: React.FC = () => {
 			});
 	}, [navigate]);
 
+	const isMounted = useRef(false);
 	useEffect(() => {
+		if (!isMounted.current) {
+			isMounted.current = true;
+			return;
+		}
 		if (userId) {
 			void (async () => {
 				setComponentLoading(true);

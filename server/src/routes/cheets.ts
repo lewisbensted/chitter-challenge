@@ -29,8 +29,8 @@ export const cheetExtension = Prisma.defineExtension({
 	},
 });
 
-export const fetchCheets = async (take: number, cursor: string, userId?: number) => {
-	take = isNaN(take) ? 10 : take;
+export const fetchCheets = async (userId?: number, cursor?: string, take?: number) => {
+	take = isNaN(take!) ? 10 : take;
 
 	const cheets = await prisma.cheet.findMany({
 		include: { user: { omit: { id: true } } },
@@ -52,8 +52,8 @@ router.get("/", async (req: Request, res: Response) => {
 		if (req.params.userId) {
 			user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
-
-		const cheets = await fetchCheets(Number(req.query.take), req.query.cursor as string, user?.id);
+		req.query.take = req.query.take === "" ? undefined : req.query.take;
+		const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
 		res.status(200).send(cheets);
 	} catch (error) {
 		console.error("Error retrieving cheets from the database:\n" + logError(error));
@@ -76,7 +76,8 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 				updatedAt: date,
 			},
 		});
-		const cheets = await fetchCheets(Number(req.query.take), req.query.cursor as string, user?.id);
+		req.query.take = req.query.take === "" ? undefined : req.query.take;
+		const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
 		res.status(201).send(cheets);
 	} catch (error) {
 		console.error("Error adding cheet to the database:\n" + logError(error));
@@ -106,7 +107,8 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 					},
 				});
 			}
-			const cheets = await fetchCheets(Number(req.query.take), req.query.cursor as string, user?.id);
+			req.query.take = req.query.take === "" ? undefined : req.query.take;
+			const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
 			res.status(200).send(cheets);
 		} else {
 			res.status(403).send(["Cannot update someone else's cheet."]);
@@ -130,7 +132,8 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 					id: targetCheet.id,
 				},
 			});
-			const cheets = await fetchCheets(Number(req.query.take), req.query.cursor as string, user?.id);
+			req.query.take = req.query.take === "" ? undefined : req.query.take;
+			const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
 			res.status(200).send(cheets);
 		} else {
 			res.status(403).send(["Cannot delete someone else's cheet."]);

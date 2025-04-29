@@ -29,8 +29,8 @@ export const replyExtension = Prisma.defineExtension({
 	},
 });
 
-export const fetchReplies = async ( take: number,cursor:string, cheetId: number) => {
-	take = isNaN(take) ? 10 : take;
+export const fetchReplies = async (cheetId: number, cursor?: string, take?: number) => {
+	take = isNaN(take!) ? 10 : take;
 
 	const replies = await prisma.reply.findMany({
 		include: { cheet: { omit: { id: true, userId: true } }, user: { omit: { id: true } } },
@@ -39,7 +39,7 @@ export const fetchReplies = async ( take: number,cursor:string, cheetId: number)
 			cheet: { id: cheetId },
 		},
 		take: take,
-		skip: cursor?1:0,
+		skip: cursor ? 1 : 0,
 		cursor: cursor ? { uuid: cursor } : undefined,
 		orderBy: { createdAt: "desc" },
 	});
@@ -49,7 +49,8 @@ export const fetchReplies = async ( take: number,cursor:string, cheetId: number)
 router.get("/", async (req: Request, res: Response) => {
 	try {
 		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-		const replies = await fetchReplies(Number(req.query.take),req.query.cursor as string, cheet.id);
+		req.query.take = req.query.take === "" ? undefined : req.query.take;
+		const replies = await fetchReplies(cheet.id, req.query.cursor as string, Number(req.query.take));
 		res.status(200).send(replies);
 	} catch (error) {
 		console.error("Error retrieving replies from the database:\n" + logError(error));
@@ -60,7 +61,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
 	const date = new Date();
 	try {
-		let cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		await prisma.$extends(replyExtension).reply.create({
 			data: {
 				userId: req.session.user!.id,
@@ -81,7 +82,8 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 				},
 			});
 		}
-		const replies = await fetchReplies(Number(req.query.take),req.query.cursor as string, cheet.id);
+		req.query.take = req.query.take === "" ? undefined : req.query.take;
+		const replies = await fetchReplies(cheet.id, req.query.cursor as string, Number(req.query.take));
 		res.status(201).send(replies);
 	} catch (error) {
 		console.error("Error adding reply to the database:\n" + logError(error));
@@ -110,7 +112,8 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 						},
 					});
 				}
-				const replies = await fetchReplies(Number(req.query.take),req.query.cursor as string, cheet.id);
+				req.query.take = req.query.take === "" ? undefined : req.query.take;
+				const replies = await fetchReplies(cheet.id, req.query.cursor as string, Number(req.query.take));
 				res.status(200).send(replies);
 			} else {
 				res.status(403).send(["Cheet IDs do not match."]);
@@ -138,7 +141,8 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 						id: targetReply.id,
 					},
 				});
-				const replies = await fetchReplies(Number(req.query.take),req.query.cursor as string, cheet.id);
+				req.query.take = req.query.take === "" ? undefined : req.query.take;
+				const replies = await fetchReplies(cheet.id, req.query.cursor as string, Number(req.query.take));
 				res.status(200).send(replies);
 			} else {
 				res.status(403).send(["Cheet IDs do not match."]);
