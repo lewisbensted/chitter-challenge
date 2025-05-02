@@ -71,7 +71,7 @@ const MessageModal: React.FC<Props> = ({
 					setComponentLoading(false);
 				});
 		}
-	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]); //eslint-disable-line
+	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
 
 	useEffect(() => {
 		if (isOpen && scroll) {

@@ -21,60 +21,75 @@ const Conversations: React.FC = () => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const navigate = useNavigate();
 
+	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
 	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then((res: { data: string }) => {
+		const validateUser = async () => {
+			try {
+				const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
 				setUserId(res.data);
-			})
-			.catch((error: unknown) => {
+			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 401) {
 					navigate("/");
 				} else {
 					handleErrors(error, "authenticating the user", setErrors);
 				}
-				setPageLoading(false);
-			});
-	}, [navigate]);
+			} finally {
+				setValidateLoading(false);
+			}
+		};
+		validateUser();
+	}, []);
 
-	const isMounted = useRef(false);
+	const [isConversationsLoading, setConversationsLoading] = useState(true);
 	useEffect(() => {
-		if (!isMounted.current) {
-			isMounted.current = true;
-			return;
-		}
-		if (userId) {
-			void (async () => {
+		if (!userId) return;
+		const fetchConversations = async () => {
+			try {
+				const res = await axios.get(`${serverURL}/conversations`, { withCredentials: true });
+				setConversations(res.data);
+			} catch {
+				setConversationsError("An unexpected error occured while loading conversations.");
+			}
+		};
+
+		const fetchUnread = async () => {
+			const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
+			setUnreadMessages(res.data);
+		};
+
+		const loadData = async () => {
+			try {
 				setComponentLoading(true);
-				await axios
-					.get(`${serverURL}/conversations`, { withCredentials: true })
-					.then((res: { data: IConversation[] }) => {
-						setConversations(res.data);
-					})
-					.catch(() => {
-						setConversationsError("An unexpected error occured while loading conversations.");
-					});
-			})();
-		}
+				await fetchConversations();
+				await fetchUnread();
+			} catch (error: unknown) {
+				handleErrors(error, "loading messages", setErrors);
+			} finally {
+				setTimeout(()=>setComponentLoading(false));
+				setConversationsLoading(false);
+			}
+		};
+
+		loadData();
 	}, [userId, reloadTrigger]);
 
-	useEffect(() => {
-		if (userId) {
-			void (async () => {
-				await axios
-					.get(`${serverURL}/messages/unread`, { withCredentials: true })
-					.then((res: { data: boolean }) => {
-						setUnreadMessages(res.data);
-					});
-				setComponentLoading(false);
-				setPageLoading(false);
-			})();
-		}
-	}, [conversations, userId]);
+	// useEffect(() => {
+	// 	if (userId) {
+	// 		void (async () => {
+	// 			await axios
+	// 				.get(`${serverURL}/messages/unread`, { withCredentials: true })
+	// 				.then((res: { data: boolean }) => {
+	// 					setUnreadMessages(res.data);
+	// 				});
+	// 			setComponentLoading(false);
+	// 			setPageLoading(false);
+	// 		})();
+	// 	}
+	// }, [conversations, userId]);
 
 	return (
 		<Layout
-			isPageLoading={isPageLoading}
+			isPageLoading={isConversationsLoading || isValidateLoading}
 			isComponentLoading={isComponentLoading}
 			setPageLoading={setPageLoading}
 			userId={userId}
@@ -89,7 +104,7 @@ const Conversations: React.FC = () => {
 					}}
 				/>
 				<Typography variant="h4">Messages</Typography>
-				{isPageLoading ? (
+				{isConversationsLoading || isValidateLoading ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />
 					</FlexBox>

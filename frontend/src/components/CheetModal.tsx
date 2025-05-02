@@ -46,26 +46,34 @@ const CheetModal: React.FC<Props> = ({
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
-	const [cursor, setCursor] = useState<string>();
 
-	const ref = useRef<HTMLDivElement>(null);
+	const divRef = useRef<HTMLDivElement>(null);
+	const cursorRef = useRef<string>();
+	const repliesLengthRef = useRef<number>(0);
 
 	useEffect(() => {
 		if (isOpen) {
 			setComponentLoading(true);
 			axios
-				.get(`${serverURL}/cheets/${cheet.uuid}/replies?${cursor ? `cursor=${cursor}` : ""}&take=5`, {
-					withCredentials: true,
-				})
+				.get(
+					`${serverURL}/cheets/${cheet.uuid}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=5`,
+					{
+						withCredentials: true,
+					}
+				)
 				.then((res: { data: IReply[] }) => {
-					setReplies([...replies, ...res.data]);
+					setReplies((replies) => {
+						const updated = [...replies, ...res.data];
+						repliesLengthRef.current = updated.length;
+						return updated;
+					});
 					setRepliesLoading(false);
 					setComponentLoading(false);
 					if (page > 0) {
 						setScrollDown(true);
 					}
 					if (res.data.length) {
-						setCursor(res.data[res.data.length - 1].uuid);
+						cursorRef.current = res.data[res.data.length - 1].uuid;
 					}
 				})
 				.catch(() => {
@@ -79,10 +87,10 @@ const CheetModal: React.FC<Props> = ({
 	useEffect(() => {
 		if (isOpen) {
 			if (scrollUp) {
-				ref.current?.firstElementChild?.scrollIntoView();
+				divRef.current?.firstElementChild?.scrollIntoView();
 				setScrollUp(false);
 			} else if (scrollDown) {
-				ref.current?.lastElementChild?.scrollIntoView();
+				divRef.current?.lastElementChild?.scrollIntoView();
 				setScrollDown(false);
 			}
 		}
@@ -123,7 +131,7 @@ const CheetModal: React.FC<Props> = ({
 						{repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 390 }}>
+							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 390 }}>
 								{replies.map((reply) => (
 									<Reply
 										key={reply.uuid}
@@ -153,7 +161,7 @@ const CheetModal: React.FC<Props> = ({
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								setScroll={setScrollUp}
-								numberOfReplies={replies.length}
+								repliesLengthRef={repliesLengthRef}
 								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}
 							/>
