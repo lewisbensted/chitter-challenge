@@ -14,7 +14,7 @@ import FlexBox from "../styles/FlexBox";
 
 const Homepage: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
-	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
+	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [errors, setErrors] = useState<string[]>([]);
@@ -40,13 +40,13 @@ const Homepage: React.FC = () => {
 				if (axios.isAxiosError(error) && error.response?.status === 401) {
 					setUserId(undefined);
 				} else {
-					handleErrors(error, "authenticating the user", setErrors);
+					handleErrors(error, "authenticating user", setErrors);
 				}
 			} finally {
 				setValidateLoading(false);
 			}
 		};
-		validateUser();
+		void validateUser();
 	}, []);
 
 	useEffect(() => {
@@ -74,13 +74,16 @@ const Homepage: React.FC = () => {
 					withCredentials: true,
 				});
 				const newCheets = res.data
+				console.log(newCheets, ...newCheets)
 				setCheets((cheets) => {
 					const updatedCheets = [...cheets, ...newCheets];
+					
 					cheetsLengthRef.current = updatedCheets.length;
 					return updatedCheets;
 				});
+				setCheetsError('')
 				setScrollDown(true);
-				if (newCheets) {
+				if (newCheets.length) {
 					cursorRef.current = newCheets[newCheets.length - 1].uuid;
 				}
 			} catch (error) {
@@ -89,10 +92,11 @@ const Homepage: React.FC = () => {
 				setCheetsLoading(false);
 			}
 		};
-		fetchCheets();
+		void fetchCheets();
 	}, [page]);
 
 	const hasFetchedCheetsOnce = useRef<boolean>(false);
+	const cheetsErrorOnModalClose = useRef<string>();
 	useEffect(() => {
 		if (!hasFetchedCheetsOnce.current) {
 			hasFetchedCheetsOnce.current = true;
@@ -101,12 +105,14 @@ const Homepage: React.FC = () => {
 		const fetchCheets = async () => {
 			setComponentLoading(true);
 			try {
-				const res = await axios.get<{cheets:ICheet[]}>(`${serverURL}/cheets?take=${cheetsLengthRef.current}`, {
+				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?take=${cheetsLengthRef.current}`, {
 					withCredentials: true,
 				});
-				setCheets(res.data.cheets);
+				setCheets(res.data);
+				setCheetsError('')
 			} catch (error) {
 				handleErrors(error, "loading the cheets", setErrors);
+				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
 			} finally {
 				setComponentLoading(false);
 			}
@@ -128,8 +134,8 @@ const Homepage: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isPageLoading={isValidateLoading || isMessagesLoading}
-			isComponentLoading={isComponentLoading || isCheetsLoading}
+			isPageLoading={isValidateLoading}
+			isComponentLoading={isComponentLoading || isMessagesLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -138,6 +144,8 @@ const Homepage: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
+						setCheetsError(cheetsErrorOnModalClose.current);
+						cheetsErrorOnModalClose.current=undefined
 					}}
 				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>

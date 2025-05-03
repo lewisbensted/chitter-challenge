@@ -15,7 +15,7 @@ import FlexBox from "../styles/FlexBox";
 
 const User: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
-	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
+	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [conversation, setConversation] = useState<IConversation>();
 	const [cheets, setCheets] = useState<ICheet[]>([]);
@@ -52,7 +52,7 @@ const User: React.FC = () => {
 				if (axios.isAxiosError(error) && error.response?.status === 401) {
 					setUserValidated(true);
 				} else {
-					handleErrors(error, "authenticating the user", setErrors);
+					handleErrors(error, "authenticating user", setErrors);
 				}
 			} finally {
 				setValidateLoading(false);
@@ -91,10 +91,11 @@ const User: React.FC = () => {
 				});
 				const newCheets = res.data;
 				setCheets((cheets) => {
-					const updated = [...cheets, ...newCheets];
-					cheetsLengthRef.current = updated.length;
-					return updated;
+					const updatedCheets = [...cheets, ...newCheets];
+					cheetsLengthRef.current = updatedCheets.length;
+					return updatedCheets;
 				});
+				setCheetsError('')
 				setScrollDown(true);
 				if (newCheets.length) {
 					cursorRef.current = newCheets[newCheets.length - 1].uuid;
@@ -124,6 +125,7 @@ const User: React.FC = () => {
 					{ withCredentials: true }
 				);
 				setCheets(res.data);
+				setCheetsError('')
 			} catch (error) {
 				handleErrors(error, "reloading cheets", setErrors);
 				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
@@ -144,7 +146,7 @@ const User: React.FC = () => {
 
 		const fetchConversation = async () => {
 			if (!id) return;
-			const res = await axios.get<IConversation>(`${serverURL}/conversation/${id}`, {
+			const res = await axios.get<IConversation>(`${serverURL}/conversations/${id}`, {
 				withCredentials: true,
 			});
 			setConversation(res.data);
@@ -184,8 +186,8 @@ const User: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isPageLoading={isValidateLoading || isUserLoading || isMessagesLoading}
-			isComponentLoading={isComponentLoading || isCheetsLoading}
+			isPageLoading={isValidateLoading}
+			isComponentLoading={isComponentLoading || isMessagesLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -195,6 +197,7 @@ const User: React.FC = () => {
 					closeModal={() => {
 						setErrors([]);
 						setCheetsError(cheetsErrorOnModalClose.current);
+						cheetsErrorOnModalClose.current=undefined
 					}}
 				/>
 				{isValidateLoading || isUserLoading || isMessagesLoading ? (

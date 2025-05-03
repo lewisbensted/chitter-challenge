@@ -40,7 +40,7 @@ const SendCheet: React.FC<Props> = ({
 		setComponentLoading(true);
 		reset();
 		await axios
-			.post(`${serverURL + (id ? `/users/${id}/` : "/")}cheets?take=${cheetsLengthRef.current + 1}`, data, {
+			.post(`${serverURL + (id ? `/users/${id}` : "")}/cheets?take=${cheetsLengthRef.current + 1}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: ICheet[] }) => {
