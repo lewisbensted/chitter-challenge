@@ -73,14 +73,15 @@ const Homepage: React.FC = () => {
 				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?${cursorParam}&take=5`, {
 					withCredentials: true,
 				});
+				const newCheets = res.data
 				setCheets((cheets) => {
-					const updatedCheets = [...cheets, ...res.data];
+					const updatedCheets = [...cheets, ...newCheets];
 					cheetsLengthRef.current = updatedCheets.length;
 					return updatedCheets;
 				});
 				setScrollDown(true);
-				if (res.data.length) {
-					cursorRef.current = res.data[res.data.length - 1].uuid;
+				if (newCheets) {
+					cursorRef.current = newCheets[newCheets.length - 1].uuid;
 				}
 			} catch (error) {
 				setCheetsError("An unexpected error occured while loading cheets.");
@@ -100,10 +101,10 @@ const Homepage: React.FC = () => {
 		const fetchCheets = async () => {
 			setComponentLoading(true);
 			try {
-				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?take=${cheetsLengthRef.current}`, {
+				const res = await axios.get<{cheets:ICheet[]}>(`${serverURL}/cheets?take=${cheetsLengthRef.current}`, {
 					withCredentials: true,
 				});
-				setCheets(res.data);
+				setCheets(res.data.cheets);
 			} catch (error) {
 				handleErrors(error, "loading the cheets", setErrors);
 			} finally {

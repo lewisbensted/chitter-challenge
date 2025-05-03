@@ -25,7 +25,6 @@ const ConversationIcon: React.FC<Props> = ({
 	toggleReloadTrigger,
 }) => {
 	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
-	const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
 
 	return (
 		<Fragment>
@@ -37,15 +36,10 @@ const ConversationIcon: React.FC<Props> = ({
 				setComponentLoading={setComponentLoading}
 				closeModal={() => {
 					setMessageModalOpen(false);
-					if (reloadWhenClosed) {
-						toggleReloadTrigger(!reloadTrigger);
-						setReloadWhenClosed(false);
-					}
 				}}
 				setConversations={setConversations}
 				reloadTrigger={reloadTrigger}
 				toggleReloadTrigger={toggleReloadTrigger}
-				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
 				onUserPage={true}
 			/>

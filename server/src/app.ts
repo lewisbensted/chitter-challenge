@@ -17,6 +17,7 @@ import path from "path";
 import cors from "cors";
 import conversations from "./routes/conversations.js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
+import user from "./routes/user.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 const SessionStore = MySQLStore(expressSession);
@@ -74,6 +75,7 @@ prisma
 			})
 		);
 
+		app.use("/user", express.json(), user);
 		app.use("/register", express.json(), register);
 		app.use("/login", express.json(), login);
 		app.use("/validate", validate);

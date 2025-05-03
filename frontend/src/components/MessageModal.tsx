@@ -23,7 +23,7 @@ interface Props {
 	setConversations: (arg: IConversation[]) => void;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: (arg: boolean) => void;
-	setReloadWhenClosed: (arg: boolean) => void;
+	setReloadWhenClosed?: (arg: boolean) => void;
 	unread: number;
 	onUserPage: boolean;
 }

@@ -17,7 +17,7 @@ interface Props {
 	setMessages: (arg: IMessage[]) => void;
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
-	setReloadWhenClosed: (arg: boolean) => void;
+	setReloadWhenClosed?: (arg: boolean) => void;
 	setScroll: (arg: boolean) => void;
 }
 
@@ -44,7 +44,10 @@ const SendMessage: React.FC<Props> = ({
 			.then((res: { data: IMessage[] }) => {
 				setMessages(res.data);
 				setScroll(true);
-				setReloadWhenClosed(true);
+				if (setReloadWhenClosed){
+					setReloadWhenClosed(true);
+				}
+				
 			})
 			.catch((error: unknown) => {
 				handleErrors(error, "sending message", setErrors);

@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICheet, IConversation } from "../utils/interfaces";
+import { ICheet, IConversation, IUser } from "../utils/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SubmitCheet from "../components/SendCheet";
@@ -28,23 +28,29 @@ const User: React.FC = () => {
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
+	const [isUserLoading, setUserLoading] = useState(true);
+	const [isMessagesLoading, setMessagesLoading] = useState(true);
+	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
 
 	const divRef = useRef<HTMLDivElement>(null);
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
 
 	const { id } = useParams();
+
+	const [isUserValidated, setUserValidated] = useState(false);
+
 	const navigate = useNavigate();
 
-	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
 	useEffect(() => {
 		const validateUser = async () => {
 			try {
 				const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
 				setUserId(res.data);
+				setUserValidated(true);
 			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserId(undefined);
+					setUserValidated(true);
 				} else {
 					handleErrors(error, "authenticating the user", setErrors);
 				}
@@ -52,8 +58,27 @@ const User: React.FC = () => {
 				setValidateLoading(false);
 			}
 		};
-		validateUser();
+		void validateUser();
 	}, []);
+
+	useEffect(() => {
+		if (!id) return;
+		const fetchUser = async () => {
+			try {
+				const res = await axios.get<IUser>(`${serverURL}/user/${id}`, { withCredentials: true });
+				setUsername(res.data.username);
+			} catch (error) {
+				if (axios.isAxiosError(error) && error.response?.status === 404) {
+					navigate("/");
+				} else {
+					handleErrors(error, "fetching page information", setErrors);
+				}
+			} finally {
+				setUserLoading(false);
+			}
+		};
+		void fetchUser();
+	}, [id]);
 
 	useEffect(() => {
 		if (!id) return;
@@ -64,14 +89,15 @@ const User: React.FC = () => {
 				const res = await axios.get<ICheet[]>(`${serverURL}/users/${id}/cheets?${cursorParam}&take=5`, {
 					withCredentials: true,
 				});
+				const newCheets = res.data;
 				setCheets((cheets) => {
-					const updated = [...cheets, ...res.data];
+					const updated = [...cheets, ...newCheets];
 					cheetsLengthRef.current = updated.length;
 					return updated;
 				});
 				setScrollDown(true);
-				if (res.data.length) {
-					cursorRef.current = res.data[res.data.length - 1].uuid;
+				if (newCheets.length) {
+					cursorRef.current = newCheets[newCheets.length - 1].uuid;
 				}
 			} catch (error) {
 				setCheetsError("An unexpected error occured while loading cheets.");
@@ -79,10 +105,11 @@ const User: React.FC = () => {
 				setCheetsLoading(false);
 			}
 		};
-		fetchCheets();
+		void fetchCheets();
 	}, [id, page]);
 
 	const hasFetchedCheetsOnce = useRef<boolean>(false);
+	const cheetsErrorOnModalClose = useRef<string>();
 	useEffect(() => {
 		if (!id) return;
 		if (!hasFetchedCheetsOnce.current) {
@@ -98,45 +125,32 @@ const User: React.FC = () => {
 				);
 				setCheets(res.data);
 			} catch (error) {
-				handleErrors(error, "loading the cheets", setErrors);
+				handleErrors(error, "reloading cheets", setErrors);
+				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
 			} finally {
 				setComponentLoading(false);
 			}
 		};
-		fetchCheets();
+		void fetchCheets();
 	}, [id, reloadCheetsTrigger]);
 
-	const [isUserLoading, setUserLoading] = useState(true);
-	const [isMessagesLoading, setMessagesLoading] = useState(true);
-	const hasUserLoaded = useRef(false);
-
 	useEffect(() => {
+		if (!userId) {
+			if (isUserValidated) {
+				setMessagesLoading(false);
+			}
+			return;
+		}
+
 		const fetchConversation = async () => {
 			if (!id) return;
-			try {
-				const res = await axios.get<{ conversation: IConversation; username: string }>(
-					`${serverURL}/conversations/${id}`,
-					{ withCredentials: true }
-				);
-				if (res.data.conversation && userId) {
-					setConversation(res.data.conversation);
-				}
-				if (!hasUserLoaded.current) {
-					setUsername(res.data.username);
-					hasUserLoaded.current = true;
-					setUserLoading(false);
-				}
-			} catch (error) {
-				if (axios.isAxiosError(error) && error.response?.status === 404) {
-					navigate("/");
-				} else {
-					throw error;
-				}
-			}
+			const res = await axios.get<IConversation>(`${serverURL}/conversation/${id}`, {
+				withCredentials: true,
+			});
+			setConversation(res.data);
 		};
 
 		const fetchUnread = async () => {
-			if (!userId) return;
 			const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
 			setUnreadMessages(res.data);
 		};
@@ -144,9 +158,8 @@ const User: React.FC = () => {
 		const loadData = async () => {
 			try {
 				setComponentLoading(true);
-				await fetchConversation();
-				await fetchUnread();
-			} catch (error: unknown) {
+				await Promise.all([fetchConversation(), fetchUnread()]);
+			} catch (error) {
 				handleErrors(error, "loading messages", setErrors);
 			} finally {
 				setComponentLoading(false);
@@ -154,8 +167,8 @@ const User: React.FC = () => {
 			}
 		};
 
-		loadData();
-	}, [id, userId, reloadMessagesTrigger, navigate]);
+		void loadData();
+	}, [id, userId, isUserValidated, reloadMessagesTrigger, navigate]);
 
 	useEffect(() => {
 		if (scrollUp) {
@@ -181,6 +194,7 @@ const User: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
+						setCheetsError(cheetsErrorOnModalClose.current);
 					}}
 				/>
 				{isValidateLoading || isUserLoading || isMessagesLoading ? (

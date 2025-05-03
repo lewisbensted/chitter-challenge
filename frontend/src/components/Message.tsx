@@ -28,7 +28,7 @@ interface Props {
 	setMessages: (arg: IMessage[]) => void;
 	isComponentLoading: boolean;
 	setComponentLoading: (arg: boolean) => void;
-	setReloadWhenClosed: (arg: boolean) => void;
+	setReloadWhenClosed?: (arg: boolean) => void;
 }
 
 const Message: React.FC<Props> = ({
@@ -173,7 +173,11 @@ const Message: React.FC<Props> = ({
 														)
 														.then((res: { data: IMessage[] }) => {
 															setMessages(res.data);
-															setReloadWhenClosed(true);
+															if (setReloadWhenClosed){
+																console.log(setReloadWhenClosed)
+																setReloadWhenClosed(true);
+															}
+															
 														})
 														.catch((error: unknown) => {
 															handleErrors(error, "deleting the message", setErrors);
