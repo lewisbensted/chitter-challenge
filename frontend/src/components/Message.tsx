@@ -174,7 +174,6 @@ const Message: React.FC<Props> = ({
 														.then((res: { data: IMessage[] }) => {
 															setMessages(res.data);
 															if (setReloadWhenClosed){
-																console.log(setReloadWhenClosed)
 																setReloadWhenClosed(true);
 															}
 															

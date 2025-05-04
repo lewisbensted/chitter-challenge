@@ -13,6 +13,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
+import validateUser from "../utils/validateUser";
 
 interface RegisterFormFields {
 	firstName: string;
@@ -26,27 +27,25 @@ const Register: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<RegisterFormFields>();
 	const navigate = useNavigate();
 
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
+	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
 	const [userId, setUserId] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 	const [isSuccessOpen, setSuccessOpen] = useState<boolean>(false);
 
 	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then(() => {
-				navigate("/");
-			})
-			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
+			void validateUser(
+				() => {
+					navigate('/')
+				},
+				() => {
 					setUserId(undefined);
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-				setPageLoading(false);
-			});
-	}, [navigate]);
+					
+				},
+				setValidateLoading,
+				setErrors
+			);
+		}, []);
 
 	const onSubmit: SubmitHandler<RegisterFormFields> = async (data) => {
 		setFormLoading(true);
@@ -65,9 +64,9 @@ const Register: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Layout
-				isPageLoading={isPageLoading}
+				isPageLoading={isValidateLoading}
 				isComponentLoading={isFormLoading}
-				setPageLoading={setPageLoading}
+				setPageLoading={setValidateLoading}
 				userId={userId}
 				setUserId={setUserId}
 			>
@@ -81,7 +80,7 @@ const Register: React.FC = () => {
 						}}
 					/>
 					<Typography variant="h4">Register</Typography>
-					{isPageLoading ? (
+					{isValidateLoading ? (
 						<FlexBox>
 							<CircularProgress thickness={5} />
 						</FlexBox>

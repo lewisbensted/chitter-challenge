@@ -9,10 +9,10 @@ import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
+import validateUser from "../utils/validateUser";
 
 const Conversations: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [conversations, setConversations] = useState<IConversation[]>();
 	const [errors, setErrors] = useState<string[]>([]);
@@ -22,30 +22,27 @@ const Conversations: React.FC = () => {
 	const navigate = useNavigate();
 
 	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
+
 	useEffect(() => {
-		const validateUser = async () => {
-			try {
-				const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
-				setUserId(res.data);
-			} catch (error) {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					navigate("/");
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-			} finally {
-				setValidateLoading(false);
-			}
-		};
-		validateUser();
+		void validateUser(
+			(arg: string) => {
+				setUserId(arg);
+			},
+			() => {
+				navigate("/");
+			},
+			setValidateLoading,
+			setErrors
+		);
 	}, []);
 
 	const [isConversationsLoading, setConversationsLoading] = useState(true);
 	useEffect(() => {
 		if (!userId) return;
+
 		const fetchConversations = async () => {
 			try {
-				const res = await axios.get(`${serverURL}/conversations`, { withCredentials: true });
+				const res = await axios.get<IConversation[]>(`${serverURL}/conversations`, { withCredentials: true });
 				setConversations(res.data);
 			} catch {
 				setConversationsError("An unexpected error occured while loading conversations.");
@@ -60,38 +57,23 @@ const Conversations: React.FC = () => {
 		const loadData = async () => {
 			try {
 				setComponentLoading(true);
-				await fetchConversations();
-				await fetchUnread();
+				await Promise.all([fetchConversations(), fetchUnread()]);
 			} catch (error: unknown) {
 				handleErrors(error, "loading messages", setErrors);
 			} finally {
-				setTimeout(()=>setComponentLoading(false));
+				setTimeout(() => setComponentLoading(false));
 				setConversationsLoading(false);
 			}
 		};
 
-		loadData();
+		void loadData();
 	}, [userId, reloadTrigger]);
-
-	// useEffect(() => {
-	// 	if (userId) {
-	// 		void (async () => {
-	// 			await axios
-	// 				.get(`${serverURL}/messages/unread`, { withCredentials: true })
-	// 				.then((res: { data: boolean }) => {
-	// 					setUnreadMessages(res.data);
-	// 				});
-	// 			setComponentLoading(false);
-	// 			setPageLoading(false);
-	// 		})();
-	// 	}
-	// }, [conversations, userId]);
 
 	return (
 		<Layout
-			isPageLoading={isConversationsLoading || isValidateLoading}
-			isComponentLoading={isComponentLoading}
-			setPageLoading={setPageLoading}
+			isPageLoading={isValidateLoading}
+			isComponentLoading={isComponentLoading || isConversationsLoading}
+			setPageLoading={setValidateLoading}
 			userId={userId}
 			setUserId={setUserId}
 			isUnreadMessages={isUnreadMessages}

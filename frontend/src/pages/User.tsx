@@ -12,6 +12,7 @@ import { Box, Button, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
+import validateUser from "../utils/validateUser";
 
 const User: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
@@ -43,22 +44,18 @@ const User: React.FC = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		const validateUser = async () => {
-			try {
-				const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
-				setUserId(res.data);
+		void validateUser(
+			(arg: string) => {
+				setUserId(arg);
 				setUserValidated(true);
-			} catch (error) {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserValidated(true);
-				} else {
-					handleErrors(error, "authenticating user", setErrors);
-				}
-			} finally {
-				setValidateLoading(false);
-			}
-		};
-		void validateUser();
+			},
+			() => {
+				setUserId(undefined);
+				setUserValidated(true);
+			},
+			setValidateLoading,
+			setErrors
+		);
 	}, []);
 
 	useEffect(() => {
@@ -95,7 +92,7 @@ const User: React.FC = () => {
 					cheetsLengthRef.current = updatedCheets.length;
 					return updatedCheets;
 				});
-				setCheetsError('')
+				setCheetsError("");
 				setScrollDown(true);
 				if (newCheets.length) {
 					cursorRef.current = newCheets[newCheets.length - 1].uuid;
@@ -125,7 +122,7 @@ const User: React.FC = () => {
 					{ withCredentials: true }
 				);
 				setCheets(res.data);
-				setCheetsError('')
+				setCheetsError("");
 			} catch (error) {
 				handleErrors(error, "reloading cheets", setErrors);
 				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
@@ -197,7 +194,7 @@ const User: React.FC = () => {
 					closeModal={() => {
 						setErrors([]);
 						setCheetsError(cheetsErrorOnModalClose.current);
-						cheetsErrorOnModalClose.current=undefined
+						cheetsErrorOnModalClose.current = undefined;
 					}}
 				/>
 				{isValidateLoading || isUserLoading || isMessagesLoading ? (

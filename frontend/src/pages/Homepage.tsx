@@ -11,6 +11,7 @@ import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
 import { Button, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
+import validateUser from "../utils/validateUser";
 
 const Homepage: React.FC = () => {
 	const [userId, setUserId] = useState<string>();
@@ -24,33 +25,36 @@ const Homepage: React.FC = () => {
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadTrigger] = useState<boolean>(false);
-	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(false);
+	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
+	const [isUserValidated, setUserValidated] = useState(false);
 
 	const divRef = useRef<HTMLDivElement>(null);
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
 
 	useEffect(() => {
-		const validateUser = async () => {
-			try {
-				const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
-				setUserId(res.data);
-			} catch (error) {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserId(undefined);
-				} else {
-					handleErrors(error, "authenticating user", setErrors);
-				}
-			} finally {
-				setValidateLoading(false);
-			}
-		};
-		void validateUser();
+		void validateUser(
+			(arg: string) => {
+				setUserId(arg);
+				setUserValidated(true);
+			},
+			() => {
+				setUserId(undefined);
+				setUserValidated(true);
+			},
+			setValidateLoading,
+			setErrors
+		);
 	}, []);
 
 	useEffect(() => {
-		if (!userId) return;
+		if (!userId) {
+			if (isUserValidated) {
+				setMessagesLoading(false);
+			}
+			return;
+		}
 		const fetchMessages = async () => {
 			setMessagesLoading(true);
 			try {
@@ -63,7 +67,7 @@ const Homepage: React.FC = () => {
 			}
 		};
 		fetchMessages();
-	}, [userId]);
+	}, [userId, isUserValidated]);
 
 	useEffect(() => {
 		const fetchCheets = async () => {
@@ -73,15 +77,14 @@ const Homepage: React.FC = () => {
 				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?${cursorParam}&take=5`, {
 					withCredentials: true,
 				});
-				const newCheets = res.data
-				console.log(newCheets, ...newCheets)
+				const newCheets = res.data;
 				setCheets((cheets) => {
 					const updatedCheets = [...cheets, ...newCheets];
-					
+
 					cheetsLengthRef.current = updatedCheets.length;
 					return updatedCheets;
 				});
-				setCheetsError('')
+				setCheetsError("");
 				setScrollDown(true);
 				if (newCheets.length) {
 					cursorRef.current = newCheets[newCheets.length - 1].uuid;
@@ -109,7 +112,7 @@ const Homepage: React.FC = () => {
 					withCredentials: true,
 				});
 				setCheets(res.data);
-				setCheetsError('')
+				setCheetsError("");
 			} catch (error) {
 				handleErrors(error, "loading the cheets", setErrors);
 				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
@@ -145,7 +148,7 @@ const Homepage: React.FC = () => {
 					closeModal={() => {
 						setErrors([]);
 						setCheetsError(cheetsErrorOnModalClose.current);
-						cheetsErrorOnModalClose.current=undefined
+						cheetsErrorOnModalClose.current = undefined;
 					}}
 				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>

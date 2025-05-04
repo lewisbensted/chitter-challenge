@@ -11,6 +11,7 @@ import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import Login from "@mui/icons-material/Login";
+import validateUser from "../utils/validateUser";
 
 interface LoginFormFields {
 	username: string;
@@ -21,26 +22,24 @@ const SignIn: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<LoginFormFields>();
 	const navigate = useNavigate();
 
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
 	const [userId, setUserId] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
+	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
 
 	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then(() => {
-				navigate("/");
-			})
-			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserId(undefined);
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-				setPageLoading(false);
-			});
-	}, [navigate]);
+		void validateUser(
+			() => {
+				navigate('/')
+			},
+			() => {
+				setUserId(undefined);
+				
+			},
+			setValidateLoading,
+			setErrors
+		);
+	}, []);
 
 	const onSubmit: SubmitHandler<LoginFormFields> = (data) => {
 		setFormLoading(true);
@@ -59,9 +58,9 @@ const SignIn: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Layout
-				isPageLoading={isPageLoading}
+				isPageLoading={isValidateLoading}
 				isComponentLoading={isFormLoading}
-				setPageLoading={setPageLoading}
+				setPageLoading={setValidateLoading}
 				userId={userId}
 				setUserId={setUserId}
 			>
@@ -73,7 +72,7 @@ const SignIn: React.FC = () => {
 						}}
 					/>
 					<Typography variant="h4">Sign In</Typography>
-					{isPageLoading ? (
+					{isValidateLoading ? (
 						<FlexBox>
 							<CircularProgress thickness={5} />
 						</FlexBox>
