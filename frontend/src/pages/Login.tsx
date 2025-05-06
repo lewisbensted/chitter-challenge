@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import ErrorModal from "../components/ErrorModal";
 import Layout from "./Layout";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import Login from "@mui/icons-material/Login";
+import validateUser from "../utils/validateUser";
+import useValidateUser from "../hooks/useValidateUser";
 
 interface LoginFormFields {
 	username: string;
@@ -21,47 +23,35 @@ const SignIn: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<LoginFormFields>();
 	const navigate = useNavigate();
 
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
-	const [userId, setUserId] = useState<string>();
+
 	const [errors, setErrors] = useState<string[]>([]);
 
-	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then(() => {
-				navigate("/");
-			})
-			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserId(undefined);
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-				setPageLoading(false);
-			});
-	}, [navigate]);
+	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
-	const onSubmit: SubmitHandler<LoginFormFields> = (data) => {
+	useEffect(() => {
+		void validateUser((error) => handleErrors(error, "fetching page information", setErrors), false, true);
+	}, []);
+
+	const onSubmit: SubmitHandler<LoginFormFields> = async (data) => {
 		setFormLoading(true);
 		reset();
-		axios
-			.post(`${serverURL}/login`, data, { withCredentials: true })
-			.then(() => {
-				navigate("/");
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "logging in", setErrors);
-				setFormLoading(false);
-			});
+		try {
+			await axios.post(`${serverURL}/login`, data, { withCredentials: true });
+			navigate("/");
+		} catch (error) {
+			handleErrors(error, "logging in", setErrors);
+		} finally {
+			setFormLoading(false);
+		}
 	};
 
 	return (
 		<ThemeProvider theme={theme}>
 			<Layout
-				isPageLoading={isPageLoading}
+				isValidationLoding={isValidateLoading}
 				isComponentLoading={isFormLoading}
-				setPageLoading={setPageLoading}
+				setPageLoading={setValidateLoading}
 				userId={userId}
 				setUserId={setUserId}
 			>
@@ -72,33 +62,36 @@ const SignIn: React.FC = () => {
 							setErrors([]);
 						}}
 					/>
-					<Typography variant="h4">Sign In</Typography>
-					{isPageLoading ? (
+
+					{isValidateLoading ? (
 						<FlexBox>
 							<CircularProgress thickness={5} />
 						</FlexBox>
 					) : (
-						<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-							<Grid2 size={12} container display="block">
-								<Typography variant="subtitle1">Username:</Typography>
-								<TextField type="text" {...register("username")}></TextField>
+						<Fragment>
+							<Typography variant="h4">Sign In</Typography>
+							<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+								<Grid2 size={12} container display="block">
+									<Typography variant="subtitle1">Username:</Typography>
+									<TextField type="text" {...register("username")}></TextField>
 
-								<Typography variant="subtitle1">Password:</Typography>
-								<TextField type="text" {...register("password")}></TextField>
+									<Typography variant="subtitle1">Password:</Typography>
+									<TextField type="text" {...register("password")}></TextField>
+								</Grid2>
+								<Grid2 size={12}>
+									<FlexBox>
+										<Button type="submit" disabled={!!userId} color="primary" variant="contained">
+											<Typography variant="button" color="inherit">
+												Sign in
+											</Typography>
+											<IconButton color="inherit">
+												<Login />
+											</IconButton>
+										</Button>
+									</FlexBox>
+								</Grid2>
 							</Grid2>
-							<Grid2 size={12}>
-								<FlexBox>
-									<Button type="submit" disabled={!!userId} color="primary" variant="contained">
-										<Typography variant="button" color="inherit">
-											Sign in
-										</Typography>
-										<IconButton color="inherit">
-											<Login />
-										</IconButton>
-									</Button>
-								</FlexBox>
-							</Grid2>
-						</Grid2>
+						</Fragment>
 					)}
 				</Box>
 			</Layout>

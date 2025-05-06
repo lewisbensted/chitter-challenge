@@ -1,5 +1,5 @@
 import axios from "axios";
-import { serverURL } from "./serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "./handleErrors";
 
 const logout = async (

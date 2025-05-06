@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ICheet } from "../utils/interfaces";
+import { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -19,7 +19,7 @@ interface Props {
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
 	setScroll: (arg: boolean) => void;
-	numberOfCheets: number;
+	cheetsLengthRef: React.MutableRefObject<number>;
 }
 
 const SendCheet: React.FC<Props> = ({
@@ -29,7 +29,7 @@ const SendCheet: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	setScroll,
-	numberOfCheets,
+	cheetsLengthRef,
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
@@ -40,11 +40,12 @@ const SendCheet: React.FC<Props> = ({
 		setComponentLoading(true);
 		reset();
 		await axios
-			.post(`${serverURL + (id ? `/users/${id}/` : "/")}cheets?take=${numberOfCheets + 1}`, data, {
+			.post(`${serverURL + (id ? `/users/${id}` : "")}/cheets?take=${cheetsLengthRef.current + 1}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: ICheet[] }) => {
 				setCheets(res.data);
+				cheetsLengthRef.current++;
 				setScroll(true);
 				setCheetsError("");
 			})
@@ -54,7 +55,7 @@ const SendCheet: React.FC<Props> = ({
 		setSubmitLoading(false);
 		setComponentLoading(false);
 	};
-	
+
 	return (
 		<ThemeProvider theme={theme}>
 			<FlexBox>

@@ -1,22 +1,22 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICheet, IConversation } from "../utils/interfaces";
+import { ICheet, IConversation, IUser } from "../interfaces/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SubmitCheet from "../components/SendCheet";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Box, Button, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
+import validateUser from "../utils/validateUser";
+import useValidateUser from "../hooks/useValidateUser";
 
 const User: React.FC = () => {
-	const [userId, setUserId] = useState<string>();
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
-	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
+	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [conversation, setConversation] = useState<IConversation>();
 	const [cheets, setCheets] = useState<ICheet[]>([]);
@@ -28,118 +28,142 @@ const User: React.FC = () => {
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
-	const [cursor, setCursor] = useState<string>();
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
+	const [isUserLoading, setUserLoading] = useState(true);
+	const [isMessagesLoading, setMessagesLoading] = useState(true);
+
+	const divRef = useRef<HTMLDivElement>(null);
+	const cursorRef = useRef<string>();
+	const cheetsLengthRef = useRef<number>(0);
 
 	const { id } = useParams();
+
 	const navigate = useNavigate();
-	const ref = useRef<HTMLDivElement>(null);
+
+	const { userId, isUserValidated, isValidateLoading, setUserId, setValidateLoading, validateUser } =
+		useValidateUser();
 
 	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then((res: { data: string }) => {
-				setUserId(res.data);
-			})
-			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserId(undefined);
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-				setPageLoading(false);
-			});
+		void validateUser((error) => handleErrors(error, "fetching page information", setErrors));
 	}, []);
 
 	useEffect(() => {
-		if (id) {
-			void (async () => {
-				setCheetsLoading(true);
-				await axios
-					.get(`${serverURL}/users/${id}/cheets?${cursor ? `cursor=${cursor}` : ""}&take=5`, {
-						withCredentials: true,
-					})
-					.then((res: { data: ICheet[] }) => {
-						setCheets([...cheets, ...res.data]);
-						setScrollDown(true);
-						if (res.data.length) {
-							setCursor(res.data[res.data.length - 1].uuid);
-						}
-					})
-					.catch(() => {
-						setCheetsError("An unexpected error occured while loading cheets.");
-					});
+		if (!id) return;
+		const fetchUser = async () => {
+			try {
+				const res = await axios.get<IUser>(`${serverURL}/user/${id}`, { withCredentials: true });
+				setUsername(res.data.username);
+			} catch (error) {
+				if (axios.isAxiosError(error) && error.response?.status === 404) {
+					navigate("/");
+				} else {
+					handleErrors(error, "fetching page information", setErrors);
+				}
+			} finally {
+				setUserLoading(false);
+			}
+		};
+		void fetchUser();
+	}, [id]);
+
+	useEffect(() => {
+		if (!id) return;
+		const fetchCheets = async () => {
+			setCheetsLoading(true);
+			try {
+				const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
+				const res = await axios.get<ICheet[]>(`${serverURL}/users/${id}/cheets?${cursorParam}&take=5`, {
+					withCredentials: true,
+				});
+				const newCheets = res.data;
+				setCheets((cheets) => {
+					const updatedCheets = [...cheets, ...newCheets];
+					cheetsLengthRef.current = updatedCheets.length;
+					return updatedCheets;
+				});
+				setCheetsError("");
+				setScrollDown(true);
+				if (newCheets.length) {
+					cursorRef.current = newCheets[newCheets.length - 1].uuid;
+				}
+			} catch (error) {
+				setCheetsError("An unexpected error occured while loading cheets.");
+			} finally {
 				setCheetsLoading(false);
-			})();
-		}
+			}
+		};
+		void fetchCheets();
 	}, [id, page]);
 
+	const hasFetchedCheetsOnce = useRef<boolean>(false);
+	const cheetsErrorOnModalClose = useRef<string>();
 	useEffect(() => {
-		if (id) {
-			void (async () => {
-				setComponentLoading(true);
-				await axios
-					.get(`${serverURL}/conversations/${id}`, { withCredentials: true })
-					.then((res: { data: { conversation: IConversation; username: string } }) => {
-						setUsername(res.data.username);
-						setConversation(res.data.conversation);
-					})
-					.catch((error: unknown) => {
-						if (axios.isAxiosError(error) && error.response?.status === 404) {
-							navigate("/");
-						} else {
-							handleErrors(error, "loading the page", setErrors);
-						}
-					});
-			})();
-		}
-	}, [userId, reloadMessagesTrigger, id, navigate]);
-
-	useEffect(() => {
-		if (userId) {
-			void (async () => {
-				await axios
-					.get(`${serverURL}/messages/unread`, { withCredentials: true })
-					.then((res: { data: boolean }) => {
-						setUnreadMessages(res.data);
-					})
-					.catch((error: unknown) => {
-						handleErrors(error, "loading user information", setErrors);
-					});
-				setPageLoading(false);
-				setComponentLoading(false);
-			})();
-		} else {
-			setComponentLoading(false);
-		}
-	}, [conversation, userId]);
-
-	const isMounted = useRef(false);
-	useEffect(() => {
-		if (!isMounted.current) {
-			isMounted.current = true;
+		if (!id) return;
+		if (!hasFetchedCheetsOnce.current) {
+			hasFetchedCheetsOnce.current = true;
 			return;
 		}
-		void (async () => {
+		const fetchCheets = async () => {
 			setComponentLoading(true);
-			await axios
-				.get(`${serverURL}/users/${id}/cheets?&take=${cheets.length}`, { withCredentials: true })
-				.then((res: { data: ICheet[] }) => {
-					setCheets(res.data);
-				})
-				.catch((error: unknown) => {
-					handleErrors(error, "loading the cheets", setErrors);
-				});
-			setComponentLoading(false);
-		})();
-	}, [id, reloadCheetsTrigger, cheets.length]);
+			try {
+				const res = await axios.get<ICheet[]>(
+					`${serverURL}/users/${id}/cheets?take=${cheetsLengthRef.current}`,
+					{ withCredentials: true }
+				);
+				setCheets(res.data);
+				setCheetsError("");
+			} catch (error) {
+				handleErrors(error, "reloading cheets", setErrors);
+				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
+			} finally {
+				setComponentLoading(false);
+			}
+		};
+		void fetchCheets();
+	}, [id, reloadCheetsTrigger]);
+
+	useEffect(() => {
+		if (!userId) {
+			if (isUserValidated) {
+				setMessagesLoading(false);
+			}
+			return;
+		}
+
+		const fetchConversation = async () => {
+			if (!id) return;
+			const res = await axios.get<IConversation>(`${serverURL}/conversations/${id}`, {
+				withCredentials: true,
+			});
+			setConversation(res.data);
+		};
+
+		const fetchUnread = async () => {
+			const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
+			setUnreadMessages(res.data);
+		};
+
+		const loadData = async () => {
+			try {
+				setComponentLoading(true);
+				await Promise.all([fetchConversation(), fetchUnread()]);
+			} catch (error) {
+				handleErrors(error, "loading messages", setErrors);
+			} finally {
+				setComponentLoading(false);
+				setMessagesLoading(false);
+			}
+		};
+
+		void loadData();
+	}, [id, userId, isUserValidated, reloadMessagesTrigger, navigate]);
 
 	useEffect(() => {
 		if (scrollUp) {
-			ref.current?.firstElementChild?.scrollIntoView();
+			divRef.current?.firstElementChild?.scrollIntoView();
 			setScrollUp(false);
 		} else if (scrollDown) {
-			ref.current?.lastElementChild?.scrollIntoView();
+			divRef.current?.lastElementChild?.scrollIntoView();
 			setScrollDown(false);
 		}
 	}, [cheets, scrollUp, scrollDown]);
@@ -148,9 +172,9 @@ const User: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isPageLoading={isPageLoading}
-			isComponentLoading={isComponentLoading || isCheetsLoading}
-			setPageLoading={setPageLoading}
+			isValidationLoding={isValidateLoading}
+			isComponentLoading={isComponentLoading || isMessagesLoading}
+			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
@@ -158,13 +182,13 @@ const User: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
+						setCheetsError(cheetsErrorOnModalClose.current);
+						cheetsErrorOnModalClose.current = undefined;
 					}}
 				/>
-				{isPageLoading ? (
+				{isValidateLoading || isUserLoading || isMessagesLoading ? (
 					<FlexBox>
-						<FlexBox>
-							<CircularProgress thickness={5} />
-						</FlexBox>
+						<CircularProgress thickness={5} />
 					</FlexBox>
 				) : (
 					<Fragment>
@@ -194,7 +218,7 @@ const User: React.FC = () => {
 						) : cheetsError ? (
 							cheetsError
 						) : (
-							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
 								{cheets.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
@@ -227,7 +251,7 @@ const User: React.FC = () => {
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								setScroll={setScrollUp}
-								numberOfCheets={cheets.length}
+								cheetsLengthRef={cheetsLengthRef}
 							/>
 						) : null}
 					</Fragment>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IConversation } from "../utils/interfaces";
+import { IConversation } from "../interfaces/interfaces";
 import { Card, CardActionArea, CardContent, Grid2, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
 import { ThemeProvider } from "@emotion/react";
@@ -62,8 +62,8 @@ const Conversation: React.FC<Props> = ({
 						isComponentLoading
 							? undefined
 							: () => {
-								setMessageModalOpen(true);
-							}
+									setMessageModalOpen(true);
+								}
 					}
 				>
 					<CardContent>

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IReply } from "../utils/interfaces";
-import { serverURL } from "../utils/serverURL";
+import { IReply } from "../interfaces/interfaces";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -18,7 +18,7 @@ interface Props {
 	setErrors: (arg: string[]) => void;
 	setComponentLoading: (arg: boolean) => void;
 	setScroll: (arg: boolean) => void;
-	numberOfReplies: number;
+	repliesLengthRef: React.MutableRefObject<number>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: (arg: boolean) => void;
 }
@@ -30,7 +30,7 @@ const SendReply: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	setScroll,
-	numberOfReplies,
+	repliesLengthRef,
 	reloadTrigger,
 	toggleReloadTrigger,
 }) => {
@@ -42,15 +42,16 @@ const SendReply: React.FC<Props> = ({
 		setComponentLoading(true);
 		reset();
 		await axios
-			.post(`${serverURL}/cheets/${cheetId}/replies?take=${numberOfReplies + 1}`, data, {
+			.post(`${serverURL}/cheets/${cheetId}/replies?take=${repliesLengthRef.current + 1}`, data, {
 				withCredentials: true,
 			})
 			.then((res: { data: IReply[] }) => {
 				setReplies(res.data);
 				setScroll(true);
-				if (numberOfReplies === 0) {
+				if (repliesLengthRef.current === 0) {
 					toggleReloadTrigger(!reloadTrigger);
 				}
+				repliesLengthRef.current++;
 			})
 			.catch((error: unknown) => {
 				handleErrors(error, "sending the reply", setErrors);

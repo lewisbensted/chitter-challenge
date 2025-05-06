@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { IReply } from "../utils/interfaces";
+import { IReply } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Edit from "@mui/icons-material/Edit";
@@ -32,7 +32,7 @@ interface Props {
 	reply: IReply;
 	cheetId: string;
 	userId?: string;
-	numberOfReplies: number
+	numberOfReplies: number;
 }
 
 const Reply: React.FC<Props> = ({
@@ -43,7 +43,7 @@ const Reply: React.FC<Props> = ({
 	setReplies,
 	setErrors,
 	userId,
-	numberOfReplies
+	numberOfReplies,
 }) => {
 	const { register, handleSubmit } = useForm<{ text: string }>();
 	const [isEditing, setEditing] = useState<boolean>(false);

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IConversation, IMessage } from "../utils/interfaces";
+import { IConversation, IMessage } from "../interfaces/interfaces";
 import axios from "axios";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";
@@ -23,7 +23,7 @@ interface Props {
 	setConversations: (arg: IConversation[]) => void;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: (arg: boolean) => void;
-	setReloadWhenClosed: (arg: boolean) => void;
+	setReloadWhenClosed?: (arg: boolean) => void;
 	unread: number;
 	onUserPage: boolean;
 }
@@ -71,7 +71,7 @@ const MessageModal: React.FC<Props> = ({
 					setComponentLoading(false);
 				});
 		}
-	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]); //eslint-disable-line
+	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
 
 	useEffect(() => {
 		if (isOpen && scroll) {
@@ -118,7 +118,7 @@ const MessageModal: React.FC<Props> = ({
 								sx={{
 									overflowY: "auto",
 									maxHeight: 390,
-									scrollbarGutter: "stable" 
+									scrollbarGutter: "stable",
 								}}
 							>
 								{messages?.map((message) => (

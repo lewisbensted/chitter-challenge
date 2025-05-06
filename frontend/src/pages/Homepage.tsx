@@ -1,21 +1,20 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
-import { ICheet } from "../utils/interfaces";
+import { ICheet } from "../interfaces/interfaces";
 import SubmitCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
 import { Button, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
+import useValidateUser from "../hooks/useValidateUser";
 
 const Homepage: React.FC = () => {
-	const [userId, setUserId] = useState<string>();
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
-	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(false);
+	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [errors, setErrors] = useState<string[]>([]);
@@ -24,88 +23,101 @@ const Homepage: React.FC = () => {
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
-	const [cursor, setCursor] = useState<string>();
-	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
+	const [reloadCheetsTrigger, toggleReloadTrigger] = useState<boolean>(false);
+	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 
-	const ref = useRef<HTMLDivElement>(null);
+	const divRef = useRef<HTMLDivElement>(null);
+	const cursorRef = useRef<string>();
+	const cheetsLengthRef = useRef<number>(0);
+
+	const { userId, isUserValidated, isValidateLoading, setUserId, setValidateLoading, validateUser } =
+		useValidateUser();
 
 	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then((res: { data: string }) => {
-				setUserId(res.data);
-			})
-			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					setUserId(undefined);
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-				setPageLoading(false);
-			});
+		void validateUser((error) => handleErrors(error, "fetching page information", setErrors));
 	}, []);
 
 	useEffect(() => {
-		if (userId) {
-			void (async () => {
-				await axios
-					.get(`${serverURL}/messages/unread`, { withCredentials: true })
-					.then((res: { data: boolean }) => {
-						setUnreadMessages(res.data);
-					})
-					.catch((error: unknown) => {
-						handleErrors(error, "loading user information", setErrors);
-					});
-				setPageLoading(false);
-			})();
-		}
-	}, [userId]);
-
-	useEffect(() => {
-		void (async () => {
-			setCheetsLoading(true);
-			await axios
-				.get(`${serverURL}/cheets?${cursor ? `cursor=${cursor}` : ""}&take=5`, { withCredentials: true })
-				.then((res: { data: ICheet[] }) => {
-					setCheets([...cheets, ...res.data]);
-					setScrollDown(true);
-					if (res.data.length) {
-						setCursor(res.data[res.data.length - 1].uuid);
-					}
-				})
-				.catch(() => {
-					setCheetsError("An unexpected error occured while loading cheets.");
-				});
-			setCheetsLoading(false);
-		})();
-	}, [page]);
-
-	const isMounted = useRef(false);
-	useEffect(() => {
-		if (!isMounted.current) {
-			isMounted.current = true;
+		if (!userId) {
+			if (isUserValidated) {
+				setMessagesLoading(false);
+			}
 			return;
 		}
-		void (async () => {
-			setComponentLoading(true);
-			await axios
-				.get(`${serverURL}/cheets?&take=${cheets.length}`, { withCredentials: true })
-				.then((res: { data: ICheet[] }) => {
-					setCheets(res.data);
-				})
-				.catch((error: unknown) => {
-					handleErrors(error, "loading the cheets", setErrors);
+		const fetchMessages = async () => {
+			setMessagesLoading(true);
+			try {
+				const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
+				setUnreadMessages(res.data);
+			} catch (error) {
+				handleErrors(error, "loading user information", setErrors);
+			} finally {
+				setMessagesLoading(false);
+			}
+		};
+		fetchMessages();
+	}, [userId, isUserValidated]);
+
+	useEffect(() => {
+		const fetchCheets = async () => {
+			setCheetsLoading(true);
+			try {
+				const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
+				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?${cursorParam}&take=5`, {
+					withCredentials: true,
 				});
-			setComponentLoading(false);
-		})();
-	}, [reloadTrigger, cheets.length]);
+				const newCheets = res.data;
+				setCheets((cheets) => {
+					const updatedCheets = [...cheets, ...newCheets];
+
+					cheetsLengthRef.current = updatedCheets.length;
+					return updatedCheets;
+				});
+				setCheetsError("");
+				setScrollDown(true);
+				if (newCheets.length) {
+					cursorRef.current = newCheets[newCheets.length - 1].uuid;
+				}
+			} catch (error) {
+				setCheetsError("An unexpected error occured while loading cheets.");
+			} finally {
+				setCheetsLoading(false);
+			}
+		};
+		void fetchCheets();
+	}, [page]);
+
+	const hasFetchedCheetsOnce = useRef<boolean>(false);
+	const cheetsErrorOnModalClose = useRef<string>();
+	useEffect(() => {
+		if (!hasFetchedCheetsOnce.current) {
+			hasFetchedCheetsOnce.current = true;
+			return;
+		}
+		const fetchCheets = async () => {
+			setComponentLoading(true);
+			try {
+				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?take=${cheetsLengthRef.current}`, {
+					withCredentials: true,
+				});
+				setCheets(res.data);
+				setCheetsError("");
+			} catch (error) {
+				handleErrors(error, "loading the cheets", setErrors);
+				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
+			} finally {
+				setComponentLoading(false);
+			}
+		};
+		fetchCheets();
+	}, [reloadCheetsTrigger]);
 
 	useEffect(() => {
 		if (scrollUp) {
-			ref.current?.firstElementChild?.scrollIntoView();
+			divRef.current?.firstElementChild?.scrollIntoView();
 			setScrollUp(false);
 		} else if (scrollDown) {
-			ref.current?.lastElementChild?.scrollIntoView();
+			divRef.current?.lastElementChild?.scrollIntoView();
 			setScrollDown(false);
 		}
 	}, [cheets, scrollUp, scrollDown]);
@@ -114,9 +126,9 @@ const Homepage: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isPageLoading={isPageLoading}
-			isComponentLoading={isComponentLoading || isCheetsLoading}
-			setPageLoading={setPageLoading}
+			isValidationLoding={isValidateLoading}
+			isComponentLoading={isComponentLoading || isMessagesLoading}
+			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
 			<Box>
@@ -124,11 +136,13 @@ const Homepage: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
+						setCheetsError(cheetsErrorOnModalClose.current);
+						cheetsErrorOnModalClose.current = undefined;
 					}}
 				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>
 
-				{isPageLoading ? (
+				{isValidateLoading || isMessagesLoading ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />
 					</FlexBox>
@@ -137,7 +151,7 @@ const Homepage: React.FC = () => {
 						{cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
-							<Grid2 ref={ref} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
 								{cheets.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
@@ -149,7 +163,7 @@ const Homepage: React.FC = () => {
 										isComponentLoading={isComponentLoading}
 										isModalView={false}
 										numberOfCheets={cheets.length}
-										reloadTrigger={reloadTrigger}
+										reloadTrigger={reloadCheetsTrigger}
 										toggleReloadTrigger={toggleReloadTrigger}
 									/>
 								))}
@@ -176,7 +190,7 @@ const Homepage: React.FC = () => {
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								setScroll={setScrollUp}
-								numberOfCheets={cheets.length}
+								cheetsLengthRef={cheetsLengthRef}
 							/>
 						) : null}
 					</Fragment>

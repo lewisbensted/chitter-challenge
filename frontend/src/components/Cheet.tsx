@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ICheet } from "../utils/interfaces";
+import { ICheet } from "../interfaces/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
 import theme from "../styles/theme";
@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import CheetModal from "./CheetModal";
@@ -48,7 +48,7 @@ const Cheet: React.FC<Props> = ({
 	isModalView,
 	numberOfCheets,
 	reloadTrigger,
-	toggleReloadTrigger
+	toggleReloadTrigger,
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit } = useForm<{ text: string }>();

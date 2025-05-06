@@ -1,9 +1,9 @@
 import React from "react";
 import { useState } from "react";
-import { IMessage } from "../utils/interfaces";
+import { IMessage } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import {
 	Box,
@@ -28,7 +28,7 @@ interface Props {
 	setMessages: (arg: IMessage[]) => void;
 	isComponentLoading: boolean;
 	setComponentLoading: (arg: boolean) => void;
-	setReloadWhenClosed: (arg: boolean) => void;
+	setReloadWhenClosed?: (arg: boolean) => void;
 }
 
 const Message: React.FC<Props> = ({
@@ -173,7 +173,9 @@ const Message: React.FC<Props> = ({
 														)
 														.then((res: { data: IMessage[] }) => {
 															setMessages(res.data);
-															setReloadWhenClosed(true);
+															if (setReloadWhenClosed) {
+																setReloadWhenClosed(true);
+															}
 														})
 														.catch((error: unknown) => {
 															handleErrors(error, "deleting the message", setErrors);

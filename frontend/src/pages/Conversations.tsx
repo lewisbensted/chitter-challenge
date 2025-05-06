@@ -1,18 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
-import { IConversation } from "../utils/interfaces";
+import { IConversation } from "../interfaces/interfaces";
 import ErrorModal from "../components/ErrorModal";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import Conversation from "../components/Conversation";
 import { useNavigate } from "react-router-dom";
 import { handleErrors } from "../utils/handleErrors";
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
+import validateUser from "../utils/validateUser";
+import useValidateUser from "../hooks/useValidateUser";
 
 const Conversations: React.FC = () => {
-	const [userId, setUserId] = useState<string>();
-	const [isPageLoading, setPageLoading] = useState<boolean>(true);
+	
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [conversations, setConversations] = useState<IConversation[]>();
 	const [errors, setErrors] = useState<string[]>([]);
@@ -21,62 +22,53 @@ const Conversations: React.FC = () => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		axios
-			.get(`${serverURL}/validate`, { withCredentials: true })
-			.then((res: { data: string }) => {
-				setUserId(res.data);
-			})
-			.catch((error: unknown) => {
-				if (axios.isAxiosError(error) && error.response?.status === 401) {
-					navigate("/");
-				} else {
-					handleErrors(error, "authenticating the user", setErrors);
-				}
-				setPageLoading(false);
-			});
-	}, [navigate]);
 
-	const isMounted = useRef(false);
+
+	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } =
+		useValidateUser();
+
 	useEffect(() => {
-		if (!isMounted.current) {
-			isMounted.current = true;
-			return;
-		}
-		if (userId) {
-			void (async () => {
+		void validateUser((error) => handleErrors(error, "fetching page information", setErrors), true);
+	}, []);
+
+	const [isConversationsLoading, setConversationsLoading] = useState(true);
+	useEffect(() => {
+		if (!userId) return;
+
+		const fetchConversations = async () => {
+			try {
+				const res = await axios.get<IConversation[]>(`${serverURL}/conversations`, { withCredentials: true });
+				setConversations(res.data);
+			} catch {
+				setConversationsError("An unexpected error occured while loading conversations.");
+			}
+		};
+
+		const fetchUnread = async () => {
+			const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
+			setUnreadMessages(res.data);
+		};
+
+		const loadData = async () => {
+			try {
 				setComponentLoading(true);
-				await axios
-					.get(`${serverURL}/conversations`, { withCredentials: true })
-					.then((res: { data: IConversation[] }) => {
-						setConversations(res.data);
-					})
-					.catch(() => {
-						setConversationsError("An unexpected error occured while loading conversations.");
-					});
-			})();
-		}
-	}, [userId, reloadTrigger]);
-
-	useEffect(() => {
-		if (userId) {
-			void (async () => {
-				await axios
-					.get(`${serverURL}/messages/unread`, { withCredentials: true })
-					.then((res: { data: boolean }) => {
-						setUnreadMessages(res.data);
-					});
+				await Promise.all([fetchConversations(), fetchUnread()]);
+			} catch (error: unknown) {
+				handleErrors(error, "loading messages", setErrors);
+			} finally {
 				setComponentLoading(false);
-				setPageLoading(false);
-			})();
-		}
-	}, [conversations, userId]);
+				setConversationsLoading(false);
+			}
+		};
+
+		void loadData();
+	}, [userId, reloadTrigger]);
 
 	return (
 		<Layout
-			isPageLoading={isPageLoading}
-			isComponentLoading={isComponentLoading}
-			setPageLoading={setPageLoading}
+			isValidationLoding={isValidateLoading}
+			isComponentLoading={isComponentLoading || isConversationsLoading}
+			setPageLoading={setValidateLoading}
 			userId={userId}
 			setUserId={setUserId}
 			isUnreadMessages={isUnreadMessages}
@@ -88,8 +80,8 @@ const Conversations: React.FC = () => {
 						setErrors([]);
 					}}
 				/>
-				<Typography variant="h4">Messages</Typography>
-				{isPageLoading ? (
+
+				{isConversationsLoading || isValidateLoading ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />
 					</FlexBox>
@@ -97,24 +89,25 @@ const Conversations: React.FC = () => {
 					conversationsError ? (
 						conversationsError
 					) : (
-						<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-							{conversations?.map((conversation) => (
-								<Conversation
-									key={conversation.interlocutorId}
-									userId={userId}
-									conversation={conversation}
-									isComponentLoading={isComponentLoading}
-									setComponentLoading={setComponentLoading}
-									setConversations={setConversations}
-									reloadTrigger={reloadTrigger}
-									toggleReloadTrigger={toggleReloadTrigger}
-								/>
-							))}
-						</Grid2>
+						<Fragment>
+							<Typography variant="h4">Messages</Typography>
+							<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+								{conversations?.map((conversation) => (
+									<Conversation
+										key={conversation.interlocutorId}
+										userId={userId}
+										conversation={conversation}
+										isComponentLoading={isComponentLoading}
+										setComponentLoading={setComponentLoading}
+										setConversations={setConversations}
+										reloadTrigger={reloadTrigger}
+										toggleReloadTrigger={toggleReloadTrigger}
+									/>
+								))}
+							</Grid2>
+						</Fragment>
 					)
-				) : (
-					"Error loading conversations."
-				)}
+				) : null}
 			</Box>
 		</Layout>
 	);

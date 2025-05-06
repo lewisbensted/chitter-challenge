@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { IConversation } from "../utils/interfaces";
+import { IConversation } from "../interfaces/interfaces";
 import MessageModal from "./MessageModal";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Chat from "@mui/icons-material/Chat";
@@ -25,7 +25,6 @@ const ConversationIcon: React.FC<Props> = ({
 	toggleReloadTrigger,
 }) => {
 	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
-	const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
 
 	return (
 		<Fragment>
@@ -37,15 +36,10 @@ const ConversationIcon: React.FC<Props> = ({
 				setComponentLoading={setComponentLoading}
 				closeModal={() => {
 					setMessageModalOpen(false);
-					if (reloadWhenClosed) {
-						toggleReloadTrigger(!reloadTrigger);
-						setReloadWhenClosed(false);
-					}
 				}}
 				setConversations={setConversations}
 				reloadTrigger={reloadTrigger}
 				toggleReloadTrigger={toggleReloadTrigger}
-				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
 				onUserPage={true}
 			/>
