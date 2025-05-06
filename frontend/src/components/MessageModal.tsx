@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IConversation, IMessage } from "../utils/interfaces";
+import { IConversation, IMessage } from "../interfaces/interfaces";
 import axios from "axios";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";
@@ -118,7 +118,7 @@ const MessageModal: React.FC<Props> = ({
 								sx={{
 									overflowY: "auto",
 									maxHeight: 390,
-									scrollbarGutter: "stable" 
+									scrollbarGutter: "stable",
 								}}
 							>
 								{messages?.map((message) => (

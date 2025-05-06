@@ -1,20 +1,19 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Layout from "./Layout";
-import { ICheet } from "../utils/interfaces";
+import { ICheet } from "../interfaces/interfaces";
 import SubmitCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
 import { Button, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
-import validateUser from "../utils/validateUser";
+import useValidateUser from "../hooks/useValidateUser";
 
 const Homepage: React.FC = () => {
-	const [userId, setUserId] = useState<string>();
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [cheets, setCheets] = useState<ICheet[]>([]);
@@ -26,26 +25,16 @@ const Homepage: React.FC = () => {
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadTrigger] = useState<boolean>(false);
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
-	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
-	const [isUserValidated, setUserValidated] = useState(false);
 
 	const divRef = useRef<HTMLDivElement>(null);
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
 
+	const { userId, isUserValidated, isValidateLoading, setUserId, setValidateLoading, validateUser } =
+		useValidateUser();
+
 	useEffect(() => {
-		void validateUser(
-			(arg: string) => {
-				setUserId(arg);
-				setUserValidated(true);
-			},
-			() => {
-				setUserId(undefined);
-				setUserValidated(true);
-			},
-			setValidateLoading,
-			setErrors
-		);
+		void validateUser((error) => handleErrors(error, "fetching page information", setErrors));
 	}, []);
 
 	useEffect(() => {
@@ -137,7 +126,7 @@ const Homepage: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isPageLoading={isValidateLoading}
+			isValidationLoding={isValidateLoading}
 			isComponentLoading={isComponentLoading || isMessagesLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}

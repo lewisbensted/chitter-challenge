@@ -23,7 +23,7 @@ interface Props {
 	userId?: string;
 	setPageLoading: (arg: boolean) => void;
 	setUserId: (arg?: string) => void;
-	isPageLoading: boolean;
+	isValidationLoding: boolean;
 	children: React.JSX.Element;
 	isUnreadMessages?: boolean;
 }
@@ -36,7 +36,7 @@ const Layout: React.FC<Props> = ({
 	setPageLoading,
 	userId,
 	setUserId,
-	isPageLoading,
+	isValidationLoding,
 	isUnreadMessages,
 }) => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -74,7 +74,7 @@ const Layout: React.FC<Props> = ({
 							isDrawerOpen={isDrawerOpen}
 						></DrawerElement>
 						<Divider />
-						{isPageLoading ? null : userId ? (
+						{isValidationLoding ? null : userId ? (
 							<Fragment>
 								<DrawerElement
 									link="/conversations"

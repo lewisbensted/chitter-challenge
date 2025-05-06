@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICheet, IConversation, IUser } from "../utils/interfaces";
+import { ICheet, IConversation, IUser } from "../interfaces/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SubmitCheet from "../components/SendCheet";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Box, Button, Grid2, Typography } from "@mui/material";
@@ -13,9 +13,9 @@ import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
 import validateUser from "../utils/validateUser";
+import useValidateUser from "../hooks/useValidateUser";
 
 const User: React.FC = () => {
-	const [userId, setUserId] = useState<string>();
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [conversation, setConversation] = useState<IConversation>();
@@ -31,7 +31,6 @@ const User: React.FC = () => {
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
 	const [isUserLoading, setUserLoading] = useState(true);
 	const [isMessagesLoading, setMessagesLoading] = useState(true);
-	const [isValidateLoading, setValidateLoading] = useState<boolean>(true);
 
 	const divRef = useRef<HTMLDivElement>(null);
 	const cursorRef = useRef<string>();
@@ -39,23 +38,13 @@ const User: React.FC = () => {
 
 	const { id } = useParams();
 
-	const [isUserValidated, setUserValidated] = useState(false);
-
 	const navigate = useNavigate();
 
+	const { userId, isUserValidated, isValidateLoading, setUserId, setValidateLoading, validateUser } =
+		useValidateUser();
+
 	useEffect(() => {
-		void validateUser(
-			(arg: string) => {
-				setUserId(arg);
-				setUserValidated(true);
-			},
-			() => {
-				setUserId(undefined);
-				setUserValidated(true);
-			},
-			setValidateLoading,
-			setErrors
-		);
+		void validateUser((error) => handleErrors(error, "fetching page information", setErrors));
 	}, []);
 
 	useEffect(() => {
@@ -183,7 +172,7 @@ const User: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isPageLoading={isValidateLoading}
+			isValidationLoding={isValidateLoading}
 			isComponentLoading={isComponentLoading || isMessagesLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
@@ -199,9 +188,7 @@ const User: React.FC = () => {
 				/>
 				{isValidateLoading || isUserLoading || isMessagesLoading ? (
 					<FlexBox>
-						<FlexBox>
-							<CircularProgress thickness={5} />
-						</FlexBox>
+						<CircularProgress thickness={5} />
 					</FlexBox>
 				) : (
 					<Fragment>

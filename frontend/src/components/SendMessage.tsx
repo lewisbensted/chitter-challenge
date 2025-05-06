@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IMessage } from "../utils/interfaces";
+import { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -28,7 +28,7 @@ const SendMessage: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	setReloadWhenClosed,
-	setScroll
+	setScroll,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -44,10 +44,9 @@ const SendMessage: React.FC<Props> = ({
 			.then((res: { data: IMessage[] }) => {
 				setMessages(res.data);
 				setScroll(true);
-				if (setReloadWhenClosed){
+				if (setReloadWhenClosed) {
 					setReloadWhenClosed(true);
 				}
-				
 			})
 			.catch((error: unknown) => {
 				handleErrors(error, "sending message", setErrors);

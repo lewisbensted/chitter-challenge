@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ICheet, IReply } from "../utils/interfaces";
+import { ICheet, IReply } from "../interfaces/interfaces";
 import axios from "axios";
 import ErrorModal from "./ErrorModal";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";

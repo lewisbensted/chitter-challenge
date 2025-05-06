@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IReply } from "../utils/interfaces";
-import { serverURL } from "../utils/serverURL";
+import { IReply } from "../interfaces/interfaces";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";

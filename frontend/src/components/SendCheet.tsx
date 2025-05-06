@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ICheet } from "../utils/interfaces";
+import { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
-import { serverURL } from "../utils/serverURL";
+import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -45,7 +45,7 @@ const SendCheet: React.FC<Props> = ({
 			})
 			.then((res: { data: ICheet[] }) => {
 				setCheets(res.data);
-				cheetsLengthRef.current ++;
+				cheetsLengthRef.current++;
 				setScroll(true);
 				setCheetsError("");
 			})
@@ -55,7 +55,7 @@ const SendCheet: React.FC<Props> = ({
 		setSubmitLoading(false);
 		setComponentLoading(false);
 	};
-	
+
 	return (
 		<ThemeProvider theme={theme}>
 			<FlexBox>
