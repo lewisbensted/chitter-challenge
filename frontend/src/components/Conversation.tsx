@@ -9,7 +9,7 @@ import MessageModal from "./MessageModal";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
-	userId?: string;
+	userId?: string | null;
 	conversation: IConversation;
 	isComponentLoading: boolean;
 	setComponentLoading: (arg: boolean) => void;

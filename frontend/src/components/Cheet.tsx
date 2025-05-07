@@ -25,7 +25,7 @@ import CheetModal from "./CheetModal";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
-	userId?: string;
+	userId?: string | null;
 	cheet: ICheet;
 	setErrors: (arg: string[]) => void;
 	setCheets: (arg: ICheet[]) => void;

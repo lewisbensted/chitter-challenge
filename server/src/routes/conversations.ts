@@ -89,7 +89,7 @@ router.get("/:userId", authMiddleware,async (req: Request, res: Response) => {
 	try {
 		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		const conversation = await fetchConversations(req.session.user!.id, user);
-		res.status(200).send(conversation[0]);
+		res.status(200).send(conversation);
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));
 		sendErrorResponse(error, res);

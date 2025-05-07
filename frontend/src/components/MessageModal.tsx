@@ -14,7 +14,7 @@ import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 
 interface Props {
-	userId?: string;
+	userId?: string | null;
 	conversation: IConversation;
 	isOpen: boolean;
 	isComponentLoading: boolean;

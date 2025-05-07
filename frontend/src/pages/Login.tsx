@@ -11,7 +11,6 @@ import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import Login from "@mui/icons-material/Login";
-import validateUser from "../utils/validateUser";
 import useValidateUser from "../hooks/useValidateUser";
 
 interface LoginFormFields {
@@ -30,8 +29,13 @@ const SignIn: React.FC = () => {
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
 	useEffect(() => {
-		void validateUser((error) => handleErrors(error, "fetching page information", setErrors), false, true);
-	}, []);
+		void validateUser(
+			(error) => {
+				handleErrors(error, "fetching page information", setErrors);
+			},
+			{ isLoggedIn: true }
+		);
+	}, [validateUser]);
 
 	const onSubmit: SubmitHandler<LoginFormFields> = async (data) => {
 		setFormLoading(true);

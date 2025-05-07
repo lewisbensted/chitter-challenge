@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICheet, IConversation, IUser } from "../interfaces/interfaces";
+import { IConversation, IUser } from "../interfaces/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SubmitCheet from "../components/SendCheet";
@@ -12,40 +12,60 @@ import { Box, Button, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
-import validateUser from "../utils/validateUser";
 import useValidateUser from "../hooks/useValidateUser";
+import useFetchCheets from "../hooks/useFetchCheets";
+import useFetchConversations from "../hooks/useFetchConversations";
 
 const User: React.FC = () => {
-	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-	const [conversation, setConversation] = useState<IConversation>();
-	const [cheets, setCheets] = useState<ICheet[]>([]);
+	//const [conversation, setConversation] = useState<IConversation>();
+
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
-	const [cheetsError, setCheetsError] = useState<string>();
+
 	const [reloadMessagesTrigger, toggleReloadMessagesTrigger] = useState<boolean>(false);
-	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
+	//const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
 	const [isUserLoading, setUserLoading] = useState(true);
-	const [isMessagesLoading, setMessagesLoading] = useState(true);
+	//const [isMessagesLoading, setMessagesLoading] = useState(true);
 
 	const divRef = useRef<HTMLDivElement>(null);
-	const cursorRef = useRef<string>();
-	const cheetsLengthRef = useRef<number>(0);
 
 	const { id } = useParams();
 
 	const navigate = useNavigate();
 
-	const { userId, isUserValidated, isValidateLoading, setUserId, setValidateLoading, validateUser } =
-		useValidateUser();
+	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
+
+	const {
+		cheets,
+		isCheetsLoading,
+		cheetsLengthRef,
+		cheetsErrorOnModalClose,
+		cheetsError,
+		setCheetsError,
+		setCheets,
+		refreshCheets,
+		loadMoreCheets,
+	} = useFetchCheets();
+
+	const {
+		isUnreadMessages,
+		conversations,
+		isConversationsLoading,
+		setConversations,
+		setConversationsLoading,
+		fetchData,
+	} = useFetchConversations();
 
 	useEffect(() => {
-		void validateUser((error) => handleErrors(error, "fetching page information", setErrors));
-	}, []);
+		void validateUser((error) => {
+			handleErrors(error, "fetching page information", setErrors);
+		});
+	}, [validateUser]);
 
 	useEffect(() => {
 		if (!id) return;
@@ -64,99 +84,48 @@ const User: React.FC = () => {
 			}
 		};
 		void fetchUser();
-	}, [id]);
+	}, [id, navigate]);
 
 	useEffect(() => {
 		if (!id) return;
-		const fetchCheets = async () => {
-			setCheetsLoading(true);
-			try {
-				const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
-				const res = await axios.get<ICheet[]>(`${serverURL}/users/${id}/cheets?${cursorParam}&take=5`, {
-					withCredentials: true,
-				});
-				const newCheets = res.data;
-				setCheets((cheets) => {
-					const updatedCheets = [...cheets, ...newCheets];
-					cheetsLengthRef.current = updatedCheets.length;
-					return updatedCheets;
-				});
-				setCheetsError("");
-				setScrollDown(true);
-				if (newCheets.length) {
-					cursorRef.current = newCheets[newCheets.length - 1].uuid;
-				}
-			} catch (error) {
-				setCheetsError("An unexpected error occured while loading cheets.");
-			} finally {
-				setCheetsLoading(false);
-			}
-		};
-		void fetchCheets();
-	}, [id, page]);
+		void loadMoreCheets((error) => {
+			handleErrors(error, "updating cheets", setErrors);
+		}, id);
+	}, [id, page, loadMoreCheets]);
 
 	const hasFetchedCheetsOnce = useRef<boolean>(false);
-	const cheetsErrorOnModalClose = useRef<string>();
+
 	useEffect(() => {
 		if (!id) return;
 		if (!hasFetchedCheetsOnce.current) {
 			hasFetchedCheetsOnce.current = true;
 			return;
 		}
-		const fetchCheets = async () => {
-			setComponentLoading(true);
-			try {
-				const res = await axios.get<ICheet[]>(
-					`${serverURL}/users/${id}/cheets?take=${cheetsLengthRef.current}`,
-					{ withCredentials: true }
-				);
-				setCheets(res.data);
-				setCheetsError("");
-			} catch (error) {
-				handleErrors(error, "reloading cheets", setErrors);
-				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
-			} finally {
-				setComponentLoading(false);
-			}
-		};
-		void fetchCheets();
-	}, [id, reloadCheetsTrigger]);
+		void refreshCheets(
+			(error) => {
+				handleErrors(error, "updating cheets", setErrors);
+			},
+			setComponentLoading,
+			id
+		);
+	}, [id, reloadCheetsTrigger, refreshCheets]);
 
 	useEffect(() => {
-		if (!userId) {
-			if (isUserValidated) {
-				setMessagesLoading(false);
-			}
+		if (userId === undefined) {
+			return;
+		} else if (userId === null) {
+			setConversationsLoading(false);
 			return;
 		}
 
-		const fetchConversation = async () => {
-			if (!id) return;
-			const res = await axios.get<IConversation>(`${serverURL}/conversations/${id}`, {
-				withCredentials: true,
-			});
-			setConversation(res.data);
-		};
-
-		const fetchUnread = async () => {
-			const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
-			setUnreadMessages(res.data);
-		};
-
-		const loadData = async () => {
-			try {
-				setComponentLoading(true);
-				await Promise.all([fetchConversation(), fetchUnread()]);
-			} catch (error) {
-				handleErrors(error, "loading messages", setErrors);
-			} finally {
-				setComponentLoading(false);
-				setMessagesLoading(false);
-			}
-		};
-
-		void loadData();
-	}, [id, userId, isUserValidated, reloadMessagesTrigger, navigate]);
+		void fetchData(
+			(error) => {
+				handleErrors(error, "fetching messages", setErrors);
+			},
+			setComponentLoading,
+			{ id: id }
+		);
+	}, [id, userId, reloadMessagesTrigger, navigate]);
 
 	useEffect(() => {
 		if (scrollUp) {
@@ -173,7 +142,7 @@ const User: React.FC = () => {
 			userId={userId}
 			setUserId={setUserId}
 			isValidationLoding={isValidateLoading}
-			isComponentLoading={isComponentLoading || isMessagesLoading}
+			isComponentLoading={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -183,10 +152,10 @@ const User: React.FC = () => {
 					closeModal={() => {
 						setErrors([]);
 						setCheetsError(cheetsErrorOnModalClose.current);
-						cheetsErrorOnModalClose.current = undefined;
+						cheetsErrorOnModalClose.current = "";
 					}}
 				/>
-				{isValidateLoading || isUserLoading || isMessagesLoading ? (
+				{isValidateLoading || isUserLoading || isConversationsLoading ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />
 					</FlexBox>
@@ -194,14 +163,14 @@ const User: React.FC = () => {
 					<Fragment>
 						<Typography variant="h4" display="flex">
 							{username}
-							{!conversation || userId === id ? null : (
+							{!conversations || userId === id ? null : (
 								<ConversationIcon
 									userId={userId}
-									conversation={conversation}
+									conversation={conversations[0]}
 									isComponentLoading={isComponentLoading || isCheetsLoading}
 									setComponentLoading={setComponentLoading}
 									setConversations={() => {
-										setConversation(conversation);
+										setConversations(conversations);
 									}}
 									reloadTrigger={reloadMessagesTrigger}
 									toggleReloadTrigger={toggleReloadMessagesTrigger}

@@ -22,7 +22,7 @@ import theme from "../styles/theme";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
-	userId?: string;
+	userId?: string | null;
 	message: IMessage;
 	setErrors: (arg: string[]) => void;
 	setMessages: (arg: IMessage[]) => void;

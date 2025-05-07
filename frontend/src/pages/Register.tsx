@@ -4,7 +4,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import ErrorModal from "../components/ErrorModal";
 import SuccessModal from "../components/SuccessModal";
 import Layout from "./Layout";
-import { useNavigate } from "react-router-dom";
 import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -13,7 +12,6 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
-import validateUser from "../utils/validateUser";
 import useValidateUser from "../hooks/useValidateUser";
 
 interface RegisterFormFields {
@@ -34,8 +32,13 @@ const Register: React.FC = () => {
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
 	useEffect(() => {
-		void validateUser((error) => handleErrors(error, "fetching page information", setErrors), false, true);
-	}, []);
+		void validateUser(
+			(error) => {
+				handleErrors(error, "fetching page information", setErrors);
+			},
+			{ isLoggedIn: true }
+		);
+	}, [validateUser]);
 
 	const onSubmit: SubmitHandler<RegisterFormFields> = async (data) => {
 		setFormLoading(true);

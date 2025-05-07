@@ -4,7 +4,7 @@ import { handleErrors } from "./handleErrors";
 
 const logout = async (
 	setPageLoading: (arg: boolean) => void,
-	setUserId: (arg?: string) => void,
+	setUserId: (arg: string | null) => void,
 	setErrors: (arg: string[]) => void,
 	redirect: () => void
 ) => {
@@ -12,12 +12,12 @@ const logout = async (
 	await axios
 		.delete(`${serverURL}/logout`, { withCredentials: true })
 		.then(() => {
-			setUserId(undefined);
+			setUserId(null);
 			redirect();
 		})
 		.catch((error: unknown) => {
 			if (axios.isAxiosError(error) && error.response?.status === 403) {
-				setUserId(undefined);
+				setUserId(null);
 				redirect();
 			} else {
 				handleErrors(error, "logging out", setErrors);

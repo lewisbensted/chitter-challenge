@@ -1,10 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import axios from "axios";
 import Layout from "./Layout";
-import { ICheet } from "../interfaces/interfaces";
 import SubmitCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
-import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
@@ -12,105 +9,69 @@ import Cheet from "../components/Cheet";
 import { Button, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useValidateUser from "../hooks/useValidateUser";
+import useFetchCheets from "../hooks/useFetchCheets";
+import useFetchConversations from "../hooks/useFetchConversations";
 
 const Homepage: React.FC = () => {
-	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [errors, setErrors] = useState<string[]>([]);
-	const [cheetsError, setCheetsError] = useState<string>();
-	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadTrigger] = useState<boolean>(false);
-	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 
 	const divRef = useRef<HTMLDivElement>(null);
-	const cursorRef = useRef<string>();
-	const cheetsLengthRef = useRef<number>(0);
 
-	const { userId, isUserValidated, isValidateLoading, setUserId, setValidateLoading, validateUser } =
-		useValidateUser();
+	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
+
+	const {
+		cheets,
+		isCheetsLoading,
+		cheetsLengthRef,
+		cheetsErrorOnModalClose,
+		cheetsError,
+		setCheetsError,
+		setCheets,
+		refreshCheets,
+		loadMoreCheets,
+	} = useFetchCheets();
+
+	const { isUnreadMessages, isConversationsLoading, setConversationsLoading, fetchData } = useFetchConversations();
 
 	useEffect(() => {
-		void validateUser((error) => handleErrors(error, "fetching page information", setErrors));
-	}, []);
+		void validateUser((error) => {
+			handleErrors(error, "fetching page information", setErrors);
+		});
+	}, [validateUser]);
 
 	useEffect(() => {
-		if (!userId) {
-			if (isUserValidated) {
-				setMessagesLoading(false);
-			}
+		if (userId === undefined) {
+			return;
+		} else if (userId === null) {
+			setConversationsLoading(false);
 			return;
 		}
-		const fetchMessages = async () => {
-			setMessagesLoading(true);
-			try {
-				const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
-				setUnreadMessages(res.data);
-			} catch (error) {
-				handleErrors(error, "loading user information", setErrors);
-			} finally {
-				setMessagesLoading(false);
-			}
-		};
-		fetchMessages();
-	}, [userId, isUserValidated]);
+		void fetchData((error) => {
+			handleErrors(error, "fetching messages", setErrors);
+		}, setComponentLoading);
+	}, [userId]);
 
 	useEffect(() => {
-		const fetchCheets = async () => {
-			setCheetsLoading(true);
-			try {
-				const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
-				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?${cursorParam}&take=5`, {
-					withCredentials: true,
-				});
-				const newCheets = res.data;
-				setCheets((cheets) => {
-					const updatedCheets = [...cheets, ...newCheets];
-
-					cheetsLengthRef.current = updatedCheets.length;
-					return updatedCheets;
-				});
-				setCheetsError("");
-				setScrollDown(true);
-				if (newCheets.length) {
-					cursorRef.current = newCheets[newCheets.length - 1].uuid;
-				}
-			} catch (error) {
-				setCheetsError("An unexpected error occured while loading cheets.");
-			} finally {
-				setCheetsLoading(false);
-			}
-		};
-		void fetchCheets();
-	}, [page]);
+		void loadMoreCheets((error) => {
+			handleErrors(error, "updating cheets", setErrors);
+		});
+	}, [page, loadMoreCheets]);
 
 	const hasFetchedCheetsOnce = useRef<boolean>(false);
-	const cheetsErrorOnModalClose = useRef<string>();
 	useEffect(() => {
 		if (!hasFetchedCheetsOnce.current) {
 			hasFetchedCheetsOnce.current = true;
 			return;
 		}
-		const fetchCheets = async () => {
-			setComponentLoading(true);
-			try {
-				const res = await axios.get<ICheet[]>(`${serverURL}/cheets?take=${cheetsLengthRef.current}`, {
-					withCredentials: true,
-				});
-				setCheets(res.data);
-				setCheetsError("");
-			} catch (error) {
-				handleErrors(error, "loading the cheets", setErrors);
-				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
-			} finally {
-				setComponentLoading(false);
-			}
-		};
-		fetchCheets();
-	}, [reloadCheetsTrigger]);
+		void refreshCheets((error) => {
+			handleErrors(error, "updating cheets", setErrors);
+		}, setComponentLoading);
+	}, [reloadCheetsTrigger, refreshCheets]);
 
 	useEffect(() => {
 		if (scrollUp) {
@@ -127,7 +88,7 @@ const Homepage: React.FC = () => {
 			userId={userId}
 			setUserId={setUserId}
 			isValidationLoding={isValidateLoading}
-			isComponentLoading={isComponentLoading || isMessagesLoading}
+			isComponentLoading={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -137,12 +98,12 @@ const Homepage: React.FC = () => {
 					closeModal={() => {
 						setErrors([]);
 						setCheetsError(cheetsErrorOnModalClose.current);
-						cheetsErrorOnModalClose.current = undefined;
+						cheetsErrorOnModalClose.current = "";
 					}}
 				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>
 
-				{isValidateLoading || isMessagesLoading ? (
+				{isValidateLoading || isConversationsLoading ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />
 					</FlexBox>

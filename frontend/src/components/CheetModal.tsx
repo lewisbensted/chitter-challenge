@@ -15,7 +15,7 @@ import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
 
 interface Props {
-	userId?: string;
+	userId?: string | null;
 	cheet: ICheet;
 	isOpen: boolean;
 	closeModal: () => void;

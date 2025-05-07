@@ -31,7 +31,7 @@ interface Props {
 	setErrors: (arg: string[]) => void;
 	reply: IReply;
 	cheetId: string;
-	userId?: string;
+	userId?: string | null;
 	numberOfReplies: number;
 }
 

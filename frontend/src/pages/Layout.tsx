@@ -20,9 +20,9 @@ import ErrorModal from "../components/ErrorModal";
 
 interface Props {
 	isComponentLoading: boolean;
-	userId?: string;
+	userId?: string | null;
 	setPageLoading: (arg: boolean) => void;
-	setUserId: (arg?: string) => void;
+	setUserId: (arg: string | null) => void;
 	isValidationLoding: boolean;
 	children: React.JSX.Element;
 	isUnreadMessages?: boolean;
