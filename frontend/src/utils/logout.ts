@@ -8,22 +8,21 @@ const logout = async (
 	setErrors: (arg: string[]) => void,
 	redirect: () => void
 ) => {
-	setPageLoading(true);
-	await axios
-		.delete(`${serverURL}/logout`, { withCredentials: true })
-		.then(() => {
+	try {
+		setPageLoading(true);
+		await axios.delete(`${serverURL}/logout`, { withCredentials: true });
+		setUserId(null);
+		redirect();
+	} catch (error) {
+		if (axios.isAxiosError(error) && error.response?.status === 403) {
 			setUserId(null);
 			redirect();
-		})
-		.catch((error: unknown) => {
-			if (axios.isAxiosError(error) && error.response?.status === 403) {
-				setUserId(null);
-				redirect();
-			} else {
-				handleErrors(error, "logging out", setErrors);
-			}
-		});
-	setPageLoading(false);
+		} else {
+			handleErrors(error, "logging out", setErrors);
+		}
+	} finally {
+		setPageLoading(false);
+	}
 };
 
 export default logout;

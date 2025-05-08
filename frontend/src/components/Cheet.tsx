@@ -57,22 +57,46 @@ const Cheet: React.FC<Props> = ({
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-		setEditLoading(true);
-		setComponentLoading(true);
-		await axios
-			.put(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`, data, {
-				withCredentials: true,
-			})
-			.then((res: { data: ICheet[] }) => {
-				setCheets(res.data);
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "editing the cheet", setErrors);
-			});
-		setEditing(false);
-		setEditLoading(false);
-		setComponentLoading(false);
+	const editCheet: SubmitHandler<{ text: string }> = async (data) => {
+		try {
+			setEditLoading(true);
+			setComponentLoading(true);
+			const cheets = await axios.put<ICheet[]>(
+				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
+				data,
+				{
+					withCredentials: true,
+				}
+			);
+			setCheets(cheets.data);
+		} catch (error) {
+			handleErrors(error, "editing the cheet", setErrors);
+		} finally {
+			setEditing(false);
+			setEditLoading(false);
+			setComponentLoading(false);
+		}
+	};
+
+	const deleteCheet = async () => {
+		try {
+			setDeleteLoading(true);
+			setComponentLoading(true);
+			const cheets = await axios.delete<ICheet[]>(
+				`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
+				{
+					withCredentials: true,
+				}
+			);
+
+			setCheets(cheets.data);
+			setModalOpen(false);
+		} catch (error) {
+			handleErrors(error, "deleting the cheet", setErrors);
+		} finally {
+			setDeleteLoading(false);
+			setComponentLoading(false);
+		}
 	};
 
 	const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
@@ -118,7 +142,7 @@ const Cheet: React.FC<Props> = ({
 									{isEditing ? (
 										<Box
 											component="form"
-											onSubmit={handleSubmit(onSubmit)}
+											onSubmit={handleSubmit(editCheet)}
 											id={`edit-cheet-${cheet.uuid}`}
 										>
 											<TextField
@@ -203,28 +227,7 @@ const Cheet: React.FC<Props> = ({
 											<IconButton
 												color="primary"
 												disabled={isComponentLoading}
-												onClick={async () => {
-													setDeleteLoading(true);
-													setComponentLoading(true);
-													await axios
-														.delete(
-															`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${
-																cheet.uuid
-															}?take=${numberOfCheets}`,
-															{
-																withCredentials: true,
-															}
-														)
-														.then((res: { data: ICheet[] }) => {
-															setCheets(res.data);
-															setModalOpen(false);
-														})
-														.catch((error: unknown) => {
-															handleErrors(error, "deleting the cheet", setErrors);
-														});
-													setDeleteLoading(false);
-													setComponentLoading(false);
-												}}
+												onClick={deleteCheet}
 											>
 												<Delete />
 											</IconButton>

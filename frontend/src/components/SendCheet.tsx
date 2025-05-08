@@ -33,27 +33,30 @@ const SendCheet: React.FC<Props> = ({
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
-	const [isLoading, setSubmitLoading] = useState<boolean>(false);
+	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-		setSubmitLoading(true);
-		setComponentLoading(true);
-		reset();
-		await axios
-			.post(`${serverURL + (id ? `/users/${id}` : "")}/cheets?take=${cheetsLengthRef.current + 1}`, data, {
-				withCredentials: true,
-			})
-			.then((res: { data: ICheet[] }) => {
-				setCheets(res.data);
-				cheetsLengthRef.current++;
-				setScroll(true);
-				setCheetsError("");
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "sending cheet", setErrors);
-			});
-		setSubmitLoading(false);
-		setComponentLoading(false);
+		try {
+			setSubmitLoading(true);
+			setComponentLoading(true);
+			reset();
+			const cheets = await axios.post<ICheet[]>(
+				`${serverURL + (id ? `/users/${id}` : "")}/cheets?take=${cheetsLengthRef.current + 1}`,
+				data,
+				{
+					withCredentials: true,
+				}
+			);
+			setCheets(cheets.data);
+			cheetsLengthRef.current++;
+			setScroll(true);
+			setCheetsError("");
+		} catch (error) {
+			handleErrors(error, "sending cheet", setErrors);
+		} finally {
+			setSubmitLoading(false);
+			setComponentLoading(false);
+		}
 	};
 
 	return (
@@ -70,7 +73,7 @@ const SendCheet: React.FC<Props> = ({
 						</Grid2>
 					</Grid2>
 					<Grid2 size={2} container justifyContent="center">
-						{isLoading ? (
+						{isSubmitLoading ? (
 							<Box paddingTop={3}>
 								<CircularProgress size="2.1rem" thickness={6} />
 							</Box>

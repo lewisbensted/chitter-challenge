@@ -27,6 +27,7 @@ const useValidateUser = (): UseValidateUserReturn => {
 		) => {
 			const { requiresAuthorisation = false, isLoggedIn = false } = extraParams ?? {};
 			try {
+				setValidateLoading(true);
 				const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
 				if (isLoggedIn) {
 					navigate("/");

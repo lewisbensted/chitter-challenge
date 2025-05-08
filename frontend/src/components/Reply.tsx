@@ -50,22 +50,44 @@ const Reply: React.FC<Props> = ({
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-		setEditLoading(true);
-		setComponentLoading(true);
-		await axios
-			.put(`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}?&take=${numberOfReplies}`, data, {
-				withCredentials: true,
-			})
-			.then((res: { data: IReply[] }) => {
-				setReplies(res.data);
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "editing the reply", setErrors);
-			});
-		setEditLoading(false);
-		setComponentLoading(false);
-		setEditing(false);
+	const editReply: SubmitHandler<{ text: string }> = async (data) => {
+		try {
+			const replies = await axios.put<IReply[]>(
+				`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}?&take=${numberOfReplies}`,
+				data,
+				{
+					withCredentials: true,
+				}
+			);
+
+			setReplies(replies.data);
+		} catch (error) {
+			handleErrors(error, "editing the reply", setErrors);
+		} finally {
+			setEditLoading(false);
+			setComponentLoading(false);
+			setEditing(false);
+		}
+	};
+
+	const deleteReply = async () => {
+		try {
+			setDeleteLoading(true);
+			setComponentLoading(true);
+			const replies = await axios.delete<IReply[]>(
+				`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}?take=${numberOfReplies}`,
+				{
+					withCredentials: true,
+				}
+			);
+
+			setReplies(replies.data);
+		} catch (error) {
+			handleErrors(error, "deleting the reply", setErrors);
+		} finally {
+			setDeleteLoading(false);
+			setComponentLoading(false);
+		}
 	};
 
 	const createdAt = new Date(reply.createdAt);
@@ -93,7 +115,7 @@ const Reply: React.FC<Props> = ({
 									{isEditing ? (
 										<Box
 											component="form"
-											onSubmit={handleSubmit(onSubmit)}
+											onSubmit={handleSubmit(editReply)}
 											id={`edit-reply-${reply.uuid}`}
 										>
 											<TextField
@@ -159,25 +181,7 @@ const Reply: React.FC<Props> = ({
 											<IconButton
 												color="primary"
 												disabled={isComponentLoading}
-												onClick={async () => {
-													setDeleteLoading(true);
-													setComponentLoading(true);
-													await axios
-														.delete(
-															`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}?take=${numberOfReplies}`,
-															{
-																withCredentials: true,
-															}
-														)
-														.then((res: { data: IReply[] }) => {
-															setReplies(res.data);
-														})
-														.catch((error: unknown) => {
-															handleErrors(error, "deleting the reply", setErrors);
-														});
-													setDeleteLoading(false);
-													setComponentLoading(false);
-												}}
+												onClick={deleteReply}
 											>
 												<Delete />
 											</IconButton>

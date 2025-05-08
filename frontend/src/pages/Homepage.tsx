@@ -54,11 +54,11 @@ const Homepage: React.FC = () => {
 		void fetchData((error) => {
 			handleErrors(error, "fetching messages", setErrors);
 		}, setComponentLoading);
-	}, [userId]);
+	}, [userId, fetchData, setConversationsLoading]);
 
 	useEffect(() => {
 		void loadMoreCheets((error) => {
-			handleErrors(error, "updating cheets", setErrors);
+			handleErrors(error, "loading cheets", setErrors);
 		});
 	}, [page, loadMoreCheets]);
 

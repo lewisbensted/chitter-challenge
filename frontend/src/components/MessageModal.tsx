@@ -50,27 +50,28 @@ const MessageModal: React.FC<Props> = ({
 	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (isOpen) {
-			setComponentLoading(true);
-			axios
-				.get(`${serverURL}/messages/${conversation.interlocutorId}`, {
-					withCredentials: true,
-				})
-				.then((res: { data: IMessage[] }) => {
-					setMessages(res.data);
+		const fetchMessages = async () => {
+			if (isOpen) {
+				try {
+					setComponentLoading(true);
+					const messages = await axios.get(`${serverURL}/messages/${conversation.interlocutorId}`, {
+						withCredentials: true,
+					});
+					setMessages(messages.data);
 					setScroll(true);
-					setMessagesLoading(false);
-					setComponentLoading(false);
+
 					if (unread > 0) {
 						toggleReloadTrigger(!reloadTrigger);
 					}
-				})
-				.catch(() => {
+				} catch {
 					setMessagesError("An unexpected error occured while loading messages.");
+				} finally {
 					setMessagesLoading(false);
 					setComponentLoading(false);
-				});
-		}
+				}
+			}
+		};
+		fetchMessages();
 	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
 
 	useEffect(() => {

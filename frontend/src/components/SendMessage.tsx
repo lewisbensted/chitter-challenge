@@ -34,25 +34,25 @@ const SendMessage: React.FC<Props> = ({
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-		setSubmitLoading(true);
-		setComponentLoading(true);
-		reset();
-		await axios
-			.post(`${serverURL}/messages/${recipientId}`, data, {
+		try {
+			setSubmitLoading(true);
+			setComponentLoading(true);
+			reset();
+			const messages = await axios.post<IMessage[]>(`${serverURL}/messages/${recipientId}`, data, {
 				withCredentials: true,
-			})
-			.then((res: { data: IMessage[] }) => {
-				setMessages(res.data);
-				setScroll(true);
-				if (setReloadWhenClosed) {
-					setReloadWhenClosed(true);
-				}
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "sending message", setErrors);
 			});
-		setSubmitLoading(false);
-		setComponentLoading(false);
+
+			setMessages(messages.data);
+			setScroll(true);
+			if (setReloadWhenClosed) {
+				setReloadWhenClosed(true);
+			}
+		} catch (error) {
+			handleErrors(error, "sending message", setErrors);
+		} finally {
+			setSubmitLoading(false);
+			setComponentLoading(false);
+		}
 	};
 
 	return (

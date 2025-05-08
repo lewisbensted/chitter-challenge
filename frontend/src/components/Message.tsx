@@ -45,22 +45,49 @@ const Message: React.FC<Props> = ({
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [isEditing, setEditing] = useState<boolean>(false);
 
-	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-		setEditLoading(true);
-		setComponentLoading(true);
-		await axios
-			.put(`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`, data, {
-				withCredentials: true,
-			})
-			.then((res: { data: IMessage[] }) => {
-				setMessages(res.data);
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "editing the message", setErrors);
-			});
-		setEditing(false);
-		setEditLoading(false);
-		setComponentLoading(false);
+	const editMessage: SubmitHandler<{ text: string }> = async (data) => {
+		try {
+			setEditLoading(true);
+			setComponentLoading(true);
+			const messages = await axios.put(
+				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
+				data,
+				{
+					withCredentials: true,
+				}
+			);
+
+			setMessages(messages.data);
+		} catch (error) {
+			handleErrors(error, "editing the message", setErrors);
+		} finally {
+			setEditing(false);
+			setEditLoading(false);
+			setComponentLoading(false);
+		}
+	};
+
+	const deleteMessage = async () => {
+		try {
+			setDeleteLoading(true);
+			setComponentLoading(true);
+			const messages = await axios.delete(
+				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
+				{
+					withCredentials: true,
+				}
+			);
+
+			setMessages(messages.data);
+			if (setReloadWhenClosed) {
+				setReloadWhenClosed(true);
+			}
+		} catch (error) {
+			handleErrors(error, "deleting the message", setErrors);
+		} finally {
+			setDeleteLoading(false);
+			setComponentLoading(false);
+		}
 	};
 
 	const createdAt = new Date(message.createdAt);
@@ -78,12 +105,11 @@ const Message: React.FC<Props> = ({
 									{isEditing ? (
 										<Box
 											component="form"
-											onSubmit={handleSubmit(onSubmit)}
+											onSubmit={handleSubmit(editMessage)}
 											id={`edit-message-${message.uuid}`}
 										>
 											<TextField
 												component="form"
-												onSubmit={handleSubmit(onSubmit)}
 												id="edit-message"
 												{...register("text")}
 												type="text"
@@ -161,28 +187,7 @@ const Message: React.FC<Props> = ({
 											<IconButton
 												color="primary"
 												disabled={isComponentLoading}
-												onClick={async () => {
-													setDeleteLoading(true);
-													setComponentLoading(true);
-													await axios
-														.delete(
-															`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
-															{
-																withCredentials: true,
-															}
-														)
-														.then((res: { data: IMessage[] }) => {
-															setMessages(res.data);
-															if (setReloadWhenClosed) {
-																setReloadWhenClosed(true);
-															}
-														})
-														.catch((error: unknown) => {
-															handleErrors(error, "deleting the message", setErrors);
-														});
-													setDeleteLoading(false);
-													setComponentLoading(false);
-												}}
+												onClick={deleteMessage}
 											>
 												<Delete />
 											</IconButton>

@@ -1,9 +1,6 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
-import axios from "axios";
+import React, { Fragment, useEffect, useState } from "react";
 import Layout from "./Layout";
-import { IConversation } from "../interfaces/interfaces";
 import ErrorModal from "../components/ErrorModal";
-import { serverURL } from "../config/config";
 import Conversation from "../components/Conversation";
 import { handleErrors } from "../utils/handleErrors";
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
@@ -32,7 +29,7 @@ const Conversations: React.FC = () => {
 	useEffect(() => {
 		void validateUser(
 			(error) => {
-				handleErrors(error, "fetching page information", setErrors);
+				handleErrors(error, "validating user", setErrors);
 			},
 			{ requiresAuthorisation: true }
 		);
@@ -40,15 +37,14 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		if (!userId) return;
-
 		void fetchData(
-			() => {
-				setConversationsError("j");
+			(error) => {
+				handleErrors(error, "fetching conversations", setErrors);
 			},
 			setComponentLoading,
 			{}
 		);
-	}, [userId, reloadTrigger]);
+	}, [userId, reloadTrigger, setConversationsError, fetchData]);
 
 	return (
 		<Layout
@@ -72,11 +68,11 @@ const Conversations: React.FC = () => {
 						<CircularProgress thickness={5} />
 					</FlexBox>
 				) : userId ? (
-					conversationsError ? (
-						conversationsError
-					) : (
-						<Fragment>
-							<Typography variant="h4">Messages</Typography>
+					<Fragment>
+						<Typography variant="h4">Messages</Typography>
+						{conversationsError ? (
+							<Typography variant="subtitle1">{conversationsError}</Typography>
+						) : (
 							<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
 								{conversations?.map((conversation) => (
 									<Conversation
@@ -91,8 +87,8 @@ const Conversations: React.FC = () => {
 									/>
 								))}
 							</Grid2>
-						</Fragment>
-					)
+						)}
+					</Fragment>
 				) : null}
 			</Box>
 		</Layout>

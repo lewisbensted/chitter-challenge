@@ -41,6 +41,7 @@ const Conversation: React.FC<Props> = ({
 				isComponentLoading={isComponentLoading}
 				setComponentLoading={setComponentLoading}
 				closeModal={() => {
+					console.log('hi')
 					setMessageModalOpen(false);
 					if (reloadWhenClosed) {
 						toggleReloadTrigger(!reloadTrigger);
@@ -62,8 +63,8 @@ const Conversation: React.FC<Props> = ({
 						isComponentLoading
 							? undefined
 							: () => {
-									setMessageModalOpen(true);
-								}
+								setMessageModalOpen(true);
+							}
 					}
 				>
 					<CardContent>

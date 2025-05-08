@@ -44,13 +44,13 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 
 			const newCheets = res.data;
 
-			setCheets((cheets) => {
-				const updatedCheets = [...cheets, ...newCheets];
-
-				cheetsLengthRef.current = updatedCheets.length;
-				return updatedCheets;
-			});
 			if (newCheets.length) {
+				setCheets((cheets) => {
+					const updatedCheets = [...cheets, ...newCheets];
+					cheetsLengthRef.current = updatedCheets.length;
+					return updatedCheets;
+				});
+
 				cursorRef.current = newCheets[newCheets.length - 1].uuid;
 			}
 			setCheetsError("");

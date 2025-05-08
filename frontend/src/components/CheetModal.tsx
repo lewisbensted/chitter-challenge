@@ -52,36 +52,37 @@ const CheetModal: React.FC<Props> = ({
 	const repliesLengthRef = useRef<number>(0);
 
 	useEffect(() => {
-		if (isOpen) {
-			setComponentLoading(true);
-			axios
-				.get(
-					`${serverURL}/cheets/${cheet.uuid}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=5`,
-					{
-						withCredentials: true,
+		const fetchReplies = async () => {
+			if (isOpen) {
+				try {
+					setComponentLoading(true);
+					const res = await axios.get<IReply[]>(
+						`${serverURL}/cheets/${cheet.uuid}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=5`,
+						{
+							withCredentials: true,
+						}
+					);
+					const newReplies = res.data;
+					if (newReplies.length) {
+						setReplies((replies) => {
+							const updated = [...replies, ...newReplies];
+							repliesLengthRef.current = updated.length;
+							return updated;
+						});
+						cursorRef.current = newReplies[newReplies.length - 1].uuid;
 					}
-				)
-				.then((res: { data: IReply[] }) => {
-					setReplies((replies) => {
-						const updated = [...replies, ...res.data];
-						repliesLengthRef.current = updated.length;
-						return updated;
-					});
-					setRepliesLoading(false);
-					setComponentLoading(false);
 					if (page > 0) {
 						setScrollDown(true);
 					}
-					if (res.data.length) {
-						cursorRef.current = res.data[res.data.length - 1].uuid;
-					}
-				})
-				.catch(() => {
+				} catch {
 					setRepliesError("An unexpected error occured while loading replies.");
+				} finally {
 					setRepliesLoading(false);
 					setComponentLoading(false);
-				});
-		}
+				}
+			}
+		};
+		void fetchReplies();
 	}, [isOpen, page, cheet.uuid, setComponentLoading]);
 
 	useEffect(() => {

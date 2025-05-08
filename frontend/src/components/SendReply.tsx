@@ -38,26 +38,29 @@ const SendReply: React.FC<Props> = ({
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
-		setSubmitLoading(true);
-		setComponentLoading(true);
-		reset();
-		await axios
-			.post(`${serverURL}/cheets/${cheetId}/replies?take=${repliesLengthRef.current + 1}`, data, {
-				withCredentials: true,
-			})
-			.then((res: { data: IReply[] }) => {
-				setReplies(res.data);
-				setScroll(true);
-				if (repliesLengthRef.current === 0) {
-					toggleReloadTrigger(!reloadTrigger);
+		try {
+			setSubmitLoading(true);
+			setComponentLoading(true);
+			reset();
+			const replies = await axios.post<IReply[]>(
+				`${serverURL}/cheets/${cheetId}/replies?take=${repliesLengthRef.current + 1}`,
+				data,
+				{
+					withCredentials: true,
 				}
-				repliesLengthRef.current++;
-			})
-			.catch((error: unknown) => {
-				handleErrors(error, "sending the reply", setErrors);
-			});
-		setSubmitLoading(false);
-		setComponentLoading(false);
+			);
+			setReplies(replies.data);
+			setScroll(true);
+			if (repliesLengthRef.current === 0) {
+				toggleReloadTrigger(!reloadTrigger);
+			}
+			repliesLengthRef.current++;
+		} catch (error) {
+			handleErrors(error, "sending the reply", setErrors);
+		} finally {
+			setSubmitLoading(false);
+			setComponentLoading(false);
+		}
 	};
 	return (
 		<ThemeProvider theme={theme}>

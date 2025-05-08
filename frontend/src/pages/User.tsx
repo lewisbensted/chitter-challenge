@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { IConversation, IUser } from "../interfaces/interfaces";
+import { IUser } from "../interfaces/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SubmitCheet from "../components/SendCheet";
@@ -18,19 +18,19 @@ import useFetchConversations from "../hooks/useFetchConversations";
 
 const User: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-	//const [conversation, setConversation] = useState<IConversation>();
+
 
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 
 	const [reloadMessagesTrigger, toggleReloadMessagesTrigger] = useState<boolean>(false);
-	//const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
+
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
 	const [isUserLoading, setUserLoading] = useState(true);
-	//const [isMessagesLoading, setMessagesLoading] = useState(true);
+
 
 	const divRef = useRef<HTMLDivElement>(null);
 
@@ -125,7 +125,7 @@ const User: React.FC = () => {
 			setComponentLoading,
 			{ id: id }
 		);
-	}, [id, userId, reloadMessagesTrigger, navigate]);
+	}, [id, userId, reloadMessagesTrigger, navigate, setConversationsLoading, fetchData]);
 
 	useEffect(() => {
 		if (scrollUp) {
@@ -185,7 +185,7 @@ const User: React.FC = () => {
 								</FlexBox>
 							</FlexBox>
 						) : cheetsError ? (
-							cheetsError
+							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
 								{cheets.map((cheet) => (
