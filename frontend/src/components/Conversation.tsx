@@ -16,6 +16,7 @@ interface Props {
 	setConversations: (arg: IConversation[]) => void;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: (arg: boolean) => void;
+	errorOnModalClose?: React.MutableRefObject<boolean>
 }
 
 const Conversation: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const Conversation: React.FC<Props> = ({
 	setConversations,
 	reloadTrigger,
 	toggleReloadTrigger,
+	errorOnModalClose
 }) => {
 	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
 	const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
@@ -41,7 +43,6 @@ const Conversation: React.FC<Props> = ({
 				isComponentLoading={isComponentLoading}
 				setComponentLoading={setComponentLoading}
 				closeModal={() => {
-					console.log('hi')
 					setMessageModalOpen(false);
 					if (reloadWhenClosed) {
 						toggleReloadTrigger(!reloadTrigger);
@@ -54,6 +55,7 @@ const Conversation: React.FC<Props> = ({
 				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
 				onUserPage={false}
+				errorOnModalClose = {errorOnModalClose}
 			/>
 
 			<Card>

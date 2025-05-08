@@ -7,7 +7,7 @@ interface UseFetchCheetsReturn {
 	cheets: ICheet[];
 	isCheetsLoading: boolean;
 	cheetsLengthRef: React.MutableRefObject<number>;
-	cheetsErrorOnModalClose: React.MutableRefObject<string>;
+	errorOnModalClose: React.MutableRefObject<boolean>;
 	cheetsError: string;
 	setCheetsError: (arg: string) => void;
 	setCheets: (arg: ICheet[]) => void;
@@ -28,7 +28,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
-	const cheetsErrorOnModalClose = useRef<string>("");
+	const errorOnModalClose = useRef(false);
 
 	const loadMoreCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
 		try {
@@ -71,7 +71,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				setComponentLoading(true);
 
 				const res = await axios.get<ICheet[]>(
-					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?take=${cheetsLengthRef.current}`,
+					`${serverURL}${userId ? `/users/${userId}` : ""}/chets?take=${cheetsLengthRef.current}`,
 					{
 						withCredentials: true,
 					}
@@ -82,7 +82,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				setCheetsError("");
 			} catch (error) {
 				handleError(error);
-				cheetsErrorOnModalClose.current = "An unexpected error occured while loading cheets.";
+				errorOnModalClose.current = true;
 			} finally {
 				setComponentLoading(false);
 			}
@@ -94,7 +94,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		cheetsErrorOnModalClose,
+		errorOnModalClose,
 		cheetsError,
 		setCheets,
 		setCheetsError,

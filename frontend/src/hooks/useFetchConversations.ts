@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
@@ -16,6 +16,7 @@ interface UseFetchConversationsReturn {
 		setComponentLoading: (arg: boolean) => void,
 		conversationParams?: { id?: string }
 	) => Promise<void>;
+	errorOnModalClose: React.MutableRefObject<boolean>;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -23,6 +24,8 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [isConversationsLoading, setConversationsLoading] = useState(true);
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [conversationsError, setConversationsError] = useState<string>();
+
+	const errorOnModalClose = useRef(false);
 
 	const fetchUnreadMessages = async () => {
 		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
@@ -48,7 +51,12 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				setComponentLoading(true);
 				await Promise.all([fetchUnreadMessages(), conversationParams ? fetchConversations(id) : null]);
 			} catch (error) {
-				handleError(error);
+				if (errorOnModalClose.current || id) {
+					
+					handleError(error);
+				} else {
+					setConversationsError("An unexpected error occured while loading conversations.");
+				}
 			} finally {
 				setComponentLoading(false);
 				setConversationsLoading(false);
@@ -66,6 +74,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversations,
 		setConversationsLoading,
 		fetchData,
+		errorOnModalClose,
 	};
 };
 

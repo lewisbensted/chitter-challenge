@@ -44,7 +44,7 @@ const User: React.FC = () => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		cheetsErrorOnModalClose,
+		errorOnModalClose,
 		cheetsError,
 		setCheetsError,
 		setCheets,
@@ -151,8 +151,8 @@ const User: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						setCheetsError(cheetsErrorOnModalClose.current);
-						cheetsErrorOnModalClose.current = "";
+						setCheetsError('An unexpected error occured while loading cheets.');
+						errorOnModalClose.current = false;
 					}}
 				/>
 				{isValidateLoading || isUserLoading || isConversationsLoading ? (

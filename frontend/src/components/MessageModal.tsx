@@ -26,6 +26,7 @@ interface Props {
 	setReloadWhenClosed?: (arg: boolean) => void;
 	unread: number;
 	onUserPage: boolean;
+	errorOnModalClose?: React.MutableRefObject<boolean>
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -40,6 +41,7 @@ const MessageModal: React.FC<Props> = ({
 	setReloadWhenClosed,
 	unread,
 	onUserPage,
+	errorOnModalClose
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [messages, setMessages] = useState<IMessage[]>();
@@ -62,6 +64,7 @@ const MessageModal: React.FC<Props> = ({
 
 					if (unread > 0) {
 						toggleReloadTrigger(!reloadTrigger);
+						errorOnModalClose!.current = true
 					}
 				} catch {
 					setMessagesError("An unexpected error occured while loading messages.");

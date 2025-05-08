@@ -24,6 +24,7 @@ const Conversations: React.FC = () => {
 		setConversationsError,
 		setConversations,
 		fetchData,
+		errorOnModalClose,
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -59,6 +60,10 @@ const Conversations: React.FC = () => {
 				<ErrorModal
 					errors={errors}
 					closeModal={() => {
+						if (errorOnModalClose.current) {
+							setConversationsError("An unexpected error occred while loading conversations.");
+							errorOnModalClose.current = false;
+						}
 						setErrors([]);
 					}}
 				/>
@@ -84,6 +89,7 @@ const Conversations: React.FC = () => {
 										setConversations={setConversations}
 										reloadTrigger={reloadTrigger}
 										toggleReloadTrigger={toggleReloadTrigger}
+										errorOnModalClose={errorOnModalClose}
 									/>
 								))}
 							</Grid2>
