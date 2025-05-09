@@ -21,6 +21,8 @@ interface Props {
 	repliesLengthRef: React.MutableRefObject<number>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: (arg: boolean) => void;
+	//repliesError:string;
+	setRepliesError: (arg: string) => void;
 }
 
 const SendReply: React.FC<Props> = ({
@@ -33,6 +35,7 @@ const SendReply: React.FC<Props> = ({
 	repliesLengthRef,
 	reloadTrigger,
 	toggleReloadTrigger,
+	setRepliesError,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -55,6 +58,7 @@ const SendReply: React.FC<Props> = ({
 				toggleReloadTrigger(!reloadTrigger);
 			}
 			repliesLengthRef.current++;
+			setRepliesError("");
 		} catch (error) {
 			handleErrors(error, "sending the reply", setErrors);
 		} finally {

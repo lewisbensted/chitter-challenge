@@ -19,7 +19,6 @@ import useFetchConversations from "../hooks/useFetchConversations";
 const User: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 
-
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 
@@ -30,7 +29,6 @@ const User: React.FC = () => {
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
 	const [isUserLoading, setUserLoading] = useState(true);
-
 
 	const divRef = useRef<HTMLDivElement>(null);
 
@@ -151,7 +149,7 @@ const User: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						setCheetsError('An unexpected error occured while loading cheets.');
+						setCheetsError("An unexpected error occured while loading cheets.");
 						errorOnModalClose.current = false;
 					}}
 				/>
@@ -212,7 +210,7 @@ const User: React.FC = () => {
 						>
 							LOAD MORE
 						</Button>
-						{userId === id ? (
+						{userId === id && !cheetsError ? (
 							<SubmitCheet
 								setCheetsError={setCheetsError}
 								isDisabled={isComponentLoading || isCheetsLoading}

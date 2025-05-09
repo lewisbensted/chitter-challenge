@@ -49,7 +49,7 @@ const Message: React.FC<Props> = ({
 		try {
 			setEditLoading(true);
 			setComponentLoading(true);
-			const messages = await axios.put(
+			const messages = await axios.put<IMessage[]>(
 				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
 				data,
 				{
@@ -71,7 +71,7 @@ const Message: React.FC<Props> = ({
 		try {
 			setDeleteLoading(true);
 			setComponentLoading(true);
-			const messages = await axios.delete(
+			const messages = await axios.delete<IMessage[]>(
 				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
 				{
 					withCredentials: true,

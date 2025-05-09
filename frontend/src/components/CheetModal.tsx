@@ -154,7 +154,7 @@ const CheetModal: React.FC<Props> = ({
 							</Grid2>
 						)}
 
-						{userId ? (
+						{userId && !repliesError ? (
 							<SendReply
 								cheetId={cheet.uuid}
 								isDisabled={isComponentLoading}
@@ -165,6 +165,7 @@ const CheetModal: React.FC<Props> = ({
 								repliesLengthRef={repliesLengthRef}
 								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}
+								setRepliesError={setRepliesError}
 							/>
 						) : null}
 						<Button

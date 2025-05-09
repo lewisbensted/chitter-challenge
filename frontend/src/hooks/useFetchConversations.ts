@@ -52,7 +52,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				await Promise.all([fetchUnreadMessages(), conversationParams ? fetchConversations(id) : null]);
 			} catch (error) {
 				if (errorOnModalClose.current || id) {
-					
 					handleError(error);
 				} else {
 					setConversationsError("An unexpected error occured while loading conversations.");

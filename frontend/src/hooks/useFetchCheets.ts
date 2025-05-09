@@ -71,7 +71,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				setComponentLoading(true);
 
 				const res = await axios.get<ICheet[]>(
-					`${serverURL}${userId ? `/users/${userId}` : ""}/chets?take=${cheetsLengthRef.current}`,
+					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?take=${cheetsLengthRef.current}`,
 					{
 						withCredentials: true,
 					}

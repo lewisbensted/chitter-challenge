@@ -97,8 +97,10 @@ const Homepage: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						setCheetsError('An unexpected error occured while loading cheets.');
-						errorOnModalClose.current = false;
+						if (errorOnModalClose.current) {
+							setCheetsError("An unexpected error occured while loading cheets.");
+							errorOnModalClose.current = false;
+						}
 					}}
 				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>
@@ -143,7 +145,7 @@ const Homepage: React.FC = () => {
 						>
 							LOAD MORE
 						</Button>
-						{userId ? (
+						{userId && !cheetsError ? (
 							<SubmitCheet
 								isDisabled={isComponentLoading || isCheetsLoading}
 								setCheets={setCheets}

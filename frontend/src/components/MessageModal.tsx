@@ -26,7 +26,7 @@ interface Props {
 	setReloadWhenClosed?: (arg: boolean) => void;
 	unread: number;
 	onUserPage: boolean;
-	errorOnModalClose?: React.MutableRefObject<boolean>
+	errorOnModalClose?: React.MutableRefObject<boolean>;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -41,11 +41,11 @@ const MessageModal: React.FC<Props> = ({
 	setReloadWhenClosed,
 	unread,
 	onUserPage,
-	errorOnModalClose
+	errorOnModalClose,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [messages, setMessages] = useState<IMessage[]>();
-	const [messagesError, setMessagesError] = useState<string>();
+	const [messagesError, setMessagesError] = useState<string>("");
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [scroll, setScroll] = useState<boolean>(false);
 
@@ -56,15 +56,18 @@ const MessageModal: React.FC<Props> = ({
 			if (isOpen) {
 				try {
 					setComponentLoading(true);
-					const messages = await axios.get(`${serverURL}/messages/${conversation.interlocutorId}`, {
-						withCredentials: true,
-					});
+					const messages = await axios.get<IMessage[]>(
+						`${serverURL}/messages/${conversation.interlocutorId}`,
+						{
+							withCredentials: true,
+						}
+					);
 					setMessages(messages.data);
 					setScroll(true);
 
 					if (unread > 0) {
 						toggleReloadTrigger(!reloadTrigger);
-						errorOnModalClose!.current = true
+						errorOnModalClose!.current = true;
 					}
 				} catch {
 					setMessagesError("An unexpected error occured while loading messages.");
@@ -74,7 +77,7 @@ const MessageModal: React.FC<Props> = ({
 				}
 			}
 		};
-		fetchMessages();
+		void fetchMessages();
 	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
 
 	useEffect(() => {
@@ -139,15 +142,18 @@ const MessageModal: React.FC<Props> = ({
 								))}
 							</Grid2>
 						)}
-						<SendMessage
-							recipientId={conversation.interlocutorId}
-							isDisabled={isComponentLoading}
-							setMessages={setMessages}
-							setErrors={setErrors}
-							setComponentLoading={setComponentLoading}
-							setReloadWhenClosed={setReloadWhenClosed}
-							setScroll={setScroll}
-						/>
+						{messagesError ? null : (
+							<SendMessage
+								recipientId={conversation.interlocutorId}
+								isDisabled={isComponentLoading}
+								setMessages={setMessages}
+								setErrors={setErrors}
+								setComponentLoading={setComponentLoading}
+								setReloadWhenClosed={setReloadWhenClosed}
+								setScroll={setScroll}
+								setMessagesError={setMessagesError}
+							/>
+						)}
 					</Grid2>
 				</Grid2>
 			</Dialog>
