@@ -11,7 +11,7 @@ interface UseFetchCheetsReturn {
 	cheetsError: string;
 	setCheetsError: (arg: string) => void;
 	setCheets: (arg: ICheet[]) => void;
-	loadMoreCheets: (handleError: (error: unknown) => void, userId?: string) => Promise<void>;
+	fetchCheets: (handleError: (error: unknown) => void, userId?: string) => Promise<void>;
 	refreshCheets: (
 		handleError: (error: unknown) => void,
 		setComponentLoading: (arg: boolean) => void,
@@ -21,16 +21,13 @@ interface UseFetchCheetsReturn {
 
 const useFetchCheets = (): UseFetchCheetsReturn => {
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
-
 	const [cheets, setCheets] = useState<ICheet[]>([]);
-
 	const [cheetsError, setCheetsError] = useState<string>("");
-
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
 	const errorOnModalClose = useRef(false);
 
-	const loadMoreCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
+	const fetchCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
 		try {
 			setCheetsLoading(true);
 
@@ -98,7 +95,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 		cheetsError,
 		setCheets,
 		setCheetsError,
-		loadMoreCheets,
+		fetchCheets,
 		refreshCheets,
 	};
 };

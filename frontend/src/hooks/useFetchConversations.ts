@@ -4,7 +4,7 @@ import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
 
 interface UseFetchConversationsReturn {
-	conversations: IConversation[] | undefined;
+	conversations: IConversation[];
 	isUnreadMessages: boolean | undefined;
 	conversationsError: string | undefined;
 	isConversationsLoading: boolean;
@@ -20,10 +20,10 @@ interface UseFetchConversationsReturn {
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
-	const [conversations, setConversations] = useState<IConversation[]>();
-	const [isConversationsLoading, setConversationsLoading] = useState(true);
+	const [conversations, setConversations] = useState<IConversation[]>([]);
+	const [isConversationsLoading, setConversationsLoading] = useState<boolean>(true);
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
-	const [conversationsError, setConversationsError] = useState<string>();
+	const [conversationsError, setConversationsError] = useState<string>("");
 
 	const errorOnModalClose = useRef(false);
 

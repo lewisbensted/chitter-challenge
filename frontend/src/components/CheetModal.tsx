@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ICheet, IReply } from "../interfaces/interfaces";
-import axios from "axios";
+import { ICheet } from "../interfaces/interfaces";
 import ErrorModal from "./ErrorModal";
-import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
@@ -13,6 +11,7 @@ import theme from "../styles/theme";
 import Cheet from "./Cheet";
 import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
+import useFetchReplies from "../hooks/useFetchReplies";
 
 interface Props {
 	userId?: string | null;
@@ -40,49 +39,27 @@ const CheetModal: React.FC<Props> = ({
 	toggleReloadTrigger,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
-	const [replies, setReplies] = useState<IReply[]>([]);
-	const [repliesError, setRepliesError] = useState<string>();
-	const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 
 	const divRef = useRef<HTMLDivElement>(null);
-	const cursorRef = useRef<string>();
-	const repliesLengthRef = useRef<number>(0);
+
+
+	const {
+		replies,
+		repliesError,
+		isRepliesLoading,
+		repliesLengthRef,
+		setRepliesError,
+		setReplies,
+		fetchReplies,
+	} = useFetchReplies();
 
 	useEffect(() => {
-		const fetchReplies = async () => {
-			if (isOpen) {
-				try {
-					setComponentLoading(true);
-					const res = await axios.get<IReply[]>(
-						`${serverURL}/cheets/${cheet.uuid}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=5`,
-						{
-							withCredentials: true,
-						}
-					);
-					const newReplies = res.data;
-					if (newReplies.length) {
-						setReplies((replies) => {
-							const updated = [...replies, ...newReplies];
-							repliesLengthRef.current = updated.length;
-							return updated;
-						});
-						cursorRef.current = newReplies[newReplies.length - 1].uuid;
-					}
-					if (page > 0) {
-						setScrollDown(true);
-					}
-				} catch {
-					setRepliesError("An unexpected error occured while loading replies.");
-				} finally {
-					setRepliesLoading(false);
-					setComponentLoading(false);
-				}
-			}
-		};
-		void fetchReplies();
+		if (isOpen) {
+			void fetchReplies(cheet.uuid);
+		}
 	}, [isOpen, page, cheet.uuid, setComponentLoading]);
 
 	useEffect(() => {
@@ -157,7 +134,7 @@ const CheetModal: React.FC<Props> = ({
 						{userId && !repliesError ? (
 							<SendReply
 								cheetId={cheet.uuid}
-								isDisabled={isComponentLoading}
+								isDisabled={isComponentLoading || isRepliesLoading}
 								setReplies={setReplies}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}

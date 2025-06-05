@@ -21,7 +21,6 @@ interface Props {
 	repliesLengthRef: React.MutableRefObject<number>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: (arg: boolean) => void;
-	//repliesError:string;
 	setRepliesError: (arg: string) => void;
 }
 

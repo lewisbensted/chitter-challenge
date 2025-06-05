@@ -33,7 +33,7 @@ const Homepage: React.FC = () => {
 		setCheetsError,
 		setCheets,
 		refreshCheets,
-		loadMoreCheets,
+		fetchCheets,
 	} = useFetchCheets();
 
 	const { isUnreadMessages, isConversationsLoading, setConversationsLoading, fetchData } = useFetchConversations();
@@ -57,10 +57,10 @@ const Homepage: React.FC = () => {
 	}, [userId, fetchData, setConversationsLoading]);
 
 	useEffect(() => {
-		void loadMoreCheets((error) => {
+		void fetchCheets((error) => {
 			handleErrors(error, "loading cheets", setErrors);
 		});
-	}, [page, loadMoreCheets]);
+	}, [page, fetchCheets]);
 
 	const hasFetchedCheetsOnce = useRef<boolean>(false);
 	useEffect(() => {
@@ -87,7 +87,7 @@ const Homepage: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isValidationLoding={isValidateLoading}
+			isValidationLoading={isValidateLoading || isConversationsLoading}
 			isComponentLoading={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
@@ -115,7 +115,7 @@ const Homepage: React.FC = () => {
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets.map((cheet) => (
+								{cheets?.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
 										cheet={cheet}

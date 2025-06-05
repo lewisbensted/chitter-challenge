@@ -56,7 +56,7 @@ const Register: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Layout
-				isValidationLoding={isValidateLoading}
+				isValidationLoading={isValidateLoading}
 				isComponentLoading={isFormLoading}
 				setPageLoading={setValidateLoading}
 				userId={userId}

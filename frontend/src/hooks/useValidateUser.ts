@@ -15,7 +15,7 @@ interface UseValidateUserReturn {
 }
 
 const useValidateUser = (): UseValidateUserReturn => {
-	const [userId, setUserId] = useState<string | null | undefined>(undefined);
+	const [userId, setUserId] = useState<string | null>();
 	const [isValidateLoading, setValidateLoading] = useState(true);
 
 	const navigate = useNavigate();

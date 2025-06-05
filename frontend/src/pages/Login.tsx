@@ -23,7 +23,6 @@ const SignIn: React.FC = () => {
 	const navigate = useNavigate();
 
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
-
 	const [errors, setErrors] = useState<string[]>([]);
 
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
@@ -53,7 +52,7 @@ const SignIn: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Layout
-				isValidationLoding={isValidateLoading}
+				isValidationLoading={isValidateLoading}
 				isComponentLoading={isFormLoading}
 				setPageLoading={setValidateLoading}
 				userId={userId}

@@ -18,12 +18,9 @@ import useFetchConversations from "../hooks/useFetchConversations";
 
 const User: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
-
 	const [reloadMessagesTrigger, toggleReloadMessagesTrigger] = useState<boolean>(false);
-
 	const [scrollUp, setScrollUp] = useState<boolean>(false);
 	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
@@ -47,7 +44,7 @@ const User: React.FC = () => {
 		setCheetsError,
 		setCheets,
 		refreshCheets,
-		loadMoreCheets,
+		fetchCheets,
 	} = useFetchCheets();
 
 	const {
@@ -86,10 +83,10 @@ const User: React.FC = () => {
 
 	useEffect(() => {
 		if (!id) return;
-		void loadMoreCheets((error) => {
+		void fetchCheets((error) => {
 			handleErrors(error, "updating cheets", setErrors);
 		}, id);
-	}, [id, page, loadMoreCheets]);
+	}, [id, page, fetchCheets]);
 
 	const hasFetchedCheetsOnce = useRef<boolean>(false);
 
@@ -139,8 +136,8 @@ const User: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isValidationLoding={isValidateLoading}
-			isComponentLoading={isComponentLoading}
+			isValidationLoading={isValidateLoading}
+			isComponentLoading={isComponentLoading }
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -186,7 +183,7 @@ const User: React.FC = () => {
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets.map((cheet) => (
+								{cheets?.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
 										cheet={cheet}

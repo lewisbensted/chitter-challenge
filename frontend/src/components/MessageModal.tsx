@@ -44,7 +44,7 @@ const MessageModal: React.FC<Props> = ({
 	errorOnModalClose,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
-	const [messages, setMessages] = useState<IMessage[]>();
+	const [messages, setMessages] = useState<IMessage[]>([]);
 	const [messagesError, setMessagesError] = useState<string>("");
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [scroll, setScroll] = useState<boolean>(false);

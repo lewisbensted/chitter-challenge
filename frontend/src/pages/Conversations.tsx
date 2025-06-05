@@ -10,7 +10,6 @@ import useFetchConversations from "../hooks/useFetchConversations";
 
 const Conversations: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
-
 	const [errors, setErrors] = useState<string[]>([]);
 	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
@@ -49,7 +48,7 @@ const Conversations: React.FC = () => {
 
 	return (
 		<Layout
-			isValidationLoding={isValidateLoading}
+			isValidationLoading={isValidateLoading}
 			isComponentLoading={isComponentLoading || isConversationsLoading}
 			setPageLoading={setValidateLoading}
 			userId={userId}
