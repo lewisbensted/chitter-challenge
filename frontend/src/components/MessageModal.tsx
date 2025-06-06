@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IConversation, IMessage } from "../interfaces/interfaces";
-import axios from "axios";
-import { serverURL } from "../config/config";
+import { IConversation } from "../interfaces/interfaces";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";
@@ -12,6 +10,7 @@ import Dialog from "@mui/material/Dialog";
 import { Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
+import useFetchMessages from "../hooks/useFetchMessages";
 
 interface Props {
 	userId?: string | null;
@@ -22,11 +21,11 @@ interface Props {
 	setComponentLoading: (arg: boolean) => void;
 	setConversations: (arg: IConversation[]) => void;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: (arg: boolean) => void;
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setReloadWhenClosed?: (arg: boolean) => void;
 	unread: number;
 	onUserPage: boolean;
-	errorOnModalClose?: React.MutableRefObject<boolean>;
+	conversationErrorOnClose: React.MutableRefObject<boolean>;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -36,49 +35,35 @@ const MessageModal: React.FC<Props> = ({
 	isComponentLoading,
 	closeModal,
 	setComponentLoading,
-	reloadTrigger,
 	toggleReloadTrigger,
 	setReloadWhenClosed,
 	unread,
 	onUserPage,
-	errorOnModalClose,
+	conversationErrorOnClose,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
-	const [messages, setMessages] = useState<IMessage[]>([]);
-	const [messagesError, setMessagesError] = useState<string>("");
-	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [scroll, setScroll] = useState<boolean>(false);
 
 	const ref = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
-		const fetchMessages = async () => {
-			if (isOpen) {
-				try {
-					setComponentLoading(true);
-					const messages = await axios.get<IMessage[]>(
-						`${serverURL}/messages/${conversation.interlocutorId}`,
-						{
-							withCredentials: true,
-						}
-					);
-					setMessages(messages.data);
-					setScroll(true);
+	const { messages, messagesError, isMessagesLoading, setMessages, setMessagesError, fetchMessages } =
+		useFetchMessages();
 
-					if (unread > 0) {
-						toggleReloadTrigger(!reloadTrigger);
-						errorOnModalClose!.current = true;
-					}
-				} catch {
-					setMessagesError("An unexpected error occured while loading messages.");
-				} finally {
-					setMessagesLoading(false);
-					setComponentLoading(false);
+	const unreadRef = useRef(unread);
+	useEffect(() => {
+		unreadRef.current = unread;
+	}, [unread]);
+
+	useEffect(() => {
+		if (isOpen) {
+			void fetchMessages(conversation.interlocutorId).then(() => {
+				if (unreadRef.current > 0) {
+					conversationErrorOnClose.current = true;
+					toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 				}
-			}
-		};
-		void fetchMessages();
-	}, [isOpen, conversation.interlocutorId, setComponentLoading, toggleReloadTrigger]);
+			});
+		}
+	}, [isOpen, conversation.interlocutorId, conversationErrorOnClose, toggleReloadTrigger, fetchMessages]);
 
 	useEffect(() => {
 		if (isOpen && scroll) {
@@ -128,7 +113,7 @@ const MessageModal: React.FC<Props> = ({
 									scrollbarGutter: "stable",
 								}}
 							>
-								{messages?.map((message) => (
+								{messages.map((message) => (
 									<Message
 										key={message.uuid}
 										userId={userId}
@@ -145,7 +130,7 @@ const MessageModal: React.FC<Props> = ({
 						{messagesError ? null : (
 							<SendMessage
 								recipientId={conversation.interlocutorId}
-								isDisabled={isComponentLoading}
+								isDisabled={isComponentLoading || isMessagesLoading}
 								setMessages={setMessages}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}

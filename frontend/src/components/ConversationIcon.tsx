@@ -12,7 +12,10 @@ interface Props {
 	setComponentLoading: (arg: boolean) => void;
 	setConversations: (arg: IConversation[]) => void;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: (arg: boolean) => void;
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>
+	conversationErrorOnClose: React.MutableRefObject<boolean>;
+	
+	
 }
 
 const ConversationIcon: React.FC<Props> = ({
@@ -23,6 +26,8 @@ const ConversationIcon: React.FC<Props> = ({
 	setConversations,
 	reloadTrigger,
 	toggleReloadTrigger,
+	conversationErrorOnClose,
+
 }) => {
 	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
 
@@ -42,6 +47,7 @@ const ConversationIcon: React.FC<Props> = ({
 				toggleReloadTrigger={toggleReloadTrigger}
 				unread={conversation.unread}
 				onUserPage={true}
+				conversationErrorOnClose={conversationErrorOnClose}
 			/>
 			<IconButton
 				onClick={() => {

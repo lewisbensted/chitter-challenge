@@ -39,7 +39,7 @@ const User: React.FC = () => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		errorOnModalClose,
+		cheetsErrorOnClose,
 		cheetsError,
 		setCheetsError,
 		setCheets,
@@ -51,6 +51,7 @@ const User: React.FC = () => {
 		isUnreadMessages,
 		conversations,
 		isConversationsLoading,
+		conversationErrorOnClose,
 		setConversations,
 		setConversationsLoading,
 		fetchData,
@@ -146,8 +147,10 @@ const User: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						setCheetsError("An unexpected error occured while loading cheets.");
-						errorOnModalClose.current = false;
+						if (cheetsErrorOnClose.current) {
+							setCheetsError("An unexpected error occured while loading cheets.");
+							cheetsErrorOnClose.current = false;
+						}
 					}}
 				/>
 				{isValidateLoading || isUserLoading || isConversationsLoading ? (
@@ -158,7 +161,7 @@ const User: React.FC = () => {
 					<Fragment>
 						<Typography variant="h4" display="flex">
 							{username}
-							{!conversations || userId === id ? null : (
+							{userId === id ? null : (
 								<ConversationIcon
 									userId={userId}
 									conversation={conversations[0]}
@@ -169,6 +172,7 @@ const User: React.FC = () => {
 									}}
 									reloadTrigger={reloadMessagesTrigger}
 									toggleReloadTrigger={toggleReloadMessagesTrigger}
+									conversationErrorOnClose={conversationErrorOnClose}
 								/>
 							)}
 						</Typography>
@@ -183,7 +187,7 @@ const User: React.FC = () => {
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets?.map((cheet) => (
+								{cheets.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
 										cheet={cheet}

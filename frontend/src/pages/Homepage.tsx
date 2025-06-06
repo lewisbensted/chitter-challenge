@@ -28,7 +28,7 @@ const Homepage: React.FC = () => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		errorOnModalClose,
+		cheetsErrorOnClose,
 		cheetsError,
 		setCheetsError,
 		setCheets,
@@ -97,9 +97,9 @@ const Homepage: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						if (errorOnModalClose.current) {
+						if (cheetsErrorOnClose.current) {
 							setCheetsError("An unexpected error occured while loading cheets.");
-							errorOnModalClose.current = false;
+							cheetsErrorOnClose.current = false;
 						}
 					}}
 				/>
@@ -115,7 +115,7 @@ const Homepage: React.FC = () => {
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets?.map((cheet) => (
+								{cheets.map((cheet) => (
 									<Cheet
 										key={cheet.uuid}
 										cheet={cheet}

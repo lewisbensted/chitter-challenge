@@ -23,7 +23,7 @@ const Conversations: React.FC = () => {
 		setConversationsError,
 		setConversations,
 		fetchData,
-		errorOnModalClose,
+		conversationErrorOnClose,
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -59,11 +59,11 @@ const Conversations: React.FC = () => {
 				<ErrorModal
 					errors={errors}
 					closeModal={() => {
-						if (errorOnModalClose.current) {
-							setConversationsError("An unexpected error occred while loading conversations.");
-							errorOnModalClose.current = false;
-						}
 						setErrors([]);
+						if (conversationErrorOnClose.current) {
+							setConversationsError("An unexpected error occured while loading conversations.");
+							conversationErrorOnClose.current = false;
+						}
 					}}
 				/>
 
@@ -78,7 +78,7 @@ const Conversations: React.FC = () => {
 							<Typography variant="subtitle1">{conversationsError}</Typography>
 						) : (
 							<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{conversations?.map((conversation) => (
+								{conversations.map((conversation) => (
 									<Conversation
 										key={conversation.interlocutorId}
 										userId={userId}
@@ -88,7 +88,7 @@ const Conversations: React.FC = () => {
 										setConversations={setConversations}
 										reloadTrigger={reloadTrigger}
 										toggleReloadTrigger={toggleReloadTrigger}
-										errorOnModalClose={errorOnModalClose}
+										conversationErrorOnClose={conversationErrorOnClose}
 									/>
 								))}
 							</Grid2>

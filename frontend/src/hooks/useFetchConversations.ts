@@ -16,7 +16,7 @@ interface UseFetchConversationsReturn {
 		setComponentLoading: (arg: boolean) => void,
 		conversationParams?: { id?: string }
 	) => Promise<void>;
-	errorOnModalClose: React.MutableRefObject<boolean>;
+	conversationErrorOnClose: React.MutableRefObject<boolean>;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -25,7 +25,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [conversationsError, setConversationsError] = useState<string>("");
 
-	const errorOnModalClose = useRef(false);
+	const conversationErrorOnClose = useRef(false);
 
 	const fetchUnreadMessages = async () => {
 		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
@@ -51,7 +51,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				setComponentLoading(true);
 				await Promise.all([fetchUnreadMessages(), conversationParams ? fetchConversations(id) : null]);
 			} catch (error) {
-				if (errorOnModalClose.current || id) {
+				if (conversationErrorOnClose.current || id) {
 					handleError(error);
 				} else {
 					setConversationsError("An unexpected error occured while loading conversations.");
@@ -73,7 +73,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversations,
 		setConversationsLoading,
 		fetchData,
-		errorOnModalClose,
+		conversationErrorOnClose,
 	};
 };
 

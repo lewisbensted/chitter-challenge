@@ -35,7 +35,7 @@ interface Props {
 	closeModal?: () => void;
 	numberOfCheets: number;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: (arg: boolean) => void;
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Cheet: React.FC<Props> = ({

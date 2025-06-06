@@ -7,7 +7,7 @@ interface UseFetchCheetsReturn {
 	cheets: ICheet[];
 	isCheetsLoading: boolean;
 	cheetsLengthRef: React.MutableRefObject<number>;
-	errorOnModalClose: React.MutableRefObject<boolean>;
+	cheetsErrorOnClose: React.MutableRefObject<boolean>;
 	cheetsError: string;
 	setCheetsError: (arg: string) => void;
 	setCheets: (arg: ICheet[]) => void;
@@ -25,7 +25,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const [cheetsError, setCheetsError] = useState<string>("");
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
-	const errorOnModalClose = useRef(false);
+	const cheetsErrorOnClose = useRef(false);
 
 	const fetchCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
 		try {
@@ -79,7 +79,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				setCheetsError("");
 			} catch (error) {
 				handleError(error);
-				errorOnModalClose.current = true;
+				cheetsErrorOnClose.current = true;
 			} finally {
 				setComponentLoading(false);
 			}
@@ -91,7 +91,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		errorOnModalClose,
+		cheetsErrorOnClose,
 		cheetsError,
 		setCheets,
 		setCheetsError,

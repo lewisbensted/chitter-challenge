@@ -12,11 +12,11 @@ interface Props {
 	userId?: string | null;
 	conversation: IConversation;
 	isComponentLoading: boolean;
-	setComponentLoading: (arg: boolean) => void;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: (arg: IConversation[]) => void;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: (arg: boolean) => void;
-	errorOnModalClose?: React.MutableRefObject<boolean>
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	conversationErrorOnClose: React.MutableRefObject<boolean>;
 }
 
 const Conversation: React.FC<Props> = ({
@@ -27,7 +27,7 @@ const Conversation: React.FC<Props> = ({
 	setConversations,
 	reloadTrigger,
 	toggleReloadTrigger,
-	errorOnModalClose
+	conversationErrorOnClose,
 }) => {
 	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
 	const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
@@ -45,7 +45,7 @@ const Conversation: React.FC<Props> = ({
 				closeModal={() => {
 					setMessageModalOpen(false);
 					if (reloadWhenClosed) {
-						toggleReloadTrigger(!reloadTrigger);
+						toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 						setReloadWhenClosed(false);
 					}
 				}}
@@ -55,7 +55,7 @@ const Conversation: React.FC<Props> = ({
 				setReloadWhenClosed={setReloadWhenClosed}
 				unread={conversation.unread}
 				onUserPage={false}
-				errorOnModalClose = {errorOnModalClose}
+				conversationErrorOnClose={conversationErrorOnClose}
 			/>
 
 			<Card>
