@@ -1,10 +1,10 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { IUser } from "../interfaces/interfaces";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
-import SubmitCheet from "../components/SendCheet";
+import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -21,13 +21,9 @@ const User: React.FC = () => {
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
 	const [reloadMessagesTrigger, toggleReloadMessagesTrigger] = useState<boolean>(false);
-	const [scrollUp, setScrollUp] = useState<boolean>(false);
-	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
 	const [isUserLoading, setUserLoading] = useState(true);
-
-	const divRef = useRef<HTMLDivElement>(null);
 
 	const { id } = useParams();
 
@@ -41,6 +37,7 @@ const User: React.FC = () => {
 		cheetsLengthRef,
 		cheetsErrorOnClose,
 		cheetsError,
+		hasNextPage,
 		setCheetsError,
 		setCheets,
 		refreshCheets,
@@ -123,22 +120,36 @@ const User: React.FC = () => {
 		);
 	}, [id, userId, reloadMessagesTrigger, navigate, setConversationsLoading, fetchData]);
 
-	useEffect(() => {
-		if (scrollUp) {
-			divRef.current?.firstElementChild?.scrollIntoView();
-			setScrollUp(false);
-		} else if (scrollDown) {
-			divRef.current?.lastElementChild?.scrollIntoView();
-			setScrollDown(false);
+	const listRef = useRef<HTMLDivElement>(null);
+	const scrollToTop = () => {
+		if (listRef.current) {
+			listRef.current.scrollTop = 0;
 		}
-	}, [cheets, scrollUp, scrollDown]);
+	};
+
+	const observer = useRef<IntersectionObserver>();
+	const lastCheetRef = useCallback(
+		(cheet: HTMLElement | null) => {
+			if (isCheetsLoading) return;
+			if (observer.current) observer.current.disconnect();
+
+			observer.current = new IntersectionObserver((cheets) => {
+				console.log(cheet);
+				if (cheets[0].isIntersecting && hasNextPage) {
+					setPage((page) => page + 1);
+				}
+			});
+			if (cheet) observer.current?.observe(cheet);
+		},
+		[isCheetsLoading, hasNextPage]
+	);
 
 	return (
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
 			isValidationLoading={isValidateLoading}
-			isComponentLoading={isComponentLoading }
+			isComponentLoading={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -177,18 +188,13 @@ const User: React.FC = () => {
 							)}
 						</Typography>
 
-						{isCheetsLoading ? (
-							<FlexBox>
-								<FlexBox>
-									<CircularProgress thickness={5} />
-								</FlexBox>
-							</FlexBox>
-						) : cheetsError ? (
+						{cheetsError ? (
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
-							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets.map((cheet) => (
+							<Grid2 ref={listRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+								{cheets.map((cheet, index) => (
 									<Cheet
+										ref={cheets.length === index + 1 ? lastCheetRef : undefined}
 										key={cheet.uuid}
 										cheet={cheet}
 										userId={userId}
@@ -202,23 +208,21 @@ const User: React.FC = () => {
 										toggleReloadTrigger={toggleReloadCheetsTrigger}
 									/>
 								))}
+								{isCheetsLoading ? (
+									<FlexBox>
+										<CircularProgress thickness={5} />
+									</FlexBox>
+								) : null}
 							</Grid2>
 						)}
-						<Button
-							onClick={() => {
-								setPage(page + 1);
-							}}
-						>
-							LOAD MORE
-						</Button>
 						{userId === id && !cheetsError ? (
-							<SubmitCheet
+							<SendCheet
 								setCheetsError={setCheetsError}
 								isDisabled={isComponentLoading || isCheetsLoading}
 								setCheets={setCheets}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								setScroll={setScrollUp}
+								scroll={scrollToTop}
 								cheetsLengthRef={cheetsLengthRef}
 							/>
 						) : null}

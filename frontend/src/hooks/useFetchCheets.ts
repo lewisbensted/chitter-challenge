@@ -17,6 +17,7 @@ interface UseFetchCheetsReturn {
 		setComponentLoading: (arg: boolean) => void,
 		userId?: string
 	) => Promise<void>;
+	hasNextPage: boolean
 }
 
 const useFetchCheets = (): UseFetchCheetsReturn => {
@@ -27,19 +28,24 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const cheetsLengthRef = useRef<number>(0);
 	const cheetsErrorOnClose = useRef(false);
 
+	const take = 5
+
+	const [hasNextPage, setHasNextPage] = useState(false)
+
 	const fetchCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
 		try {
 			setCheetsLoading(true);
 
 			const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
 			const res = await axios.get<ICheet[]>(
-				`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?${cursorParam}&take=5`,
+				`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?${cursorParam}&take=${take}`,
 				{
 					withCredentials: true,
 				}
 			);
 
 			const newCheets = res.data;
+			setHasNextPage(newCheets.length<take?false:true)
 
 			if (newCheets.length) {
 				setCheets((cheets) => {
@@ -58,7 +64,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				handleError(error);
 			}
 		} finally {
-			setCheetsLoading(false);
+			setTimeout(()=>setCheetsLoading(false))
 		}
 	}, []);
 
@@ -97,6 +103,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 		setCheetsError,
 		fetchCheets,
 		refreshCheets,
+		hasNextPage
 	};
 };
 
