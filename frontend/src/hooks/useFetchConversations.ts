@@ -8,12 +8,12 @@ interface UseFetchConversationsReturn {
 	isUnreadMessages: boolean | undefined;
 	conversationsError: string | undefined;
 	isConversationsLoading: boolean;
-	setConversations: (arg: IConversation[]) => void;
-	setConversationsLoading: (arg: boolean) => void;
-	setConversationsError: (arg: string) => void;
+	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
+	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
 	fetchData: (
 		handleError: (error: unknown) => void,
-		setComponentLoading: (arg: boolean) => void,
+		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 		conversationParams?: { id?: string }
 	) => Promise<void>;
 	conversationErrorOnClose: React.MutableRefObject<boolean>;

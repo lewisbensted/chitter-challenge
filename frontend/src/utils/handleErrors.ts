@@ -1,6 +1,10 @@
 import axios from "axios";
 
-export const handleErrors = (error: unknown, action: string, setErrors: (arg: string[]) => void) => {
+export const handleErrors = (
+	error: unknown,
+	action: string,
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>
+) => {
 	if (
 		axios.isAxiosError(error) &&
 		error.response?.status &&

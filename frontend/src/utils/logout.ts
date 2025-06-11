@@ -3,9 +3,9 @@ import { serverURL } from "../config/config";
 import { handleErrors } from "./handleErrors";
 
 const logout = async (
-	setPageLoading: (arg: boolean) => void,
-	setUserId: (arg: string | null) => void,
-	setErrors: (arg: string[]) => void,
+	setPageLoading: React.Dispatch<React.SetStateAction<boolean>>,
+	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>,
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 	redirect: () => void
 ) => {
 	try {

@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ICheet } from "../interfaces/interfaces";
 import ErrorModal from "./ErrorModal";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import { Button, Divider, Grid2, ThemeProvider, Typography } from "@mui/material";
+import { Divider, Grid2, ThemeProvider, Typography } from "@mui/material";
 import Reply from "./Reply";
 import theme from "../styles/theme";
 import Cheet from "./Cheet";
@@ -18,9 +18,9 @@ interface Props {
 	cheet: ICheet;
 	isOpen: boolean;
 	closeModal: () => void;
-	setCheets: (arg: ICheet[]) => void;
+	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isComponentLoading: boolean;
-	setComponentLoading: (arg: boolean) => void;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	numberOfCheets: number;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,18 +39,14 @@ const CheetModal: React.FC<Props> = ({
 	toggleReloadTrigger,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
-	const [scrollUp, setScrollUp] = useState<boolean>(false);
-	const [scrollDown, setScrollDown] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
-
-	const divRef = useRef<HTMLDivElement>(null);
-
 
 	const {
 		replies,
 		repliesError,
 		isRepliesLoading,
 		repliesLengthRef,
+		hasNextPage,
 		setRepliesError,
 		setReplies,
 		fetchReplies,
@@ -62,17 +58,27 @@ const CheetModal: React.FC<Props> = ({
 		}
 	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
 
-	useEffect(() => {
-		if (isOpen) {
-			if (scrollUp) {
-				divRef.current?.firstElementChild?.scrollIntoView();
-				setScrollUp(false);
-			} else if (scrollDown) {
-				divRef.current?.lastElementChild?.scrollIntoView();
-				setScrollDown(false);
-			}
+	const listRef = useRef<HTMLDivElement>(null);
+	const scrollToTop = () => {
+		if (listRef.current) {
+			listRef.current.scrollTo({ top: 0, behavior: "smooth" });
 		}
-	}, [isOpen, replies, scrollUp, scrollDown]);
+	};
+
+	const observer = useRef<IntersectionObserver>();
+	const lastReplyRef = useCallback(
+		(cheet: HTMLElement | null) => {
+			if (isRepliesLoading) return;
+			if (observer.current) observer.current.disconnect();
+			observer.current = new IntersectionObserver((cheets) => {
+				if (cheets[0].isIntersecting && hasNextPage) {
+					setPage((page) => page + 1);
+				}
+			});
+			if (cheet) observer.current?.observe(cheet);
+		},
+		[isRepliesLoading, hasNextPage]
+	);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -109,9 +115,10 @@ const CheetModal: React.FC<Props> = ({
 						{repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							<Grid2 ref={divRef} sx={{ overflowY: "auto", maxHeight: 390 }}>
-								{replies.map((reply) => (
+							<Grid2 ref={listRef} sx={{ overflowY: "auto", maxHeight: 390 }}>
+								{replies.map((reply, index) => (
 									<Reply
+										ref={replies.length === index + 1 ? lastReplyRef : null}
 										key={reply.uuid}
 										isComponentLoading={isComponentLoading}
 										userId={userId}
@@ -138,20 +145,13 @@ const CheetModal: React.FC<Props> = ({
 								setReplies={setReplies}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								setScroll={setScrollUp}
+								scroll={scrollToTop}
 								repliesLengthRef={repliesLengthRef}
 								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}
 								setRepliesError={setRepliesError}
 							/>
 						) : null}
-						<Button
-							onClick={() => {
-								setPage(page + 1);
-							}}
-						>
-							LOAD MORE
-						</Button>
 					</Grid2>
 				</Grid2>
 			</Dialog>

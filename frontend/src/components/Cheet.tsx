@@ -25,13 +25,12 @@ import CheetModal from "./CheetModal";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
-	ref?: any;
 	userId?: string | null;
 	cheet: ICheet;
-	setErrors: (arg: string[]) => void;
-	setCheets: (arg: ICheet[]) => void;
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
+	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isComponentLoading: boolean;
-	setComponentLoading: (arg: boolean) => void;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	isModalView: boolean;
 	closeModal?: () => void;
 	numberOfCheets: number;
@@ -39,7 +38,7 @@ interface Props {
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Cheet: React.FC<Props> = forwardRef<HTMLDivElement, Props>(
+const Cheet = forwardRef<HTMLDivElement, Props>(
 	(
 		{
 			userId,

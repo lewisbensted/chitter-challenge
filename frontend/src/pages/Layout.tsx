@@ -21,8 +21,8 @@ import ErrorModal from "../components/ErrorModal";
 interface Props {
 	isComponentLoading: boolean;
 	userId?: string | null;
-	setPageLoading: (arg: boolean) => void;
-	setUserId: (arg: string | null) => void;
+	setPageLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
 	isValidationLoading: boolean;
 	children: React.JSX.Element;
 	isUnreadMessages?: boolean;

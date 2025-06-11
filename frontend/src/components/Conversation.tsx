@@ -13,7 +13,7 @@ interface Props {
 	conversation: IConversation;
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	setConversations: (arg: IConversation[]) => void;
+	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	conversationErrorOnClose: React.MutableRefObject<boolean>;

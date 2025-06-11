@@ -14,14 +14,14 @@ import FlexBox from "../styles/FlexBox";
 interface Props {
 	cheetId: string;
 	isDisabled: boolean;
-	setReplies: (arg: IReply[]) => void;
-	setErrors: (arg: string[]) => void;
-	setComponentLoading: (arg: boolean) => void;
-	setScroll: (arg: boolean) => void;
+	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	scroll: () => void;
 	repliesLengthRef: React.MutableRefObject<number>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	setRepliesError: (arg: string) => void;
+	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const SendReply: React.FC<Props> = ({
@@ -30,7 +30,7 @@ const SendReply: React.FC<Props> = ({
 	setReplies,
 	setErrors,
 	setComponentLoading,
-	setScroll,
+	scroll,
 	repliesLengthRef,
 	toggleReloadTrigger,
 	setRepliesError,
@@ -51,9 +51,9 @@ const SendReply: React.FC<Props> = ({
 				}
 			);
 			setReplies(replies.data);
-			setScroll(true);
+			scroll();
 			if (repliesLengthRef.current === 0) {
-				toggleReloadTrigger(reloadTrigger => !reloadTrigger);
+				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
 			repliesLengthRef.current++;
 			setRepliesError("");

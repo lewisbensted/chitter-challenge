@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 interface UseValidateUserReturn {
 	userId: string | null | undefined;
 	isValidateLoading: boolean;
-	setUserId: (arg: string | null) => void;
-	setValidateLoading: (arg: boolean) => void;
+	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+	setValidateLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	validateUser: (
 		handleError: (error: unknown) => void,
 		extraParams?: { requiresAuthorisation?: boolean; isLoggedIn?: boolean }

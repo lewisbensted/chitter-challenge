@@ -123,7 +123,7 @@ const User: React.FC = () => {
 	const listRef = useRef<HTMLDivElement>(null);
 	const scrollToTop = () => {
 		if (listRef.current) {
-			listRef.current.scrollTop = 0;
+			listRef.current.scrollTo({ top: 0, behavior: "smooth" });
 		}
 	};
 

@@ -14,10 +14,10 @@ import theme from "../styles/theme";
 
 interface Props {
 	isDisabled: boolean;
-	setCheets: (arg: ICheet[]) => void;
-	setCheetsError: (arg: string) => void;
-	setErrors: (arg: string[]) => void;
-	setComponentLoading: (arg: boolean) => void;
+	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
+	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	scroll: () => void;
 	cheetsLengthRef: React.MutableRefObject<number>;
 }

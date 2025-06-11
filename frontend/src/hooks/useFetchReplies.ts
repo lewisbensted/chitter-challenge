@@ -7,18 +7,23 @@ const useFetchReplies = () => {
 	const [replies, setReplies] = useState<IReply[]>([]);
 	const [repliesError, setRepliesError] = useState<string>("");
 	const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
+	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
+
+	const take = 5;
 
 	const fetchReplies = useCallback(async (cheetId: string) => {
 		try {
 			const res = await axios.get<IReply[]>(
-				`${serverURL}/cheets/${cheetId}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=5`,
+				`${serverURL}/cheets/${cheetId}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=${take}`,
 				{
 					withCredentials: true,
 				}
 			);
 			const newReplies = res.data;
+			setHasNextPage(newReplies.length < take ? false : true);
+
 			if (newReplies.length) {
 				setReplies((replies) => {
 					const updated = [...replies, ...newReplies];
@@ -39,6 +44,7 @@ const useFetchReplies = () => {
 		isRepliesLoading,
 		repliesError,
 		repliesLengthRef,
+		hasNextPage,
 		setReplies,
 		setRepliesLoading,
 		setRepliesError,

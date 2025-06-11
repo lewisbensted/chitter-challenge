@@ -9,13 +9,11 @@ interface Props {
 	userId?: string | null;
 	conversation: IConversation;
 	isComponentLoading: boolean;
-	setComponentLoading: (arg: boolean) => void;
-	setConversations: (arg: IConversation[]) => void;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>
-	conversationErrorOnClose: React.MutableRefObject<boolean>;
-	
-	
+	conversationErrorOnClose: React.MutableRefObject<boolean>;	
 }
 
 const ConversationIcon: React.FC<Props> = ({

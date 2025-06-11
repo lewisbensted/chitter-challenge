@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Grid2, Link, ThemeProvider, Typography } from "@mui/material";
+import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
@@ -18,11 +18,11 @@ interface Props {
 	isOpen: boolean;
 	isComponentLoading: boolean;
 	closeModal: () => void;
-	setComponentLoading: (arg: boolean) => void;
-	setConversations: (arg: IConversation[]) => void;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>
+	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	setReloadWhenClosed?: (arg: boolean) => void;
+	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>;
 	unread: number;
 	onUserPage: boolean;
 	conversationErrorOnClose: React.MutableRefObject<boolean>;
@@ -42,7 +42,6 @@ const MessageModal: React.FC<Props> = ({
 	conversationErrorOnClose,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
-	const [scroll, setScroll] = useState<boolean>(false);
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -57,6 +56,7 @@ const MessageModal: React.FC<Props> = ({
 	useEffect(() => {
 		if (isOpen) {
 			void fetchMessages(conversation.interlocutorId).then(() => {
+				toggleScrollTrigger((prev) => !prev);
 				if (unreadRef.current > 0) {
 					conversationErrorOnClose.current = true;
 					toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
@@ -65,12 +65,14 @@ const MessageModal: React.FC<Props> = ({
 		}
 	}, [isOpen, conversation.interlocutorId, conversationErrorOnClose, toggleReloadTrigger, fetchMessages]);
 
+	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
+
+	const bottomRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
-		if (isOpen && scroll) {
-			ref.current?.lastElementChild?.scrollIntoView();
-			setScroll(false);
+		if (isOpen) {
+			bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 		}
-	}, [isOpen, messages, scroll]);
+	}, [scrollTrigger]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -98,11 +100,7 @@ const MessageModal: React.FC<Props> = ({
 								</Link>
 							)}
 						</Typography>
-						{isMessagesLoading ? (
-							<FlexBox>
-								<CircularProgress thickness={5} />
-							</FlexBox>
-						) : messagesError ? (
+						{messagesError ? (
 							<Typography variant="subtitle1">{messagesError}</Typography>
 						) : (
 							<Grid2
@@ -125,6 +123,12 @@ const MessageModal: React.FC<Props> = ({
 										setReloadWhenClosed={setReloadWhenClosed}
 									/>
 								))}
+								{isMessagesLoading ? (
+									<FlexBox>
+										<CircularProgress thickness={5} />
+									</FlexBox>
+								) : null}
+								<Box ref={bottomRef} />
 							</Grid2>
 						)}
 						{messagesError ? null : (
@@ -135,7 +139,7 @@ const MessageModal: React.FC<Props> = ({
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								setReloadWhenClosed={setReloadWhenClosed}
-								setScroll={setScroll}
+								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
 							/>
 						)}

@@ -9,28 +9,27 @@ interface UseFetchCheetsReturn {
 	cheetsLengthRef: React.MutableRefObject<number>;
 	cheetsErrorOnClose: React.MutableRefObject<boolean>;
 	cheetsError: string;
-	setCheetsError: (arg: string) => void;
-	setCheets: (arg: ICheet[]) => void;
+	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
+	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>
 	fetchCheets: (handleError: (error: unknown) => void, userId?: string) => Promise<void>;
 	refreshCheets: (
 		handleError: (error: unknown) => void,
-		setComponentLoading: (arg: boolean) => void,
+		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 		userId?: string
 	) => Promise<void>;
-	hasNextPage: boolean
+	hasNextPage: boolean;
 }
 
 const useFetchCheets = (): UseFetchCheetsReturn => {
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [cheetsError, setCheetsError] = useState<string>("");
+	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
 	const cheetsErrorOnClose = useRef(false);
 
-	const take = 5
-
-	const [hasNextPage, setHasNextPage] = useState(false)
+	const take = 5;
 
 	const fetchCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
 		try {
@@ -45,7 +44,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 			);
 
 			const newCheets = res.data;
-			setHasNextPage(newCheets.length<take?false:true)
+			setHasNextPage(newCheets.length < take ? false : true);
 
 			if (newCheets.length) {
 				setCheets((cheets) => {
@@ -64,12 +63,12 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				handleError(error);
 			}
 		} finally {
-			setTimeout(()=>setCheetsLoading(false))
+			setCheetsLoading(false);
 		}
 	}, []);
 
 	const refreshCheets = useCallback(
-		async (handleError: (error: unknown) => void, setComponentLoading: (arg: boolean) => void, userId?: string) => {
+		async (handleError: (error: unknown) => void, setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>, userId?: string) => {
 			try {
 				setComponentLoading(true);
 
@@ -81,7 +80,6 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				);
 
 				setCheets(res.data);
-
 				setCheetsError("");
 			} catch (error) {
 				handleError(error);
@@ -103,7 +101,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 		setCheetsError,
 		fetchCheets,
 		refreshCheets,
-		hasNextPage
+		hasNextPage,
 	};
 };
 

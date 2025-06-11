@@ -74,7 +74,7 @@ const Homepage: React.FC = () => {
 	const listRef = useRef<HTMLDivElement>(null);
 	const scrollToTop = () => {
 		if (listRef.current) {
-			listRef.current.scrollTop = 0;
+			listRef.current.scrollTo({top:0, behavior:'smooth'})
 		}
 	};
 
@@ -128,7 +128,7 @@ const Homepage: React.FC = () => {
 								{cheets.map((cheet, index) => {
 									return (
 										<Cheet
-											ref={cheets.length === index + 1 ? lastCheetRef : undefined}
+											ref={cheets.length === index + 1 ? lastCheetRef : null}
 											key={cheet.uuid}
 											cheet={cheet}
 											userId={userId}

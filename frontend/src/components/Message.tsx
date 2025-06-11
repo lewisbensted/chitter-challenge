@@ -24,11 +24,11 @@ import { formatDate } from "../utils/formatDate";
 interface Props {
 	userId?: string | null;
 	message: IMessage;
-	setErrors: (arg: string[]) => void;
-	setMessages: (arg: IMessage[]) => void;
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
+	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	isComponentLoading: boolean;
-	setComponentLoading: (arg: boolean) => void;
-	setReloadWhenClosed?: (arg: boolean) => void;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Message: React.FC<Props> = ({

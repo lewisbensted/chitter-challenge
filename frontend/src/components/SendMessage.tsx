@@ -14,12 +14,12 @@ import FlexBox from "../styles/FlexBox";
 interface Props {
 	recipientId: string;
 	isDisabled: boolean;
-	setMessages: (arg: IMessage[]) => void;
-	setErrors: (arg: string[]) => void;
-	setComponentLoading: (arg: boolean) => void;
-	setReloadWhenClosed?: (arg: boolean) => void;
-	setScroll: (arg: boolean) => void;
-	setMessagesError: (arg: string) => void;
+	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>
+	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>
+	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
+	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -29,7 +29,7 @@ const SendMessage: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	setReloadWhenClosed,
-	setScroll,
+	triggerScroll,
 	setMessagesError,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
@@ -45,7 +45,7 @@ const SendMessage: React.FC<Props> = ({
 			});
 
 			setMessages(messages.data);
-			setScroll(true);
+			triggerScroll(prev => !prev);
 			if (setReloadWhenClosed) {
 				setReloadWhenClosed(true);
 			}
