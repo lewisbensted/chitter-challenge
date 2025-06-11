@@ -75,7 +75,7 @@ const CheetModal: React.FC<Props> = ({
 					setPage((page) => page + 1);
 				}
 			});
-			if (cheet) observer.current?.observe(cheet);
+			if (cheet) observer.current.observe(cheet);
 		},
 		[isRepliesLoading, hasNextPage]
 	);

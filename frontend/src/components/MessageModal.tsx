@@ -72,7 +72,7 @@ const MessageModal: React.FC<Props> = ({
 		if (isOpen) {
 			bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 		}
-	}, [scrollTrigger]);
+	}, [isOpen, scrollTrigger]);
 
 	return (
 		<ThemeProvider theme={theme}>

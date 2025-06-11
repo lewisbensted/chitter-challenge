@@ -28,7 +28,7 @@ interface Props {
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
-	setErrors: React.Dispatch<React.SetStateAction<string[]>>
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	reply: IReply;
 	cheetId: string;
 	userId?: string | null;
@@ -192,5 +192,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 		);
 	}
 );
+
+Reply.displayName = "Reply";
 
 export default Reply;

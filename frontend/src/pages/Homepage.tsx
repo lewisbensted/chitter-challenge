@@ -70,11 +70,10 @@ const Homepage: React.FC = () => {
 		}, setComponentLoading);
 	}, [reloadCheetsTrigger, refreshCheets]);
 
-
 	const listRef = useRef<HTMLDivElement>(null);
 	const scrollToTop = () => {
 		if (listRef.current) {
-			listRef.current.scrollTo({top:0, behavior:'smooth'})
+			listRef.current.scrollTo({ top: 0, behavior: "smooth" });
 		}
 	};
 
@@ -88,7 +87,7 @@ const Homepage: React.FC = () => {
 					setPage((page) => page + 1);
 				}
 			});
-			if (cheet) observer.current?.observe(cheet);
+			if (cheet) observer.current.observe(cheet);
 		},
 		[isCheetsLoading, hasNextPage]
 	);
@@ -125,24 +124,22 @@ const Homepage: React.FC = () => {
 							<Typography variant="subtitle1">{cheetsError}</Typography>
 						) : (
 							<Grid2 ref={listRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{cheets.map((cheet, index) => {
-									return (
-										<Cheet
-											ref={cheets.length === index + 1 ? lastCheetRef : null}
-											key={cheet.uuid}
-											cheet={cheet}
-											userId={userId}
-											setCheets={setCheets}
-											setErrors={setErrors}
-											setComponentLoading={setComponentLoading}
-											isComponentLoading={isComponentLoading}
-											isModalView={false}
-											numberOfCheets={cheets.length}
-											reloadTrigger={reloadCheetsTrigger}
-											toggleReloadTrigger={toggleReloadTrigger}
-										/>
-									);
-								})}
+								{cheets.map((cheet, index) => (
+									<Cheet
+										ref={cheets.length === index + 1 ? lastCheetRef : null}
+										key={cheet.uuid}
+										cheet={cheet}
+										userId={userId}
+										setCheets={setCheets}
+										setErrors={setErrors}
+										setComponentLoading={setComponentLoading}
+										isComponentLoading={isComponentLoading}
+										isModalView={false}
+										numberOfCheets={cheets.length}
+										reloadTrigger={reloadCheetsTrigger}
+										toggleReloadTrigger={toggleReloadTrigger}
+									/>
+								))}
 								{isCheetsLoading ? (
 									<FlexBox>
 										<CircularProgress thickness={5} />
@@ -159,7 +156,7 @@ const Homepage: React.FC = () => {
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								cheetsLengthRef={cheetsLengthRef}
-								scroll = {scrollToTop}
+								scroll={scrollToTop}
 							/>
 						) : null}
 					</Fragment>

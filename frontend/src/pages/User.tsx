@@ -8,7 +8,7 @@ import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Box, Button, Grid2, Typography } from "@mui/material";
+import { Box, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
@@ -139,7 +139,7 @@ const User: React.FC = () => {
 					setPage((page) => page + 1);
 				}
 			});
-			if (cheet) observer.current?.observe(cheet);
+			if (cheet) observer.current.observe(cheet);
 		},
 		[isCheetsLoading, hasNextPage]
 	);

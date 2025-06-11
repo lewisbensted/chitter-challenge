@@ -96,6 +96,13 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 			where: { uuid: req.params.cheetId },
 		});
 		if (targetCheet.userId === req.session.user!.id) {
+			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
+			if (targetCheet.createdAt < oneHourAgo) {
+				return res.status(400).send(["Cheet cannot be updated (time limit exceeded)."]);
+			}
+			if (targetCheet.hasReplies) {
+				return res.status(400).send(["Cannot update a cheet with replies."]);
+			}
 			if ((req as { body: { text: string | undefined } }).body.text !== targetCheet.text) {
 				await prisma.$extends(cheetExtension).cheet.update({
 					where: {
