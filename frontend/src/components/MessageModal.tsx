@@ -116,6 +116,7 @@ const MessageModal: React.FC<Props> = ({
 										key={message.uuid}
 										userId={userId}
 										message={message}
+										messages={messages}
 										setMessages={setMessages}
 										isComponentLoading={isComponentLoading}
 										setComponentLoading={setComponentLoading}

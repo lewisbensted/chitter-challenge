@@ -24,6 +24,7 @@ import { formatDate } from "../utils/formatDate";
 interface Props {
 	userId?: string | null;
 	message: IMessage;
+	messages: IMessage[];
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	isComponentLoading: boolean;
@@ -34,6 +35,7 @@ interface Props {
 const Message: React.FC<Props> = ({
 	userId,
 	message,
+	messages,
 	setErrors,
 	setMessages,
 	isComponentLoading,
@@ -49,7 +51,7 @@ const Message: React.FC<Props> = ({
 		try {
 			setEditLoading(true);
 			setComponentLoading(true);
-			const messages = await axios.put<IMessage[]>(
+			const updatedMessage = await axios.put<IMessage>(
 				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
 				data,
 				{
@@ -57,7 +59,10 @@ const Message: React.FC<Props> = ({
 				}
 			);
 
-			setMessages(messages.data);
+			const updatedMessages = messages.map((message) =>
+				message.uuid === updatedMessage.data.uuid ? updatedMessage.data : message
+			);
+			setMessages(updatedMessages);
 		} catch (error) {
 			handleErrors(error, "editing the message", setErrors);
 		} finally {
@@ -71,14 +76,11 @@ const Message: React.FC<Props> = ({
 		try {
 			setDeleteLoading(true);
 			setComponentLoading(true);
-			const messages = await axios.delete<IMessage[]>(
-				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
-				{
-					withCredentials: true,
-				}
-			);
-
-			setMessages(messages.data);
+			await axios.delete(`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`, {
+				withCredentials: true,
+			});
+			const updatedMessages = messages.filter((m) => m.uuid !== message.uuid);
+			setMessages(updatedMessages);
 			if (setReloadWhenClosed) {
 				setReloadWhenClosed(true);
 			}

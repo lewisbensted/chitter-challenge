@@ -30,6 +30,7 @@ interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	reply: IReply;
+	replies: IReply[];
 	cheetId: string;
 	userId?: string | null;
 	numberOfReplies: number;
@@ -37,7 +38,16 @@ interface Props {
 
 const Reply = forwardRef<HTMLDivElement, Props>(
 	(
-		{ reply, cheetId, isComponentLoading, setComponentLoading, setReplies, setErrors, userId, numberOfReplies },
+		{
+			reply,
+			replies,
+			cheetId,
+			isComponentLoading,
+			setComponentLoading,
+			setReplies,
+			setErrors,
+			userId,
+		},
 		ref
 	) => {
 		const { register, handleSubmit } = useForm<{ text: string }>();
@@ -47,15 +57,18 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 
 		const editReply: SubmitHandler<{ text: string }> = async (data) => {
 			try {
-				const replies = await axios.put<IReply[]>(
-					`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}?&take=${numberOfReplies}`,
+				const updatedReply = await axios.put<IReply>(
+					`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}`,
 					data,
 					{
 						withCredentials: true,
 					}
 				);
+				const updatedReplies = replies.map((reply) =>
+					reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply
+				);
 
-				setReplies(replies.data);
+				setReplies(updatedReplies);
 			} catch (error) {
 				handleErrors(error, "editing the reply", setErrors);
 			} finally {
@@ -69,14 +82,11 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 			try {
 				setDeleteLoading(true);
 				setComponentLoading(true);
-				const replies = await axios.delete<IReply[]>(
-					`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}?take=${numberOfReplies}`,
-					{
-						withCredentials: true,
-					}
-				);
-
-				setReplies(replies.data);
+				await axios.delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
+					withCredentials: true,
+				});
+				const updatedReplies = replies.filter((r) => r.uuid !== reply.uuid);
+				setReplies(updatedReplies);
 			} catch (error) {
 				handleErrors(error, "deleting the reply", setErrors);
 			} finally {

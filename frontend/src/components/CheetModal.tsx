@@ -16,6 +16,7 @@ import useFetchReplies from "../hooks/useFetchReplies";
 interface Props {
 	userId?: string | null;
 	cheet: ICheet;
+	cheets: ICheet[]
 	isOpen: boolean;
 	closeModal: () => void;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
@@ -29,6 +30,7 @@ interface Props {
 const CheetModal: React.FC<Props> = ({
 	userId,
 	cheet,
+	cheets,
 	isOpen,
 	closeModal,
 	setCheets,
@@ -99,6 +101,7 @@ const CheetModal: React.FC<Props> = ({
 					<Grid2 marginInline={3} size={12}>
 						<Cheet
 							cheet={cheet}
+							cheets={cheets}
 							userId={userId}
 							setCheets={setCheets}
 							setErrors={setErrors}
@@ -124,6 +127,7 @@ const CheetModal: React.FC<Props> = ({
 										userId={userId}
 										cheetId={cheet.uuid}
 										reply={reply}
+										replies={replies}
 										setReplies={setReplies}
 										setErrors={setErrors}
 										setComponentLoading={setComponentLoading}

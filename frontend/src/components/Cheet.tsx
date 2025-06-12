@@ -28,6 +28,7 @@ interface Props {
 	userId?: string | null;
 	cheet: ICheet;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
+	cheets: ICheet[];
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -43,6 +44,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		{
 			userId,
 			cheet,
+			cheets,
 			setErrors,
 			setCheets,
 			setComponentLoading,
@@ -65,14 +67,18 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			try {
 				setEditLoading(true);
 				setComponentLoading(true);
-				const cheets = await axios.put<ICheet[]>(
-					`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
+				const updatedCheet = await axios.put<ICheet>(
+					`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`,
 					data,
 					{
 						withCredentials: true,
 					}
 				);
-				setCheets(cheets.data);
+
+				const updatedCheets = cheets.map((cheet) =>
+					cheet.uuid === updatedCheet.data.uuid ? updatedCheet.data : cheet
+				);
+				setCheets(updatedCheets);
 			} catch (error) {
 				handleErrors(error, "editing the cheet", setErrors);
 			} finally {
@@ -86,14 +92,12 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			try {
 				setDeleteLoading(true);
 				setComponentLoading(true);
-				const cheets = await axios.delete<ICheet[]>(
-					`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}?take=${numberOfCheets}`,
-					{
-						withCredentials: true,
-					}
-				);
+				await axios.delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, {
+					withCredentials: true,
+				});
 
-				setCheets(cheets.data);
+				const updatedCheets = cheets.filter((c) => c.uuid !== cheet.uuid);
+				setCheets(updatedCheets);
 				setModalOpen(false);
 			} catch (error) {
 				handleErrors(error, "deleting the cheet", setErrors);
@@ -114,6 +118,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				{isModalView ? null : (
 					<CheetModal
 						cheet={cheet}
+						cheets={cheets}
 						userId={userId}
 						isOpen={isModalOpen}
 						closeModal={() => {

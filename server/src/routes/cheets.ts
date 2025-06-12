@@ -64,21 +64,20 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
 	const date = new Date();
 	try {
-		let user;
 		if (req.params.userId) {
-			user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
+			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
-		await prisma.$extends(cheetExtension).cheet.create({
+		const newCheet = await prisma.$extends(cheetExtension).cheet.create({
 			data: {
 				userId: req.session.user!.id,
 				text: (req as { body: { text: string } }).body.text,
 				createdAt: date,
 				updatedAt: date,
 			},
+			include: { user: { omit: { id: true } } },
+			omit: { id: true, userId: true },
 		});
-		req.query.take = req.query.take === "" ? undefined : req.query.take;
-		const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
-		res.status(201).send(cheets);
+		res.status(201).send(newCheet);
 	} catch (error) {
 		console.error("Error adding cheet to the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -88,9 +87,8 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 	const date = new Date();
 	try {
-		let user;
 		if (req.params.userId) {
-			user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
+			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
 		const targetCheet = await prisma.cheet.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
@@ -104,7 +102,7 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 				return res.status(400).send(["Cannot update a cheet with replies."]);
 			}
 			if ((req as { body: { text: string | undefined } }).body.text !== targetCheet.text) {
-				await prisma.$extends(cheetExtension).cheet.update({
+				const updatedCheet = await prisma.$extends(cheetExtension).cheet.update({
 					where: {
 						id: targetCheet.id,
 					},
@@ -112,11 +110,13 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 						text: (req as { body: { text: string } }).body.text,
 						updatedAt: date,
 					},
+					include: { user: { omit: { id: true } } },
+					omit: { id: true, userId: true },
 				});
+				return res.status(200).send(updatedCheet);
+			} else {
+				return res.status(200).send(targetCheet);
 			}
-			req.query.take = req.query.take === "" ? undefined : req.query.take;
-			const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
-			res.status(200).send(cheets);
 		} else {
 			res.status(403).send(["Cannot update someone else's cheet."]);
 		}
@@ -128,9 +128,8 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 
 router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		let user;
 		if (req.params.userId) {
-			user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
+			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
 		const targetCheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		if (targetCheet.userId === req.session.user!.id) {
@@ -139,9 +138,8 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 					id: targetCheet.id,
 				},
 			});
-			req.query.take = req.query.take === "" ? undefined : req.query.take;
-			const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
-			res.status(200).send(cheets);
+
+			res.status(204).send();
 		} else {
 			res.status(403).send(["Cannot delete someone else's cheet."]);
 		}

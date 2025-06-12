@@ -16,8 +16,8 @@ interface Props {
 	isDisabled: boolean;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>
-	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -40,12 +40,11 @@ const SendMessage: React.FC<Props> = ({
 			setSubmitLoading(true);
 			setComponentLoading(true);
 			reset();
-			const messages = await axios.post<IMessage[]>(`${serverURL}/messages/${recipientId}`, data, {
+			const newMessage = await axios.post<IMessage>(`${serverURL}/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
-
-			setMessages(messages.data);
-			triggerScroll(prev => !prev);
+			setMessages((messages) => [...messages, newMessage.data]);
+			triggerScroll((prev) => !prev);
 			if (setReloadWhenClosed) {
 				setReloadWhenClosed(true);
 			}

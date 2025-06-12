@@ -43,14 +43,15 @@ const SendReply: React.FC<Props> = ({
 			setSubmitLoading(true);
 			setComponentLoading(true);
 			reset();
-			const replies = await axios.post<IReply[]>(
-				`${serverURL}/cheets/${cheetId}/replies?take=${repliesLengthRef.current + 1}`,
+			const newReply = await axios.post<IReply>(
+				`${serverURL}/cheets/${cheetId}/replies`,
 				data,
 				{
 					withCredentials: true,
 				}
 			);
-			setReplies(replies.data);
+			
+			setReplies((replies) => [newReply.data, ...replies]);
 			scroll();
 			if (repliesLengthRef.current === 0) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);

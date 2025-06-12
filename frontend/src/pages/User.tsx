@@ -134,7 +134,6 @@ const User: React.FC = () => {
 			if (observer.current) observer.current.disconnect();
 
 			observer.current = new IntersectionObserver((cheets) => {
-				console.log(cheet);
 				if (cheets[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
@@ -197,6 +196,7 @@ const User: React.FC = () => {
 										ref={cheets.length === index + 1 ? lastCheetRef : undefined}
 										key={cheet.uuid}
 										cheet={cheet}
+										cheets={cheets}
 										userId={userId}
 										setCheets={setCheets}
 										setErrors={setErrors}
