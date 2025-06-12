@@ -10,7 +10,7 @@ interface UseFetchCheetsReturn {
 	cheetsErrorOnClose: React.MutableRefObject<boolean>;
 	cheetsError: string;
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
-	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>
+	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	fetchCheets: (handleError: (error: unknown) => void, userId?: string) => Promise<void>;
 	refreshCheets: (
 		handleError: (error: unknown) => void,
@@ -61,6 +61,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				setCheetsError("An unexpected error occured while loading cheets.");
 			} else {
 				handleError(error);
+				setHasNextPage(false);
 			}
 		} finally {
 			setCheetsLoading(false);
@@ -68,7 +69,11 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	}, []);
 
 	const refreshCheets = useCallback(
-		async (handleError: (error: unknown) => void, setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>, userId?: string) => {
+		async (
+			handleError: (error: unknown) => void,
+			setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
+			userId?: string
+		) => {
 			try {
 				setComponentLoading(true);
 

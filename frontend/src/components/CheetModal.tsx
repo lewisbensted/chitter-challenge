@@ -12,11 +12,12 @@ import Cheet from "./Cheet";
 import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
 import useFetchReplies from "../hooks/useFetchReplies";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
 	userId?: string | null;
 	cheet: ICheet;
-	cheets: ICheet[]
+	cheets: ICheet[];
 	isOpen: boolean;
 	closeModal: () => void;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
@@ -56,7 +57,9 @@ const CheetModal: React.FC<Props> = ({
 
 	useEffect(() => {
 		if (isOpen) {
-			void fetchReplies(cheet.uuid);
+			void fetchReplies(cheet.uuid, (error) => {
+				handleErrors(error, "loading cheets", setErrors);
+			});
 		}
 	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
 

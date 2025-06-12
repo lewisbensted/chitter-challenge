@@ -13,7 +13,7 @@ const useFetchReplies = () => {
 
 	const take = 5;
 
-	const fetchReplies = useCallback(async (cheetId: string) => {
+	const fetchReplies = useCallback(async (cheetId: string, handleError: (error: unknown) => void) => {
 		try {
 			const res = await axios.get<IReply[]>(
 				`${serverURL}/cheets/${cheetId}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=${take}`,
@@ -32,8 +32,13 @@ const useFetchReplies = () => {
 				});
 				cursorRef.current = newReplies[newReplies.length - 1].uuid;
 			}
-		} catch {
-			setRepliesError("An unexpected error occured while loading replies.");
+		} catch (error) {
+			if (repliesLengthRef.current === 0) {
+				setRepliesError("An unexpected error occured while loading replies.");
+			} else {
+				handleError(error);
+				setHasNextPage(false);
+			}
 		} finally {
 			setRepliesLoading(false);
 		}
