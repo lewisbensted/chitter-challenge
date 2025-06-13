@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { ICheet } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
+import { logErrors } from "../utils/handleErrors";
 
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
@@ -58,6 +59,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 			setCheetsError("");
 		} catch (error) {
 			if (cheetsLengthRef.current === 0) {
+				logErrors(error);
 				setCheetsError("An unexpected error occured while loading cheets.");
 			} else {
 				handleError(error);

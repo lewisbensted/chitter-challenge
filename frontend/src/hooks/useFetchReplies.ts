@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
+import { logErrors } from "../utils/handleErrors";
 
 const useFetchReplies = () => {
 	const [replies, setReplies] = useState<IReply[]>([]);
@@ -34,6 +35,7 @@ const useFetchReplies = () => {
 			}
 		} catch (error) {
 			if (repliesLengthRef.current === 0) {
+				logErrors(error);
 				setRepliesError("An unexpected error occured while loading replies.");
 			} else {
 				handleError(error);

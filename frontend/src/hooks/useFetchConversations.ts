@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
+import { logErrors } from "../utils/handleErrors";
 
 interface UseFetchConversationsReturn {
 	conversations: IConversation[];
@@ -54,6 +55,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				if (conversationErrorOnClose.current || id) {
 					handleError(error);
 				} else {
+					logErrors(error);
 					setConversationsError("An unexpected error occured while loading conversations.");
 				}
 			} finally {

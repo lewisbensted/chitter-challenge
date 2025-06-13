@@ -86,7 +86,7 @@ try {
 	app.use("/cheets/:cheetId/replies", express.json(), replies);
 	app.use("/messages", express.json(), messages);
 	app.all("*", (_req, res) => {
-		res.status(404).send(["Invalid route provided."]);
+		res.status(404).send(["Resource not found."]);
 	});
 	app.listen(SERVER_PORT, () => {
 		console.log(`\nServer running on port ${SERVER_PORT}.\n`);

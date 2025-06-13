@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { IMessage } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
+import { logErrors } from "../utils/handleErrors";
 
 const useFetchMessages = () => {
 	const [messages, setMessages] = useState<IMessage[]>([]);
@@ -14,7 +15,8 @@ const useFetchMessages = () => {
 				withCredentials: true,
 			});
 			setMessages(messages.data);
-		} catch {
+		} catch (error) {
+			logErrors(error);
 			setMessagesError("An unexpected error occured while loading messages.");
 		} finally {
 			setMessagesLoading(false);
