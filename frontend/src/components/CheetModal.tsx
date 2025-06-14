@@ -26,6 +26,7 @@ interface Props {
 	numberOfCheets: number;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
 const CheetModal: React.FC<Props> = ({
@@ -40,6 +41,7 @@ const CheetModal: React.FC<Props> = ({
 	numberOfCheets,
 	reloadTrigger,
 	toggleReloadTrigger,
+	setSelectedCheet
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [page, setPage] = useState<number>(0);
@@ -115,6 +117,7 @@ const CheetModal: React.FC<Props> = ({
 							numberOfCheets={numberOfCheets}
 							reloadTrigger={reloadTrigger}
 							toggleReloadTrigger={toggleReloadTrigger}
+							setSelectedCheet={setSelectedCheet}
 						/>
 						<Divider />
 

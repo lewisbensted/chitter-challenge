@@ -18,7 +18,7 @@ interface Props {
 	isOpen: boolean;
 	isComponentLoading: boolean;
 	closeModal: () => void;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,6 +33,7 @@ const MessageModal: React.FC<Props> = ({
 	conversation,
 	isOpen,
 	isComponentLoading,
+	reloadTrigger,
 	closeModal,
 	setComponentLoading,
 	toggleReloadTrigger,
@@ -86,7 +87,13 @@ const MessageModal: React.FC<Props> = ({
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
-						<IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
+						<IconButton
+							onClick={() => {
+								closeModal();
+							}}
+							disabled={isComponentLoading}
+							color="primary"
+						>
 							<Close />
 						</IconButton>
 					</Grid2>
@@ -136,6 +143,8 @@ const MessageModal: React.FC<Props> = ({
 							<SendMessage
 								recipientId={conversation.interlocutorId}
 								isDisabled={isComponentLoading || isMessagesLoading}
+								reloadTrigger={reloadTrigger}
+								toggleReloadTrigger={toggleReloadTrigger}
 								setMessages={setMessages}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}

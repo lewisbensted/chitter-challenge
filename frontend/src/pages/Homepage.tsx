@@ -11,6 +11,8 @@ import FlexBox from "../styles/FlexBox";
 import useValidateUser from "../hooks/useValidateUser";
 import useFetchCheets from "../hooks/useFetchCheets";
 import useFetchConversations from "../hooks/useFetchConversations";
+import CheetModal from "../components/CheetModal";
+import { ICheet } from "../interfaces/interfaces";
 
 const Homepage: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
@@ -92,6 +94,8 @@ const Homepage: React.FC = () => {
 		[isCheetsLoading, hasNextPage]
 	);
 
+	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
+
 	return (
 		<Layout
 			userId={userId}
@@ -139,6 +143,7 @@ const Homepage: React.FC = () => {
 										numberOfCheets={cheets.length}
 										reloadTrigger={reloadCheetsTrigger}
 										toggleReloadTrigger={toggleReloadTrigger}
+										setSelectedCheet={setSelectedCheet}
 									/>
 								))}
 								{isCheetsLoading ? (
@@ -160,6 +165,25 @@ const Homepage: React.FC = () => {
 								scroll={scrollToTop}
 							/>
 						) : null}
+
+						{selectedCheet && (
+							<CheetModal
+								cheet={selectedCheet}
+								cheets={cheets}
+								userId={userId}
+								isOpen={!!selectedCheet}
+								closeModal={() => {
+									setSelectedCheet(null);
+								}}
+								setCheets={setCheets}
+								isComponentLoading={isComponentLoading}
+								setComponentLoading={setComponentLoading}
+								numberOfCheets={cheets.length}
+								reloadTrigger={reloadCheetsTrigger}
+								toggleReloadTrigger={toggleReloadTrigger}
+								setSelectedCheet={setSelectedCheet}
+							/>
+						)}
 					</Fragment>
 				)}
 			</Box>

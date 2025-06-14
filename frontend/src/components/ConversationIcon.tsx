@@ -27,14 +27,14 @@ const ConversationIcon: React.FC<Props> = ({
 	conversationErrorOnClose,
 
 }) => {
-	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
+	const [isMessageModalOpen, setMessageModalOpen] = useState<boolean>(false);
 
 	return (
 		<Fragment>
 			<MessageModal
 				userId={userId}
 				conversation={conversation}
-				isOpen={messageModalOpen}
+				isOpen={isMessageModalOpen}
 				isComponentLoading={isComponentLoading}
 				setComponentLoading={setComponentLoading}
 				closeModal={() => {

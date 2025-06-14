@@ -7,6 +7,8 @@ import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useValidateUser from "../hooks/useValidateUser";
 import useFetchConversations from "../hooks/useFetchConversations";
+import { IConversation } from "../interfaces/interfaces";
+import MessageModal from "../components/MessageModal";
 
 const Conversations: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
@@ -45,6 +47,8 @@ const Conversations: React.FC = () => {
 			{}
 		);
 	}, [userId, reloadTrigger, setConversationsError, fetchData]);
+
+	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
 
 	return (
 		<Layout
@@ -89,12 +93,31 @@ const Conversations: React.FC = () => {
 										reloadTrigger={reloadTrigger}
 										toggleReloadTrigger={toggleReloadTrigger}
 										conversationErrorOnClose={conversationErrorOnClose}
+										setSelectedConversation={setSelectedConversation}
 									/>
 								))}
 							</Grid2>
 						)}
 					</Fragment>
 				) : null}
+				{selectedConversation && (
+					<MessageModal
+						userId={userId}
+						conversation={selectedConversation}
+						isOpen={!!selectedConversation}
+						isComponentLoading={isComponentLoading}
+						setComponentLoading={setComponentLoading}
+						closeModal={() => {
+							setSelectedConversation(null);
+						}}
+						setConversations={setConversations}
+						reloadTrigger={reloadTrigger}
+						toggleReloadTrigger={toggleReloadTrigger}
+						unread={selectedConversation.unread}
+						onUserPage={false}
+						conversationErrorOnClose={conversationErrorOnClose}
+					/>
+				)}
 			</Box>
 		</Layout>
 	);

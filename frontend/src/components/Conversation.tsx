@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { IConversation } from "../interfaces/interfaces";
 import { Card, CardActionArea, CardContent, Grid2, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
 import { ThemeProvider } from "@emotion/react";
 import theme from "../styles/theme";
 import { PriorityHigh } from "@mui/icons-material";
-import MessageModal from "./MessageModal";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
@@ -17,57 +16,20 @@ interface Props {
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	conversationErrorOnClose: React.MutableRefObject<boolean>;
+	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 }
 
-const Conversation: React.FC<Props> = ({
-	userId,
-	conversation,
-	isComponentLoading,
-	setComponentLoading,
-	setConversations,
-	reloadTrigger,
-	toggleReloadTrigger,
-	conversationErrorOnClose,
-}) => {
-	const [messageModalOpen, setMessageModalOpen] = useState<boolean>(false);
-	const [reloadWhenClosed, setReloadWhenClosed] = useState<boolean>(false);
-
+const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoading, setSelectedConversation }) => {
 	const createdAt = new Date(conversation.latestMessage!.createdAt);
 
 	return (
 		<ThemeProvider theme={theme}>
-			<MessageModal
-				userId={userId}
-				conversation={conversation}
-				isOpen={messageModalOpen}
-				isComponentLoading={isComponentLoading}
-				setComponentLoading={setComponentLoading}
-				closeModal={() => {
-					setMessageModalOpen(false);
-					if (reloadWhenClosed) {
-						toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
-						setReloadWhenClosed(false);
-					}
-				}}
-				setConversations={setConversations}
-				reloadTrigger={reloadTrigger}
-				toggleReloadTrigger={toggleReloadTrigger}
-				setReloadWhenClosed={setReloadWhenClosed}
-				unread={conversation.unread}
-				onUserPage={false}
-				conversationErrorOnClose={conversationErrorOnClose}
-			/>
-
 			<Card>
 				<CardActionArea
 					disabled={isComponentLoading}
-					onClick={
-						isComponentLoading
-							? undefined
-							: () => {
-								setMessageModalOpen(true);
-							}
-					}
+					onClick={() => {
+						setSelectedConversation(conversation);
+					}}
 				>
 					<CardContent>
 						<Grid2 container width={600}>

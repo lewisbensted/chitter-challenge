@@ -21,7 +21,6 @@ import axios from "axios";
 import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
-import CheetModal from "./CheetModal";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
@@ -37,6 +36,7 @@ interface Props {
 	numberOfCheets: number;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
@@ -50,16 +50,13 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			setComponentLoading,
 			isComponentLoading,
 			isModalView,
-			numberOfCheets,
-			reloadTrigger,
-			toggleReloadTrigger,
+			setSelectedCheet,
 		},
 		ref
 	) => {
 		const { id } = useParams();
 		const { register, handleSubmit } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
-		const [isModalOpen, setModalOpen] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
@@ -98,7 +95,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 
 				const updatedCheets = cheets.filter((c) => c.uuid !== cheet.uuid);
 				setCheets(updatedCheets);
-				setModalOpen(false);
+				setSelectedCheet(null);
 			} catch (error) {
 				handleErrors(error, "deleting the cheet", setErrors);
 			} finally {
@@ -115,23 +112,6 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 
 		return (
 			<ThemeProvider theme={theme}>
-				{isModalView ? null : (
-					<CheetModal
-						cheet={cheet}
-						cheets={cheets}
-						userId={userId}
-						isOpen={isModalOpen}
-						closeModal={() => {
-							setModalOpen(false);
-						}}
-						setCheets={setCheets}
-						isComponentLoading={isComponentLoading}
-						setComponentLoading={setComponentLoading}
-						numberOfCheets={numberOfCheets}
-						reloadTrigger={reloadTrigger}
-						toggleReloadTrigger={toggleReloadTrigger}
-					/>
-				)}
 				<Card ref={ref}>
 					<Grid2 container width={isModalView ? "auto" : 750}>
 						<Grid2 size={isModalView ? (userId ? 10.5 : 12) : userId ? 10 : 11}>
@@ -188,7 +168,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 											<IconButton
 												color="primary"
 												onClick={() => {
-													setModalOpen(true);
+													setSelectedCheet(cheet);
 												}}
 												disabled={isComponentLoading}
 											>
@@ -227,7 +207,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 										) : null}
 									</Grid2>
 									<Grid2 size={1}>
-										{userId === cheet.user.uuid && !isModalView ? (
+										{userId === cheet.user.uuid ? (
 											isDeleteLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1}>
 													<CircularProgress size="1.3rem" thickness={6} />

@@ -14,6 +14,8 @@ import FlexBox from "../styles/FlexBox";
 interface Props {
 	recipientId: string;
 	isDisabled: boolean;
+	reloadTrigger: boolean;
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,10 +27,10 @@ interface Props {
 const SendMessage: React.FC<Props> = ({
 	recipientId,
 	isDisabled,
+	toggleReloadTrigger,
 	setMessages,
 	setErrors,
 	setComponentLoading,
-	setReloadWhenClosed,
 	triggerScroll,
 	setMessagesError,
 }) => {
@@ -45,9 +47,8 @@ const SendMessage: React.FC<Props> = ({
 			});
 			setMessages((messages) => [...messages, newMessage.data]);
 			triggerScroll((prev) => !prev);
-			if (setReloadWhenClosed) {
-				setReloadWhenClosed(true);
-			}
+		
+			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			setMessagesError("");
 		} catch (error) {
 			handleErrors(error, "sending message", setErrors);
