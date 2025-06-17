@@ -32,6 +32,7 @@ export interface IMessage {
 	createdAt: string;
 	updatedAt: string;
 	isRead: boolean;
+	isDeleted: boolean
 }
 
 export interface IConversation {

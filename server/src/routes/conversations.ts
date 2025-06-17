@@ -18,6 +18,7 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 	const messages = await prisma.message.findMany({
 		include: { sender: true, recipient: true },
 		where: {
+			isDeleted: false, 
 			OR: [
 				{ senderId: userId, recipientId: interlocutor ? interlocutor.id : undefined },
 				{ recipientId: userId, senderId: interlocutor ? interlocutor.id : undefined },

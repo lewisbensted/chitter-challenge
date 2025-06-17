@@ -29,7 +29,7 @@ interface Props {
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>;
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Message: React.FC<Props> = ({
@@ -40,7 +40,7 @@ const Message: React.FC<Props> = ({
 	setMessages,
 	isComponentLoading,
 	setComponentLoading,
-	setReloadWhenClosed,
+	toggleReloadTrigger,
 }) => {
 	const { register, handleSubmit } = useForm<{ text: string }>();
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
@@ -76,14 +76,18 @@ const Message: React.FC<Props> = ({
 		try {
 			setDeleteLoading(true);
 			setComponentLoading(true);
-			await axios.delete(`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`, {
-				withCredentials: true,
-			});
-			const updatedMessages = messages.filter((m) => m.uuid !== message.uuid);
+			const deletedMessage = await axios.delete<IMessage>(
+				`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
+				{
+					withCredentials: true,
+				}
+			);
+			const updatedMessages = messages.map((message) =>
+				message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
+			);
+
 			setMessages(updatedMessages);
-			if (setReloadWhenClosed) {
-				setReloadWhenClosed(true);
-			}
+			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 		} catch (error) {
 			handleErrors(error, "deleting the message", setErrors);
 		} finally {
@@ -104,7 +108,15 @@ const Message: React.FC<Props> = ({
 						<CardContent>
 							<Grid2 container>
 								<Grid2 size={message.isRead && userId === message.sender.uuid ? 11 : 12}>
-									{isEditing ? (
+									{message.isDeleted ? (
+										<Typography
+											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
+											textAlign={message.sender.uuid === userId ? "left" : "right"}
+											fontStyle={"italic"}
+										>
+											Message deleted
+										</Typography>
+									) : isEditing ? (
 										<Box
 											component="form"
 											onSubmit={handleSubmit(editMessage)}
@@ -131,7 +143,7 @@ const Message: React.FC<Props> = ({
 										</Typography>
 									)}
 								</Grid2>
-								{message.sender.uuid === userId && message.isRead ? (
+								{message.sender.uuid === userId && message.isRead && !message.isDeleted ? (
 									<Grid2 size={1} display="flex" justifyContent="center">
 										<Done fontSize="small" color="primary" />
 									</Grid2>
@@ -142,15 +154,17 @@ const Message: React.FC<Props> = ({
 										justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 										textAlign={message.sender.uuid === userId ? "left" : "right"}
 									>
-										{isEdited ? <Edit fontSize="small" color="primary" /> : null}
-										{formatDate(isEdited ? updatedAt : createdAt)}
+										{isEdited && !message.isDeleted ? (
+											<Edit fontSize="small" color="primary" />
+										) : null}
+										{formatDate(isEdited && !message.isDeleted ? updatedAt : createdAt)}
 									</Typography>
 								</Grid2>
 							</Grid2>
 						</CardContent>
 					</Grid2>
 
-					{message.sender.uuid === userId ? (
+					{message.sender.uuid === userId && !message.isDeleted ? (
 						<Grid2 size={1.5} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>

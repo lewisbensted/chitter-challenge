@@ -19,7 +19,6 @@ interface Props {
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -47,7 +46,6 @@ const SendMessage: React.FC<Props> = ({
 			});
 			setMessages((messages) => [...messages, newMessage.data]);
 			triggerScroll((prev) => !prev);
-		
 			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			setMessagesError("");
 		} catch (error) {

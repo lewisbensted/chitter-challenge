@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../schemas/message.schema.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
@@ -19,10 +19,12 @@ export const messageExtension = Prisma.defineExtension({
 				return query(args);
 			},
 			async update({ args, query }) {
-				if (args.data.text) {
-					args.data.text = (args.data.text as string).trim();
+				if (!("isDeleted" in args.data && Object.keys(args.data).length === 1)) {
+					if (args.data.text) {
+						args.data.text = (args.data.text as string).trim();
+					}
+					args.data = await UpdateMessageSchema.parseAsync(args.data);
 				}
-				args.data = await UpdateMessageSchema.parseAsync(args.data);
 				return query(args);
 			},
 		},
@@ -107,15 +109,17 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await prisma.message.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
+			omit: { id: true, senderId: true, recipientId: true },
+			include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 		});
-		if (targetMessage.senderId === req.session.user!.id) {
+		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			if (targetMessage.isRead) {
 				return res.status(400).send(["Cannot update a message after it has been read."]);
 			}
 			if ((req as { body: { text: string | undefined } }).body.text !== targetMessage.text) {
 				const updatedMessage = await prisma.$extends(messageExtension).message.update({
 					where: {
-						id: targetMessage.id,
+						uuid: targetMessage.uuid,
 					},
 					data: { text: (req as { body: { text: string } }).body.text, updatedAt: date },
 					omit: { id: true, senderId: true, recipientId: true },
@@ -141,12 +145,15 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 			where: { uuid: req.params.messageId },
 		});
 		if (targetMessage.senderId === req.session.user!.id) {
-			await prisma.message.delete({
+			const deletedMessage = await prisma.$extends(messageExtension).message.update({
 				where: {
-					id: targetMessage.id,
+					uuid: targetMessage.uuid,
 				},
+				data: { isDeleted: true },
+				omit: { id: true, senderId: true, recipientId: true, text: true },
+				include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 			});
-			res.status(204).send();
+			res.status(200).send(deletedMessage);
 		} else {
 			res.status(403).send(["Cannot delete someone else's message."]);
 		}

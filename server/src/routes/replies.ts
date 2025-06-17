@@ -96,15 +96,16 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const targetReply = await prisma.reply.findUniqueOrThrow({
-			include: { cheet: true },
 			where: { uuid: req.params.replyId },
+			include: { cheet: { omit: { id: true, userId: true } }, user: { omit: { id: true } } },
+			omit: { id: true, cheetId: true, userId: true },
 		});
-		if (targetReply.userId === req.session.user!.id) {
+		if (targetReply.user.uuid === req.session.user!.uuid) {
 			if (targetReply.cheet.uuid === req.params.cheetId) {
 				if ((req as { body: { text: string | undefined } }).body.text !== targetReply.text) {
 					const updatedReply = await prisma.$extends(replyExtension).reply.update({
 						where: {
-							id: targetReply.id,
+							uuid: targetReply.uuid,
 						},
 						data: {
 							text: (req as { body: { text: string } }).body.text,

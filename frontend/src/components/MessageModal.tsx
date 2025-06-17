@@ -22,7 +22,6 @@ interface Props {
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	setReloadWhenClosed?: React.Dispatch<React.SetStateAction<boolean>>;
 	unread: number;
 	onUserPage: boolean;
 	conversationErrorOnClose: React.MutableRefObject<boolean>;
@@ -37,7 +36,6 @@ const MessageModal: React.FC<Props> = ({
 	closeModal,
 	setComponentLoading,
 	toggleReloadTrigger,
-	setReloadWhenClosed,
 	unread,
 	onUserPage,
 	conversationErrorOnClose,
@@ -128,7 +126,7 @@ const MessageModal: React.FC<Props> = ({
 										isComponentLoading={isComponentLoading}
 										setComponentLoading={setComponentLoading}
 										setErrors={setErrors}
-										setReloadWhenClosed={setReloadWhenClosed}
+										toggleReloadTrigger={toggleReloadTrigger}
 									/>
 								))}
 								{isMessagesLoading ? (
@@ -148,7 +146,6 @@ const MessageModal: React.FC<Props> = ({
 								setMessages={setMessages}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								setReloadWhenClosed={setReloadWhenClosed}
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
 							/>

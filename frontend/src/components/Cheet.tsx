@@ -76,6 +76,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 					cheet.uuid === updatedCheet.data.uuid ? updatedCheet.data : cheet
 				);
 				setCheets(updatedCheets);
+				if (isModalView){
+					setSelectedCheet(updatedCheet.data)
+				}
 			} catch (error) {
 				handleErrors(error, "editing the cheet", setErrors);
 			} finally {
