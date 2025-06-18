@@ -113,7 +113,6 @@ const Conversations: React.FC = () => {
 						setConversations={setConversations}
 						reloadTrigger={reloadTrigger}
 						toggleReloadTrigger={toggleReloadTrigger}
-						unread={selectedConversation.unread}
 						onUserPage={false}
 						conversationErrorOnClose={conversationErrorOnClose}
 					/>

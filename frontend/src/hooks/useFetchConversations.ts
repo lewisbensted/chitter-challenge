@@ -37,6 +37,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		const res = await axios.get<IConversation[]>(`${serverURL}/conversations${id ? "/" + id : ""}`, {
 			withCredentials: true,
 		});
+		console.log(res)
 		setConversations(res.data);
 	};
 

@@ -43,7 +43,6 @@ const ConversationIcon: React.FC<Props> = ({
 				setConversations={setConversations}
 				reloadTrigger={reloadTrigger}
 				toggleReloadTrigger={toggleReloadTrigger}
-				unread={conversation.unread}
 				onUserPage={true}
 				conversationErrorOnClose={conversationErrorOnClose}
 			/>

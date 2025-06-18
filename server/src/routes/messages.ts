@@ -19,12 +19,15 @@ export const messageExtension = Prisma.defineExtension({
 				return query(args);
 			},
 			async update({ args, query }) {
-				if (!("isDeleted" in args.data && Object.keys(args.data).length === 1)) {
+				if ("isDeleted" in args.data && Object.keys(args.data).length === 1) {
+					args.data.updatedAt = new Date();
+				} else {
 					if (args.data.text) {
 						args.data.text = (args.data.text as string).trim();
 					}
 					args.data = await UpdateMessageSchema.parseAsync(args.data);
 				}
+
 				return query(args);
 			},
 		},
@@ -60,7 +63,7 @@ export const readMessages = async (userId: number, interlocutorId: number) => {
 router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const unreadMessages = await prisma.message.findFirst({
-			where: { recipientId: req.session.user!.id, isRead: false },
+			where: { recipientId: req.session.user!.id, isRead: false, isDeleted: false },
 		});
 		res.status(200).send(unreadMessages ? true : false);
 	} catch (error) {
@@ -73,7 +76,11 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 	try {
 		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const messages = await fetchMessages(req.session.user!.id, recipient.id);
-		res.status(200).send(messages);
+		const formattedMessages = messages.map((message) => ({
+			...message,
+			text: message.isDeleted ? null : message.text,
+		}));
+		res.status(200).send(formattedMessages);
 		await readMessages(req.session.user!.id, recipient.id);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
@@ -115,6 +122,9 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			if (targetMessage.isRead) {
 				return res.status(400).send(["Cannot update a message after it has been read."]);
+			}
+			if (targetMessage.isDeleted) {
+				return res.status(400).send(["Cannot update a deleted message."]);
 			}
 			if ((req as { body: { text: string | undefined } }).body.text !== targetMessage.text) {
 				const updatedMessage = await prisma.$extends(messageExtension).message.update({

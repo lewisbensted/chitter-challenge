@@ -108,15 +108,7 @@ const Message: React.FC<Props> = ({
 						<CardContent>
 							<Grid2 container>
 								<Grid2 size={message.isRead && userId === message.sender.uuid ? 11 : 12}>
-									{message.isDeleted ? (
-										<Typography
-											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
-											textAlign={message.sender.uuid === userId ? "left" : "right"}
-											fontStyle={"italic"}
-										>
-											Message deleted
-										</Typography>
-									) : isEditing ? (
+									{isEditing ? (
 										<Box
 											component="form"
 											onSubmit={handleSubmit(editMessage)}
@@ -138,12 +130,17 @@ const Message: React.FC<Props> = ({
 											fontWeight={
 												!message.isRead && message.recipient.uuid === userId ? "bold" : ""
 											}
+											fontStyle={message.isDeleted ? "italic" : "none"}
 										>
-											{message.text}
+											{message?.isDeleted
+												? message.sender.uuid === userId
+													? "You deleted this message."
+													: `${message.sender.username} deleted this message.`
+												: message?.text}
 										</Typography>
 									)}
 								</Grid2>
-								{message.sender.uuid === userId && message.isRead && !message.isDeleted ? (
+								{message.sender.uuid === userId && message.isRead ? (
 									<Grid2 size={1} display="flex" justifyContent="center">
 										<Done fontSize="small" color="primary" />
 									</Grid2>
@@ -157,14 +154,14 @@ const Message: React.FC<Props> = ({
 										{isEdited && !message.isDeleted ? (
 											<Edit fontSize="small" color="primary" />
 										) : null}
-										{formatDate(isEdited && !message.isDeleted ? updatedAt : createdAt)}
+										{formatDate(isEdited ? updatedAt : createdAt)}
 									</Typography>
 								</Grid2>
 							</Grid2>
 						</CardContent>
 					</Grid2>
 
-					{message.sender.uuid === userId && !message.isDeleted ? (
+					{message.sender.uuid === userId && !message.isDeleted? (
 						<Grid2 size={1.5} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>

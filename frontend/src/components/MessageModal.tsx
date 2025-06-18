@@ -22,7 +22,6 @@ interface Props {
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	unread: number;
 	onUserPage: boolean;
 	conversationErrorOnClose: React.MutableRefObject<boolean>;
 }
@@ -36,13 +35,14 @@ const MessageModal: React.FC<Props> = ({
 	closeModal,
 	setComponentLoading,
 	toggleReloadTrigger,
-	unread,
 	onUserPage,
 	conversationErrorOnClose,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 
 	const ref = useRef<HTMLDivElement>(null);
+
+	const unread = conversation.unread
 
 	const { messages, messagesError, isMessagesLoading, setMessages, setMessagesError, fetchMessages } =
 		useFetchMessages();

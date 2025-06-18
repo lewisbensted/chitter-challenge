@@ -51,10 +51,20 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
 								</Typography>
 							</Grid2>
 							<Grid2 size={11}>
-								<Typography variant="body2">{conversation.latestMessage?.text}</Typography>
+								<Typography
+									fontStyle={conversation.latestMessage?.isDeleted ? "italic" : "none"}
+									variant="body2"
+								>
+									{conversation.latestMessage?.isDeleted
+										? conversation.latestMessage.senderId === userId
+											? "You deleted this message."
+											: `${conversation.interlocutorUsername} deleted this message`
+										: conversation.latestMessage?.text}
+								</Typography>
 							</Grid2>
 							<Grid2 size={1} display="flex" justifyContent="flex-end">
-								{conversation.latestMessage?.senderId === userId ? (
+								{conversation.latestMessage?.isDeleted ? null : conversation.latestMessage?.senderId ===
+								  userId ? (
 									conversation.latestMessage?.isRead ? (
 										<Done fontSize="small" color="primary" />
 									) : null
