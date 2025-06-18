@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const CreateMessageSchema = z.object({
 	id: z.number().optional(),
-	senderId: z.number({ required_error: "Sender ID not provided." }),
-	recipientId: z.number({ required_error: "Recipient ID not provided." }),
+	senderId: z.string({ required_error: "Sender ID not provided." }),
+	recipientId: z.string({ required_error: "Recipient ID not provided." }),
 	text: z
 		.string({ required_error: "Message not provided." })
 		.min(1, "Message cannot be empty.")

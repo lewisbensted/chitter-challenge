@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const CreateCheetSchema = z.object({
 	id: z.number().optional(),
-	userId: z.number({ required_error: "User ID not provided." }),
+	userId: z.string({ required_error: "User ID not provided." }),
 	text: z
 		.string({ required_error: "Text not provided." })
 		.min(5, "Cheet too short - must be between 5 and 50 characters.")

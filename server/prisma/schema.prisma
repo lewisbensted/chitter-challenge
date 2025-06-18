@@ -33,8 +33,8 @@ model User {
 model Cheet {
   id          Int         @id @default(autoincrement())
   uuid        String      @default(uuid()) @db.VarChar(36) @unique
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int         @map(name: "user_id")
+  user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId      String         @map(name: "user_id")
   text        String      @db.VarChar(50)
   createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
   updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
@@ -48,10 +48,10 @@ model Cheet {
 model Reply {
   id          Int         @id @default(autoincrement())
   uuid        String      @default(uuid()) @db.VarChar(36) @unique
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int         @map(name: "user_id")
-  cheet       Cheet       @relation(fields: [cheetId], references: [id], onDelete: Cascade)
-  cheetId     Int         @map(name: "cheet_id")
+  user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId      String         @map(name: "user_id")
+  cheet       Cheet       @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
+  cheetId     String         @map(name: "cheet_id")
   text        String      @db.VarChar(50)
   createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
   updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
@@ -63,10 +63,10 @@ model Reply {
 model Message {
   id                  Int         @id @default(autoincrement())
   uuid                String      @default(uuid()) @db.VarChar(36) @unique
-  sender              User        @relation(name: "sender", fields: [senderId], references: [id], onDelete: Cascade)
-  senderId            Int         @map(name: "sender_id")
-  recipient           User        @relation(name:"recipient", fields: [recipientId], references: [id], onDelete: Cascade)
-  recipientId         Int         @map(name: "recipient_id")
+  sender              User        @relation(name: "sender", fields: [senderId], references: [uuid], onDelete: Cascade)
+  senderId            String         @map(name: "sender_id")
+  recipient           User        @relation(name:"recipient", fields: [recipientId], references: [uuid], onDelete: Cascade)
+  recipientId         String         @map(name: "recipient_id")
   text                String      @db.VarChar(200)
   isRead              Boolean     @default(false) @map(name: "is_read")
   isDeleted           Boolean     @default(false) @map(name:"is_deleted")

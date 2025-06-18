@@ -34,9 +34,9 @@ export const messageExtension = Prisma.defineExtension({
 	},
 });
 
-export const fetchMessages = async (userId: number, interlocutorId: number) => {
+export const fetchMessages = async (userId: string, interlocutorId: string) => {
 	const messages = await prisma.message.findMany({
-		omit: { id: true, senderId: true, recipientId: true },
+		omit: { id: true },
 		include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 		where: {
 			OR: [
@@ -49,7 +49,7 @@ export const fetchMessages = async (userId: number, interlocutorId: number) => {
 	return messages;
 };
 
-export const readMessages = async (userId: number, interlocutorId: number) => {
+export const readMessages = async (userId: string, interlocutorId: string) => {
 	const readMessages = await prisma.message.updateMany({
 		where: {
 			recipientId: userId,
@@ -63,7 +63,7 @@ export const readMessages = async (userId: number, interlocutorId: number) => {
 router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const unreadMessages = await prisma.message.findFirst({
-			where: { recipientId: req.session.user!.id, isRead: false, isDeleted: false },
+			where: { recipientId: req.session.user!.uuid, isRead: false, isDeleted: false },
 		});
 		res.status(200).send(unreadMessages ? true : false);
 	} catch (error) {
@@ -75,13 +75,13 @@ router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const messages = await fetchMessages(req.session.user!.id, recipient.id);
+		const messages = await fetchMessages(req.session.user!.uuid, recipient.uuid);
 		const formattedMessages = messages.map((message) => ({
 			...message,
 			text: message.isDeleted ? null : message.text,
 		}));
 		res.status(200).send(formattedMessages);
-		await readMessages(req.session.user!.id, recipient.id);
+		await readMessages(req.session.user!.uuid, recipient.uuid);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -94,13 +94,13 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const newMessage = await prisma.$extends(messageExtension).message.create({
 			data: {
-				senderId: req.session.user!.id,
-				recipientId: recipient.id,
+				senderId: req.session.user!.uuid,
+				recipientId: recipient.uuid,
 				text: (req as { body: { text: string } }).body.text,
 				createdAt: date,
 				updatedAt: date,
 			},
-			omit: { id: true, senderId: true, recipientId: true },
+			omit: { id: true },
 			include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 		});
 		res.status(201).send(newMessage);
@@ -116,7 +116,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await prisma.message.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
-			omit: { id: true, senderId: true, recipientId: true },
+			omit: { id: true },
 			include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
@@ -132,7 +132,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 						uuid: targetMessage.uuid,
 					},
 					data: { text: (req as { body: { text: string } }).body.text, updatedAt: date },
-					omit: { id: true, senderId: true, recipientId: true },
+					omit: { id: true },
 					include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 				});
 				return res.status(200).send(updatedMessage);
@@ -143,7 +143,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 			res.status(403).send(["Cannot update someone else's message."]);
 		}
 	} catch (error) {
-		console.error("Error deleting cheet from the database:\n" + logError(error));
+		console.error("Error updating cheet in the database:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
 });
@@ -154,13 +154,13 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 		const targetMessage = await prisma.message.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
 		});
-		if (targetMessage.senderId === req.session.user!.id) {
+		if (targetMessage.senderId === req.session.user!.uuid) {
 			const deletedMessage = await prisma.$extends(messageExtension).message.update({
 				where: {
 					uuid: targetMessage.uuid,
 				},
 				data: { isDeleted: true },
-				omit: { id: true, senderId: true, recipientId: true, text: true },
+				omit: { id: true },
 				include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 			});
 			res.status(200).send(deletedMessage);

@@ -8,13 +8,13 @@ import { IConversation } from "../../types/responses.js";
 
 const router = express.Router({ mergeParams: true });
 
-export const fetchConversations = async (userId: number, interlocutor?: User) => {
+export const fetchConversations = async (userId: string, interlocutor?: User) => {
 	const messages = await prisma.message.findMany({
-		include: { sender: true, recipient: true },
+		include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 		where: {
 			OR: [
-				{ senderId: userId, recipientId: interlocutor ? interlocutor.id : undefined },
-				{ recipientId: userId, senderId: interlocutor ? interlocutor.id : undefined },
+				{ senderId: userId, recipientId: interlocutor ? interlocutor.uuid : undefined },
+				{ recipientId: userId, senderId: interlocutor ? interlocutor.uuid : undefined },
 			],
 		},
 		orderBy: { createdAt: "desc" },
@@ -61,7 +61,7 @@ export const fetchConversations = async (userId: number, interlocutor?: User) =>
 
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		const conversations = await fetchConversations(req.session.user!.id);
+		const conversations = await fetchConversations(req.session.user!.uuid);
 		res.status(200).send(conversations);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
@@ -72,7 +72,7 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-		const conversation = await fetchConversations(req.session.user!.id, user);
+		const conversation = await fetchConversations(req.session.user!.uuid, user);
 		res.status(200).send(conversation);
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));

@@ -29,14 +29,14 @@ export const cheetExtension = Prisma.defineExtension({
 	},
 });
 
-export const fetchCheets = async (userId?: number, cursor?: string, take?: number) => {
+export const fetchCheets = async (userId?: string, cursor?: string, take?: number) => {
 	take = isNaN(take!) ? 10 : take;
 
 	const cheets = await prisma.cheet.findMany({
 		include: { user: { omit: { id: true } } },
-		omit: { id: true, userId: true },
+		omit: { id: true },
 		where: {
-			userId: userId,
+			user:{uuid: userId},
 		},
 		orderBy: { createdAt: "desc" },
 		take: take,
@@ -53,7 +53,7 @@ router.get("/", async (req: Request, res: Response) => {
 			user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
 		req.query.take = req.query.take === "" ? undefined : req.query.take;
-		const cheets = await fetchCheets(user?.id, req.query.cursor as string, Number(req.query.take));
+		const cheets = await fetchCheets(user?.uuid, req.query.cursor as string, Number(req.query.take));
 		res.status(200).send(cheets);
 	} catch (error) {
 		console.error("Error retrieving cheets from the database:\n" + logError(error));
@@ -69,13 +69,13 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 		}
 		const newCheet = await prisma.$extends(cheetExtension).cheet.create({
 			data: {
-				userId: req.session.user!.id,
+				userId: req.session.user!.uuid,
 				text: (req as { body: { text: string } }).body.text,
 				createdAt: date,
 				updatedAt: date,
 			},
 			include: { user: { omit: { id: true } } },
-			omit: { id: true, userId: true },
+			omit: { id: true },
 		});
 		res.status(201).send(newCheet);
 	} catch (error) {
@@ -93,7 +93,7 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 		const targetCheet = await prisma.cheet.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 			include: { user: { omit: { id: true } } },
-			omit: { id: true, userId: true },
+			omit: { id: true },
 		});
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
@@ -113,7 +113,7 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 						updatedAt: date,
 					},
 					include: { user: { omit: { id: true } } },
-					omit: { id: true, userId: true },
+					omit: { id: true },
 				});
 				return res.status(200).send(updatedCheet);
 			} else {
@@ -134,10 +134,10 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
 		const targetCheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-		if (targetCheet.userId === req.session.user!.id) {
+		if (targetCheet.userId === req.session.user!.uuid) {
 			await prisma.cheet.delete({
 				where: {
-					id: targetCheet.id,
+					uuid: targetCheet.uuid,
 				},
 			});
 
