@@ -15,7 +15,6 @@ interface Props {
 	recipientId: string;
 	isDisabled: boolean;
 	reloadTrigger: boolean;
-	messages :IMessage[]
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
@@ -28,7 +27,6 @@ interface Props {
 const SendMessage: React.FC<Props> = ({
 	recipientId,
 	isDisabled,
-	messages,
 	toggleReloadTrigger,
 	setMessages,
 	setErrors,
@@ -39,10 +37,6 @@ const SendMessage: React.FC<Props> = ({
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
-
-	useEffect(()=>{
-		triggerScroll((prev) => !prev);
-	}, [messages])
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {

@@ -41,7 +41,7 @@ const CheetModal: React.FC<Props> = ({
 	numberOfCheets,
 	reloadTrigger,
 	toggleReloadTrigger,
-	setSelectedCheet
+	setSelectedCheet,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 	const [page, setPage] = useState<number>(0);
@@ -66,11 +66,14 @@ const CheetModal: React.FC<Props> = ({
 	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
 
 	const listRef = useRef<HTMLDivElement>(null);
-	const scrollToTop = () => {
-		if (listRef.current) {
-			listRef.current.scrollTo({ top: 0, behavior: "smooth" });
-		}
-	};
+	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
+	useEffect(() => {
+		requestAnimationFrame(() => {
+			if (listRef.current) {
+				listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+			}
+		});
+	}, [scrollTrigger]);
 
 	const observer = useRef<IntersectionObserver>();
 	const lastReplyRef = useCallback(
@@ -155,7 +158,7 @@ const CheetModal: React.FC<Props> = ({
 								setReplies={setReplies}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								scroll={scrollToTop}
+								triggerScroll={toggleScrollTrigger}
 								repliesLengthRef={repliesLengthRef}
 								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}

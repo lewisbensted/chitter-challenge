@@ -72,12 +72,17 @@ const Homepage: React.FC = () => {
 		}, setComponentLoading);
 	}, [reloadCheetsTrigger, refreshCheets]);
 
+	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
+
 	const listRef = useRef<HTMLDivElement>(null);
-	const scrollToTop = () => {
-		if (listRef.current) {
-			listRef.current.scrollTo({ top: 0, behavior: "smooth" });
-		}
-	};
+
+	useEffect(() => {
+		requestAnimationFrame(() => {
+			if (listRef.current) {
+				listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+			}
+		});
+	}, [scrollTrigger]);
 
 	const observer = useRef<IntersectionObserver>();
 	const lastCheetRef = useCallback(
@@ -162,7 +167,7 @@ const Homepage: React.FC = () => {
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								cheetsLengthRef={cheetsLengthRef}
-								scroll={scrollToTop}
+								triggerScroll={toggleScrollTrigger}
 							/>
 						) : null}
 

@@ -18,7 +18,7 @@ interface Props {
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	scroll: () => void;
+	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	cheetsLengthRef: React.MutableRefObject<number>;
 }
 
@@ -28,7 +28,7 @@ const SendCheet: React.FC<Props> = ({
 	setCheetsError,
 	setErrors,
 	setComponentLoading,
-	scroll,
+	triggerScroll,
 	cheetsLengthRef,
 }) => {
 	const { id } = useParams();
@@ -45,7 +45,7 @@ const SendCheet: React.FC<Props> = ({
 			});
 			setCheets((cheets) => [newCheet.data, ...cheets]);
 			cheetsLengthRef.current++;
-			scroll();
+			triggerScroll((prev) => !prev);
 			setCheetsError("");
 		} catch (error) {
 			handleErrors(error, "sending cheet", setErrors);

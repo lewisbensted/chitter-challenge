@@ -99,9 +99,10 @@ const MessageModal: React.FC<Props> = ({
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
 	const bottomRef = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
 		if (isOpen) {
-			bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+			requestAnimationFrame(()=>bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
 		}
 	}, [isOpen, scrollTrigger]);
 
@@ -173,7 +174,6 @@ const MessageModal: React.FC<Props> = ({
 							<SendMessage
 								recipientId={conversation.interlocutorId}
 								isDisabled={isComponentLoading || isMessagesLoading}
-								messages={messages}
 								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}
 								setMessages={setMessages}

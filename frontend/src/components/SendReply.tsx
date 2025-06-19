@@ -17,7 +17,7 @@ interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	scroll: () => void;
+	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	repliesLengthRef: React.MutableRefObject<number>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,7 +30,7 @@ const SendReply: React.FC<Props> = ({
 	setReplies,
 	setErrors,
 	setComponentLoading,
-	scroll,
+	triggerScroll,
 	repliesLengthRef,
 	toggleReloadTrigger,
 	setRepliesError,
@@ -52,7 +52,7 @@ const SendReply: React.FC<Props> = ({
 			);
 			
 			setReplies((replies) => [newReply.data, ...replies]);
-			scroll();
+			triggerScroll((prev) => !prev);
 			if (repliesLengthRef.current === 0) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}

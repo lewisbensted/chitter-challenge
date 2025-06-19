@@ -120,12 +120,15 @@ const User: React.FC = () => {
 		);
 	}, [id, userId, reloadMessagesTrigger, navigate, setConversationsLoading, fetchData]);
 
+	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
-	const scrollToTop = () => {
-		if (listRef.current) {
-			listRef.current.scrollTo({ top: 0, behavior: "smooth" });
-		}
-	};
+	useEffect(() => {
+		requestAnimationFrame(() => {
+			if (listRef.current) {
+				listRef.current.scrollTo({ top: 0, behavior: "smooth" });
+			}
+		});
+	}, [scrollTrigger]);
 
 	const observer = useRef<IntersectionObserver>();
 	const lastCheetRef = useCallback(
@@ -184,7 +187,6 @@ const User: React.FC = () => {
 									}}
 									reloadTrigger={reloadMessagesTrigger}
 									toggleReloadTrigger={toggleReloadMessagesTrigger}
-							
 								/>
 							)}
 						</Typography>
@@ -225,7 +227,7 @@ const User: React.FC = () => {
 								setCheets={setCheets}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								scroll={scrollToTop}
+								triggerScroll={toggleScrollTrigger}
 								cheetsLengthRef={cheetsLengthRef}
 							/>
 						) : null}
