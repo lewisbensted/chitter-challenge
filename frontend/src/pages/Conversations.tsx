@@ -25,7 +25,6 @@ const Conversations: React.FC = () => {
 		setConversationsError,
 		setConversations,
 		fetchData,
-		conversationErrorOnClose,
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -64,10 +63,6 @@ const Conversations: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						if (conversationErrorOnClose.current) {
-							setConversationsError("An unexpected error occured while loading conversations.");
-							conversationErrorOnClose.current = false;
-						}
 					}}
 				/>
 
@@ -92,7 +87,6 @@ const Conversations: React.FC = () => {
 										setConversations={setConversations}
 										reloadTrigger={reloadTrigger}
 										toggleReloadTrigger={toggleReloadTrigger}
-										conversationErrorOnClose={conversationErrorOnClose}
 										setSelectedConversation={setSelectedConversation}
 									/>
 								))}
@@ -114,7 +108,6 @@ const Conversations: React.FC = () => {
 						reloadTrigger={reloadTrigger}
 						toggleReloadTrigger={toggleReloadTrigger}
 						onUserPage={false}
-						conversationErrorOnClose={conversationErrorOnClose}
 					/>
 				)}
 			</Box>

@@ -38,6 +38,6 @@ export interface IMessage {
 export interface IConversation {
 	interlocutorId: string;
 	interlocutorUsername: string;
-	unread: number;
+	unread: boolean;
 	latestMessage?: { text: string; senderId: string; isRead: boolean; createdAt: string, isDeleted: boolean };
 }

@@ -132,11 +132,11 @@ const Message: React.FC<Props> = ({
 											}
 											fontStyle={message.isDeleted ? "italic" : "none"}
 										>
-											{message?.isDeleted
+											{message.isDeleted
 												? message.sender.uuid === userId
 													? "You deleted this message."
 													: `${message.sender.username} deleted this message.`
-												: message?.text}
+												: message.text}
 										</Typography>
 									)}
 								</Grid2>
@@ -161,7 +161,7 @@ const Message: React.FC<Props> = ({
 						</CardContent>
 					</Grid2>
 
-					{message.sender.uuid === userId && !message.isDeleted? (
+					{message.sender.uuid === userId && !message.isDeleted ? (
 						<Grid2 size={1.5} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>

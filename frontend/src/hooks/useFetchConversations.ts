@@ -17,7 +17,7 @@ interface UseFetchConversationsReturn {
 		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 		conversationParams?: { id?: string }
 	) => Promise<void>;
-	conversationErrorOnClose: React.MutableRefObject<boolean>;
+	
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -26,7 +26,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [conversationsError, setConversationsError] = useState<string>("");
 
-	const conversationErrorOnClose = useRef(false);
 
 	const fetchUnreadMessages = async () => {
 		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
@@ -52,7 +51,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				setComponentLoading(true);
 				await Promise.all([fetchUnreadMessages(), conversationParams ? fetchConversations(id) : null]);
 			} catch (error) {
-				if (conversationErrorOnClose.current || id) {
+				if (id) {
 					handleError(error);
 				} else {
 					logErrors(error);
@@ -75,7 +74,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversations,
 		setConversationsLoading,
 		fetchData,
-		conversationErrorOnClose,
 	};
 };
 

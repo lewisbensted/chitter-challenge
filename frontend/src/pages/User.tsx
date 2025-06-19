@@ -49,7 +49,6 @@ const User: React.FC = () => {
 		isUnreadMessages,
 		conversations,
 		isConversationsLoading,
-		conversationErrorOnClose,
 		setConversations,
 		setConversationsLoading,
 		fetchData,
@@ -174,7 +173,7 @@ const User: React.FC = () => {
 					<Fragment>
 						<Typography variant="h4" display="flex">
 							{username}
-							{userId === id ? null : (
+							{!userId || userId === id ? null : (
 								<ConversationIcon
 									userId={userId}
 									conversation={conversations[0]}
@@ -185,7 +184,7 @@ const User: React.FC = () => {
 									}}
 									reloadTrigger={reloadMessagesTrigger}
 									toggleReloadTrigger={toggleReloadMessagesTrigger}
-									conversationErrorOnClose={conversationErrorOnClose}
+							
 								/>
 							)}
 						</Typography>

@@ -11,6 +11,7 @@ import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 
 interface Props {
 	userId?: string | null;
@@ -23,7 +24,6 @@ interface Props {
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	onUserPage: boolean;
-	conversationErrorOnClose: React.MutableRefObject<boolean>;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -36,33 +36,65 @@ const MessageModal: React.FC<Props> = ({
 	setComponentLoading,
 	toggleReloadTrigger,
 	onUserPage,
-	conversationErrorOnClose,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 
 	const ref = useRef<HTMLDivElement>(null);
 
-	const unread = conversation.unread
+	const {
+		messages,
+		messagesError,
+		isMessagesLoading,
+		setMessages,
+		setMessagesError,
+		fetchMessages,
+		markMessagesRead,
+	} = useFetchMessages();
 
-	const { messages, messagesError, isMessagesLoading, setMessages, setMessagesError, fetchMessages } =
-		useFetchMessages();
+	function usePrevious<T>(value: T): T | undefined {
+		const ref = useRef<T>();
+		useEffect(() => {
+			ref.current = value;
+		}, [value]);
+		return ref.current;
+	}
 
-	const unreadRef = useRef(unread);
+	const prevUnread = usePrevious(conversation.unread);
+
 	useEffect(() => {
-		unreadRef.current = unread;
-	}, [unread]);
+		if (!isOpen) return;
 
+		const loadAndMarkRead = async () => {
+			await fetchMessages(conversation.interlocutorId);
+			toggleScrollTrigger((prev) => !prev);
+			if (prevUnread) {
+				await markMessagesRead(conversation.interlocutorId, (error) =>
+					handleErrors(error, "updating read messages.", setErrors)
+				);
+				toggleReloadTrigger((prev) => !prev);
+			}
+		};
+		void loadAndMarkRead();
+	}, [isOpen, conversation.interlocutorId, , prevUnread, toggleReloadTrigger, fetchMessages]);
+
+	const [refresh, triggerRefresh] = useState<boolean>(false);
+
+	const isFirstRender = useRef(true);
 	useEffect(() => {
-		if (isOpen) {
-			void fetchMessages(conversation.interlocutorId).then(() => {
-				toggleScrollTrigger((prev) => !prev);
-				if (unreadRef.current > 0) {
-					conversationErrorOnClose.current = true;
-					toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
-				}
-			});
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return;
 		}
-	}, [isOpen, conversation.interlocutorId, conversationErrorOnClose, toggleReloadTrigger, fetchMessages]);
+		if (!isOpen) return;
+		const load = async () => {
+			await fetchMessages(conversation.interlocutorId, (error) =>
+				handleErrors(error, "updating read messages.", setErrors)
+			);
+		};
+		if (prevUnread) {
+			void load();
+		}
+	}, [refresh]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
@@ -141,6 +173,7 @@ const MessageModal: React.FC<Props> = ({
 							<SendMessage
 								recipientId={conversation.interlocutorId}
 								isDisabled={isComponentLoading || isMessagesLoading}
+								messages={messages}
 								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}
 								setMessages={setMessages}
@@ -148,6 +181,7 @@ const MessageModal: React.FC<Props> = ({
 								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
+								triggerRefresh={triggerRefresh}
 							/>
 						)}
 					</Grid2>

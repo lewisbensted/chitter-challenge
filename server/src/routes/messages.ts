@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../schemas/message.schema.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
@@ -54,6 +54,7 @@ export const readMessages = async (userId: string, interlocutorId: string) => {
 		where: {
 			recipientId: userId,
 			senderId: interlocutorId,
+			isRead: false
 		},
 		data: { isRead: true },
 	});
@@ -81,9 +82,19 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 			text: message.isDeleted ? null : message.text,
 		}));
 		res.status(200).send(formattedMessages);
-		await readMessages(req.session.user!.uuid, recipient.uuid);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
+		sendErrorResponse(error, res);
+	}
+});
+
+router.put("/read/:recipientId", authMiddleware, async (req: Request, res: Response) => {
+	try {
+		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+		await readMessages(req.session.user!.uuid, recipient.uuid);
+		res.status(200).send();
+	} catch (error) {
+		console.error("Error marking messages as read:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
 });

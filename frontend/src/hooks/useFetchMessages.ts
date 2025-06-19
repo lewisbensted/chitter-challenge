@@ -9,15 +9,35 @@ const useFetchMessages = () => {
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [messagesError, setMessagesError] = useState<string>("");
 
-	const fetchMessages = useCallback(async (interlocutorId: string) => {
+	const fetchMessages = useCallback(async (interlocutorId: string, handleError?: (error: unknown) => void) => {
 		try {
 			const messages = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}`, {
 				withCredentials: true,
 			});
 			setMessages(messages.data);
 		} catch (error) {
-			logErrors(error);
-			setMessagesError("An unexpected error occured while loading messages.");
+			if (handleError) {
+				handleError(error);
+			} else {
+				logErrors(error);
+				setMessagesError("An unexpected error occured while loading messages.");
+			}
+		} finally {
+			setMessagesLoading(false);
+		}
+	}, []);
+
+	const markMessagesRead = useCallback(async (interlocutorId: string, handleError: (error: unknown) => void) => {
+		try {
+			await axios.put(
+				`${serverURL}/messages/read/${interlocutorId}`,
+				{},
+				{
+					withCredentials: true,
+				}
+			);
+		} catch (error) {
+			handleError(error);
 		} finally {
 			setMessagesLoading(false);
 		}
@@ -31,6 +51,7 @@ const useFetchMessages = () => {
 		setMessagesError,
 		setMessagesLoading,
 		fetchMessages,
+		markMessagesRead,
 	};
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
@@ -15,26 +15,34 @@ interface Props {
 	recipientId: string;
 	isDisabled: boolean;
 	reloadTrigger: boolean;
+	messages :IMessage[]
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
+	triggerRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SendMessage: React.FC<Props> = ({
 	recipientId,
 	isDisabled,
+	messages,
 	toggleReloadTrigger,
 	setMessages,
 	setErrors,
 	setComponentLoading,
 	triggerScroll,
 	setMessagesError,
+	triggerRefresh
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
+
+	useEffect(()=>{
+		triggerScroll((prev) => !prev);
+	}, [messages])
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
@@ -48,6 +56,7 @@ const SendMessage: React.FC<Props> = ({
 			triggerScroll((prev) => !prev);
 			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			setMessagesError("");
+			triggerRefresh(prev => !prev)
 		} catch (error) {
 			handleErrors(error, "sending message", setErrors);
 		} finally {
