@@ -8,16 +8,10 @@ interface UseFetchCheetsReturn {
 	cheets: ICheet[];
 	isCheetsLoading: boolean;
 	cheetsLengthRef: React.MutableRefObject<number>;
-	cheetsErrorOnClose: React.MutableRefObject<boolean>;
 	cheetsError: string;
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	fetchCheets: (handleError: (error: unknown) => void, userId?: string) => Promise<void>;
-	refreshCheets: (
-		handleError: (error: unknown) => void,
-		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
-		userId?: string
-	) => Promise<void>;
 	hasNextPage: boolean;
 }
 
@@ -28,7 +22,6 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
-	const cheetsErrorOnClose = useRef(false);
 
 	const take = 5;
 
@@ -70,44 +63,14 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 		}
 	}, []);
 
-	const refreshCheets = useCallback(
-		async (
-			handleError: (error: unknown) => void,
-			setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
-			userId?: string
-		) => {
-			try {
-				setComponentLoading(true);
-
-				const res = await axios.get<ICheet[]>(
-					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?take=${cheetsLengthRef.current}`,
-					{
-						withCredentials: true,
-					}
-				);
-
-				setCheets(res.data);
-				setCheetsError("");
-			} catch (error) {
-				handleError(error);
-				cheetsErrorOnClose.current = true;
-			} finally {
-				setComponentLoading(false);
-			}
-		},
-		[]
-	);
-
 	return {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		cheetsErrorOnClose,
 		cheetsError,
 		setCheets,
 		setCheetsError,
 		fetchCheets,
-		refreshCheets,
 		hasNextPage,
 	};
 };

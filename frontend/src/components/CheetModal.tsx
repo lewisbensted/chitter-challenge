@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ICheet } from "../interfaces/interfaces";
 import ErrorModal from "./ErrorModal";
 import IconButton from "@mui/material/IconButton/IconButton";
@@ -25,7 +25,6 @@ interface Props {
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	numberOfCheets: number;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
@@ -40,7 +39,6 @@ const CheetModal: React.FC<Props> = ({
 	isComponentLoading,
 	numberOfCheets,
 	reloadTrigger,
-	toggleReloadTrigger,
 	setSelectedCheet,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
@@ -67,7 +65,7 @@ const CheetModal: React.FC<Props> = ({
 
 	const listRef = useRef<HTMLDivElement>(null);
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
 			if (listRef.current) {
 				listRef.current.scrollTo({ top: 0, behavior: "smooth" });
@@ -119,7 +117,6 @@ const CheetModal: React.FC<Props> = ({
 							closeModal={closeModal}
 							numberOfCheets={numberOfCheets}
 							reloadTrigger={reloadTrigger}
-							toggleReloadTrigger={toggleReloadTrigger}
 							setSelectedCheet={setSelectedCheet}
 						/>
 						<Divider />
@@ -153,7 +150,7 @@ const CheetModal: React.FC<Props> = ({
 
 						{userId && !repliesError ? (
 							<SendReply
-								cheetId={cheet.uuid}
+								selectedCheet={cheet}
 								isDisabled={isComponentLoading || isRepliesLoading}
 								setReplies={setReplies}
 								setErrors={setErrors}
@@ -161,8 +158,9 @@ const CheetModal: React.FC<Props> = ({
 								triggerScroll={toggleScrollTrigger}
 								repliesLengthRef={repliesLengthRef}
 								reloadTrigger={reloadTrigger}
-								toggleReloadTrigger={toggleReloadTrigger}
 								setRepliesError={setRepliesError}
+								setSelectedCheet={setSelectedCheet}
+								setCheets={setCheets}
 							/>
 						) : null}
 					</Grid2>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IReply } from "../interfaces/interfaces";
+import { ICheet, IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
@@ -12,28 +12,30 @@ import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 
 interface Props {
-	cheetId: string;
+	selectedCheet: ICheet;
 	isDisabled: boolean;
-	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>
-	setErrors: React.Dispatch<React.SetStateAction<string[]>>
+	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
+	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	repliesLengthRef: React.MutableRefObject<number>;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
+	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
+	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 }
 
 const SendReply: React.FC<Props> = ({
-	cheetId,
+	selectedCheet,
 	isDisabled,
 	setReplies,
 	setErrors,
 	setComponentLoading,
 	triggerScroll,
 	repliesLengthRef,
-	toggleReloadTrigger,
 	setRepliesError,
+	setSelectedCheet,
+	setCheets,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -43,18 +45,22 @@ const SendReply: React.FC<Props> = ({
 			setSubmitLoading(true);
 			setComponentLoading(true);
 			reset();
-			const newReply = await axios.post<IReply>(
-				`${serverURL}/cheets/${cheetId}/replies`,
-				data,
-				{
-					withCredentials: true,
-				}
-			);
-			
+			const newReply = await axios.post<IReply>(`${serverURL}/cheets/${selectedCheet.uuid}/replies`, data, {
+				withCredentials: true,
+			});
+
 			setReplies((replies) => [newReply.data, ...replies]);
 			triggerScroll((prev) => !prev);
 			if (repliesLengthRef.current === 0) {
-				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
+				setSelectedCheet((cheet) => {
+					if (!cheet) return cheet;
+					return { ...cheet, hasReplies: true };
+				});
+
+				setCheets((cheets) => {
+					const updatedCheets = cheets.map((cheet) => (cheet.uuid === selectedCheet.uuid ? { ...cheet, hasReplies: true } : cheet));
+					return updatedCheets;
+				});
 			}
 			repliesLengthRef.current++;
 			setRepliesError("");

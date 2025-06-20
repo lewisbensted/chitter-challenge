@@ -35,7 +35,6 @@ interface Props {
 	closeModal?: () => void;
 	numberOfCheets: number;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 

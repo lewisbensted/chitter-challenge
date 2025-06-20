@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { IConversation } from "../interfaces/interfaces";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
@@ -11,7 +11,7 @@ import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
 	userId?: string | null;
@@ -68,14 +68,14 @@ const MessageModal: React.FC<Props> = ({
 			await fetchMessages(conversation.interlocutorId);
 			toggleScrollTrigger((prev) => !prev);
 			if (prevUnread) {
-				await markMessagesRead(conversation.interlocutorId, (error) =>
-					handleErrors(error, "updating read messages.", setErrors)
-				);
+				await markMessagesRead(conversation.interlocutorId, (error) => {
+					handleErrors(error, "updating read messages.", setErrors);
+				});
 				toggleReloadTrigger((prev) => !prev);
 			}
 		};
 		void loadAndMarkRead();
-	}, [isOpen, conversation.interlocutorId, , prevUnread, toggleReloadTrigger, fetchMessages]);
+	}, [isOpen, conversation.interlocutorId, prevUnread, toggleReloadTrigger, fetchMessages, markMessagesRead]);
 
 	const [refresh, triggerRefresh] = useState<boolean>(false);
 
@@ -87,9 +87,9 @@ const MessageModal: React.FC<Props> = ({
 		}
 		if (!isOpen) return;
 		const load = async () => {
-			await fetchMessages(conversation.interlocutorId, (error) =>
-				handleErrors(error, "updating read messages.", setErrors)
-			);
+			await fetchMessages(conversation.interlocutorId, (error) => {
+				handleErrors(error, "updating read messages.", setErrors);
+			});
 		};
 		if (prevUnread) {
 			void load();
@@ -100,9 +100,9 @@ const MessageModal: React.FC<Props> = ({
 
 	const bottomRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (isOpen) {
-			requestAnimationFrame(()=>bottomRef.current?.scrollIntoView({ behavior: "smooth" }))
+			requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }));
 		}
 	}, [isOpen, scrollTrigger]);
 

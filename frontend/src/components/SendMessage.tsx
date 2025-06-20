@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
@@ -15,7 +15,7 @@ interface Props {
 	recipientId: string;
 	isDisabled: boolean;
 	reloadTrigger: boolean;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>
+	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,7 +33,7 @@ const SendMessage: React.FC<Props> = ({
 	setComponentLoading,
 	triggerScroll,
 	setMessagesError,
-	triggerRefresh
+	triggerRefresh,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -50,7 +50,7 @@ const SendMessage: React.FC<Props> = ({
 			triggerScroll((prev) => !prev);
 			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			setMessagesError("");
-			triggerRefresh(prev => !prev)
+			triggerRefresh((prev) => !prev);
 		} catch (error) {
 			handleErrors(error, "sending message", setErrors);
 		} finally {

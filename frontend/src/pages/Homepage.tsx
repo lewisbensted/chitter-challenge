@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import SendCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
@@ -26,16 +26,16 @@ const Homepage: React.FC = () => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		cheetsErrorOnClose,
 		cheetsError,
 		setCheetsError,
 		setCheets,
-		refreshCheets,
 		fetchCheets,
 		hasNextPage,
 	} = useFetchCheets();
 
 	const { isUnreadMessages, isConversationsLoading, setConversationsLoading, fetchData } = useFetchConversations();
+
+	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
 	useEffect(() => {
 		void validateUser((error) => {
@@ -61,22 +61,11 @@ const Homepage: React.FC = () => {
 		});
 	}, [page, fetchCheets]);
 
-	const hasFetchedCheetsOnce = useRef<boolean>(false);
-	useEffect(() => {
-		if (!hasFetchedCheetsOnce.current) {
-			hasFetchedCheetsOnce.current = true;
-			return;
-		}
-		void refreshCheets((error) => {
-			handleErrors(error, "updating cheets", setErrors);
-		}, setComponentLoading);
-	}, [reloadCheetsTrigger, refreshCheets]);
-
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
 	const listRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
 			if (listRef.current) {
 				listRef.current.scrollTo({ top: 0, behavior: "smooth" });
@@ -99,8 +88,6 @@ const Homepage: React.FC = () => {
 		[isCheetsLoading, hasNextPage]
 	);
 
-	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
-
 	return (
 		<Layout
 			userId={userId}
@@ -115,10 +102,6 @@ const Homepage: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						if (cheetsErrorOnClose.current) {
-							setCheetsError("An unexpected error occured while loading cheets.");
-							cheetsErrorOnClose.current = false;
-						}
 					}}
 				/>
 				<Typography variant="h4">Welcome to Chitter</Typography>
@@ -147,7 +130,6 @@ const Homepage: React.FC = () => {
 										isModalView={false}
 										numberOfCheets={cheets.length}
 										reloadTrigger={reloadCheetsTrigger}
-										toggleReloadTrigger={toggleReloadTrigger}
 										setSelectedCheet={setSelectedCheet}
 									/>
 								))}
@@ -185,7 +167,6 @@ const Homepage: React.FC = () => {
 								setComponentLoading={setComponentLoading}
 								numberOfCheets={cheets.length}
 								reloadTrigger={reloadCheetsTrigger}
-								toggleReloadTrigger={toggleReloadTrigger}
 								setSelectedCheet={setSelectedCheet}
 							/>
 						)}

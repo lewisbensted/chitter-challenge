@@ -36,7 +36,7 @@ export const fetchCheets = async (userId?: string, cursor?: string, take?: numbe
 		include: { user: { omit: { id: true } } },
 		omit: { id: true },
 		where: {
-			user:{uuid: userId},
+			user: { uuid: userId },
 		},
 		orderBy: { createdAt: "desc" },
 		take: take,
@@ -57,6 +57,20 @@ router.get("/", async (req: Request, res: Response) => {
 		res.status(200).send(cheets);
 	} catch (error) {
 		console.error("Error retrieving cheets from the database:\n" + logError(error));
+		sendErrorResponse(error, res);
+	}
+});
+
+router.get("/:cheetId", async (req: Request, res: Response) => {
+	try {
+		const cheet = await prisma.cheet.findUniqueOrThrow({
+			where: { uuid: req.params.cheetId },
+			include: { user: { omit: { id: true } } },
+			omit: { id: true },
+		});
+		res.status(200).send(cheet);
+	} catch (error) {
+		console.error("Error retrieving cheet from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
 });

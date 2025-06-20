@@ -64,12 +64,12 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
 							<Grid2 size={1} display="flex" justifyContent="flex-end">
 								{conversation.latestMessage?.isDeleted ? null : conversation.latestMessage?.senderId ===
 								  userId ? (
-									conversation.latestMessage?.isRead ? (
-										<Done fontSize="small" color="primary" />
-									) : null
-								) : conversation.latestMessage?.isRead ? null : (
-									<PriorityHigh fontSize="small" color="primary" />
-								)}
+										conversation.latestMessage?.isRead ? (
+											<Done fontSize="small" color="primary" />
+										) : null
+									) : conversation.latestMessage?.isRead ? null : (
+										<PriorityHigh fontSize="small" color="primary" />
+									)}
 							</Grid2>
 						</Grid2>
 					</CardContent>

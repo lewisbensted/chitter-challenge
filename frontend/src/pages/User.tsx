@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { ICheet, IUser } from "../interfaces/interfaces";
@@ -36,12 +36,10 @@ const User: React.FC = () => {
 		cheets,
 		isCheetsLoading,
 		cheetsLengthRef,
-		cheetsErrorOnClose,
 		cheetsError,
 		hasNextPage,
 		setCheetsError,
 		setCheets,
-		refreshCheets,
 		fetchCheets,
 	} = useFetchCheets();
 
@@ -59,6 +57,8 @@ const User: React.FC = () => {
 			handleErrors(error, "fetching page information", setErrors);
 		});
 	}, [validateUser]);
+
+	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
 	useEffect(() => {
 		if (!id) return;
@@ -86,23 +86,6 @@ const User: React.FC = () => {
 		}, id);
 	}, [id, page, fetchCheets]);
 
-	const hasFetchedCheetsOnce = useRef<boolean>(false);
-
-	useEffect(() => {
-		if (!id) return;
-		if (!hasFetchedCheetsOnce.current) {
-			hasFetchedCheetsOnce.current = true;
-			return;
-		}
-		void refreshCheets(
-			(error) => {
-				handleErrors(error, "updating cheets", setErrors);
-			},
-			setComponentLoading,
-			id
-		);
-	}, [id, reloadCheetsTrigger, refreshCheets]);
-
 	useEffect(() => {
 		if (userId === undefined) {
 			return;
@@ -122,7 +105,7 @@ const User: React.FC = () => {
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
 			if (listRef.current) {
 				listRef.current.scrollTo({ top: 0, behavior: "smooth" });
@@ -146,8 +129,6 @@ const User: React.FC = () => {
 		[isCheetsLoading, hasNextPage]
 	);
 
-	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
-
 	return (
 		<Layout
 			userId={userId}
@@ -162,10 +143,6 @@ const User: React.FC = () => {
 					errors={errors}
 					closeModal={() => {
 						setErrors([]);
-						if (cheetsErrorOnClose.current) {
-							setCheetsError("An unexpected error occured while loading cheets.");
-							cheetsErrorOnClose.current = false;
-						}
 					}}
 				/>
 				{isValidateLoading || isUserLoading || isConversationsLoading ? (
@@ -209,7 +186,6 @@ const User: React.FC = () => {
 										isModalView={false}
 										numberOfCheets={cheets.length}
 										reloadTrigger={reloadCheetsTrigger}
-										toggleReloadTrigger={toggleReloadCheetsTrigger}
 										setSelectedCheet={setSelectedCheet}
 									/>
 								))}
@@ -245,7 +221,6 @@ const User: React.FC = () => {
 								setComponentLoading={setComponentLoading}
 								numberOfCheets={cheets.length}
 								reloadTrigger={reloadCheetsTrigger}
-								toggleReloadTrigger={toggleReloadCheetsTrigger}
 								setSelectedCheet={setSelectedCheet}
 							/>
 						)}

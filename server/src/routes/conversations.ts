@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { Prisma, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import prisma from "../../prisma/prismaClient.js";
 import { IConversation } from "../../types/responses.js";
 
@@ -22,7 +22,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 
 	if (interlocutor) {
 		let unread = false;
-		for (let message of messages) {
+		for (const message of messages) {
 			if (message.recipientId === userId && !message.isRead && !message.isDeleted) {
 				unread = true;
 				break;
@@ -31,7 +31,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 		return [{ interlocutorId: interlocutor.uuid, interlocutorUsername: interlocutor.username, unread: unread }];
 	} else {
 		const conversations = new Map<string, IConversation>();
-		for (let message of messages) {
+		for (const message of messages) {
 			const otherUser = message.senderId === userId ? message.recipient : message.sender;
 			if (!conversations.has(otherUser.uuid)) {
 				conversations.set(otherUser.uuid, {
