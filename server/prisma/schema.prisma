@@ -71,7 +71,7 @@ model Message {
   isRead              Boolean     @default(false) @map(name: "is_read")
   isDeleted           Boolean     @default(false) @map(name:"is_deleted")
   createdAt           DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
-  updatedAt           DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "updated_at")
+  updatedAt           DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
 
   @@map("Messages")   
   @@index([createdAt])   

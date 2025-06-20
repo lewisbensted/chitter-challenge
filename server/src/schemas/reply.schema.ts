@@ -8,8 +8,8 @@ export const CreateReplySchema = z.object({
 		.min(5, "Reply too short - must be between 5 and 50 characters.")
 		.max(50, "Reply too long - must be between 5 and 50 characters."),
 	cheetId: z.string({ required_error: "Cheet ID not provided" }),
-	createdAt: z.date(),
-	updatedAt: z.date(),
+	createdAt: z.date().optional(),
+	updatedAt: z.date().optional(),
 });
 
 export const UpdateReplySchema = z.object({
@@ -17,5 +17,5 @@ export const UpdateReplySchema = z.object({
 		.string({ required_error: "Text not provided." })
 		.min(5, "Reply too short - must be between 5 and 50 characters.")
 		.max(50, "Reply too long - must be between 5 and 50 characters."),
-	updatedAt: z.date(),
+	updatedAt: z.date().optional(),
 });

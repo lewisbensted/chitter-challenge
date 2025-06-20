@@ -8,22 +8,24 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router({ mergeParams: true });
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const createSchema = isProduction ? CreateReplySchema.omit({ createdAt: true, updatedAt: true }) : CreateReplySchema;
+const updateSchema = isProduction ? UpdateReplySchema.omit({ updatedAt: true }) : UpdateReplySchema;
+
 export const replyExtension = Prisma.defineExtension({
 	query: {
 		reply: {
 			async create({ args, query }) {
-				if (args.data.text) {
-					args.data.text = args.data.text.trim();
-				}
-				args.data = await CreateReplySchema.parseAsync(args.data);
-				return query(args);
+				const parsedData = await createSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
+				return query({ ...args, data: parsedData });
 			},
 			async update({ args, query }) {
-				if (args.data.text) {
-					args.data.text = (args.data.text as string).trim();
-				}
-				args.data = await UpdateReplySchema.parseAsync(args.data);
-				return query(args);
+				const parsedData = await updateSchema.parseAsync({
+					...args.data,
+					text: (args.data.text as string)?.trim(),
+				});
+				return query({ ...args, data: parsedData });
 			},
 		},
 	},
@@ -59,16 +61,13 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
-	const date = new Date();
 	try {
 		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const newReply = await prisma.$extends(replyExtension).reply.create({
 			data: {
 				userId: req.session.user!.uuid,
 				text: (req as { body: { text: string } }).body.text,
-				cheetId: cheet.uuid,
-				createdAt: date,
-				updatedAt: date,
+				cheetId: cheet.uuid
 			},
 			include: { cheet: { omit: { id: true} }, user: { omit: { id: true } } },
 			omit: { id: true },
@@ -109,7 +108,7 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 						},
 						data: {
 							text: (req as { body: { text: string } }).body.text,
-							updatedAt: date,
+							
 						},
 						include: { cheet: { omit: { id: true } }, user: { omit: { id: true } } },
 						omit: { id: true },

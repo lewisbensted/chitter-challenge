@@ -7,8 +7,8 @@ export const CreateCheetSchema = z.object({
 		.string({ required_error: "Text not provided." })
 		.min(5, "Cheet too short - must be between 5 and 50 characters.")
 		.max(50, "Cheet too long - must be between 5 and 50 characters."),
-	createdAt: z.date(),
-	updatedAt: z.date(),
+	createdAt: z.date().optional(),
+	updatedAt: z.date().optional(),
 });
 
 export const UpdateCheetSchema = z.object({
@@ -16,5 +16,5 @@ export const UpdateCheetSchema = z.object({
 		.string({ required_error: "Text not provided." })
 		.min(5, "Cheet too short - must be between 5 and 50 characters.")
 		.max(50, "Cheet too long - must be between 5 and 50 characters."),
-	updatedAt: z.date(),
+	updatedAt: z.date().optional(),
 });

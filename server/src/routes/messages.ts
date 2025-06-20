@@ -8,27 +8,22 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router({ mergeParams: true });
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const createSchema = isProduction ? CreateMessageSchema.omit({ createdAt: true, updatedAt: true }) : CreateMessageSchema;
+const updateSchema = isProduction ? UpdateMessageSchema.omit({ updatedAt: true }) : UpdateMessageSchema;
+
+
 export const messageExtension = Prisma.defineExtension({
 	query: {
 		message: {
 			async create({ args, query }) {
-				if (args.data.text) {
-					args.data.text = args.data.text.trim();
-				}
-				args.data = await CreateMessageSchema.parseAsync(args.data);
-				return query(args);
+				const parsedData = await createSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
+				return query({ ...args, data: parsedData });
 			},
 			async update({ args, query }) {
-				if ("isDeleted" in args.data && Object.keys(args.data).length === 1) {
-					args.data.updatedAt = new Date();
-				} else {
-					if (args.data.text) {
-						args.data.text = (args.data.text as string).trim();
-					}
-					args.data = await UpdateMessageSchema.parseAsync(args.data);
-				}
-
-				return query(args);
+				const parsedData = await updateSchema.parseAsync({...args.data, text: (args.data.text as string)?.trim()});
+				return query({...args, data:parsedData});
 			},
 		},
 	},
@@ -108,8 +103,6 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 				senderId: req.session.user!.uuid,
 				recipientId: recipient.uuid,
 				text: (req as { body: { text: string } }).body.text,
-				createdAt: date,
-				updatedAt: date,
 			},
 			omit: { id: true },
 			include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
@@ -142,7 +135,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 					where: {
 						uuid: targetMessage.uuid,
 					},
-					data: { text: (req as { body: { text: string } }).body.text, updatedAt: date },
+					data: { text: (req as { body: { text: string } }).body.text },
 					omit: { id: true },
 					include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 				});
@@ -166,7 +159,7 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 			where: { uuid: req.params.messageId },
 		});
 		if (targetMessage.senderId === req.session.user!.uuid) {
-			const deletedMessage = await prisma.$extends(messageExtension).message.update({
+			const deletedMessage = await prisma.message.update({
 				where: {
 					uuid: targetMessage.uuid,
 				},

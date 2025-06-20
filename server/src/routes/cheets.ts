@@ -8,22 +8,24 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router({ mergeParams: true });
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const createSchema = isProduction ? CreateCheetSchema.omit({ createdAt: true, updatedAt: true }) : CreateCheetSchema;
+const updateSchema = isProduction ? UpdateCheetSchema.omit({ updatedAt: true }) : UpdateCheetSchema;
+
 export const cheetExtension = Prisma.defineExtension({
 	query: {
 		cheet: {
 			async create({ args, query }) {
-				if (args.data.text) {
-					args.data.text = args.data.text.trim();
-				}
-				args.data = await CreateCheetSchema.parseAsync(args.data);
-				return query(args);
+				const parsedData = await createSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
+				return query({ ...args, data: parsedData });
 			},
 			async update({ args, query }) {
-				if (args.data.text) {
-					args.data.text = (args.data.text as string).trim();
-				}
-				args.data = await UpdateCheetSchema.parseAsync(args.data);
-				return query(args);
+				const parsedData = await updateSchema.parseAsync({
+					...args.data,
+					text: (args.data.text as string)?.trim(),
+				});
+				return query({ ...args, data: parsedData });
 			},
 		},
 	},
@@ -76,7 +78,6 @@ router.get("/:cheetId", async (req: Request, res: Response) => {
 });
 
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
-	const date = new Date();
 	try {
 		if (req.params.userId) {
 			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -85,8 +86,6 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 			data: {
 				userId: req.session.user!.uuid,
 				text: (req as { body: { text: string } }).body.text,
-				createdAt: date,
-				updatedAt: date,
 			},
 			include: { user: { omit: { id: true } } },
 			omit: { id: true },
@@ -99,7 +98,6 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 });
 
 router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
-	const date = new Date();
 	try {
 		if (req.params.userId) {
 			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -123,8 +121,7 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 						uuid: targetCheet.uuid,
 					},
 					data: {
-						text: (req as { body: { text: string } }).body.text,
-						updatedAt: date,
+						text: (req as { body: { text: string } }).body.text
 					},
 					include: { user: { omit: { id: true } } },
 					omit: { id: true },

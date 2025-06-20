@@ -11,15 +11,13 @@ export const registerExtension = Prisma.defineExtension({
 	query: {
 		user: {
 			async create({ args, query }) {
-				if (args.data.firstName) {
-					args.data.firstName = args.data.firstName.trim();
-				}
-				if (args.data.lastName) {
-					args.data.lastName = args.data.lastName.trim();
-				}
-				args.data = await UserSchema.parseAsync(args.data);
-				args.data.password = bcrypt.hashSync(args.data.password, 5);
-				return query(args);
+				const parsedData = await UserSchema.parseAsync({
+					...args.data,
+					firstName: args.data.firstName?.trim(),
+					lastName: args.data.lastName?.trim(),
+				});
+				parsedData.password = await bcrypt.hash(parsedData.password, 5);
+				return query({ ...args, data: parsedData });
 			},
 		},
 	},
@@ -32,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
 				req as {
 					body: { firstName: string; lastName: string; username: string; email: string; password: string };
 				}
-			).body ,
+			).body,
 			omit: { id: true, password: true },
 		});
 		res.status(201).send(newUser);

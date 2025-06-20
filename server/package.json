@@ -7,11 +7,9 @@
     "scripts": {
         "migrate:dev": "dotenv -e ../.env.development -r dotenv-expand/config -- npx prisma migrate dev --name inititalise",
         "start:dev": "set NODE_ENV=development&& nodemon src/app.ts",
-
         "migrate:test": "dotenv -e ../.env.test -r dotenv-expand/config -- npx prisma migrate deploy",
         "start:test": "set NODE_ENV=test&& nodemon app.ts",
         "test": "dotenv -e ../.env.test vitest",
-
         "migrate:prod": "dotenv -e ../.env.production -r dotenv-expand/config -- npx prisma migrate deploy",
         "start:prod": "set NODE_ENV=production&& node --loader ts-node/esm app.ts"
     },
@@ -43,6 +41,6 @@
         "express": "^4.18.3",
         "express-mysql-session": "^3.0.2",
         "express-session": "^1.18.0",
-        "zod": "^3.22.4"
+        "zod": "^3.25.67"
     }
 }
