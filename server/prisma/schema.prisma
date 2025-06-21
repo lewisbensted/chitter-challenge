@@ -36,8 +36,8 @@ model Cheet {
   user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
   userId      String         @map(name: "user_id")
   text        String      @db.VarChar(50)
-  createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
-  updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
+  createdAt   DateTime    @default(now()) @map(name: "created_at")
+  updatedAt   DateTime    @updatedAt @map(name: "updated_at")
   hasReplies  Boolean     @default(false) @map(name: "has_replies")
   replies     Reply[]
 
@@ -53,8 +53,8 @@ model Reply {
   cheet       Cheet       @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
   cheetId     String         @map(name: "cheet_id")
   text        String      @db.VarChar(50)
-  createdAt   DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
-  updatedAt   DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
+  createdAt   DateTime    @default(now()) @map(name: "created_at")
+  updatedAt   DateTime    @updatedAt @map(name: "updated_at")
 
   @@map("Replies")
   @@index([createdAt])
@@ -70,8 +70,8 @@ model Message {
   text                String      @db.VarChar(200)
   isRead              Boolean     @default(false) @map(name: "is_read")
   isDeleted           Boolean     @default(false) @map(name:"is_deleted")
-  createdAt           DateTime    @default(dbgenerated("now()")) @db.DateTime() @map(name: "created_at")
-  updatedAt           DateTime    @default(dbgenerated("now() ON UPDATE now()")) @db.DateTime() @map(name: "updated_at")
+  createdAt           DateTime    @default(now()) @map(name: "created_at")
+  updatedAt           DateTime    @updatedAt @map(name: "updated_at")
 
   @@map("Messages")   
   @@index([createdAt])   

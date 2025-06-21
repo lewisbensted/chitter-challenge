@@ -80,16 +80,18 @@ const MessageModal: React.FC<Props> = ({
 	const [refresh, triggerRefresh] = useState<boolean>(false);
 
 	const isFirstRender = useRef(true);
+	const hasRefreshedMessages = useRef(false)
 	useEffect(() => {
 		if (isFirstRender.current) {
 			isFirstRender.current = false;
 			return;
 		}
-		if (!isOpen) return;
+		if (!isOpen || hasRefreshedMessages.current) return;
 		const load = async () => {
 			await fetchMessages(conversation.interlocutorId, (error) => {
 				handleErrors(error, "updating read messages.", setErrors);
 			});
+			hasRefreshedMessages.current=true
 		};
 		if (prevUnread) {
 			void load();
