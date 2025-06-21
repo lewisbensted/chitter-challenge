@@ -8,20 +8,15 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router({ mergeParams: true });
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const createSchema = isProduction ? CreateReplySchema.omit({ createdAt: true, updatedAt: true }) : CreateReplySchema;
-const updateSchema = isProduction ? UpdateReplySchema.omit({ updatedAt: true }) : UpdateReplySchema;
-
 export const replyExtension = Prisma.defineExtension({
 	query: {
 		reply: {
 			async create({ args, query }) {
-				const parsedData = await createSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
+				const parsedData = await CreateReplySchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
 				return query({ ...args, data: parsedData });
 			},
 			async update({ args, query }) {
-				const parsedData = await updateSchema.parseAsync({
+				const parsedData = await UpdateReplySchema.parseAsync({
 					...args.data,
 					text: (args.data.text as string)?.trim(),
 				});

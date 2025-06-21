@@ -8,21 +8,15 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router({ mergeParams: true });
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const createSchema = isProduction ? CreateMessageSchema.omit({ createdAt: true, updatedAt: true }) : CreateMessageSchema;
-const updateSchema = isProduction ? UpdateMessageSchema.omit({ updatedAt: true }) : UpdateMessageSchema;
-
-
 export const messageExtension = Prisma.defineExtension({
 	query: {
 		message: {
 			async create({ args, query }) {
-				const parsedData = await createSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
+				const parsedData = await CreateMessageSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
 				return query({ ...args, data: parsedData });
 			},
 			async update({ args, query }) {
-				const parsedData = await updateSchema.parseAsync({...args.data, text: (args.data.text as string)?.trim()});
+				const parsedData = await UpdateMessageSchema.parseAsync({...args.data, text: (args.data.text as string)?.trim()});
 				return query({...args, data:parsedData});
 			},
 		},

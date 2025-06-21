@@ -18,7 +18,7 @@ A mock Twitter app where users are able to post "cheets" (messages up to 50 char
 2. Install dependencies from the project [root directory](/):
 
 ```sh
-  npm install
+  npm install-all
 ```
 
 3. Create _.env_ files for the respective environments in the [root directory](/):

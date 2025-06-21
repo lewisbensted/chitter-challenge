@@ -8,20 +8,15 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router({ mergeParams: true });
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const createSchema = isProduction ? CreateCheetSchema.omit({ createdAt: true, updatedAt: true }) : CreateCheetSchema;
-const updateSchema = isProduction ? UpdateCheetSchema.omit({ updatedAt: true }) : UpdateCheetSchema;
-
 export const cheetExtension = Prisma.defineExtension({
 	query: {
 		cheet: {
 			async create({ args, query }) {
-				const parsedData = await createSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
+				const parsedData = await CreateCheetSchema.parseAsync({ ...args.data, text: args.data.text?.trim() });
 				return query({ ...args, data: parsedData });
 			},
 			async update({ args, query }) {
-				const parsedData = await updateSchema.parseAsync({
+				const parsedData = await UpdateCheetSchema.parseAsync({
 					...args.data,
 					text: (args.data.text as string)?.trim(),
 				});
