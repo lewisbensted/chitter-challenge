@@ -10,8 +10,6 @@ export const fetchCheets = async (userId?: string, cursor?: string, take?: numbe
 	take = isNaN(take!) ? 10 : take;
 
 	const cheets = await prisma.cheet.findMany({
-		include: { user: { omit: { id: true } }, cheetStatus: true },
-		omit: { id: true },
 		where: {
 			user: { uuid: userId },
 		},
@@ -38,19 +36,6 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/:cheetId", async (req: Request, res: Response) => {
-	try {
-		const cheet = await prisma.cheet.findUniqueOrThrow({
-			where: { uuid: req.params.cheetId },
-			include: { user: { omit: { id: true } }, cheetStatus: true },
-			omit: { id: true },
-		});
-		res.status(200).send(cheet);
-	} catch (error) {
-		console.error("Error retrieving cheet from the database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-});
 
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
 	try {
@@ -60,18 +45,15 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 		const newCheet = await prisma.cheet.create({
 			data: {
 				userId: req.session.user!.uuid,
-				text: (req as { body: { text: string } }).body.text
+				text: (req as { body: { text: string } }).body.text,
 			},
-			include: {  user: { omit: { id: true } } },
-			omit: { id: true },
 		});
 		const status = await prisma.cheetStatus.create({
 			data: {
 				cheetId: newCheet.uuid,
 			},
 		});
-		
-		res.status(201).send({...newCheet, cheetStatus: status});
+		res.status(201).send({ ...newCheet, cheetStatus: status });
 	} catch (error) {
 		console.error("Error adding cheet to the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -85,8 +67,8 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 		}
 		const targetCheet = await prisma.cheet.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
-			include: { user: { omit: { id: true } }, cheetStatus: true },
-			omit: { id: true },
+			include: {user: true, cheetStatus:true}
+
 		});
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
@@ -104,8 +86,6 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 					data: {
 						text: (req as { body: { text: string } }).body.text,
 					},
-					include: { user: { omit: { id: true } }, cheetStatus: true },
-					omit: { id: true },
 				});
 				return res.status(200).send(updatedCheet);
 			} else {

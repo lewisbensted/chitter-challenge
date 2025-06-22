@@ -16,7 +16,6 @@ router.post("/", async (req: Request, res: Response) => {
 					body: { firstName: string; lastName: string; username: string; email: string; password: string };
 				}
 			).body,
-			omit: { id: true, password: true },
 		});
 		res.status(201).send(newUser);
 	} catch (error) {

@@ -8,8 +8,7 @@ const router = express.Router({ mergeParams: true });
 
 export const fetchMessages = async (userId: string, interlocutorId: string) => {
 	const messages = await prisma.message.findMany({
-		omit: { id: true },
-		include: { messageStatus: true, sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
+		include: { messageStatus: true },
 		where: {
 			OR: [
 				{ senderId: userId, recipientId: interlocutorId },
@@ -37,7 +36,7 @@ router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 		const unreadMessages = await prisma.message.findFirst({
 			where: { recipientId: req.session.user!.uuid, messageStatus: { isRead: false, isDeleted: false } },
 		});
-		console.log(unreadMessages)
+		console.log(unreadMessages);
 		res.status(200).send(!!unreadMessages);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
@@ -80,8 +79,7 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 				recipientId: recipient.uuid,
 				text: (req as { body: { text: string } }).body.text,
 			},
-			omit: { id: true },
-			include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
+			
 		});
 		const status = await prisma.messageStatus.create({
 			data: {
@@ -100,8 +98,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await prisma.message.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
-			omit: { id: true },
-			include: { messageStatus: true, sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
+			include: { messageStatus: true, sender: true, recipient: true },
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			if (targetMessage.messageStatus?.isRead) {
@@ -116,8 +113,6 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 						uuid: targetMessage.uuid,
 					},
 					data: { text: (req as { body: { text: string } }).body.text },
-					omit: { id: true },
-					include: { messageStatus: true, sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 				});
 				return res.status(200).send(updatedMessage);
 			} else {
@@ -137,8 +132,9 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await prisma.message.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
+			include: {sender: true}
 		});
-		if (targetMessage.senderId === req.session.user!.uuid) {
+		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			const deletedMessage = await prisma.messageStatus.update({
 				where: {
 					messageId: targetMessage.uuid,
