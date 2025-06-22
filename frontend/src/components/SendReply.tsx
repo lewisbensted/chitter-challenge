@@ -54,11 +54,13 @@ const SendReply: React.FC<Props> = ({
 			if (repliesLengthRef.current === 0) {
 				setSelectedCheet((cheet) => {
 					if (!cheet) return cheet;
-					return { ...cheet, hasReplies: true };
+					return { ...cheet, cheetStatus: { hasReplies: true } };
 				});
 
 				setCheets((cheets) => {
-					const updatedCheets = cheets.map((cheet) => (cheet.uuid === selectedCheet.uuid ? { ...cheet, hasReplies: true } : cheet));
+					const updatedCheets = cheets.map((cheet) =>
+						cheet.uuid === selectedCheet.uuid ? { ...cheet, cheetStatus: { hasReplies: true } } : cheet
+					);
 					return updatedCheets;
 				});
 			}

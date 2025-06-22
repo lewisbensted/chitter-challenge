@@ -3,7 +3,7 @@ export interface IUser {
 	username: string;
 	firstName: string;
 	lastName: string;
-	email: string
+	email: string;
 }
 
 export interface ICheet {
@@ -12,7 +12,7 @@ export interface ICheet {
 	createdAt: string;
 	updatedAt: string;
 	user: IUser;
-	hasReplies: boolean;
+	cheetStatus: { hasReplies: boolean };
 }
 
 export interface IReply {
@@ -31,13 +31,17 @@ export interface IMessage {
 	text: string;
 	createdAt: string;
 	updatedAt: string;
-	isRead: boolean;
-	isDeleted: boolean
+	messageStatus: { isRead: boolean; isDeleted: boolean };
 }
 
 export interface IConversation {
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: boolean;
-	latestMessage?: { text: string; senderId: string; isRead: boolean; createdAt: string, isDeleted: boolean };
+	latestMessage?: {
+		text: string;
+		senderId: string;
+		createdAt: string;
+		messageStatus: { isRead: boolean; isDeleted: boolean };
+	};
 }

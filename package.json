@@ -14,17 +14,17 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/lewisbensted/chitter.git"
+		"url": "https://github.com/lewisbensted/chitter-challenge.git"
 	},
 	"author": "Lewis Bensted",
 	"license": "ISC",
-	"homepage": "https://github.com/lewisbensted/chitter#readme",
+	"homepage": "https://github.com/lewisbensted/chitter-challenge#readme",
 	"engines": {
 		"node": ">=20.17.0",
 		"npm": ">=10"
 	},
 	"dependencies": {
-		"concurrently": "^8.2.2",
+		"concurrently": "^9.2.0",
 		"dotenv-cli": "^7.4.2",
 		"dotenv-expand": "^11.0.6"
 	},

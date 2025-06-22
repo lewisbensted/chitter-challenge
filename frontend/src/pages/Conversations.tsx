@@ -38,6 +38,7 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		if (!userId) return;
+		console.log('here')
 		void fetchData(
 			(error) => {
 				handleErrors(error, "fetching conversations", setErrors);

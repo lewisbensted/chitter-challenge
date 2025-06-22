@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true });
 
 export const fetchConversations = async (userId: string, interlocutor?: User) => {
 	const messages = await prisma.message.findMany({
-		include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
+		include: { messageStatus: true, sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
 		where: {
 			OR: [
 				{ senderId: userId, recipientId: interlocutor ? interlocutor.uuid : undefined },
@@ -23,7 +23,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 	if (interlocutor) {
 		let unread = false;
 		for (const message of messages) {
-			if (message.recipientId === userId && !message.isRead && !message.isDeleted) {
+			if (message.recipientId === userId && !message.messageStatus?.isRead && !message.messageStatus?.isDeleted) {
 				unread = true;
 				break;
 			}
@@ -39,16 +39,18 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 					interlocutorUsername: otherUser.username,
 					unread: false,
 					latestMessage: {
-						text: message.isDeleted ? null : message.text,
-						isRead: message.isRead,
-						isDeleted: message.isDeleted,
+						text: message.messageStatus?.isDeleted ? null : message.text,
 						senderId: message.sender.uuid,
 						createdAt: message.createdAt,
+						messageStatus: {
+							isRead: message.messageStatus?.isRead ?? false,
+							isDeleted: message.messageStatus?.isDeleted ?? false,
+						},
 					},
 				});
 			}
 
-			if (!message.isRead && message.recipientId === userId && !message.isDeleted) {
+			if (!message.messageStatus?.isRead && message.recipientId === userId && !message.messageStatus?.isDeleted) {
 				const conversation = conversations.get(otherUser.uuid);
 				if (!conversation?.unread) {
 					conversation!.unread = true;

@@ -51,10 +51,10 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
 							</Grid2>
 							<Grid2 size={11}>
 								<Typography
-									fontStyle={conversation.latestMessage?.isDeleted ? "italic" : "none"}
+									fontStyle={conversation.latestMessage?.messageStatus.isDeleted ? "italic" : "none"}
 									variant="body2"
 								>
-									{conversation.latestMessage?.isDeleted
+									{conversation.latestMessage?.messageStatus.isDeleted
 										? conversation.latestMessage.senderId === userId
 											? "You deleted this message."
 											: `${conversation.interlocutorUsername} deleted this message`
@@ -62,12 +62,12 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
 								</Typography>
 							</Grid2>
 							<Grid2 size={1} display="flex" justifyContent="flex-end">
-								{conversation.latestMessage?.isDeleted ? null : conversation.latestMessage?.senderId ===
+								{conversation.latestMessage?.messageStatus.isDeleted ? null : conversation.latestMessage?.senderId ===
 								  userId ? (
-										conversation.latestMessage?.isRead ? (
+										conversation.latestMessage?.messageStatus.isRead ? (
 											<Done fontSize="small" color="primary" />
 										) : null
-									) : conversation.latestMessage?.isRead ? null : (
+									) : conversation.latestMessage?.messageStatus.isRead ? null : (
 										<PriorityHigh fontSize="small" color="primary" />
 									)}
 							</Grid2>

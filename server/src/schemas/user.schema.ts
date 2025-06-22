@@ -14,32 +14,36 @@ export const UserSchema = z.object({
 	uuid: z.string().optional(),
 	firstName: z
 		.string({ required_error: "First name not provided." })
+		.trim()
 		.min(2, "First name too short. Must be at least 2 characters.")
 		.max(20, "First name too long. Must be less than 20 characters.")
 		.regex(firstNameExp1, "First name cannot contain numbers or special characters.")
 		.regex(firstNameExp2, "Invalid first name format."),
 	lastName: z
 		.string({ required_error: "Last name not provided." })
+		.trim()
 		.min(2, "Last name too short. Must be at least 2 characters.")
 		.max(30, "Last name too long. Must be less than 20 characters.")
 		.regex(lastNameExp1, "Last name cannot contain numbers or special characters.")
 		.regex(lastNameExp2, "Invalid last name format."),
 	email: z
 		.string({ required_error: "Email address not provided." })
+		.trim()
 		.email("Invalid email address.")
 		.refine(async (email) => {
 			const user = await prisma.user.findUnique({ where: { email: email } });
-			return user ? false : true;
+			return !user;
 		}, "Email address already taken."),
 	username: z
 		.string({ required_error: "Username not provided." })
+		.trim()
 		.min(5, "Username too short. Must be at least 5 characters.")
 		.max(30, "Username too long. Must be less than 30 characters.")
 		.refine(async (username) => {
 			const user = await prisma.user.findUnique({
 				where: { username: username },
 			});
-			return user ? false : true;
+			return !user;
 		}, "Username already taken."),
 	password: z
 		.string({ required_error: "Password not provided." })

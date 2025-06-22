@@ -110,7 +110,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const createdAt = new Date(cheet.createdAt);
 		const updatedAt = new Date(cheet.updatedAt);
 		const isEdited = updatedAt > createdAt;
-		const isEditDisabled = isComponentLoading || cheet.hasReplies || createdAt < oneHourAgo;
+		const isEditDisabled = isComponentLoading || cheet.cheetStatus.hasReplies || createdAt < oneHourAgo;
 
 		return (
 			<ThemeProvider theme={theme}>

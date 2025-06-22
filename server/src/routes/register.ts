@@ -7,25 +7,10 @@ import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 
 const router = express.Router();
-export const registerExtension = Prisma.defineExtension({
-	query: {
-		user: {
-			async create({ args, query }) {
-				const parsedData = await UserSchema.parseAsync({
-					...args.data,
-					firstName: args.data.firstName?.trim(),
-					lastName: args.data.lastName?.trim(),
-				});
-				parsedData.password = await bcrypt.hash(parsedData.password, 5);
-				return query({ ...args, data: parsedData });
-			},
-		},
-	},
-});
 
 router.post("/", async (req: Request, res: Response) => {
 	try {
-		const newUser = await prisma.$extends(registerExtension).user.create({
+		const newUser = await prisma.user.create({
 			data: (
 				req as {
 					body: { firstName: string; lastName: string; username: string; email: string; password: string };

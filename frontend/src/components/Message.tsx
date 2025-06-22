@@ -107,7 +107,7 @@ const Message: React.FC<Props> = ({
 					<Grid2 size={6}>
 						<CardContent>
 							<Grid2 container>
-								<Grid2 size={message.isRead && userId === message.sender.uuid ? 11 : 12}>
+								<Grid2 size={message.messageStatus.isRead && userId === message.sender.uuid ? 11 : 12}>
 									{isEditing ? (
 										<Box
 											component="form"
@@ -128,11 +128,11 @@ const Message: React.FC<Props> = ({
 											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 											textAlign={message.sender.uuid === userId ? "left" : "right"}
 											fontWeight={
-												!message.isRead && message.recipient.uuid === userId ? "bold" : ""
+												!message.messageStatus.isRead && message.recipient.uuid === userId ? "bold" : ""
 											}
-											fontStyle={message.isDeleted ? "italic" : "none"}
+											fontStyle={message.messageStatus.isDeleted ? "italic" : "none"}
 										>
-											{message.isDeleted
+											{message.messageStatus.isDeleted
 												? message.sender.uuid === userId
 													? "You deleted this message."
 													: `${message.sender.username} deleted this message.`
@@ -140,7 +140,7 @@ const Message: React.FC<Props> = ({
 										</Typography>
 									)}
 								</Grid2>
-								{message.sender.uuid === userId && message.isRead ? (
+								{message.sender.uuid === userId && message.messageStatus.isRead ? (
 									<Grid2 size={1} display="flex" justifyContent="center">
 										<Done fontSize="small" color="primary" />
 									</Grid2>
@@ -151,7 +151,7 @@ const Message: React.FC<Props> = ({
 										justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 										textAlign={message.sender.uuid === userId ? "left" : "right"}
 									>
-										{isEdited && !message.isDeleted ? (
+										{isEdited && !message.messageStatus.isDeleted ? (
 											<Edit fontSize="small" color="primary" />
 										) : null}
 										{formatDate(isEdited ? updatedAt : createdAt)}
@@ -161,7 +161,7 @@ const Message: React.FC<Props> = ({
 						</CardContent>
 					</Grid2>
 
-					{message.sender.uuid === userId && !message.isDeleted ? (
+					{message.sender.uuid === userId && !message.messageStatus.isDeleted ? (
 						<Grid2 size={1.5} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>
@@ -170,7 +170,7 @@ const Message: React.FC<Props> = ({
 											<Box paddingTop={1.3} paddingLeft={1.4}>
 												<CircularProgress size="1.3rem" thickness={6} />
 											</Box>
-										) : message.isRead ? null : isEditing ? (
+										) : message.messageStatus.isRead ? null : isEditing ? (
 											<IconButton
 												type="submit"
 												disabled={isComponentLoading}
@@ -196,7 +196,7 @@ const Message: React.FC<Props> = ({
 											<Box paddingTop={1.3} paddingLeft={1}>
 												<CircularProgress size="1.3rem" thickness={6} />
 											</Box>
-										) : message.isRead ? null : (
+										) : message.messageStatus.isRead ? null : (
 											<IconButton
 												color="primary"
 												disabled={isComponentLoading}

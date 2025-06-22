@@ -8,6 +8,7 @@ export const CreateReplySchema = z
 		userId: z.string({ required_error: "User ID not provided." }),
 		text: z
 			.string({ required_error: "Text not provided." })
+			.trim()
 			.min(5, "Reply too short - must be between 5 and 50 characters.")
 			.max(50, "Reply too long - must be between 5 and 50 characters."),
 		cheetId: z.string({ required_error: "Cheet ID not provided" }),
@@ -21,6 +22,7 @@ export const UpdateReplySchema = z
 	.object({
 		text: z
 			.string({ required_error: "Text not provided." })
+			.trim()
 			.min(5, "Reply too short - must be between 5 and 50 characters.")
 			.max(50, "Reply too long - must be between 5 and 50 characters."),
 		updatedAt: z.date().optional(),

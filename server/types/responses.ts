@@ -30,12 +30,17 @@ export interface IMessage {
 	createdAt: string;
 	updatedAt: string;
 	isRead: boolean;
-	isDeleted: boolean
+	isDeleted: boolean;
 }
 
 export interface IConversation {
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: boolean;
-	latestMessage?: { text: string | null; senderId: string; isRead: boolean, createdAt: Date, isDeleted: boolean };
+	latestMessage?: {
+		text: string | null;
+		senderId: string;
+		createdAt: Date;
+		messageStatus: { isRead: boolean; isDeleted: boolean };
+	};
 }
