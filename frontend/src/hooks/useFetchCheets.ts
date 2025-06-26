@@ -11,7 +11,7 @@ interface UseFetchCheetsReturn {
 	cheetsError: string;
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	fetchCheets: (handleError: (error: unknown) => void, userId?: string) => Promise<void>;
+	fetchCheets: (handleError: (error: unknown) => void, take:number, userId?: string) => Promise<void>;
 	hasNextPage: boolean;
 }
 
@@ -23,9 +23,8 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const cursorRef = useRef<string>();
 	const cheetsLengthRef = useRef<number>(0);
 
-	const take = 5;
-
-	const fetchCheets = useCallback(async (handleError: (error: unknown) => void, userId?: string) => {
+	const fetchCheets = useCallback(async (handleError: (error: unknown) => void, take:number,userId?: string) => {
+		
 		try {
 			setCheetsLoading(true);
 

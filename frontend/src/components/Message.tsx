@@ -30,6 +30,8 @@ interface Props {
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	updateUnreadRef: React.MutableRefObject<boolean>;
+	userPageId?: string
 }
 
 const Message: React.FC<Props> = ({
@@ -41,6 +43,8 @@ const Message: React.FC<Props> = ({
 	isComponentLoading,
 	setComponentLoading,
 	toggleReloadTrigger,
+	updateUnreadRef,
+	userPageId
 }) => {
 	const { register, handleSubmit } = useForm<{ text: string }>();
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
@@ -87,7 +91,12 @@ const Message: React.FC<Props> = ({
 			);
 
 			setMessages(updatedMessages);
-			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
+			updateUnreadRef.current = false;
+
+			const isLastMessage = messages[messages.length - 1].uuid === message.uuid ? true : false;
+			if (isLastMessage && !userPageId) {
+				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
+			}
 		} catch (error) {
 			handleErrors(error, "deleting the message", setErrors);
 		} finally {
@@ -128,7 +137,9 @@ const Message: React.FC<Props> = ({
 											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 											textAlign={message.sender.uuid === userId ? "left" : "right"}
 											fontWeight={
-												!message.messageStatus.isRead && message.recipient.uuid === userId ? "bold" : ""
+												!message.messageStatus.isRead && message.recipient.uuid === userId
+													? "bold"
+													: ""
 											}
 											fontStyle={message.messageStatus.isDeleted ? "italic" : "none"}
 										>

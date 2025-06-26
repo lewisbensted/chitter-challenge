@@ -36,7 +36,6 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		if (req.params.userId) {
@@ -67,8 +66,7 @@ router.put("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 		}
 		const targetCheet = await prisma.cheet.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
-			include: {user: true, cheetStatus:true}
-
+			include: { user: true, cheetStatus: true },
 		});
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
@@ -105,8 +103,11 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 		if (req.params.userId) {
 			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
-		const targetCheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-		if (targetCheet.userId === req.session.user!.uuid) {
+		const targetCheet = await prisma.cheet.findUniqueOrThrow({
+			where: { uuid: req.params.cheetId },
+			include: { user: true },
+		});
+		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			await prisma.cheet.delete({
 				where: {
 					uuid: targetCheet.uuid,

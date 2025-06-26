@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useSt
 import Layout from "./Layout";
 import SendCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
@@ -33,7 +33,8 @@ const Homepage: React.FC = () => {
 		hasNextPage,
 	} = useFetchCheets();
 
-	const { isUnreadMessages, isConversationsLoading, setConversationsLoading, fetchData } = useFetchConversations();
+	const { isUnreadMessages, isConversationsLoading, fetchUnread, setConversationsLoading } =
+		useFetchConversations();
 
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
@@ -50,15 +51,25 @@ const Homepage: React.FC = () => {
 			setConversationsLoading(false);
 			return;
 		}
-		void fetchData((error) => {
-			handleErrors(error, "fetching messages", setErrors);
-		}, setComponentLoading);
-	}, [userId, fetchData, setConversationsLoading]);
+		const getUnread = async () => {
+			try {
+				await fetchUnread();
+			} catch (error) {
+				logErrors(error);
+			} finally {
+				setConversationsLoading(false);
+			}
+		};
+		void getUnread();
+	}, [userId, setConversationsLoading]);
 
 	useEffect(() => {
-		void fetchCheets((error) => {
-			handleErrors(error, "loading cheets", setErrors);
-		});
+		void fetchCheets(
+			(error) => {
+				handleErrors(error, "loading cheets", setErrors);
+			},
+			page === 0 ? 10 : 5
+		);
 	}, [page, fetchCheets]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);

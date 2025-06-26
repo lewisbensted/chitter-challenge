@@ -57,9 +57,13 @@ const CheetModal: React.FC<Props> = ({
 
 	useEffect(() => {
 		if (isOpen) {
-			void fetchReplies(cheet.uuid, (error) => {
-				handleErrors(error, "loading cheets", setErrors);
-			});
+			void fetchReplies(
+				cheet.uuid,
+				(error) => {
+					handleErrors(error, "loading cheets", setErrors);
+				},
+				page === 0 ? 10 : 5
+			);
 		}
 	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
 

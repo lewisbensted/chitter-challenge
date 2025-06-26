@@ -13,8 +13,6 @@ interface Props {
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	reloadTrigger: boolean;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 }
 

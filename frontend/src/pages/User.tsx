@@ -21,7 +21,7 @@ const User: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [username, setUsername] = useState<string>();
 	const [errors, setErrors] = useState<string[]>([]);
-	const [reloadMessagesTrigger, toggleReloadMessagesTrigger] = useState<boolean>(false);
+	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [reloadCheetsTrigger, toggleReloadCheetsTrigger] = useState<boolean>(false);
 	const [isUserLoading, setUserLoading] = useState(true);
@@ -43,14 +43,8 @@ const User: React.FC = () => {
 		fetchCheets,
 	} = useFetchCheets();
 
-	const {
-		isUnreadMessages,
-		conversations,
-		isConversationsLoading,
-		setConversations,
-		setConversationsLoading,
-		fetchData,
-	} = useFetchConversations();
+	const { isUnreadMessages, conversations, isConversationsLoading, setConversations, setConversationsLoading, fetchUnread, fetchConversations } =
+		useFetchConversations();
 
 	useEffect(() => {
 		void validateUser((error) => {
@@ -81,27 +75,54 @@ const User: React.FC = () => {
 
 	useEffect(() => {
 		if (!id) return;
-		void fetchCheets((error) => {
-			handleErrors(error, "updating cheets", setErrors);
-		}, id);
+		void fetchCheets(
+			(error) => {
+				handleErrors(error, "updating cheets", setErrors);
+			},
+			page === 0 ? 10 : 5,
+			id
+		);
 	}, [id, page, fetchCheets]);
 
+	// useEffect(() => {
+	// 	if (userId === undefined) {
+	// 		return;
+	// 	} else if (userId === null) {
+	// 		setConversationsLoading(false);
+	// 		return;
+	// 	}
+
+	// 	void fetchData(
+	// 		(error) => {
+	// 			handleErrors(error, "fetching messages", setErrors);
+	// 		},
+	// 		setComponentLoading,
+	// 		{ id: id }
+	// 	);
+	// }, [id, userId, reloadMessagesTrigger, navigate, setConversationsLoading, fetchData]);
+
+		const updateUnreadRef = useRef<boolean>(true);
+		
 	useEffect(() => {
-		if (userId === undefined) {
+		if (!userId) {
 			return;
 		} else if (userId === null) {
 			setConversationsLoading(false);
 			return;
 		}
-
-		void fetchData(
-			(error) => {
-				handleErrors(error, "fetching messages", setErrors);
-			},
-			setComponentLoading,
-			{ id: id }
-		);
-	}, [id, userId, reloadMessagesTrigger, navigate, setConversationsLoading, fetchData]);
+		const getConversations = async () => {
+			try {
+				setComponentLoading(true);
+				await Promise.all([updateUnreadRef.current ? fetchUnread() : null, fetchConversations(id)]);
+			} catch (error) {
+				handleErrors(error, 'fetching conversations', setErrors);
+			} finally {
+				setComponentLoading(false);
+				setConversationsLoading(false);
+			}
+		};
+		void getConversations();
+	}, [userId, reloadConversationsTrigger]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
@@ -162,8 +183,10 @@ const User: React.FC = () => {
 									setConversations={() => {
 										setConversations(conversations);
 									}}
-									reloadTrigger={reloadMessagesTrigger}
-									toggleReloadTrigger={toggleReloadMessagesTrigger}
+									reloadTrigger={reloadConversationsTrigger}
+									toggleReloadTrigger={toggleConversationsTrigger}
+									updateUnreadRef={updateUnreadRef}
+									
 								/>
 							)}
 						</Typography>

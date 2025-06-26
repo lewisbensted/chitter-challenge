@@ -101,10 +101,10 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 	try {
 		await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const targetReply = await prisma.reply.findUniqueOrThrow({
-			include: { cheet: true },
+			include: { cheet: true, user: true },
 			where: { uuid: req.params.replyId },
 		});
-		if (targetReply.userId === req.session.user!.uuid) {
+		if (targetReply.user.uuid === req.session.user!.uuid) {
 			if (targetReply.cheet.uuid === req.params.cheetId) {
 				await prisma.reply.delete({
 					where: {

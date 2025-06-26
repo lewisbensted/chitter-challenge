@@ -102,7 +102,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 		return (
 			<ThemeProvider theme={theme}>
 				<Card ref={ref}>
-					<Grid2 container>
+					<Grid2 container >
 						<Grid2 size={userId ? 10.5 : 12}>
 							<CardContent>
 								<Grid2 container>

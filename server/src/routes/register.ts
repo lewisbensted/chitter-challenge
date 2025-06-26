@@ -1,8 +1,5 @@
 import express, { Request, Response } from "express";
-import { Prisma } from "@prisma/client";
-import { UserSchema } from "../schemas/user.schema.js";
 import { ZodError } from "zod";
-import bcrypt from "bcrypt";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 

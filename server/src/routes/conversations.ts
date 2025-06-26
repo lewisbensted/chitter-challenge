@@ -10,11 +10,11 @@ const router = express.Router({ mergeParams: true });
 
 export const fetchConversations = async (userId: string, interlocutor?: User) => {
 	const messages = await prisma.message.findMany({
-		include: { messageStatus: true, sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
+		include: { messageStatus: true, sender: true, recipient: true },
 		where: {
 			OR: [
-				{ senderId: userId, recipientId: interlocutor ? interlocutor.uuid : undefined },
-				{ recipientId: userId, senderId: interlocutor ? interlocutor.uuid : undefined },
+				{ sender: { uuid: userId }, recipient: interlocutor ? { uuid: interlocutor.uuid } : undefined },
+				{ recipient: { uuid: userId }, sender: interlocutor ? { uuid: interlocutor.uuid } : undefined },
 			],
 		},
 		orderBy: { createdAt: "desc" },
@@ -23,7 +23,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 	if (interlocutor) {
 		let unread = false;
 		for (const message of messages) {
-			if (message.recipientId === userId && !message.messageStatus?.isRead && !message.messageStatus?.isDeleted) {
+			if (message.recipient.uuid === userId && !message.messageStatus?.isRead && !message.messageStatus?.isDeleted) {
 				unread = true;
 				break;
 			}
@@ -32,7 +32,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 	} else {
 		const conversations = new Map<string, IConversation>();
 		for (const message of messages) {
-			const otherUser = message.senderId === userId ? message.recipient : message.sender;
+			const otherUser = message.sender.uuid === userId ? message.recipient : message.sender;
 			if (!conversations.has(otherUser.uuid)) {
 				conversations.set(otherUser.uuid, {
 					interlocutorId: otherUser.uuid,
@@ -50,7 +50,11 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 				});
 			}
 
-			if (!message.messageStatus?.isRead && message.recipientId === userId && !message.messageStatus?.isDeleted) {
+			if (
+				!message.messageStatus?.isRead &&
+				message.recipient.uuid === userId &&
+				!message.messageStatus?.isDeleted
+			) {
 				const conversation = conversations.get(otherUser.uuid);
 				if (!conversation?.unread) {
 					conversation!.unread = true;
@@ -62,6 +66,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 };
 
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
+	console.log("get convos");
 	try {
 		const conversations = await fetchConversations(req.session.user!.uuid);
 		res.status(200).send(conversations);
@@ -72,6 +77,7 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 });
 
 router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
+	console.log("get convo (singular)");
 	try {
 		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		const conversation = await fetchConversations(req.session.user!.uuid, user);

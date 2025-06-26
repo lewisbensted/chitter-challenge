@@ -1,8 +1,8 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import Conversation from "../components/Conversation";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useValidateUser from "../hooks/useValidateUser";
@@ -13,7 +13,7 @@ import MessageModal from "../components/MessageModal";
 const Conversations: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [errors, setErrors] = useState<string[]>([]);
-	const [reloadTrigger, toggleReloadTrigger] = useState<boolean>(false);
+	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
@@ -24,7 +24,9 @@ const Conversations: React.FC = () => {
 		conversationsError,
 		setConversationsError,
 		setConversations,
-		fetchData,
+		fetchConversations,
+		fetchUnread,
+		setConversationsLoading,
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -36,16 +38,24 @@ const Conversations: React.FC = () => {
 		);
 	}, [validateUser]);
 
+	const updateUnreadRef = useRef<boolean>(true);
+
 	useEffect(() => {
 		if (!userId) return;
-		void fetchData(
-			(error) => {
-				handleErrors(error, "fetching conversations", setErrors);
-			},
-			setComponentLoading,
-			{}
-		);
-	}, [userId, reloadTrigger, setConversationsError, fetchData]);
+		const getConversations = async () => {
+			try {
+				setComponentLoading(true);
+				await Promise.all([updateUnreadRef.current ? fetchUnread() : null, fetchConversations()]);
+			} catch (error) {
+				logErrors(error);
+				setConversationsError("An unexpected error occured while loading conversations.");
+			} finally {
+				setComponentLoading(false);
+				setConversationsLoading(false);
+			}
+		};
+		void getConversations();
+	}, [userId, reloadConversationsTrigger, setConversationsError]);
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
 
@@ -85,8 +95,6 @@ const Conversations: React.FC = () => {
 										isComponentLoading={isComponentLoading}
 										setComponentLoading={setComponentLoading}
 										setConversations={setConversations}
-										reloadTrigger={reloadTrigger}
-										toggleReloadTrigger={toggleReloadTrigger}
 										setSelectedConversation={setSelectedConversation}
 									/>
 								))}
@@ -105,9 +113,9 @@ const Conversations: React.FC = () => {
 							setSelectedConversation(null);
 						}}
 						setConversations={setConversations}
-						reloadTrigger={reloadTrigger}
-						toggleReloadTrigger={toggleReloadTrigger}
+						toggleReloadTrigger={toggleConversationsTrigger}
 						onUserPage={false}
+						updateUnreadRef={updateUnreadRef}
 					/>
 				)}
 			</Box>

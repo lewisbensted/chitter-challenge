@@ -12,11 +12,13 @@ interface UseFetchConversationsReturn {
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
-	fetchData: (
-		handleError: (error: unknown) => void,
-		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
-		conversationParams?: { id?: string }
-	) => Promise<void>;
+	// fetchData: (
+	// 	handleError: (error: unknown) => void,
+	// 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
+	// 	conversationParams?: { id?: string }
+	// ) => Promise<void>;
+	fetchUnread : () => void,
+	fetchConversations: (id?:string) => void,
 	
 }
 
@@ -27,7 +29,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [conversationsError, setConversationsError] = useState<string>("");
 
 
-	const fetchUnreadMessages = async () => {
+	const fetchUnread = async () => {
 		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
 		setUnreadMessages(res.data);
 	};
@@ -39,31 +41,31 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversations(res.data);
 	};
 
-	const fetchData = useCallback(
-		async (
-			handleError: (error: unknown) => void,
-			setComponentLoading: (arg: boolean) => void,
-			conversationParams?: { id?: string }
-		) => {
-			const { id } = conversationParams ?? {};
+	// const fetchData = useCallback(
+	// 	async (
+	// 		handleError: (error: unknown) => void,
+	// 		setComponentLoading: (arg: boolean) => void,
+	// 		conversationParams?: { id?: string }
+	// 	) => {
+	// 		const { id } = conversationParams ?? {};
 
-			try {
-				setComponentLoading(true);
-				await Promise.all([fetchUnreadMessages(), conversationParams ? fetchConversations(id) : null]);
-			} catch (error) {
-				if (id) {
-					handleError(error);
-				} else {
-					logErrors(error);
-					setConversationsError("An unexpected error occured while loading conversations.");
-				}
-			} finally {
-				setComponentLoading(false);
-				setConversationsLoading(false);
-			}
-		},
-		[]
-	);
+	// 		try {
+	// 			setComponentLoading(true);
+	// 			await Promise.all([fetchUnread(), conversationParams ? fetchConversations(id) : null]);
+	// 		} catch (error) {
+	// 			if (id) {
+	// 				handleError(error);
+	// 			} else {
+	// 				logErrors(error);
+	// 				setConversationsError("An unexpected error occured while loading conversations.");
+	// 			}
+	// 		} finally {
+	// 			setComponentLoading(false);
+	// 			setConversationsLoading(false);
+	// 		}
+	// 	},
+	// 	[]
+	// );
 
 	return {
 		conversations,
@@ -73,7 +75,9 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversationsError,
 		setConversations,
 		setConversationsLoading,
-		fetchData,
+		fetchUnread,
+		fetchConversations,
+		
 	};
 };
 

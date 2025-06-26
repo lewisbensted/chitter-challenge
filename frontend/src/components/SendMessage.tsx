@@ -14,7 +14,6 @@ import FlexBox from "../styles/FlexBox";
 interface Props {
 	recipientId: string;
 	isDisabled: boolean;
-	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
@@ -22,6 +21,8 @@ interface Props {
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	triggerRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+	updateUnreadRef: React.MutableRefObject<boolean>
+	userPageId?: string
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -34,6 +35,8 @@ const SendMessage: React.FC<Props> = ({
 	triggerScroll,
 	setMessagesError,
 	triggerRefresh,
+	updateUnreadRef,
+	userPageId
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -48,7 +51,11 @@ const SendMessage: React.FC<Props> = ({
 			});
 			setMessages((messages) => [...messages, newMessage.data]);
 			triggerScroll((prev) => !prev);
-			toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
+			updateUnreadRef.current=false
+			if (!userPageId){
+				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
+			}
+			
 			setMessagesError("");
 			triggerRefresh((prev) => !prev);
 		} catch (error) {

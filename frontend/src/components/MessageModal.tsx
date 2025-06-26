@@ -21,9 +21,10 @@ interface Props {
 	closeModal: () => void;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	onUserPage: boolean;
+	updateUnreadRef: React.MutableRefObject<boolean>;
+	userPageId? : string
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -31,11 +32,12 @@ const MessageModal: React.FC<Props> = ({
 	conversation,
 	isOpen,
 	isComponentLoading,
-	reloadTrigger,
 	closeModal,
 	setComponentLoading,
 	toggleReloadTrigger,
 	onUserPage,
+	updateUnreadRef,
+	userPageId
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 
@@ -67,31 +69,40 @@ const MessageModal: React.FC<Props> = ({
 		const loadAndMarkRead = async () => {
 			await fetchMessages(conversation.interlocutorId);
 			toggleScrollTrigger((prev) => !prev);
-			if (prevUnread) {
+			
+			if (conversation.unread) {
 				await markMessagesRead(conversation.interlocutorId, (error) => {
 					handleErrors(error, "updating read messages.", setErrors);
 				});
+				updateUnreadRef.current = true
 				toggleReloadTrigger((prev) => !prev);
 			}
 		};
 		void loadAndMarkRead();
-	}, [isOpen, conversation.interlocutorId, prevUnread, toggleReloadTrigger, fetchMessages, markMessagesRead]);
+	}, [
+		isOpen,
+		conversation.interlocutorId,
+		conversation.unread,
+		toggleReloadTrigger,
+		fetchMessages,
+		markMessagesRead,
+	]);
 
 	const [refresh, triggerRefresh] = useState<boolean>(false);
 
 	const isFirstRender = useRef(true);
-	const hasRefreshedMessages = useRef(false)
+	const hasRefreshedMessages = useRef(false);
 	useEffect(() => {
+		if (!isOpen || hasRefreshedMessages.current) return;
 		if (isFirstRender.current) {
 			isFirstRender.current = false;
 			return;
 		}
-		if (!isOpen || hasRefreshedMessages.current) return;
 		const load = async () => {
 			await fetchMessages(conversation.interlocutorId, (error) => {
 				handleErrors(error, "updating read messages.", setErrors);
 			});
-			hasRefreshedMessages.current=true
+			hasRefreshedMessages.current = true;
 		};
 		if (prevUnread) {
 			void load();
@@ -162,6 +173,8 @@ const MessageModal: React.FC<Props> = ({
 										setComponentLoading={setComponentLoading}
 										setErrors={setErrors}
 										toggleReloadTrigger={toggleReloadTrigger}
+										updateUnreadRef={updateUnreadRef}
+										userPageId = {userPageId}
 									/>
 								))}
 								{isMessagesLoading ? (
@@ -176,7 +189,6 @@ const MessageModal: React.FC<Props> = ({
 							<SendMessage
 								recipientId={conversation.interlocutorId}
 								isDisabled={isComponentLoading || isMessagesLoading}
-								reloadTrigger={reloadTrigger}
 								toggleReloadTrigger={toggleReloadTrigger}
 								setMessages={setMessages}
 								setErrors={setErrors}
@@ -184,6 +196,8 @@ const MessageModal: React.FC<Props> = ({
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
 								triggerRefresh={triggerRefresh}
+								updateUnreadRef={updateUnreadRef}
+								userPageId={userPageId}
 							/>
 						)}
 					</Grid2>

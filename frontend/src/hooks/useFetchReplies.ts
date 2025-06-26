@@ -12,9 +12,7 @@ const useFetchReplies = () => {
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
 
-	const take = 5;
-
-	const fetchReplies = useCallback(async (cheetId: string, handleError: (error: unknown) => void) => {
+	const fetchReplies = useCallback(async (cheetId: string, handleError: (error: unknown) => void, take: number) => {
 		try {
 			const res = await axios.get<IReply[]>(
 				`${serverURL}/cheets/${cheetId}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=${take}`,
