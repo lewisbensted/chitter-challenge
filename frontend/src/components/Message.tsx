@@ -4,7 +4,7 @@ import { IMessage } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import {
 	Box,
 	Card,
@@ -103,6 +103,9 @@ const Message: React.FC<Props> = ({
 			if (isLastMessage && !userPageId) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
+			if (isEditing) {
+				setEditing(false);
+			}
 		} catch (error) {
 			handleErrors(error, "deleting the message", setErrors);
 		} finally {
@@ -142,7 +145,7 @@ const Message: React.FC<Props> = ({
 											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 											textAlign={message.sender.uuid === userId ? "left" : "right"}
 											fontWeight={
-												!message.messageStatus.isRead && message.recipient.uuid === userId
+												!message.messageStatus.isRead && message.recipient.uuid === userId && !message.messageStatus.isDeleted
 													? "bold"
 													: ""
 											}

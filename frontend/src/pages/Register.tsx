@@ -5,7 +5,7 @@ import ErrorModal from "../components/ErrorModal";
 import SuccessModal from "../components/SuccessModal";
 import Layout from "./Layout";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import AppRegistration from "@mui/icons-material/AppRegistration";
 import IconButton from "@mui/material/IconButton/IconButton";
@@ -33,9 +33,7 @@ const Register: React.FC = () => {
 
 	useEffect(() => {
 		void validateUser(
-			(error) => {
-				handleErrors(error, "fetching page information", setErrors);
-			},
+			setErrors,
 			{ isLoggedIn: true }
 		);
 	}, [validateUser]);

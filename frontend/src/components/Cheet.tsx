@@ -19,7 +19,7 @@ import {
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 
@@ -141,11 +141,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 												onSubmit={handleSubmit(editCheet)}
 												id={`edit-cheet-${cheet.uuid}`}
 											>
-												<TextField
-													{...register("text")}
-													type="text"
-													variant="standard"
-												/>
+												<TextField {...register("text")} type="text" variant="standard" />
 											</Box>
 										) : (
 											<Typography>{cheet.text}</Typography>
@@ -168,8 +164,8 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 							justifyContent={isModalView ? "center" : "space-between"}
 						>
 							<CardActions>
-								<Grid2 container size={12} columns={isModalView ? 1 : 3}>
-									<Grid2 size={1}>
+								<Grid2 container size={12} columns={isModalView ? 2 : 3}>
+									<Grid2 size={isModalView ? 0 : 1}>
 										{isModalView ? null : (
 											<IconButton
 												color="primary"

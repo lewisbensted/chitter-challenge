@@ -6,7 +6,7 @@ import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Box, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
@@ -52,9 +52,7 @@ const User: React.FC = () => {
 	} = useFetchConversations();
 
 	useEffect(() => {
-		void validateUser((error) => {
-			handleErrors(error, "fetching page information", setErrors);
-		});
+		void validateUser(setErrors);
 	}, [validateUser]);
 
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
@@ -80,13 +78,7 @@ const User: React.FC = () => {
 
 	useEffect(() => {
 		if (!id) return;
-		void fetchCheets(
-			(error) => {
-				handleErrors(error, "updating cheets", setErrors);
-			},
-			page === 0 ? 10 : 5,
-			id
-		);
+		void fetchCheets(setErrors, page === 0 ? 10 : 5, id);
 	}, [id, page, fetchCheets]);
 
 	const updateUnreadRef = useRef<boolean>(true);
@@ -99,14 +91,12 @@ const User: React.FC = () => {
 			return;
 		}
 		void fetchConversationsData(
-			(error) => {
-				handleErrors(error, "fetching conversations", setErrors);
-			},
+			setErrors,
 			setComponentLoading,
 			updateUnreadRef,
 			id
 		);
-	}, [userId, reloadConversationsTrigger]);
+	}, [id, userId, reloadConversationsTrigger, fetchConversationsData, setConversationsLoading]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);

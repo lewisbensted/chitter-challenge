@@ -38,9 +38,7 @@ const Homepage: React.FC = () => {
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
 	useEffect(() => {
-		void validateUser((error) => {
-			handleErrors(error, "fetching page information", setErrors);
-		});
+		void validateUser(setErrors);
 	}, [validateUser]);
 
 	useEffect(() => {
@@ -54,12 +52,7 @@ const Homepage: React.FC = () => {
 	}, [userId, setConversationsLoading, fetchAndSetUnread]);
 
 	useEffect(() => {
-		void fetchCheets(
-			(error) => {
-				handleErrors(error, "loading cheets", setErrors);
-			},
-			page === 0 ? 10 : 5
-		);
+		void fetchCheets(setErrors, page === 0 ? 10 : 5);
 	}, [page, fetchCheets]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);

@@ -68,9 +68,7 @@ const MessageModal: React.FC<Props> = ({
 			toggleScrollTrigger((prev) => !prev);
 
 			if (conversation.unread) {
-				await markMessagesRead(conversation.interlocutorId, (error) => {
-					handleErrors(error, "updating read messages.", setErrors);
-				});
+				await markMessagesRead(conversation.interlocutorId, setErrors);
 				updateUnreadRef.current = true;
 				toggleReloadTrigger((prev) => !prev);
 			}
@@ -97,9 +95,7 @@ const MessageModal: React.FC<Props> = ({
 			return;
 		}
 		const load = async () => {
-			await fetchMessages(conversation.interlocutorId, (error) => {
-				handleErrors(error, "updating read messages.", setErrors);
-			});
+			await fetchMessages(conversation.interlocutorId, setErrors);
 			hasRefreshedMessages.current = true;
 		};
 		if (prevUnread) {

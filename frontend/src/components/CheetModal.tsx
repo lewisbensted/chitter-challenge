@@ -12,7 +12,6 @@ import Cheet from "./Cheet";
 import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
 import useFetchReplies from "../hooks/useFetchReplies";
-import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
 	userId?: string | null;
@@ -55,13 +54,7 @@ const CheetModal: React.FC<Props> = ({
 
 	useEffect(() => {
 		if (isOpen) {
-			void fetchReplies(
-				cheet.uuid,
-				(error) => {
-					handleErrors(error, "loading cheets", setErrors);
-				},
-				page === 0 ? 10 : 5
-			);
+			void fetchReplies(cheet.uuid, setErrors, page === 0 ? 10 : 5);
 		}
 	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
 

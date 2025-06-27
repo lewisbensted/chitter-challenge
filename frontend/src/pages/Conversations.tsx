@@ -29,9 +29,7 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		void validateUser(
-			(error) => {
-				handleErrors(error, "validating user", setErrors);
-			},
+			setErrors,
 			{ requiresAuthorisation: true }
 		);
 	}, [validateUser]);
@@ -41,10 +39,7 @@ const Conversations: React.FC = () => {
 	useEffect(() => {
 		if (!userId) return;
 		void fetchConversationsData(
-			(error) => {
-				logErrors(error);
-				setConversationsError("An unexpected error occured while loading conversations.");
-			},
+			setErrors,
 			setComponentLoading,
 			updateUnreadRef
 		);

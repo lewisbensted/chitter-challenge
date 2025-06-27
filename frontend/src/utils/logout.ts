@@ -1,6 +1,6 @@
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors } from "./handleErrors";
+import { handleErrors, logErrors } from "./handleErrors";
 
 const logout = async (
 	setPageLoading: React.Dispatch<React.SetStateAction<boolean>>,

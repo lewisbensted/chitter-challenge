@@ -22,7 +22,7 @@ export default tseslint.config(
 			},
 		},
 	},
-	{ ignores: ["eslint.config.mjs"] },
+	{ ignores: ["eslint.config.mjs", "server/ts-register.mjs"] },
 	{
 		files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
 		plugins: {

@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 
 interface UseValidateUserReturn {
 	userId: string | null | undefined;
@@ -9,7 +10,7 @@ interface UseValidateUserReturn {
 	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
 	setValidateLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	validateUser: (
-		handleError: (error: unknown) => void,
+		setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 		extraParams?: { requiresAuthorisation?: boolean; isLoggedIn?: boolean }
 	) => Promise<void>;
 }
@@ -22,7 +23,7 @@ const useValidateUser = (): UseValidateUserReturn => {
 
 	const validateUser = useCallback(
 		async (
-			handleError: (error: unknown) => void,
+			setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 			extraParams?: { requiresAuthorisation?: boolean; isLoggedIn?: boolean }
 		) => {
 			const { requiresAuthorisation = false, isLoggedIn = false } = extraParams ?? {};
@@ -40,7 +41,7 @@ const useValidateUser = (): UseValidateUserReturn => {
 					}
 					setUserId(null);
 				} else {
-					handleError(error);
+					handleErrors(error, "fetching page information", setErrors);
 				}
 			} finally {
 				setValidateLoading(false);

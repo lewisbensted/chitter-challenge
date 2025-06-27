@@ -3,7 +3,7 @@ import axios from "axios";
 import { IReply } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Edit from "@mui/icons-material/Edit";
 import Done from "@mui/icons-material/Done";

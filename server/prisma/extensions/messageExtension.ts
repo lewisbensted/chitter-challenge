@@ -4,8 +4,8 @@ import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/mess
 const messageFilters = {
 	include: {
 		messageStatus: { omit: { messageId: true } },
-		sender: { omit: { id: true } },
-		recipient: { omit: { id: true } },
+		sender: { omit: { id: true, password:true  } },
+		recipient: { omit: { id: true, password:true } },
 	},
 	omit: { id: true, senderId: true, recipientId: true },
 };

@@ -3,7 +3,7 @@ import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ICheet, IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";

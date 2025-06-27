@@ -10,4 +10,5 @@ const prisma = new PrismaClient()
 	.$extends(replyExtension)
 	.$extends(messageExtension);
 
+
 export default prisma;

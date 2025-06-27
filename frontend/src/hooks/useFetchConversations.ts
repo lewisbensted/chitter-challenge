@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
-import { logErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 
 interface UseFetchConversationsReturn {
 	conversations: IConversation[];
@@ -13,7 +13,7 @@ interface UseFetchConversationsReturn {
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
 	fetchConversationsData: (
-		handleError: (error: unknown) => void,
+		setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 		updateUnreadRef: React.MutableRefObject<boolean>,
 		pageUserId?: string
@@ -52,8 +52,8 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 
 	const fetchConversationsData = useCallback(
 		async (
-			handleError: (error: unknown) => void,
-			setComponentLoading: (arg: boolean) => void,
+			setErrors: React.Dispatch<React.SetStateAction<string[]>>,
+			setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 			updateUnreadRef: React.MutableRefObject<boolean>,
 			pageUserId?: string
 		) => {
@@ -68,7 +68,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 					setUnreadMessages(unread);
 				}
 			} catch (error) {
-				handleError(error);
+				handleErrors(error, "fetching conversations", setErrors);
 			} finally {
 				setComponentLoading(false);
 				setConversationsLoading(false);

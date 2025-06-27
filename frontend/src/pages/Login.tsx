@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ErrorModal from "../components/ErrorModal";
 import Layout from "./Layout";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
+import { handleErrors, logErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
@@ -28,12 +28,7 @@ const SignIn: React.FC = () => {
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
 	useEffect(() => {
-		void validateUser(
-			(error) => {
-				handleErrors(error, "fetching page information", setErrors);
-			},
-			{ isLoggedIn: true }
-		);
+		void validateUser(setErrors, { isLoggedIn: true });
 	}, [validateUser]);
 
 	const onSubmit: SubmitHandler<LoginFormFields> = async (data) => {
