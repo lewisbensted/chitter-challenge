@@ -1,21 +1,16 @@
 import { z } from "zod";
 
-const isProduction = process.env.NODE_ENV === "production";
-
 export const CreateReplySchema = z
 	.object({
-		id: z.number().optional(),
 		userId: z.string({ required_error: "User ID not provided." }),
+		cheetId: z.string({ required_error: "Cheet ID not provided" }),
 		text: z
 			.string({ required_error: "Text not provided." })
 			.trim()
 			.min(5, "Reply too short - must be between 5 and 50 characters.")
 			.max(50, "Reply too long - must be between 5 and 50 characters."),
-		cheetId: z.string({ required_error: "Cheet ID not provided" }),
-		createdAt: z.date().optional(),
-		updatedAt: z.date().optional(),
 	})
-	.omit(isProduction ? { updatedAt: true, createdAt: true } : {})
+
 	.strip();
 
 export const UpdateReplySchema = z
@@ -25,7 +20,22 @@ export const UpdateReplySchema = z
 			.trim()
 			.min(5, "Reply too short - must be between 5 and 50 characters.")
 			.max(50, "Reply too long - must be between 5 and 50 characters."),
+	})
+	.strip();
+
+export const FullReplySchema = z
+	.object({
+		id: z.number(),
+		uuid: z.string(),
+		userId: z.string({ required_error: "User ID not provided." }),
+		cheetId: z.string({ required_error: "Cheet ID not provided" }),
+		text: z
+			.string({ required_error: "Text not provided." })
+			.trim()
+			.min(5, "Reply too short - must be between 5 and 50 characters.")
+			.max(50, "Reply too long - must be between 5 and 50 characters."),
+		createdAt: z.date().optional(),
 		updatedAt: z.date().optional(),
 	})
-	.omit(isProduction ? { updatedAt: true } : {})
+
 	.strip();

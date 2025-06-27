@@ -24,9 +24,7 @@ const Conversations: React.FC = () => {
 		conversationsError,
 		setConversationsError,
 		setConversations,
-		fetchConversations,
-		fetchUnread,
-		setConversationsLoading,
+		fetchConversationsData,
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -42,20 +40,15 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		if (!userId) return;
-		const getConversations = async () => {
-			try {
-				setComponentLoading(true);
-				await Promise.all([updateUnreadRef.current ? fetchUnread() : null, fetchConversations()]);
-			} catch (error) {
+		void fetchConversationsData(
+			(error) => {
 				logErrors(error);
 				setConversationsError("An unexpected error occured while loading conversations.");
-			} finally {
-				setComponentLoading(false);
-				setConversationsLoading(false);
-			}
-		};
-		void getConversations();
-	}, [userId, reloadConversationsTrigger, setConversationsError]);
+			},
+			setComponentLoading,
+			updateUnreadRef
+		);
+	}, [userId, reloadConversationsTrigger, setConversationsError, fetchConversationsData]);
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
 
@@ -114,7 +107,6 @@ const Conversations: React.FC = () => {
 						}}
 						setConversations={setConversations}
 						toggleReloadTrigger={toggleConversationsTrigger}
-						onUserPage={false}
 						updateUnreadRef={updateUnreadRef}
 					/>
 				)}

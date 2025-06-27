@@ -14,7 +14,7 @@ import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 import { useNavigate } from "react-router-dom";
-import { ThemeProvider } from "@mui/material";
+import { Paper, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 
@@ -56,7 +56,7 @@ const Layout: React.FC<Props> = ({
 					open={isDrawerOpen}
 					variant="permanent"
 					sx={{ width: isDrawerOpen ? drawerWidth : drawerWidth / 2 }}
-					PaperProps={{ sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } }}
+					slotProps={{ paper: { sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } } }}
 				>
 					<List>
 						<DrawerElement
@@ -64,11 +64,11 @@ const Layout: React.FC<Props> = ({
 							onClick={
 								isDrawerOpen
 									? () => {
-										setDrawerOpen(false);
-									}
+											setDrawerOpen(false);
+										}
 									: () => {
-										setDrawerOpen(true);
-									}
+											setDrawerOpen(true);
+										}
 							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}
@@ -88,13 +88,11 @@ const Layout: React.FC<Props> = ({
 									icon={<Logout />}
 									isComponentLoading={isComponentLoading}
 									isDrawerOpen={isDrawerOpen}
-									onClick={
-										(async () => {
-											await logout(setPageLoading, setUserId, setErrors, () => {
-												navigate("/login");
-											});
-										})
-									}
+									onClick={async () => {
+										await logout(setPageLoading, setUserId, setErrors, () => {
+											navigate("/login");
+										});
+									}}
 								/>
 							</Fragment>
 						) : (

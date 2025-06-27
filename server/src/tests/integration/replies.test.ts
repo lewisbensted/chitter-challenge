@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { resetDB } from "../resetDB";
+import { resetDB } from "../../../prisma/resetDB";
 import { testUser1, testUser2 } from "../fixtures/users.fixtures";
 import prisma from "../../../prisma/prismaClient";
 import { testCheets } from "../fixtures/cheets.fixtures";

@@ -3,7 +3,7 @@ import express from "express";
 import logout from "../../routes/logout";
 import request from "supertest";
 import session from "express-session";
-import { resetDB } from "../resetDB";
+import { resetDB } from "../../../prisma/resetDB";
 
 describe("Logout a user at route: [DELETE] /logout.", () => {
 	beforeEach(async () => {

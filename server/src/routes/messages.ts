@@ -32,8 +32,6 @@ export const readMessages = async (userId: string, interlocutorId: string) => {
 };
 
 router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
-	
-	console.log('\nunread')
 	try {
 		const unreadMessages = await prisma.message.findFirst({
 			where: { recipientId: req.session.user!.uuid, messageStatus: { isRead: false, isDeleted: false } },

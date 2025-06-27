@@ -19,7 +19,6 @@ interface Props {
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	repliesLengthRef: React.MutableRefObject<number>;
-	reloadTrigger: boolean;
 	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;

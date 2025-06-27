@@ -24,7 +24,6 @@ interface Props {
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	numberOfCheets: number;
-	reloadTrigger: boolean;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
@@ -38,7 +37,6 @@ const CheetModal: React.FC<Props> = ({
 	setComponentLoading,
 	isComponentLoading,
 	numberOfCheets,
-	reloadTrigger,
 	setSelectedCheet,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
@@ -120,7 +118,6 @@ const CheetModal: React.FC<Props> = ({
 							isModalView={true}
 							closeModal={closeModal}
 							numberOfCheets={numberOfCheets}
-							reloadTrigger={reloadTrigger}
 							setSelectedCheet={setSelectedCheet}
 						/>
 						<Divider />
@@ -161,7 +158,6 @@ const CheetModal: React.FC<Props> = ({
 								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								repliesLengthRef={repliesLengthRef}
-								reloadTrigger={reloadTrigger}
 								setRepliesError={setRepliesError}
 								setSelectedCheet={setSelectedCheet}
 								setCheets={setCheets}

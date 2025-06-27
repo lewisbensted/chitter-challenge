@@ -22,7 +22,7 @@ const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDraw
 		<ListItem>
 			<ListItemButton
 				onClick={onClick}
-				href={link ? link : ""}
+				href={link ?? ""}
 				style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
 				sx={{ justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center" }}
 			>

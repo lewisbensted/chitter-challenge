@@ -12,14 +12,13 @@ interface UseFetchConversationsReturn {
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
-	// fetchData: (
-	// 	handleError: (error: unknown) => void,
-	// 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
-	// 	conversationParams?: { id?: string }
-	// ) => Promise<void>;
-	fetchUnread : () => void,
-	fetchConversations: (id?:string) => void,
-	
+	fetchConversationsData: (
+		handleError: (error: unknown) => void,
+		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
+		updateUnreadRef: React.MutableRefObject<boolean>,
+		pageUserId?: string
+	) => Promise<void>;
+	fetchAndSetUnread: () => void;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -28,44 +27,55 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [conversationsError, setConversationsError] = useState<string>("");
 
-
 	const fetchUnread = async () => {
 		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
-		setUnreadMessages(res.data);
+		return res.data;
 	};
+
+	const fetchAndSetUnread = useCallback(async () => {
+		try {
+			const unread = await fetchUnread();
+			setUnreadMessages(unread);
+		} catch (error) {
+			logErrors(error);
+		} finally {
+			setConversationsLoading(false);
+		}
+	}, []);
 
 	const fetchConversations = async (id?: string) => {
 		const res = await axios.get<IConversation[]>(`${serverURL}/conversations${id ? "/" + id : ""}`, {
 			withCredentials: true,
 		});
-		setConversations(res.data);
+		return res.data;
 	};
 
-	// const fetchData = useCallback(
-	// 	async (
-	// 		handleError: (error: unknown) => void,
-	// 		setComponentLoading: (arg: boolean) => void,
-	// 		conversationParams?: { id?: string }
-	// 	) => {
-	// 		const { id } = conversationParams ?? {};
-
-	// 		try {
-	// 			setComponentLoading(true);
-	// 			await Promise.all([fetchUnread(), conversationParams ? fetchConversations(id) : null]);
-	// 		} catch (error) {
-	// 			if (id) {
-	// 				handleError(error);
-	// 			} else {
-	// 				logErrors(error);
-	// 				setConversationsError("An unexpected error occured while loading conversations.");
-	// 			}
-	// 		} finally {
-	// 			setComponentLoading(false);
-	// 			setConversationsLoading(false);
-	// 		}
-	// 	},
-	// 	[]
-	// );
+	const fetchConversationsData = useCallback(
+		async (
+			handleError: (error: unknown) => void,
+			setComponentLoading: (arg: boolean) => void,
+			updateUnreadRef: React.MutableRefObject<boolean>,
+			pageUserId?: string
+		) => {
+			try {
+				setComponentLoading(true);
+				const [conversations, unread] = await Promise.all([
+					fetchConversations(pageUserId),
+					updateUnreadRef.current ? fetchUnread() : Promise.resolve(undefined),
+				]);
+				setConversations(conversations);
+				if (unread !== undefined) {
+					setUnreadMessages(unread);
+				}
+			} catch (error) {
+				handleError(error);
+			} finally {
+				setComponentLoading(false);
+				setConversationsLoading(false);
+			}
+		},
+		[]
+	);
 
 	return {
 		conversations,
@@ -75,9 +85,8 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversationsError,
 		setConversations,
 		setConversationsLoading,
-		fetchUnread,
-		fetchConversations,
-		
+		fetchAndSetUnread,
+		fetchConversationsData,
 	};
 };
 

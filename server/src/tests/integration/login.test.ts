@@ -1,5 +1,5 @@
 import { test, describe, beforeEach, expect, vi } from "vitest";
-import { resetDB } from "../resetDB";
+import { resetDB } from "../../../prisma/resetDB";
 import prisma from "../../../prisma/prismaClient";
 import login from "../../routes/login";
 import express from "express";

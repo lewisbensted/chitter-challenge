@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { IMessage } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -31,7 +31,7 @@ interface Props {
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	updateUnreadRef: React.MutableRefObject<boolean>;
-	userPageId?: string
+	userPageId?: string;
 }
 
 const Message: React.FC<Props> = ({
@@ -44,12 +44,18 @@ const Message: React.FC<Props> = ({
 	setComponentLoading,
 	toggleReloadTrigger,
 	updateUnreadRef,
-	userPageId
+	userPageId,
 }) => {
-	const { register, handleSubmit } = useForm<{ text: string }>();
+	const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [isEditing, setEditing] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (isEditing) {
+			setValue("text", message.text);
+		}
+	}, [isEditing, message.text, setValue]);
 
 	const editMessage: SubmitHandler<{ text: string }> = async (data) => {
 		try {
@@ -128,7 +134,6 @@ const Message: React.FC<Props> = ({
 												id="edit-message"
 												{...register("text")}
 												type="text"
-												defaultValue={message.text}
 												variant="standard"
 											/>
 										</Box>

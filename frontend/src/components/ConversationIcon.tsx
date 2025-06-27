@@ -13,9 +13,7 @@ interface Props {
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	updateUnreadRef: React.MutableRefObject<boolean>
-	
-
+	updateUnreadRef: React.MutableRefObject<boolean>;
 }
 
 const ConversationIcon: React.FC<Props> = ({
@@ -26,34 +24,31 @@ const ConversationIcon: React.FC<Props> = ({
 	setConversations,
 	toggleReloadTrigger,
 	updateUnreadRef,
-	
-
 }) => {
-	const [isMessageModalOpen, setMessageModalOpen] = useState<boolean>(false);
+	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
 
-	console.log(conversation)
-	
+
 	return (
 		<Fragment>
-			<MessageModal
-				userId={userId}
-				conversation={conversation}
-				isOpen={isMessageModalOpen}
-				isComponentLoading={isComponentLoading}
-				setComponentLoading={setComponentLoading}
-				closeModal={() => {
-					setMessageModalOpen(false);
-				}}
-				setConversations={setConversations}
-				toggleReloadTrigger={toggleReloadTrigger}
-				onUserPage={true}
-				updateUnreadRef={updateUnreadRef}
-				userPageId = {conversation.interlocutorId}
-				
-			/>
+			{selectedConversation && (
+				<MessageModal
+					userId={userId}
+					conversation={selectedConversation}
+					isOpen={!!selectedConversation}
+					isComponentLoading={isComponentLoading}
+					setComponentLoading={setComponentLoading}
+					closeModal={() => {
+						setSelectedConversation(null);
+					}}
+					setConversations={setConversations}
+					toggleReloadTrigger={toggleReloadTrigger}
+					updateUnreadRef={updateUnreadRef}
+					userPageId={conversation.interlocutorId}
+				/>
+			)}
 			<IconButton
 				onClick={() => {
-					setMessageModalOpen(true);
+					setSelectedConversation(conversation);
 				}}
 				disabled={isComponentLoading}
 				color="primary"

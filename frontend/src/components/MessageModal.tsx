@@ -22,9 +22,8 @@ interface Props {
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	onUserPage: boolean;
 	updateUnreadRef: React.MutableRefObject<boolean>;
-	userPageId? : string
+	userPageId?: string;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -35,9 +34,8 @@ const MessageModal: React.FC<Props> = ({
 	closeModal,
 	setComponentLoading,
 	toggleReloadTrigger,
-	onUserPage,
 	updateUnreadRef,
-	userPageId
+	userPageId,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
 
@@ -65,16 +63,15 @@ const MessageModal: React.FC<Props> = ({
 
 	useEffect(() => {
 		if (!isOpen) return;
-
 		const loadAndMarkRead = async () => {
 			await fetchMessages(conversation.interlocutorId);
 			toggleScrollTrigger((prev) => !prev);
-			
+
 			if (conversation.unread) {
 				await markMessagesRead(conversation.interlocutorId, (error) => {
 					handleErrors(error, "updating read messages.", setErrors);
 				});
-				updateUnreadRef.current = true
+				updateUnreadRef.current = true;
 				toggleReloadTrigger((prev) => !prev);
 			}
 		};
@@ -83,6 +80,7 @@ const MessageModal: React.FC<Props> = ({
 		isOpen,
 		conversation.interlocutorId,
 		conversation.unread,
+		updateUnreadRef,
 		toggleReloadTrigger,
 		fetchMessages,
 		markMessagesRead,
@@ -143,7 +141,7 @@ const MessageModal: React.FC<Props> = ({
 					</Grid2>
 					<Grid2 marginInline={3} size={12}>
 						<Typography variant="h5">
-							{onUserPage ? (
+							{userPageId ? (
 								conversation.interlocutorUsername
 							) : (
 								<Link href={`/users/${conversation.interlocutorId}`}>
@@ -174,7 +172,7 @@ const MessageModal: React.FC<Props> = ({
 										setErrors={setErrors}
 										toggleReloadTrigger={toggleReloadTrigger}
 										updateUnreadRef={updateUnreadRef}
-										userPageId = {userPageId}
+										userPageId={userPageId}
 									/>
 								))}
 								{isMessagesLoading ? (

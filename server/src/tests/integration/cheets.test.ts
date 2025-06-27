@@ -1,6 +1,6 @@
 import { beforeEach, test, describe, vi, expect } from "vitest";
 import prisma from "../../../prisma/prismaClient";
-import { resetDB } from "../resetDB";
+import { resetDB } from "../../../prisma/resetDB";
 import { testUser1, testUser2 } from "../fixtures/users.fixtures";
 import cheets, { fetchCheets } from "../../routes/cheets";
 import { testCheets } from "../fixtures/cheets.fixtures";

@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import axios from "axios";
 import { IReply } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -37,23 +37,17 @@ interface Props {
 }
 
 const Reply = forwardRef<HTMLDivElement, Props>(
-	(
-		{
-			reply,
-			replies,
-			cheetId,
-			isComponentLoading,
-			setComponentLoading,
-			setReplies,
-			setErrors,
-			userId,
-		},
-		ref
-	) => {
-		const { register, handleSubmit } = useForm<{ text: string }>();
+	({ reply, replies, cheetId, isComponentLoading, setComponentLoading, setReplies, setErrors, userId }, ref) => {
+		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+		useEffect(() => {
+			if (isEditing) {
+				setValue("text", reply.text);
+			}
+		}, [isEditing, reply.text, setValue]);
 
 		const editReply: SubmitHandler<{ text: string }> = async (data) => {
 			try {
@@ -102,7 +96,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 		return (
 			<ThemeProvider theme={theme}>
 				<Card ref={ref}>
-					<Grid2 container >
+					<Grid2 container>
 						<Grid2 size={userId ? 10.5 : 12}>
 							<CardContent>
 								<Grid2 container>
@@ -126,7 +120,6 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 												<TextField
 													{...register("text")}
 													type="text"
-													defaultValue={reply.text}
 													variant="standard"
 												/>
 											</Box>

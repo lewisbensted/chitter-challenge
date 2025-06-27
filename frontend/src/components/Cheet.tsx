@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { ICheet } from "../interfaces/interfaces";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
@@ -34,7 +34,6 @@ interface Props {
 	isModalView: boolean;
 	closeModal?: () => void;
 	numberOfCheets: number;
-	reloadTrigger: boolean;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
@@ -54,10 +53,16 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		ref
 	) => {
 		const { id } = useParams();
-		const { register, handleSubmit } = useForm<{ text: string }>();
+		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+		useEffect(() => {
+			if (isEditing) {
+				setValue("text", cheet.text);
+			}
+		}, [isEditing, cheet.text, setValue]);
 
 		const editCheet: SubmitHandler<{ text: string }> = async (data) => {
 			try {
@@ -139,7 +144,6 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 												<TextField
 													{...register("text")}
 													type="text"
-													defaultValue={cheet.text}
 													variant="standard"
 												/>
 											</Box>

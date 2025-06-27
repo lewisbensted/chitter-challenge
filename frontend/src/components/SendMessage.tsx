@@ -21,8 +21,8 @@ interface Props {
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	triggerRefresh: React.Dispatch<React.SetStateAction<boolean>>;
-	updateUnreadRef: React.MutableRefObject<boolean>
-	userPageId?: string
+	updateUnreadRef: React.MutableRefObject<boolean>;
+	userPageId?: string;
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -36,7 +36,7 @@ const SendMessage: React.FC<Props> = ({
 	setMessagesError,
 	triggerRefresh,
 	updateUnreadRef,
-	userPageId
+	userPageId,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -51,11 +51,11 @@ const SendMessage: React.FC<Props> = ({
 			});
 			setMessages((messages) => [...messages, newMessage.data]);
 			triggerScroll((prev) => !prev);
-			updateUnreadRef.current=false
-			if (!userPageId){
+			updateUnreadRef.current = false;
+			if (!userPageId) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
-			
+
 			setMessagesError("");
 			triggerRefresh((prev) => !prev);
 		} catch (error) {

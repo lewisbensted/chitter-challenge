@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, describe } from "vitest";
 import prisma from "../../../prisma/prismaClient";
-import { resetDB } from "../resetDB";
+import { resetDB } from "../../../prisma/resetDB";
 import request from "supertest";
 import express from "express";
 import register from "../../routes/register";
@@ -27,7 +27,7 @@ describe("Register a new user at route: [POST] /register.", () => {
 	testApp.use("/register", express.json(), register);
 
 	test("Responds with HTTP status 201 and new user information when a user is succesfully created.", async () => {
-		const { status, body } = await request(testApp).post("/register").send(testUser1) as IResponse;
+		const { status, body } = (await request(testApp).post("/register").send(testUser1)) as IResponse;
 		const newUser = await prisma.user.findFirst();
 		expect(status).toEqual(201);
 		expect(newUser).not.toBeNull();

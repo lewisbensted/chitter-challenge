@@ -66,7 +66,6 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 };
 
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
-	console.log("get convos");
 	try {
 		const conversations = await fetchConversations(req.session.user!.uuid);
 		res.status(200).send(conversations);
@@ -77,7 +76,6 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 });
 
 router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
-	console.log("get convo (singular)");
 	try {
 		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		const conversation = await fetchConversations(req.session.user!.uuid, user);

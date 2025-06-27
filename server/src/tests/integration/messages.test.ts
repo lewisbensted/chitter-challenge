@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { resetDB } from "../resetDB";
+import { resetDB } from "../../../prisma/resetDB";
 import prisma from "../../../prisma/prismaClient";
 import { testMessages } from "../fixtures/messages.fixtures";
 import { testUser1, testUser2, testUser3, testUser4 } from "../fixtures/users.fixtures";

@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useSt
 import Layout from "./Layout";
 import SendCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
@@ -18,7 +18,6 @@ const Homepage: React.FC = () => {
 	const [isComponentLoading, setComponentLoading] = useState<boolean>(false);
 	const [errors, setErrors] = useState<string[]>([]);
 	const [page, setPage] = useState<number>(0);
-	const [reloadCheetsTrigger, toggleReloadTrigger] = useState<boolean>(false);
 
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
@@ -33,7 +32,7 @@ const Homepage: React.FC = () => {
 		hasNextPage,
 	} = useFetchCheets();
 
-	const { isUnreadMessages, isConversationsLoading, fetchUnread, setConversationsLoading } =
+	const { isUnreadMessages, isConversationsLoading, fetchAndSetUnread, setConversationsLoading } =
 		useFetchConversations();
 
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
@@ -51,17 +50,8 @@ const Homepage: React.FC = () => {
 			setConversationsLoading(false);
 			return;
 		}
-		const getUnread = async () => {
-			try {
-				await fetchUnread();
-			} catch (error) {
-				logErrors(error);
-			} finally {
-				setConversationsLoading(false);
-			}
-		};
-		void getUnread();
-	}, [userId, setConversationsLoading]);
+		fetchAndSetUnread();
+	}, [userId, setConversationsLoading, fetchAndSetUnread]);
 
 	useEffect(() => {
 		void fetchCheets(
@@ -140,7 +130,6 @@ const Homepage: React.FC = () => {
 										isComponentLoading={isComponentLoading}
 										isModalView={false}
 										numberOfCheets={cheets.length}
-										reloadTrigger={reloadCheetsTrigger}
 										setSelectedCheet={setSelectedCheet}
 									/>
 								))}
@@ -177,7 +166,6 @@ const Homepage: React.FC = () => {
 								isComponentLoading={isComponentLoading}
 								setComponentLoading={setComponentLoading}
 								numberOfCheets={cheets.length}
-								reloadTrigger={reloadCheetsTrigger}
 								setSelectedCheet={setSelectedCheet}
 							/>
 						)}
