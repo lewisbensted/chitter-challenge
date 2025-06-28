@@ -1,3 +1,4 @@
+
 export interface IUser {
 	uuid: string;
 	username: string;
@@ -31,6 +32,13 @@ export interface IMessage {
 	updatedAt: string;
 	isRead: boolean;
 	isDeleted: boolean;
+}
+
+export interface LatestMessage {
+	text: string | null;
+	senderId: string;
+	createdAt: Date;
+	messageStatus: { isRead: boolean; isDeleted: boolean };
 }
 
 export interface IConversation {

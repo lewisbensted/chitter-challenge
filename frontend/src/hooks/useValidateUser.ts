@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 
 interface UseValidateUserReturn {
 	userId: string | null | undefined;

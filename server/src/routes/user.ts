@@ -7,7 +7,7 @@ const router = express.Router({ mergeParams: true });
 
 router.get("/:userId", async (req: Request, res: Response) => {
 	try {
-		const user = await prisma.user.findUniqueOrThrow({ omit: { id: true }, where: { uuid: req.params.userId } });
+		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		res.send(user);
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));

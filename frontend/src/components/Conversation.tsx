@@ -59,15 +59,14 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoadin
 										: conversation.latestMessage?.text}
 								</Typography>
 							</Grid2>
+
 							<Grid2 size={1} display="flex" justifyContent="flex-end">
-								{conversation.latestMessage?.messageStatus.isDeleted ? null : conversation.latestMessage?.senderId ===
-								  userId ? (
-										conversation.latestMessage?.messageStatus.isRead ? (
+								{conversation.latestMessage?.senderId === userId ? (
+									conversation.latestMessage?.messageStatus.isRead &&
+									!conversation.latestMessage.messageStatus.isDeleted ? (
 											<Done fontSize="small" color="primary" />
 										) : null
-									) : conversation.latestMessage?.messageStatus.isRead ? null : (
-										<PriorityHigh fontSize="small" color="primary" />
-									)}
+								) : conversation.unread?<PriorityHigh fontSize="small" color="primary" />:null}
 							</Grid2>
 						</Grid2>
 					</CardContent>

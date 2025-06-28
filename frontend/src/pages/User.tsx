@@ -6,7 +6,7 @@ import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Box, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";

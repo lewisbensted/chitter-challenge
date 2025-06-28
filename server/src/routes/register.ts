@@ -2,17 +2,15 @@ import express, { Request, Response } from "express";
 import { ZodError } from "zod";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
+import { RegisterUserRequestBody } from "../../types/requests.js";
+import { Prisma } from "@prisma/client";
 
 const router = express.Router();
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: Request<{}, {}, RegisterUserRequestBody>, res: Response) => {
 	try {
 		const newUser = await prisma.user.create({
-			data: (
-				req as {
-					body: { firstName: string; lastName: string; username: string; email: string; password: string };
-				}
-			).body,
+			data: req.body as unknown as Prisma.UserCreateInput,
 		});
 		res.status(201).send(newUser);
 	} catch (error) {

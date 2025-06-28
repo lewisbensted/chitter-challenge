@@ -2,7 +2,6 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import Layout from "./Layout";
 import ErrorModal from "../components/ErrorModal";
 import Conversation from "../components/Conversation";
-import { handleErrors, logErrors } from "../utils/handleErrors";
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useValidateUser from "../hooks/useValidateUser";

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ErrorModal from "../components/ErrorModal";
 import Layout from "./Layout";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";

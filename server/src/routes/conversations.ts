@@ -20,10 +20,11 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 		orderBy: { createdAt: "desc" },
 	});
 
+
 	if (interlocutor) {
 		let unread = false;
 		for (const message of messages) {
-			if (message.recipient.uuid === userId && !message.messageStatus?.isRead && !message.messageStatus?.isDeleted) {
+			if (message.recipient.uuid === userId && message.messageStatus?.isRead===false && !message.messageStatus.isDeleted) {
 				unread = true;
 				break;
 			}
@@ -43,21 +44,21 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 						senderId: message.sender.uuid,
 						createdAt: message.createdAt,
 						messageStatus: {
-							isRead: message.messageStatus?.isRead ?? false,
-							isDeleted: message.messageStatus?.isDeleted ?? false,
+							isRead: message.messageStatus?.isRead ===true ,
+							isDeleted: message.messageStatus?.isDeleted === true,
 						},
 					},
 				});
 			}
 
 			if (
-				!message.messageStatus?.isRead &&
+				message.messageStatus?.isRead ===false &&
 				message.recipient.uuid === userId &&
-				!message.messageStatus?.isDeleted
+				!(message.messageStatus?.isDeleted)
 			) {
 				const conversation = conversations.get(otherUser.uuid);
-				if (!conversation?.unread) {
-					conversation!.unread = true;
+				if (conversation?.unread === false) {
+					conversation.unread = true;
 				}
 			}
 		}

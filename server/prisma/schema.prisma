@@ -14,17 +14,17 @@ datasource db {
 }
 
 model User {
-  id          Int         @id @default(autoincrement())
-  uuid        String      @default(uuid()) @db.VarChar(36) @unique
-  firstName   String      @map(name: "first_name")
-  lastName    String      @map(name: "last_name")
-  email       String      @unique
-  username    String      @unique @db.VarChar(30)
-  password    String      @db.Char(60)
-  cheets      Cheet[]
-  replies     Reply[]
-  sender      Message[]   @relation("sender")
-  recipient   Message[]   @relation("recipient")
+  id              Int         @id @default(autoincrement())
+  uuid            String      @default(uuid()) @db.VarChar(36) @unique
+  firstName       String      @map(name: "first_name")
+  lastName        String      @map(name: "last_name")
+  email           String      @unique
+  username        String      @unique @db.VarChar(30)
+  passwordHash    String      @db.Char(60) @map(name: "password_hash")
+  cheets          Cheet[]
+  replies         Reply[]
+  sender          Message[]   @relation("sender")
+  recipient       Message[]   @relation("recipient")
 
   @@map("Users")
 }

@@ -3,6 +3,7 @@ import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { messageFilters } from "../../prisma/extensions/messageExtension.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -76,9 +77,8 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 			data: {
 				senderId: req.session.user!.uuid,
 				recipientId: recipient.uuid,
-				text: (req as { body: { text: string } }).body.text,
+				text: req.body.text,
 			},
-			
 		});
 		const status = await prisma.messageStatus.create({
 			data: {
@@ -106,12 +106,12 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Reque
 			if (targetMessage.messageStatus?.isDeleted) {
 				return res.status(400).send(["Cannot update a deleted message."]);
 			}
-			if ((req as { body: { text: string | undefined } }).body.text !== targetMessage.text) {
+			if (req.body.text !== targetMessage.text) {
 				const updatedMessage = await prisma.message.update({
 					where: {
 						uuid: targetMessage.uuid,
 					},
-					data: { text: (req as { body: { text: string } }).body.text },
+					data: { text: req.body.text },
 				});
 				return res.status(200).send(updatedMessage);
 			} else {
@@ -131,7 +131,7 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await prisma.message.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
-			include: {sender: true}
+			include: { sender: true },
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			const deletedMessage = await prisma.messageStatus.update({
@@ -141,16 +141,10 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 				data: { isDeleted: true },
 
 				include: {
-					message: {
-						omit: { id: true },
-						include: { sender: { omit: { id: true } }, recipient: { omit: { id: true } } },
-					},
+					message: messageFilters,
 				},
 			});
-			res.status(200).send({
-				...deletedMessage.message,
-				messageStatus: { isRead: deletedMessage.isRead, isDeleted: deletedMessage.isDeleted },
-			});
+			res.status(200).send(deletedMessage.message);
 		} else {
 			res.status(403).send(["Cannot delete someone else's message."]);
 		}

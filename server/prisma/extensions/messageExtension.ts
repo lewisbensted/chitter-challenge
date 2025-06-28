@@ -1,11 +1,11 @@
 import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.js";
 
-const messageFilters = {
+export const messageFilters = {
 	include: {
 		messageStatus: { omit: { messageId: true } },
-		sender: { omit: { id: true, password:true  } },
-		recipient: { omit: { id: true, password:true } },
+		sender: { omit: { id: true, passwordHash: true } },
+		recipient: { omit: { id: true, passwordHash: true } },
 	},
 	omit: { id: true, senderId: true, recipientId: true },
 };

@@ -42,7 +42,7 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 		const newReply = await prisma.reply.create({
 			data: {
 				userId: req.session.user!.uuid,
-				text: (req as { body: { text: string } }).body.text,
+				text: req.body.text,
 				cheetId: cheet.uuid,
 			},
 		});
@@ -72,13 +72,13 @@ router.put("/:replyId", authMiddleware, async (req: Request, res: Response) => {
 		});
 		if (targetReply.user.uuid === req.session.user!.uuid) {
 			if (targetReply.cheet.uuid === req.params.cheetId) {
-				if ((req as { body: { text: string | undefined } }).body.text !== targetReply.text) {
+				if (req.body.text !== targetReply.text) {
 					const updatedReply = await prisma.reply.update({
 						where: {
 							uuid: targetReply.uuid,
 						},
 						data: {
-							text: (req as { body: { text: string } }).body.text,
+							text: req.body.text,
 						},
 					});
 					return res.status(200).send(updatedReply);

@@ -25,7 +25,7 @@ router.post("/", async (req: Request, res: Response) => {
 				where: { username: username },
 			});
 			if (user) {
-				if (bcrypt.compareSync(password, user.password)) {
+				if (bcrypt.compareSync(password, user.passwordHash)) {
 					req.session.user = { id: user.id, uuid: user.uuid };
 					res.cookie("user_id", req.session.user.uuid);
 					res.cookie("session_id", req.sessionID);
