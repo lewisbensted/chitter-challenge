@@ -11,7 +11,6 @@ import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
-import { handleErrors } from "../utils/handleErrors";
 
 interface Props {
 	userId?: string | null;
@@ -171,15 +170,15 @@ const MessageModal: React.FC<Props> = ({
 										userPageId={userPageId}
 									/>
 								))}
-								{isMessagesLoading ? (
+								{isMessagesLoading && (
 									<FlexBox>
 										<CircularProgress thickness={5} />
 									</FlexBox>
-								) : null}
+								)}
 								<Box ref={bottomRef} />
 							</Grid2>
 						)}
-						{messagesError ? null : (
+						{!messagesError && (
 							<SendMessage
 								recipientId={conversation.interlocutorId}
 								isDisabled={isComponentLoading || isMessagesLoading}

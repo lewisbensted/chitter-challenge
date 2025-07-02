@@ -4,7 +4,7 @@ import { IMessage } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import {
 	Box,
 	Card,
@@ -145,7 +145,9 @@ const Message: React.FC<Props> = ({
 											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 											textAlign={message.sender.uuid === userId ? "left" : "right"}
 											fontWeight={
-												!message.messageStatus.isRead && message.recipient.uuid === userId && !message.messageStatus.isDeleted
+												!message.messageStatus.isRead &&
+												message.recipient.uuid === userId &&
+												!message.messageStatus.isDeleted
 													? "bold"
 													: ""
 											}
@@ -159,20 +161,20 @@ const Message: React.FC<Props> = ({
 										</Typography>
 									)}
 								</Grid2>
-								{message.sender.uuid === userId && message.messageStatus.isRead ? (
+								{message.sender.uuid === userId && message.messageStatus.isRead && (
 									<Grid2 size={1} display="flex" justifyContent="center">
 										<Done fontSize="small" color="primary" />
 									</Grid2>
-								) : null}
+								)}
 								<Grid2 size={12}>
 									<Typography
 										variant="body2"
 										justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 										textAlign={message.sender.uuid === userId ? "left" : "right"}
 									>
-										{isEdited && !message.messageStatus.isDeleted ? (
+										{isEdited && !message.messageStatus.isDeleted && (
 											<Edit fontSize="small" color="primary" />
-										) : null}
+										)}
 										{formatDate(isEdited ? updatedAt : createdAt)}
 									</Typography>
 								</Grid2>
@@ -180,7 +182,7 @@ const Message: React.FC<Props> = ({
 						</CardContent>
 					</Grid2>
 
-					{message.sender.uuid === userId && !message.messageStatus.isDeleted ? (
+					{message.sender.uuid === userId && !message.messageStatus.isDeleted && (
 						<Grid2 size={1.5} container>
 							<CardActions>
 								<Grid2 container size={12} columns={2}>
@@ -189,7 +191,7 @@ const Message: React.FC<Props> = ({
 											<Box paddingTop={1.3} paddingLeft={1.4}>
 												<CircularProgress size="1.3rem" thickness={6} />
 											</Box>
-										) : message.messageStatus.isRead ? null : isEditing ? (
+										) : !message.messageStatus.isRead && isEditing ? (
 											<IconButton
 												type="submit"
 												disabled={isComponentLoading}
@@ -228,7 +230,7 @@ const Message: React.FC<Props> = ({
 								</Grid2>
 							</CardActions>
 						</Grid2>
-					) : null}
+					)}
 				</Grid2>
 			</Card>
 		</ThemeProvider>

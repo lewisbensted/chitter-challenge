@@ -90,12 +90,7 @@ const User: React.FC = () => {
 			setConversationsLoading(false);
 			return;
 		}
-		void fetchConversationsData(
-			setErrors,
-			setComponentLoading,
-			updateUnreadRef,
-			id
-		);
+		void fetchConversationsData(setErrors, setComponentLoading, updateUnreadRef, id);
 	}, [id, userId, reloadConversationsTrigger, fetchConversationsData, setConversationsLoading]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -148,7 +143,7 @@ const User: React.FC = () => {
 					<Fragment>
 						<Typography variant="h4" display="flex">
 							{username}
-							{!userId || userId === id ? null : (
+							{userId && userId !== id && conversations[0] && (
 								<ConversationIcon
 									userId={userId}
 									conversation={conversations[0]}
@@ -184,14 +179,14 @@ const User: React.FC = () => {
 										setSelectedCheet={setSelectedCheet}
 									/>
 								))}
-								{isCheetsLoading ? (
+								{isCheetsLoading && (
 									<FlexBox>
 										<CircularProgress thickness={5} />
 									</FlexBox>
-								) : null}
+								)}
 							</Grid2>
 						)}
-						{userId === id && !cheetsError ? (
+						{userId === id && !cheetsError && (
 							<SendCheet
 								setCheetsError={setCheetsError}
 								isDisabled={isComponentLoading || isCheetsLoading}
@@ -201,7 +196,7 @@ const User: React.FC = () => {
 								triggerScroll={toggleScrollTrigger}
 								cheetsLengthRef={cheetsLengthRef}
 							/>
-						) : null}
+						)}
 						{selectedCheet && (
 							<CheetModal
 								cheet={selectedCheet}

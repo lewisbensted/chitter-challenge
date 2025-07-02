@@ -27,21 +27,14 @@ const Conversations: React.FC = () => {
 	} = useFetchConversations();
 
 	useEffect(() => {
-		void validateUser(
-			setErrors,
-			{ requiresAuthorisation: true }
-		);
+		void validateUser(setErrors, { requiresAuthorisation: true });
 	}, [validateUser]);
 
 	const updateUnreadRef = useRef<boolean>(true);
 
 	useEffect(() => {
 		if (!userId) return;
-		void fetchConversationsData(
-			setErrors,
-			setComponentLoading,
-			updateUnreadRef
-		);
+		void fetchConversationsData(setErrors, setComponentLoading, updateUnreadRef);
 	}, [userId, reloadConversationsTrigger, setConversationsError, fetchConversationsData]);
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
@@ -67,28 +60,30 @@ const Conversations: React.FC = () => {
 					<FlexBox>
 						<CircularProgress thickness={5} />
 					</FlexBox>
-				) : userId ? (
-					<Fragment>
-						<Typography variant="h4">Messages</Typography>
-						{conversationsError ? (
-							<Typography variant="subtitle1">{conversationsError}</Typography>
-						) : (
-							<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
-								{conversations.map((conversation) => (
-									<Conversation
-										key={conversation.interlocutorId}
-										userId={userId}
-										conversation={conversation}
-										isComponentLoading={isComponentLoading}
-										setComponentLoading={setComponentLoading}
-										setConversations={setConversations}
-										setSelectedConversation={setSelectedConversation}
-									/>
-								))}
-							</Grid2>
-						)}
-					</Fragment>
-				) : null}
+				) : (
+					userId && (
+						<Fragment>
+							<Typography variant="h4">Messages</Typography>
+							{conversationsError ? (
+								<Typography variant="subtitle1">{conversationsError}</Typography>
+							) : (
+								<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+									{conversations.map((conversation) => (
+										<Conversation
+											key={conversation.interlocutorId}
+											userId={userId}
+											conversation={conversation}
+											isComponentLoading={isComponentLoading}
+											setComponentLoading={setComponentLoading}
+											setConversations={setConversations}
+											setSelectedConversation={setSelectedConversation}
+										/>
+									))}
+								</Grid2>
+							)}
+						</Fragment>
+					)
+				)}
 				{selectedConversation && (
 					<MessageModal
 						userId={userId}

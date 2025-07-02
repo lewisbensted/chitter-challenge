@@ -74,7 +74,7 @@ const Layout: React.FC<Props> = ({
 							isDrawerOpen={isDrawerOpen}
 						></DrawerElement>
 						<Divider />
-						{isValidationLoading ? null : userId ? (
+						{!isValidationLoading && userId ? (
 							<Fragment>
 								<DrawerElement
 									link="/conversations"

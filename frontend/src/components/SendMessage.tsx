@@ -3,7 +3,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";

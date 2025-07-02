@@ -2,7 +2,6 @@ import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useSt
 import Layout from "./Layout";
 import SendCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
-import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
@@ -126,15 +125,15 @@ const Homepage: React.FC = () => {
 										setSelectedCheet={setSelectedCheet}
 									/>
 								))}
-								{isCheetsLoading ? (
+								{isCheetsLoading && (
 									<FlexBox>
 										<CircularProgress thickness={5} />
 									</FlexBox>
-								) : null}
+								)}
 							</Grid2>
 						)}
 
-						{userId && !cheetsError ? (
+						{userId && !cheetsError && (
 							<SendCheet
 								isDisabled={isComponentLoading || isCheetsLoading}
 								setCheets={setCheets}
@@ -144,7 +143,7 @@ const Homepage: React.FC = () => {
 								cheetsLengthRef={cheetsLengthRef}
 								triggerScroll={toggleScrollTrigger}
 							/>
-						) : null}
+						)}
 
 						{selectedCheet && (
 							<CheetModal

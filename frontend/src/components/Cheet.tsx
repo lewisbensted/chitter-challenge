@@ -19,7 +19,7 @@ import {
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 
@@ -147,14 +147,14 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 											<Typography>{cheet.text}</Typography>
 										)}
 									</Grid2>
-									{isEdited ? (
+									{isEdited && (
 										<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
 											<Typography variant="body2">
 												<Edit fontSize="small" color="primary" />
 												{formatDate(updatedAt)}
 											</Typography>
 										</Grid2>
-									) : null}
+									)}
 								</Grid2>
 							</CardContent>
 						</Grid2>
@@ -166,7 +166,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 							<CardActions>
 								<Grid2 container size={12} columns={isModalView ? 2 : 3}>
 									<Grid2 size={isModalView ? 0 : 1}>
-										{isModalView ? null : (
+										{!isModalView && (
 											<IconButton
 												color="primary"
 												onClick={() => {
@@ -180,8 +180,8 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 									</Grid2>
 
 									<Grid2 size={1}>
-										{userId === cheet.user.uuid ? (
-											isEditLoading ? (
+										{userId === cheet.user.uuid &&
+											(isEditLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1.4}>
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
@@ -205,12 +205,11 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 												>
 													<Edit />
 												</IconButton>
-											)
-										) : null}
+											))}
 									</Grid2>
 									<Grid2 size={1}>
-										{userId === cheet.user.uuid ? (
-											isDeleteLoading ? (
+										{userId === cheet.user.uuid &&
+											(isDeleteLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1}>
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
@@ -222,8 +221,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 												>
 													<Delete />
 												</IconButton>
-											)
-										) : null}
+											))}
 									</Grid2>
 								</Grid2>
 							</CardActions>

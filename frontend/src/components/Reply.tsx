@@ -3,7 +3,7 @@ import axios from "axios";
 import { IReply } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Edit from "@mui/icons-material/Edit";
 import Done from "@mui/icons-material/Done";
@@ -117,24 +117,20 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 												onSubmit={handleSubmit(editReply)}
 												id={`edit-reply-${reply.uuid}`}
 											>
-												<TextField
-													{...register("text")}
-													type="text"
-													variant="standard"
-												/>
+												<TextField {...register("text")} type="text" variant="standard" />
 											</Box>
 										) : (
 											<Typography>{reply.text}</Typography>
 										)}
 									</Grid2>
-									{isEdited ? (
+									{isEdited && (
 										<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
 											<Typography variant="body2">
 												<Edit fontSize="small" color="primary" />
 												{formatDate(updatedAt)}
 											</Typography>
 										</Grid2>
-									) : null}
+									)}
 								</Grid2>
 							</CardContent>
 						</Grid2>
@@ -142,8 +138,8 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 							<CardActions>
 								<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
 									<Grid2 size={1}>
-										{userId === reply.user.uuid ? (
-											isEditLoading ? (
+										{userId === reply.user.uuid &&
+											(isEditLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1.4}>
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
@@ -166,12 +162,11 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 												>
 													<Edit />
 												</IconButton>
-											)
-										) : null}
+											))}
 									</Grid2>
 									<Grid2 size={1}>
-										{userId === reply.user.uuid ? (
-											isDeleteLoading ? (
+										{userId === reply.user.uuid &&
+											(isDeleteLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1}>
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
@@ -183,8 +178,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 												>
 													<Delete />
 												</IconButton>
-											)
-										) : null}
+											))}
 									</Grid2>
 								</Grid2>
 							</CardActions>

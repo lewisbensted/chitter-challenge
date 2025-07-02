@@ -29,11 +29,11 @@ const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDraw
 				<ListItemIcon sx={{ justifyContent: "center" }}>
 					<IconButton color="primary">{icon}</IconButton>
 				</ListItemIcon>
-				{isDrawerOpen ? (
+				{isDrawerOpen && (
 					<Link>
 						<ListItemText primary={text} />
 					</Link>
-				) : null}
+				)}
 			</ListItemButton>
 		</ListItem>
 	</ThemeProvider>

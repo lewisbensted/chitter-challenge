@@ -134,15 +134,15 @@ const CheetModal: React.FC<Props> = ({
 										numberOfReplies={replies.length}
 									/>
 								))}
-								{isRepliesLoading ? (
+								{isRepliesLoading && (
 									<FlexBox>
 										<CircularProgress thickness={5} />
 									</FlexBox>
-								) : null}
+								)}
 							</Grid2>
 						)}
 
-						{userId && !repliesError ? (
+						{userId && !repliesError && (
 							<SendReply
 								selectedCheet={cheet}
 								isDisabled={isComponentLoading || isRepliesLoading}
@@ -155,7 +155,7 @@ const CheetModal: React.FC<Props> = ({
 								setSelectedCheet={setSelectedCheet}
 								setCheets={setCheets}
 							/>
-						) : null}
+						)}
 					</Grid2>
 				</Grid2>
 			</Dialog>

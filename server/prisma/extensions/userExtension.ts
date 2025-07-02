@@ -24,8 +24,8 @@ export const userExtension = Prisma.defineExtension({
 			async create({ args, query }): Promise<User> {
 				const parsedData = await UserSchema.parseAsync(args.data);
 
-				const passwordHash = await bcrypt.hash(parsedData.password, 5);
 				const { password, ...rest } = parsedData;
+				const passwordHash = await bcrypt.hash(password, 5);
 
 				return query({ ...args, data: { ...rest, passwordHash }, ...userFilters }) as Promise<User>;
 			},
