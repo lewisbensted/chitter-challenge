@@ -48,7 +48,7 @@ const SignIn: React.FC = () => {
 		<ThemeProvider theme={theme}>
 			<Layout
 				isValidationLoading={isValidateLoading}
-				isComponentLoading={isFormLoading}
+				isDisabled={isFormLoading}
 				setPageLoading={setValidateLoading}
 				userId={userId}
 				setUserId={setUserId}
@@ -78,7 +78,7 @@ const SignIn: React.FC = () => {
 								</Grid2>
 								<Grid2 size={12}>
 									<FlexBox>
-										<Button type="submit" disabled={!!userId} color="primary" variant="contained">
+										<Button type="submit" disabled={!!userId} variant="contained">
 											<Typography variant="button" color="inherit">
 												Sign in
 											</Typography>

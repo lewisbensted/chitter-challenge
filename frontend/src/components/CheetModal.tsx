@@ -18,9 +18,8 @@ interface Props {
 	cheet: ICheet;
 	cheets: ICheet[];
 	isOpen: boolean;
-	closeModal: () => void;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
@@ -31,10 +30,9 @@ const CheetModal: React.FC<Props> = ({
 	cheet,
 	cheets,
 	isOpen,
-	closeModal,
 	setCheets,
 	setComponentLoading,
-	isComponentLoading,
+	isDisabled,
 	numberOfCheets,
 	setSelectedCheet,
 }) => {
@@ -47,6 +45,7 @@ const CheetModal: React.FC<Props> = ({
 		isRepliesLoading,
 		repliesLengthRef,
 		hasNextPage,
+		setRepliesLoading,
 		setRepliesError,
 		setReplies,
 		fetchReplies,
@@ -95,7 +94,12 @@ const CheetModal: React.FC<Props> = ({
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
-						<IconButton onClick={closeModal} disabled={isComponentLoading} color="primary">
+						<IconButton
+							onClick={() => {
+								setRepliesLoading(false);
+								setSelectedCheet(null)
+							}}
+						>
 							<Close />
 						</IconButton>
 					</Grid2>
@@ -107,9 +111,8 @@ const CheetModal: React.FC<Props> = ({
 							setCheets={setCheets}
 							setErrors={setErrors}
 							setComponentLoading={setComponentLoading}
-							isComponentLoading={isComponentLoading}
+							isDisabled={isDisabled || isRepliesLoading}
 							isModalView={true}
-							closeModal={closeModal}
 							numberOfCheets={numberOfCheets}
 							setSelectedCheet={setSelectedCheet}
 						/>
@@ -123,7 +126,7 @@ const CheetModal: React.FC<Props> = ({
 									<Reply
 										ref={replies.length === index + 1 ? lastReplyRef : null}
 										key={reply.uuid}
-										isComponentLoading={isComponentLoading}
+										isDisabled={isDisabled || isRepliesLoading}
 										userId={userId}
 										cheetId={cheet.uuid}
 										reply={reply}
@@ -145,7 +148,7 @@ const CheetModal: React.FC<Props> = ({
 						{userId && !repliesError && (
 							<SendReply
 								selectedCheet={cheet}
-								isDisabled={isComponentLoading || isRepliesLoading}
+								isDisabled={isDisabled || isRepliesLoading}
 								setReplies={setReplies}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}

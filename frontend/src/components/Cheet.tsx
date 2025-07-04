@@ -29,27 +29,16 @@ interface Props {
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	cheets: ICheet[];
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	isModalView: boolean;
-	closeModal?: () => void;
 	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
 	(
-		{
-			userId,
-			cheet,
-			cheets,
-			setErrors,
-			setCheets,
-			setComponentLoading,
-			isComponentLoading,
-			isModalView,
-			setSelectedCheet,
-		},
+		{ userId, cheet, cheets, setErrors, setCheets, setComponentLoading, isDisabled, isModalView, setSelectedCheet },
 		ref
 	) => {
 		const { id } = useParams();
@@ -75,7 +64,6 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-
 				const updatedCheets = cheets.map((cheet) =>
 					cheet.uuid === updatedCheet.data.uuid ? updatedCheet.data : cheet
 				);
@@ -115,7 +103,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const createdAt = new Date(cheet.createdAt);
 		const updatedAt = new Date(cheet.updatedAt);
 		const isEdited = updatedAt > createdAt;
-		const isEditDisabled = isComponentLoading || cheet.cheetStatus.hasReplies || createdAt < oneHourAgo;
+		const isEditDisabled = cheet.cheetStatus.hasReplies || createdAt < oneHourAgo;
 
 		return (
 			<ThemeProvider theme={theme}>
@@ -138,7 +126,12 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 										{isEditing ? (
 											<Box
 												component="form"
-												onSubmit={handleSubmit(editCheet)}
+												onSubmit={handleSubmit((data) => {
+													if (isDisabled) {
+														return;
+													}
+													editCheet(data);
+												})}
 												id={`edit-cheet-${cheet.uuid}`}
 											>
 												<TextField {...register("text")} type="text" variant="standard" />
@@ -168,11 +161,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 									<Grid2 size={isModalView ? 0 : 1}>
 										{!isModalView && (
 											<IconButton
-												color="primary"
 												onClick={() => {
 													setSelectedCheet(cheet);
 												}}
-												disabled={isComponentLoading}
 											>
 												<OpenInNew />
 											</IconButton>
@@ -191,16 +182,18 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													disabled={isEditDisabled}
 													form={`edit-cheet-${cheet.uuid}`}
 													key={`edit-cheet-${cheet.uuid}`}
-													color="primary"
 												>
 													<Done />
 												</IconButton>
 											) : (
 												<IconButton
-													onClick={() => {
-														setEditing(true);
-													}}
-													color="primary"
+													onClick={
+														isDisabled
+															? undefined
+															: () => {
+																setEditing(true);
+															}
+													}
 													disabled={isEditDisabled}
 												>
 													<Edit />
@@ -214,11 +207,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
 											) : (
-												<IconButton
-													color="primary"
-													disabled={isComponentLoading}
-													onClick={deleteCheet}
-												>
+												<IconButton onClick={isDisabled ? undefined : deleteCheet}>
 													<Delete />
 												</IconButton>
 											))}

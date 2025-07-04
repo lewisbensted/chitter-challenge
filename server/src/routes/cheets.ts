@@ -3,6 +3,7 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -36,7 +37,7 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-router.post("/", authMiddleware, async (req: Request, res: Response) => {
+router.post("/", authMiddleware, async (req: SendCheetRequest, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -59,48 +60,44 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
 	}
 });
 
-router.put(
-	"/:cheetId",
-	authMiddleware,
-	async (req: Request, res: Response) => {
-		try {
-			if (req.params.userId) {
-				await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-			}
-			const targetCheet = await prisma.cheet.findUniqueOrThrow({
-				where: { uuid: req.params.cheetId },
-				include: { user: true, cheetStatus: true },
-			});
-			if (targetCheet.user.uuid === req.session.user!.uuid) {
-				const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
-				if (targetCheet.createdAt < oneHourAgo) {
-					return res.status(400).send(["Cheet cannot be updated (time limit exceeded)."]);
-				}
-				if (targetCheet.cheetStatus?.hasReplies) {
-					return res.status(400).send(["Cannot update a cheet with replies."]);
-				}
-				if (req.body.text !== targetCheet.text) {
-					const updatedCheet = await prisma.cheet.update({
-						where: {
-							uuid: targetCheet.uuid,
-						},
-						data: {
-							text: req.body.text,
-						},
-					});
-					return res.status(200).send(updatedCheet);
-				} else {
-					return res.status(200).send(targetCheet);
-				}
-			} else {
-				res.status(403).send(["Cannot update someone else's cheet."]);
-			}
-		} catch (error) {
-			console.error("Error updating cheet in the database:\n" + logError(error));
-			sendErrorResponse(error, res);
+router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Response) => {
+	try {
+		if (req.params.userId) {
+			await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
+		const targetCheet = await prisma.cheet.findUniqueOrThrow({
+			where: { uuid: req.params.cheetId },
+			include: { user: true, cheetStatus: true },
+		});
+		if (targetCheet.user.uuid === req.session.user!.uuid) {
+			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
+			if (targetCheet.createdAt < oneHourAgo) {
+				return res.status(400).send(["Cheet cannot be updated (time limit exceeded)."]);
+			}
+			if (targetCheet.cheetStatus?.hasReplies) {
+				return res.status(400).send(["Cannot update a cheet with replies."]);
+			}
+			if (req.body.text !== targetCheet.text) {
+				const updatedCheet = await prisma.cheet.update({
+					where: {
+						uuid: targetCheet.uuid,
+					},
+					data: {
+						text: req.body.text,
+					},
+				});
+				return res.status(200).send(updatedCheet);
+			} else {
+				return res.status(200).send(targetCheet);
+			}
+		} else {
+			res.status(403).send(["Cannot update someone else's cheet."]);
+		}
+	} catch (error) {
+		console.error("Error updating cheet in the database:\n" + logError(error));
+		sendErrorResponse(error, res);
 	}
-);
+});
 
 router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
 	try {

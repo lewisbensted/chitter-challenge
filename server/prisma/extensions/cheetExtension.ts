@@ -10,10 +10,11 @@ export const cheetExtension = Prisma.defineExtension({
 	query: {
 		cheet: {
 			async findUniqueOrThrow({ args, query }) {
-				return query({
+				const cheet = await query({
 					...args,
 					...cheetFilters,
 				});
+				return cheet;
 			},
 			async findMany({ args, query }) {
 				return query({

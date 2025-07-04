@@ -81,12 +81,14 @@ const Homepage: React.FC = () => {
 		[isCheetsLoading, hasNextPage]
 	);
 
+	console.log(isValidateLoading)
+
 	return (
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
 			isValidationLoading={isValidateLoading || isConversationsLoading}
-			isComponentLoading={isComponentLoading}
+			isDisabled={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -119,7 +121,7 @@ const Homepage: React.FC = () => {
 										setCheets={setCheets}
 										setErrors={setErrors}
 										setComponentLoading={setComponentLoading}
-										isComponentLoading={isComponentLoading}
+										isDisabled={isComponentLoading || isCheetsLoading}
 										isModalView={false}
 										numberOfCheets={cheets.length}
 										setSelectedCheet={setSelectedCheet}
@@ -151,11 +153,8 @@ const Homepage: React.FC = () => {
 								cheets={cheets}
 								userId={userId}
 								isOpen={!!selectedCheet}
-								closeModal={() => {
-									setSelectedCheet(null);
-								}}
 								setCheets={setCheets}
-								isComponentLoading={isComponentLoading}
+								isDisabled={isComponentLoading || isCheetsLoading}
 								setComponentLoading={setComponentLoading}
 								numberOfCheets={cheets.length}
 								setSelectedCheet={setSelectedCheet}

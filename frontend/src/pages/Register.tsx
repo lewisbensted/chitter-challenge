@@ -55,7 +55,7 @@ const Register: React.FC = () => {
 		<ThemeProvider theme={theme}>
 			<Layout
 				isValidationLoading={isValidateLoading}
-				isComponentLoading={isFormLoading}
+				isDisabled={isFormLoading}
 				setPageLoading={setValidateLoading}
 				userId={userId}
 				setUserId={setUserId}
@@ -102,7 +102,6 @@ const Register: React.FC = () => {
 											<Button
 												type="submit"
 												disabled={!!userId}
-												color="primary"
 												variant="contained"
 											>
 												<Typography variant="button" color="inherit">

@@ -12,22 +12,22 @@ interface Props {
 	link?: string;
 	icon: ReactNode;
 	text?: string;
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	isDrawerOpen: boolean;
 	onClick?: () => void;
 }
 
-const DrawerElement: React.FC<Props> = ({ link, icon, isComponentLoading, isDrawerOpen, onClick, text }) => (
+const DrawerElement: React.FC<Props> = ({ link, icon, isDisabled, isDrawerOpen, onClick, text }) => (
 	<ThemeProvider theme={theme}>
 		<ListItem>
 			<ListItemButton
 				onClick={onClick}
 				href={link ?? ""}
-				style={{ pointerEvents: isComponentLoading ? "none" : undefined }}
+				style={{ pointerEvents: isDisabled ? "none" : undefined }}
 				sx={{ justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center" }}
 			>
 				<ListItemIcon sx={{ justifyContent: "center" }}>
-					<IconButton color="primary">{icon}</IconButton>
+					<IconButton>{icon}</IconButton>
 				</ListItemIcon>
 				{isDrawerOpen && (
 					<Link>

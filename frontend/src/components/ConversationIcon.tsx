@@ -35,7 +35,7 @@ const ConversationIcon: React.FC<Props> = ({
 					userId={userId}
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
-					isComponentLoading={isComponentLoading}
+					isDisabled={isComponentLoading}
 					setComponentLoading={setComponentLoading}
 					closeModal={() => {
 						setSelectedConversation(null);
@@ -51,7 +51,6 @@ const ConversationIcon: React.FC<Props> = ({
 					setSelectedConversation(conversation);
 				}}
 				disabled={isComponentLoading}
-				color="primary"
 			>
 				{conversation.unread ? <MarkUnreadChatAlt /> : <Chat />}
 			</IconButton>

@@ -54,7 +54,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 			if (
 				message.messageStatus?.isRead ===false &&
 				message.recipient.uuid === userId &&
-				!(message.messageStatus?.isDeleted)
+				!(message.messageStatus.isDeleted)
 			) {
 				const conversation = conversations.get(otherUser.uuid);
 				if (conversation?.unread === false) {

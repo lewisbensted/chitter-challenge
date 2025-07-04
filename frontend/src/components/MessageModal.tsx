@@ -16,7 +16,7 @@ interface Props {
 	userId?: string | null;
 	conversation: IConversation;
 	isOpen: boolean;
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	closeModal: () => void;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
@@ -29,7 +29,7 @@ const MessageModal: React.FC<Props> = ({
 	userId,
 	conversation,
 	isOpen,
-	isComponentLoading,
+	isDisabled,
 	closeModal,
 	setComponentLoading,
 	toggleReloadTrigger,
@@ -44,21 +44,12 @@ const MessageModal: React.FC<Props> = ({
 		messages,
 		messagesError,
 		isMessagesLoading,
+		setMessagesLoading,
 		setMessages,
 		setMessagesError,
 		fetchMessages,
 		markMessagesRead,
 	} = useFetchMessages();
-
-	function usePrevious<T>(value: T): T | undefined {
-		const ref = useRef<T>();
-		useEffect(() => {
-			ref.current = value;
-		}, [value]);
-		return ref.current;
-	}
-
-	const prevUnread = usePrevious(conversation.unread);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -85,22 +76,24 @@ const MessageModal: React.FC<Props> = ({
 
 	const [refresh, triggerRefresh] = useState<boolean>(false);
 
-	const isFirstRender = useRef(true);
 	const hasRefreshedMessages = useRef(false);
+	const prevUnreadRef = useRef<boolean>();
+
 	useEffect(() => {
-		if (!isOpen || hasRefreshedMessages.current) return;
-		if (isFirstRender.current) {
-			isFirstRender.current = false;
-			return;
-		}
+		const prevUnread = prevUnreadRef.current;
+		prevUnreadRef.current = conversation.unread;
+
+		if (!isOpen || hasRefreshedMessages.current || prevUnread === undefined) return;
+
 		const load = async () => {
 			await fetchMessages(conversation.interlocutorId, setErrors);
 			hasRefreshedMessages.current = true;
 		};
+
 		if (prevUnread) {
 			void load();
 		}
-	}, [refresh]);
+	}, [refresh, conversation.interlocutorId, isOpen, fetchMessages, conversation.unread]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
@@ -111,6 +104,7 @@ const MessageModal: React.FC<Props> = ({
 			requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }));
 		}
 	}, [isOpen, scrollTrigger]);
+
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -126,10 +120,9 @@ const MessageModal: React.FC<Props> = ({
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
 						<IconButton
 							onClick={() => {
+								setMessagesLoading(false)
 								closeModal();
 							}}
-							disabled={isComponentLoading}
-							color="primary"
 						>
 							<Close />
 						</IconButton>
@@ -162,7 +155,7 @@ const MessageModal: React.FC<Props> = ({
 										message={message}
 										messages={messages}
 										setMessages={setMessages}
-										isComponentLoading={isComponentLoading}
+										isDisabled={isDisabled || isMessagesLoading}
 										setComponentLoading={setComponentLoading}
 										setErrors={setErrors}
 										toggleReloadTrigger={toggleReloadTrigger}
@@ -181,7 +174,7 @@ const MessageModal: React.FC<Props> = ({
 						{!messagesError && (
 							<SendMessage
 								recipientId={conversation.interlocutorId}
-								isDisabled={isComponentLoading || isMessagesLoading}
+								isDisabled={isDisabled || isMessagesLoading}
 								toggleReloadTrigger={toggleReloadTrigger}
 								setMessages={setMessages}
 								setErrors={setErrors}

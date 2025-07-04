@@ -25,7 +25,7 @@ import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
 
 interface Props {
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
@@ -37,7 +37,7 @@ interface Props {
 }
 
 const Reply = forwardRef<HTMLDivElement, Props>(
-	({ reply, replies, cheetId, isComponentLoading, setComponentLoading, setReplies, setErrors, userId }, ref) => {
+	({ reply, replies, cheetId, isDisabled, setComponentLoading, setReplies, setErrors, userId }, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
@@ -114,7 +114,12 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 										{isEditing ? (
 											<Box
 												component="form"
-												onSubmit={handleSubmit(editReply)}
+												onSubmit={handleSubmit((data) => {
+													if (isDisabled) {
+														return;
+													}
+													editReply(data);
+												})}
 												id={`edit-reply-${reply.uuid}`}
 											>
 												<TextField {...register("text")} type="text" variant="standard" />
@@ -146,19 +151,20 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 											) : isEditing ? (
 												<IconButton
 													type="submit"
-													disabled={isComponentLoading}
 													form={`edit-reply-${reply.uuid}`}
 													key={`edit-reply-${reply.uuid}`}
-													color="primary"
 												>
 													<Done />
 												</IconButton>
 											) : (
 												<IconButton
-													onClick={() => {
-														setEditing(true);
-													}}
-													color="primary"
+													onClick={
+														isDisabled
+															? undefined
+															: () => {
+																setEditing(true);
+															}
+													}
 												>
 													<Edit />
 												</IconButton>
@@ -171,11 +177,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
 											) : (
-												<IconButton
-													color="primary"
-													disabled={isComponentLoading}
-													onClick={deleteReply}
-												>
+												<IconButton onClick={isDisabled ? undefined : deleteReply}>
 													<Delete />
 												</IconButton>
 											))}

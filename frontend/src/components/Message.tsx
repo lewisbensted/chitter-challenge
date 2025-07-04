@@ -27,7 +27,7 @@ interface Props {
 	messages: IMessage[];
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	updateUnreadRef: React.MutableRefObject<boolean>;
@@ -40,7 +40,7 @@ const Message: React.FC<Props> = ({
 	messages,
 	setErrors,
 	setMessages,
-	isComponentLoading,
+	isDisabled,
 	setComponentLoading,
 	toggleReloadTrigger,
 	updateUnreadRef,
@@ -52,7 +52,7 @@ const Message: React.FC<Props> = ({
 	const [isEditing, setEditing] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (isEditing) {
+		if (isEditing && message.text) {
 			setValue("text", message.text);
 		}
 	}, [isEditing, message.text, setValue]);
@@ -129,7 +129,12 @@ const Message: React.FC<Props> = ({
 									{isEditing ? (
 										<Box
 											component="form"
-											onSubmit={handleSubmit(editMessage)}
+											onSubmit={handleSubmit((data) => {
+												if (isDisabled) {
+													return;
+												}
+												editMessage(data);
+											})}
 											id={`edit-message-${message.uuid}`}
 										>
 											<TextField
@@ -194,19 +199,20 @@ const Message: React.FC<Props> = ({
 										) : !message.messageStatus.isRead && isEditing ? (
 											<IconButton
 												type="submit"
-												disabled={isComponentLoading}
 												form={`edit-message-${message.uuid}`}
 												key={`edit-message-${message.uuid}`}
-												color="primary"
 											>
 												<Done />
 											</IconButton>
 										) : (
 											<IconButton
-												onClick={() => {
-													setEditing(true);
-												}}
-												color="primary"
+												onClick={
+													isDisabled
+														? undefined
+														: () => {
+															setEditing(true);
+														}
+												}
 											>
 												<Edit />
 											</IconButton>
@@ -218,11 +224,7 @@ const Message: React.FC<Props> = ({
 												<CircularProgress size="1.3rem" thickness={6} />
 											</Box>
 										) : message.messageStatus.isRead ? null : (
-											<IconButton
-												color="primary"
-												disabled={isComponentLoading}
-												onClick={deleteMessage}
-											>
+											<IconButton onClick={isDisabled ? undefined : deleteMessage}>
 												<Delete />
 											</IconButton>
 										)}

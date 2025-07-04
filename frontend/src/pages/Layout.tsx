@@ -19,7 +19,7 @@ import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 
 interface Props {
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	userId?: string | null;
 	setPageLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
@@ -32,7 +32,7 @@ const drawerWidth = 200;
 
 const Layout: React.FC<Props> = ({
 	children,
-	isComponentLoading,
+	isDisabled,
 	setPageLoading,
 	userId,
 	setUserId,
@@ -60,65 +60,66 @@ const Layout: React.FC<Props> = ({
 				>
 					<List>
 						<DrawerElement
-							isComponentLoading={false}
+							isDisabled={false}
 							onClick={
 								isDrawerOpen
 									? () => {
-										setDrawerOpen(false);
-									}
+											setDrawerOpen(false);
+										}
 									: () => {
-										setDrawerOpen(true);
-									}
+											setDrawerOpen(true);
+										}
 							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}
 						></DrawerElement>
 						<Divider />
-						{!isValidationLoading && userId ? (
-							<Fragment>
-								<DrawerElement
-									link="/conversations"
-									text="Messages"
-									icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
-									isComponentLoading={isComponentLoading}
-									isDrawerOpen={isDrawerOpen}
-								/>
-								<DrawerElement
-									text="Log out"
-									icon={<Logout />}
-									isComponentLoading={isComponentLoading}
-									isDrawerOpen={isDrawerOpen}
-									onClick={async () => {
-										await logout(setPageLoading, setUserId, setErrors, () => {
-											navigate("/login");
-										});
-									}}
-								/>
-							</Fragment>
-						) : (
-							<Fragment>
-								<DrawerElement
-									link="/register"
-									text="Register"
-									icon={<AppRegistration />}
-									isComponentLoading={isComponentLoading}
-									isDrawerOpen={isDrawerOpen}
-								/>
-								<DrawerElement
-									link="/login"
-									text="Log in"
-									icon={<Login />}
-									isComponentLoading={isComponentLoading}
-									isDrawerOpen={isDrawerOpen}
-								/>
-							</Fragment>
-						)}
+						{!isValidationLoading &&
+							(userId ? (
+								<Fragment>
+									<DrawerElement
+										link="/conversations"
+										text="Messages"
+										icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
+										isDisabled={isDisabled}
+										isDrawerOpen={isDrawerOpen}
+									/>
+									<DrawerElement
+										text="Log out"
+										icon={<Logout />}
+										isDisabled={isDisabled}
+										isDrawerOpen={isDrawerOpen}
+										onClick={async () => {
+											await logout(setPageLoading, setUserId, setErrors, () => {
+												navigate("/login");
+											});
+										}}
+									/>
+								</Fragment>
+							) : (
+								<Fragment>
+									<DrawerElement
+										link="/register"
+										text="Register"
+										icon={<AppRegistration />}
+										isDisabled={isDisabled}
+										isDrawerOpen={isDrawerOpen}
+									/>
+									<DrawerElement
+										link="/login"
+										text="Log in"
+										icon={<Login />}
+										isDisabled={isDisabled}
+										isDrawerOpen={isDrawerOpen}
+									/>
+								</Fragment>
+							))}
 						<Divider />
 						<DrawerElement
 							link="/"
 							text="Home"
 							icon={<Home />}
-							isComponentLoading={isComponentLoading}
+							isDisabled={isDisabled}
 							isDrawerOpen={isDrawerOpen}
 						/>
 					</List>

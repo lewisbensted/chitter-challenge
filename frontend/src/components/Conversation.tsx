@@ -10,20 +10,19 @@ import { formatDate } from "../utils/formatDate";
 interface Props {
 	userId?: string | null;
 	conversation: IConversation;
-	isComponentLoading: boolean;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	isDisabled: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 }
 
-const Conversation: React.FC<Props> = ({ userId, conversation, isComponentLoading, setSelectedConversation }) => {
+const Conversation: React.FC<Props> = ({ userId, conversation, isDisabled, setSelectedConversation }) => {
 	const createdAt = new Date(conversation.latestMessage!.createdAt);
 
 	return (
 		<ThemeProvider theme={theme}>
 			<Card>
 				<CardActionArea
-					disabled={isComponentLoading}
+					disabled={isDisabled}
 					onClick={() => {
 						setSelectedConversation(conversation);
 					}}

@@ -41,8 +41,8 @@ const Conversations: React.FC = () => {
 
 	return (
 		<Layout
-			isValidationLoading={isValidateLoading}
-			isComponentLoading={isComponentLoading || isConversationsLoading}
+			isValidationLoading={isValidateLoading || isConversationsLoading}
+			isDisabled={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			userId={userId}
 			setUserId={setUserId}
@@ -73,8 +73,7 @@ const Conversations: React.FC = () => {
 											key={conversation.interlocutorId}
 											userId={userId}
 											conversation={conversation}
-											isComponentLoading={isComponentLoading}
-											setComponentLoading={setComponentLoading}
+											isDisabled={isComponentLoading}
 											setConversations={setConversations}
 											setSelectedConversation={setSelectedConversation}
 										/>
@@ -89,7 +88,7 @@ const Conversations: React.FC = () => {
 						userId={userId}
 						conversation={selectedConversation}
 						isOpen={!!selectedConversation}
-						isComponentLoading={isComponentLoading}
+						isDisabled={isComponentLoading}
 						setComponentLoading={setComponentLoading}
 						closeModal={() => {
 							setSelectedConversation(null);

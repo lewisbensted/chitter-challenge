@@ -123,8 +123,8 @@ const User: React.FC = () => {
 		<Layout
 			userId={userId}
 			setUserId={setUserId}
-			isValidationLoading={isValidateLoading}
-			isComponentLoading={isComponentLoading}
+			isValidationLoading={isValidateLoading || isConversationsLoading}
+			isDisabled={isComponentLoading}
 			setPageLoading={setValidateLoading}
 			isUnreadMessages={isUnreadMessages}
 		>
@@ -173,7 +173,7 @@ const User: React.FC = () => {
 										setCheets={setCheets}
 										setErrors={setErrors}
 										setComponentLoading={setComponentLoading}
-										isComponentLoading={isComponentLoading}
+										isDisabled={isComponentLoading || isCheetsLoading}
 										isModalView={false}
 										numberOfCheets={cheets.length}
 										setSelectedCheet={setSelectedCheet}
@@ -203,11 +203,8 @@ const User: React.FC = () => {
 								cheets={cheets}
 								userId={userId}
 								isOpen={!!selectedCheet}
-								closeModal={() => {
-									setSelectedCheet(null);
-								}}
 								setCheets={setCheets}
-								isComponentLoading={isComponentLoading}
+								isDisabled={isComponentLoading || isCheetsLoading}
 								setComponentLoading={setComponentLoading}
 								numberOfCheets={cheets.length}
 								setSelectedCheet={setSelectedCheet}

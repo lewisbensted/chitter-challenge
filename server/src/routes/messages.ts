@@ -4,6 +4,7 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { messageFilters } from "../../prisma/extensions/messageExtension.js";
+import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -70,7 +71,7 @@ router.put("/read/:recipientId", authMiddleware, async (req: Request, res: Respo
 	}
 });
 
-router.post("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
+router.post("/:recipientId", authMiddleware, async (req: SendMessageRequest, res: Response) => {
 	try {
 		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const newMessage = await prisma.message.create({
@@ -92,7 +93,7 @@ router.post("/:recipientId", authMiddleware, async (req: Request, res: Response)
 	}
 });
 
-router.put("/:recipientId/message/:messageId", authMiddleware, async (req: Request, res: Response) => {
+router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditMessageRequest, res: Response) => {
 	try {
 		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await prisma.message.findUniqueOrThrow({

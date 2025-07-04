@@ -41,6 +41,8 @@ const SendMessage: React.FC<Props> = ({
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
+	
+
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
@@ -69,7 +71,16 @@ const SendMessage: React.FC<Props> = ({
 	return (
 		<ThemeProvider theme={theme}>
 			<FlexBox>
-				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+				<Grid2
+					container
+					component="form"
+					onSubmit={handleSubmit((data) => {
+						if (isDisabled) {
+							return;
+						}
+						onSubmit(data);
+					})}
+				>
 					<Grid2 size={2} />
 					<Grid2 container size={8}>
 						<Grid2 size={12}>
@@ -85,7 +96,7 @@ const SendMessage: React.FC<Props> = ({
 								<CircularProgress size="2.1rem" thickness={6} />
 							</Box>
 						) : (
-							<IconButton type="submit" disabled={isDisabled} color="primary">
+							<IconButton type="submit">
 								<Send fontSize="large" />
 							</IconButton>
 						)}
