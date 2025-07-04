@@ -97,7 +97,7 @@ const CheetModal: React.FC<Props> = ({
 						<IconButton
 							onClick={() => {
 								setRepliesLoading(false);
-								setSelectedCheet(null)
+								setSelectedCheet(null);
 							}}
 						>
 							<Close />

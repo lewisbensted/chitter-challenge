@@ -81,8 +81,6 @@ const Homepage: React.FC = () => {
 		[isCheetsLoading, hasNextPage]
 	);
 
-	console.log(isValidateLoading)
-
 	return (
 		<Layout
 			userId={userId}

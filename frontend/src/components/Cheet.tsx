@@ -182,18 +182,16 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													disabled={isEditDisabled}
 													form={`edit-cheet-${cheet.uuid}`}
 													key={`edit-cheet-${cheet.uuid}`}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
 												>
 													<Done />
 												</IconButton>
 											) : (
 												<IconButton
-													onClick={
-														isDisabled
-															? undefined
-															: () => {
-																setEditing(true);
-															}
-													}
+													onClick={() => {
+														setEditing(true);
+													}}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
 													disabled={isEditDisabled}
 												>
 													<Edit />
@@ -207,7 +205,10 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
 											) : (
-												<IconButton onClick={isDisabled ? undefined : deleteCheet}>
+												<IconButton
+													onClick={deleteCheet}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												>
 													<Delete />
 												</IconButton>
 											))}

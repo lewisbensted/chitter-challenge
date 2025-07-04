@@ -153,18 +153,16 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 													type="submit"
 													form={`edit-reply-${reply.uuid}`}
 													key={`edit-reply-${reply.uuid}`}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
 												>
 													<Done />
 												</IconButton>
 											) : (
 												<IconButton
-													onClick={
-														isDisabled
-															? undefined
-															: () => {
-																setEditing(true);
-															}
-													}
+													onClick={() => {
+														setEditing(true);
+													}}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
 												>
 													<Edit />
 												</IconButton>
@@ -177,7 +175,10 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 													<CircularProgress size="1.3rem" thickness={6} />
 												</Box>
 											) : (
-												<IconButton onClick={isDisabled ? undefined : deleteReply}>
+												<IconButton
+													onClick={deleteReply}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												>
 													<Delete />
 												</IconButton>
 											))}

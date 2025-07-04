@@ -88,7 +88,7 @@ const Conversations: React.FC = () => {
 						userId={userId}
 						conversation={selectedConversation}
 						isOpen={!!selectedConversation}
-						isDisabled={isComponentLoading}
+						isDisabled={isComponentLoading || isConversationsLoading}
 						setComponentLoading={setComponentLoading}
 						closeModal={() => {
 							setSelectedConversation(null);

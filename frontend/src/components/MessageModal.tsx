@@ -120,7 +120,7 @@ const MessageModal: React.FC<Props> = ({
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
 						<IconButton
 							onClick={() => {
-								setMessagesLoading(false)
+								setMessagesLoading(false);
 								closeModal();
 							}}
 						>

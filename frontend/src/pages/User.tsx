@@ -147,12 +147,11 @@ const User: React.FC = () => {
 								<ConversationIcon
 									userId={userId}
 									conversation={conversations[0]}
-									isComponentLoading={isComponentLoading || isCheetsLoading}
+									isDisabled={isComponentLoading || isConversationsLoading}
 									setComponentLoading={setComponentLoading}
 									setConversations={() => {
 										setConversations(conversations);
 									}}
-									reloadTrigger={reloadConversationsTrigger}
 									toggleReloadTrigger={toggleConversationsTrigger}
 									updateUnreadRef={updateUnreadRef}
 								/>

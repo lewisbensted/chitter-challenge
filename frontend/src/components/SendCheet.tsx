@@ -83,7 +83,7 @@ const SendCheet: React.FC<Props> = ({
 								<CircularProgress size="2.1rem" thickness={6} />
 							</Box>
 						) : (
-							<IconButton type="submit">
+							<IconButton type="submit" sx={{ pointerEvents: isDisabled ? "none" : undefined }}>
 								<Send fontSize="large" />
 							</IconButton>
 						)}

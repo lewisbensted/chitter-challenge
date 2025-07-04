@@ -8,10 +8,9 @@ import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 interface Props {
 	userId?: string | null;
 	conversation: IConversation;
-	isComponentLoading: boolean;
+	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	reloadTrigger: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	updateUnreadRef: React.MutableRefObject<boolean>;
 }
@@ -19,7 +18,7 @@ interface Props {
 const ConversationIcon: React.FC<Props> = ({
 	userId,
 	conversation,
-	isComponentLoading,
+	isDisabled,
 	setComponentLoading,
 	setConversations,
 	toggleReloadTrigger,
@@ -35,7 +34,7 @@ const ConversationIcon: React.FC<Props> = ({
 					userId={userId}
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
-					isDisabled={isComponentLoading}
+					isDisabled={isDisabled}
 					setComponentLoading={setComponentLoading}
 					closeModal={() => {
 						setSelectedConversation(null);
@@ -50,7 +49,6 @@ const ConversationIcon: React.FC<Props> = ({
 				onClick={() => {
 					setSelectedConversation(conversation);
 				}}
-				disabled={isComponentLoading}
 			>
 				{conversation.unread ? <MarkUnreadChatAlt /> : <Chat />}
 			</IconButton>

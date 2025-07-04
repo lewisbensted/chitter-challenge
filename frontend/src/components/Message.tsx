@@ -196,26 +196,27 @@ const Message: React.FC<Props> = ({
 											<Box paddingTop={1.3} paddingLeft={1.4}>
 												<CircularProgress size="1.3rem" thickness={6} />
 											</Box>
-										) : !message.messageStatus.isRead && isEditing ? (
-											<IconButton
-												type="submit"
-												form={`edit-message-${message.uuid}`}
-												key={`edit-message-${message.uuid}`}
-											>
-												<Done />
-											</IconButton>
 										) : (
-											<IconButton
-												onClick={
-													isDisabled
-														? undefined
-														: () => {
-															setEditing(true);
-														}
-												}
-											>
-												<Edit />
-											</IconButton>
+											!message.messageStatus.isRead &&
+											(isEditing ? (
+												<IconButton
+													type="submit"
+													form={`edit-message-${message.uuid}`}
+													key={`edit-message-${message.uuid}`}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												>
+													<Done />
+												</IconButton>
+											) : (
+												<IconButton
+													onClick={() => {
+														setEditing(true);
+													}}
+													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												>
+													<Edit />
+												</IconButton>
+											))
 										)}
 									</Grid2>
 									<Grid2 size={1}>
@@ -224,7 +225,10 @@ const Message: React.FC<Props> = ({
 												<CircularProgress size="1.3rem" thickness={6} />
 											</Box>
 										) : message.messageStatus.isRead ? null : (
-											<IconButton onClick={isDisabled ? undefined : deleteMessage}>
+											<IconButton
+												onClick={deleteMessage}
+												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+											>
 												<Delete />
 											</IconButton>
 										)}

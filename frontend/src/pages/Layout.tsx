@@ -14,7 +14,7 @@ import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 import { useNavigate } from "react-router-dom";
-import { ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 
@@ -45,6 +45,7 @@ const Layout: React.FC<Props> = ({
 
 	return (
 		<ThemeProvider theme={theme}>
+			<CssBaseline />
 			<ErrorModal
 				errors={errors}
 				closeModal={() => {
@@ -64,11 +65,11 @@ const Layout: React.FC<Props> = ({
 							onClick={
 								isDrawerOpen
 									? () => {
-											setDrawerOpen(false);
-										}
+										setDrawerOpen(false);
+									}
 									: () => {
-											setDrawerOpen(true);
-										}
+										setDrawerOpen(true);
+									}
 							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}

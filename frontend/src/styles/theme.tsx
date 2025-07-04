@@ -26,7 +26,24 @@ const theme = createTheme({
 			defaultProps: {
 				color: "primary",
 			},
-			
+		},
+		MuiCssBaseline: {
+			styleOverrides: (theme) =>({
+				"*::-webkit-scrollbar": {
+					width: "8px",
+				},
+				"*::-webkit-scrollbar-thumb": {
+					backgroundColor: theme.palette.primary.main,
+					borderRadius: "8px",
+				},
+				"*::-webkit-scrollbar-track": {
+					backgroundColor: "#f0f0f0",
+				},
+				body: {
+					scrollbarWidth: "auto",
+					scrollbarColor: `${theme.palette.primary.main} #f0f0f0`,
+				},
+			}),
 		},
 	},
 });
