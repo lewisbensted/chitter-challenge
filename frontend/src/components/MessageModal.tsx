@@ -58,7 +58,7 @@ const MessageModal: React.FC<Props> = ({
 			toggleScrollTrigger((prev) => !prev);
 
 			if (conversation.unread) {
-				await markMessagesRead(conversation.interlocutorId, setErrors);
+				await markMessagesRead(conversation.interlocutorId);
 				updateUnreadRef.current = true;
 				toggleReloadTrigger((prev) => !prev);
 			}

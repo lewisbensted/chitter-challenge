@@ -60,12 +60,16 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isDisabled, setSe
 							</Grid2>
 
 							<Grid2 size={1} display="flex" justifyContent="flex-end">
-								{conversation.latestMessage?.senderId === userId
-									? conversation.latestMessage?.messageStatus.isRead &&
-										!conversation.latestMessage.messageStatus.isDeleted && (
+				
+								{conversation.unread ? (
+									<PriorityHigh fontSize="small" color="primary" />
+								) : (
+									conversation.latestMessage?.senderId === userId &&
+									conversation.latestMessage?.messageStatus.isRead &&
+									!conversation.latestMessage.messageStatus.isDeleted && (
 										<Done fontSize="small" color="primary" />
 									)
-									: conversation.unread && <PriorityHigh fontSize="small" color="primary" />}
+								)}
 							</Grid2>
 						</Grid2>
 					</CardContent>

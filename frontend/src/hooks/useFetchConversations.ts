@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { logErrors } from "../utils/handleErrors";
 
 interface UseFetchConversationsReturn {
 	conversations: IConversation[];
@@ -44,7 +44,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	}, []);
 
 	const fetchConversations = async (id?: string) => {
-		const res = await axios.get<IConversation[]>(`${serverURL}/conversations${id ? "/" + id : ""}`, {
+		const res = await axios.get<IConversation[]>(`${serverURL}/conversation${id ? "/" + id : ""}`, {
 			withCredentials: true,
 		});
 		return res.data;
@@ -57,22 +57,29 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 			updateUnreadRef: React.MutableRefObject<boolean>,
 			pageUserId?: string
 		) => {
-			try {
-				setComponentLoading(true);
-				const [conversations, unread] = await Promise.all([
-					fetchConversations(pageUserId),
-					updateUnreadRef.current ? fetchUnread() : Promise.resolve(undefined),
-				]);
-				setConversations(conversations);
-				if (unread !== undefined) {
-					setUnreadMessages(unread);
-				}
-			} catch (error) {
-				handleErrors(error, "fetching conversations", setErrors);
-			} finally {
-				setComponentLoading(false);
-				setConversationsLoading(false);
+			setComponentLoading(true);
+			const [conversationsResult, unreadResult] = await Promise.allSettled([
+				fetchConversations(pageUserId),
+				updateUnreadRef.current ? fetchUnread() : Promise.resolve(undefined),
+			]);
+
+			if (conversationsResult.status === "fulfilled") {
+				setConversations(conversationsResult.value);
+			} else {
+				logErrors(conversationsResult.reason);
+				setConversationsError("An unexpected error occured while loading conversations.");
 			}
+
+			if (updateUnreadRef.current) {
+				if (unreadResult.status === "fulfilled") {
+					setUnreadMessages(unreadResult.value);
+				} else {
+					logErrors(unreadResult.reason);
+				}
+			}
+
+			setComponentLoading(false);
+			setConversationsLoading(false);
 		},
 		[]
 	);
