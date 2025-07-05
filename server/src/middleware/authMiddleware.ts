@@ -5,6 +5,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 	if (authenticate(req)) {
 		next();
 	} else {
-		res.status(401).send(["Invalid credentials."]);
+		res.status(401).json(["Invalid credentials."]);
 	}
 };

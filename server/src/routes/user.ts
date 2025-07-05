@@ -8,7 +8,7 @@ const router = express.Router({ mergeParams: true });
 router.get("/:userId", async (req: Request, res: Response) => {
 	try {
 		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-		res.send(user);
+		res.json(user);
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));
 		sendErrorResponse(error, res);

@@ -1,8 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { CreateCheetSchema, UpdateCheetSchema } from "../../src/schemas/cheet.schema.js";
+import { userFilters } from "./userExtension.js";
 
 const cheetFilters = {
-	include: { user: { omit: { id: true, passwordHash: true } }, cheetStatus: { omit: { cheetId: true } } },
+	include: { user: userFilters, cheetStatus: { omit: { cheetId: true } } },
 	omit: { id: true, userId: true },
 };
 

@@ -38,7 +38,7 @@ router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 		const unreadMessages = await prisma.message.findFirst({
 			where: { recipientId: req.session.user!.uuid, messageStatus: { isRead: false, isDeleted: false } },
 		});
-		res.status(200).send(!!unreadMessages);
+		res.status(200).json(!!unreadMessages);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -53,7 +53,7 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 			...message,
 			text: message.messageStatus?.isDeleted ? null : message.text,
 		}));
-		res.status(200).send(formattedMessages);
+		res.status(200).json(formattedMessages);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -64,7 +64,7 @@ router.put("/read/:recipientId", authMiddleware, async (req: Request, res: Respo
 	try {
 		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		await readMessages(req.session.user!.uuid, recipient.uuid);
-		res.status(200).send();
+		res.sendStatus(200);
 	} catch (error) {
 		console.error("Error marking messages as read:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -80,13 +80,15 @@ router.post("/:recipientId", authMiddleware, async (req: SendMessageRequest, res
 				recipientId: recipient.uuid,
 				text: req.body.text,
 			},
+			include: { sender: true, recipient: true },
 		});
 		const status = await prisma.messageStatus.create({
 			data: {
 				messageId: newMessage.uuid,
+				isRead: newMessage.recipient.uuid === newMessage.sender.uuid ? true : false,
 			},
 		});
-		res.status(201).send({ ...newMessage, messageStatus: status });
+		res.status(201).json({ ...newMessage, messageStatus: status });
 	} catch (error) {
 		console.error("Error adding message to the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -102,10 +104,10 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			if (targetMessage.messageStatus?.isRead) {
-				return res.status(400).send(["Cannot update a message after it has been read."]);
+				return res.status(400).json(["Cannot update a message after it has been read."]);
 			}
 			if (targetMessage.messageStatus?.isDeleted) {
-				return res.status(400).send(["Cannot update a deleted message."]);
+				return res.status(400).json(["Cannot update a deleted message."]);
 			}
 			if (req.body.text !== targetMessage.text) {
 				const updatedMessage = await prisma.message.update({
@@ -114,12 +116,12 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 					},
 					data: { text: req.body.text },
 				});
-				return res.status(200).send(updatedMessage);
+				return res.status(200).json(updatedMessage);
 			} else {
-				return res.status(200).send(targetMessage);
+				return res.status(200).json(targetMessage);
 			}
 		} else {
-			res.status(403).send(["Cannot update someone else's message."]);
+			res.status(403).json(["Cannot update someone else's message."]);
 		}
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));
@@ -145,9 +147,9 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 					message: messageFilters,
 				},
 			});
-			res.status(200).send(deletedMessage.message);
+			res.status(200).json({...deletedMessage.message, text:null});
 		} else {
-			res.status(403).send(["Cannot delete someone else's message."]);
+			res.status(403).json(["Cannot delete someone else's message."]);
 		}
 	} catch (error) {
 		console.error("Error deleting cheet from the database:\n" + logError(error));

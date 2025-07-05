@@ -69,7 +69,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const conversations = await fetchConversations(req.session.user!.uuid);
-		res.status(200).send(conversations);
+		res.status(200).json(conversations);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -80,7 +80,7 @@ router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		const conversation = await fetchConversations(req.session.user!.uuid, user);
-		res.status(200).send(conversation);
+		res.status(200).json(conversation);
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));
 		sendErrorResponse(error, res);

@@ -92,6 +92,7 @@ const Message: React.FC<Props> = ({
 					withCredentials: true,
 				}
 			);
+			console.log(deletedMessage)
 			const updatedMessages = messages.map((message) =>
 				message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
 			);

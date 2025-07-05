@@ -1,11 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.js";
+import { userFilters } from "./userExtension.js";
 
 export const messageFilters = {
 	include: {
 		messageStatus: { omit: { messageId: true } },
-		sender: { omit: { id: true, passwordHash: true } },
-		recipient: { omit: { id: true, passwordHash: true } },
+		sender: userFilters,
+		recipient: userFilters,
 	},
 	omit: { id: true, senderId: true, recipientId: true },
 };

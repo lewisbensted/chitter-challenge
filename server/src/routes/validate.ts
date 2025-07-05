@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.get("/", authMiddleware, (req: Request, res: Response) => {
 	try {
-		res.status(200).send(req.session.user!.uuid);
+		res.status(200).json(req.session.user!.uuid);
 	} catch (error) {
 		console.error("Error authenticating user:\n" + logError(error));
-		res.status(500).send(["An unexpected error occured."]);
+		res.status(500).json(["An unexpected error occured."]);
 	}
 });
 

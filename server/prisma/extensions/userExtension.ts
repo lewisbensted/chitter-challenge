@@ -2,7 +2,7 @@ import { Prisma, User } from "@prisma/client";
 import { UserSchema } from "../../src/schemas/user.schema.js";
 import bcrypt from "bcrypt";
 
-const userFilters = {
+export const userFilters = {
 	omit: { id: true, passwordHash: true },
 };
 

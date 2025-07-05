@@ -27,7 +27,7 @@ router.get("/", async (req: Request, res: Response) => {
 		const cheet = await prisma.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		req.query.take = req.query.take === "" ? undefined : req.query.take;
 		const replies = await fetchReplies(cheet.uuid, req.query.cursor as string, Number(req.query.take));
-		res.status(200).send(replies);
+		res.status(200).json(replies);
 	} catch (error) {
 		console.error("Error retrieving replies from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -57,7 +57,7 @@ router.post("/", authMiddleware, async (req: SendReplyRequest, res: Response) =>
 				},
 			});
 		}
-		res.status(201).send(newReply);
+		res.status(201).json(newReply);
 	} catch (error) {
 		console.error("Error adding reply to the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -82,15 +82,15 @@ router.put("/:replyId", authMiddleware, async (req: EditReplyRequest, res: Respo
 							text: req.body.text,
 						},
 					});
-					return res.status(200).send(updatedReply);
+					return res.status(200).json(updatedReply);
 				} else {
-					return res.status(200).send(targetReply);
+					return res.status(200).json(targetReply);
 				}
 			} else {
-				res.status(403).send(["Cheet IDs do not match."]);
+				res.status(403).json(["Cheet IDs do not match."]);
 			}
 		} else {
-			res.status(403).send(["Cannot update someone else's reply."]);
+			res.status(403).json(["Cannot update someone else's reply."]);
 		}
 	} catch (error) {
 		console.error("Error updating reply in the database:\n" + logError(error));
@@ -112,12 +112,12 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 						uuid: targetReply.uuid,
 					},
 				});
-				res.status(204).send();
+				res.sendStatus(204);
 			} else {
-				res.status(403).send(["Cheet IDs do not match."]);
+				res.status(403).json(["Cheet IDs do not match."]);
 			}
 		} else {
-			res.status(403).send(["Cannot delete someone else's reply."]);
+			res.status(403).json(["Cannot delete someone else's reply."]);
 		}
 	} catch (error) {
 		console.error("Error deleting reply from database:\n" + logError(error));

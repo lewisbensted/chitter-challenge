@@ -30,7 +30,7 @@ router.get("/", async (req: Request, res: Response) => {
 		}
 		req.query.take = req.query.take === "" ? undefined : req.query.take;
 		const cheets = await fetchCheets(user?.uuid, req.query.cursor as string, Number(req.query.take));
-		res.status(200).send(cheets);
+		res.status(200).json(cheets);
 	} catch (error) {
 		console.error("Error retrieving cheets from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -53,7 +53,7 @@ router.post("/", authMiddleware, async (req: SendCheetRequest, res: Response) =>
 				cheetId: newCheet.uuid,
 			},
 		});
-		res.status(201).send({ ...newCheet, cheetStatus: status });
+		res.status(201).json({ ...newCheet, cheetStatus: status });
 	} catch (error) {
 		console.error("Error adding cheet to the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -72,10 +72,10 @@ router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Respo
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 			if (targetCheet.createdAt < oneHourAgo) {
-				return res.status(400).send(["Cheet cannot be updated (time limit exceeded)."]);
+				return res.status(400).json(["Cheet cannot be updated (time limit exceeded)."]);
 			}
 			if (targetCheet.cheetStatus?.hasReplies) {
-				return res.status(400).send(["Cannot update a cheet with replies."]);
+				return res.status(400).json(["Cannot update a cheet with replies."]);
 			}
 			if (req.body.text !== targetCheet.text) {
 				const updatedCheet = await prisma.cheet.update({
@@ -86,12 +86,12 @@ router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Respo
 						text: req.body.text,
 					},
 				});
-				return res.status(200).send(updatedCheet);
+				return res.status(200).json(updatedCheet);
 			} else {
-				return res.status(200).send(targetCheet);
+				return res.status(200).json(targetCheet);
 			}
 		} else {
-			res.status(403).send(["Cannot update someone else's cheet."]);
+			res.status(403).json(["Cannot update someone else's cheet."]);
 		}
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));
@@ -115,9 +115,9 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 				},
 			});
 
-			res.status(204).send();
+			res.sendStatus(204);
 		} else {
-			res.status(403).send(["Cannot delete someone else's cheet."]);
+			res.status(403).json(["Cannot delete someone else's cheet."]);
 		}
 	} catch (error) {
 		console.error("Error deleting cheet from the database:\n" + logError(error));

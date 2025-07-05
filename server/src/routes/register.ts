@@ -12,13 +12,13 @@ router.post("/", async (req: RegisterUserRequest, res: Response) => {
 		const newUser = await prisma.user.create({
 			data: req.body as unknown as Prisma.UserCreateInput,
 		});
-		res.status(201).send(newUser);
+		res.status(201).json(newUser);
 	} catch (error) {
 		console.error("Error saving user to the database:\n" + logError(error));
 		if (error instanceof ZodError) {
-			res.status(400).send(error.errors.map((err) => err.message));
+			res.status(400).json(error.errors.map((err) => err.message));
 		} else {
-			res.status(500).send(["An unexpected error occured."]);
+			res.status(500).json(["An unexpected error occured."]);
 		}
 	}
 });
