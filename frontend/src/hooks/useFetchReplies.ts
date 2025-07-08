@@ -32,6 +32,7 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 	const fetchReplies = useCallback(
 		async (cheetId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number) => {
 			try {
+				setRepliesLoading(true);
 				const res = await axios.get<IReply[]>(
 					`${serverURL}/cheets/${cheetId}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=${take}`,
 					{

@@ -69,9 +69,9 @@ const Homepage: React.FC = () => {
 	const observer = useRef<IntersectionObserver>();
 	const lastCheetRef = useCallback(
 		(cheet: HTMLElement | null) => {
-			if (isCheetsLoading) return;
 			if (observer.current) observer.current.disconnect();
 			observer.current = new IntersectionObserver((cheets) => {
+				if (isCheetsLoading) return;
 				if (cheets[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}

@@ -44,7 +44,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	}, []);
 
 	const fetchConversations = async (id?: string) => {
-		const res = await axios.get<IConversation[]>(`${serverURL}/conversation${id ? "/" + id : ""}`, {
+		const res = await axios.get<IConversation[]>(`${serverURL}/conversations${id ? "/" + id : ""}`, {
 			withCredentials: true,
 		});
 		return res.data;

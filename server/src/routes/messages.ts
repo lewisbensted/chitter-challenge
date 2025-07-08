@@ -8,7 +8,9 @@ import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js"
 
 const router = express.Router({ mergeParams: true });
 
-export const fetchMessages = async (userId: string, interlocutorId: string) => {
+export const fetchMessages = async (userId: string, interlocutorId: string, cursor?: string, take?: number) => {
+	take = isNaN(take!) ? 20 : take;
+
 	const messages = await prisma.message.findMany({
 		include: { messageStatus: true },
 		where: {
@@ -17,9 +19,12 @@ export const fetchMessages = async (userId: string, interlocutorId: string) => {
 				{ senderId: interlocutorId, recipientId: userId },
 			],
 		},
-		orderBy: { createdAt: "asc" },
+		orderBy: { createdAt: "desc" },
+		take: take,
+		skip: cursor ? 1 : 0,
+		cursor: cursor ? { uuid: cursor } : undefined,
 	});
-	return messages;
+	return messages.reverse();
 };
 
 export const readMessages = async (userId: string, interlocutorId: string) => {
@@ -48,7 +53,12 @@ router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
 	try {
 		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const messages = await fetchMessages(req.session.user!.uuid, recipient.uuid);
+		const messages = await fetchMessages(
+			req.session.user!.uuid,
+			recipient.uuid,
+			req.query.cursor as string,
+			Number(req.query.take)
+		);
 		const formattedMessages = messages.map((message) => ({
 			...message,
 			text: message.messageStatus?.isDeleted ? null : message.text,
@@ -147,7 +157,7 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 					message: messageFilters,
 				},
 			});
-			res.status(200).json({...deletedMessage.message, text:null});
+			res.status(200).json({ ...deletedMessage.message, text: null });
 		} else {
 			res.status(403).json(["Cannot delete someone else's message."]);
 		}

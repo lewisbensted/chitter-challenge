@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { IConversation } from "../interfaces/interfaces";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Box, Grid2, Link, ThemeProvider, Typography } from "@mui/material";
+import { Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
@@ -37,13 +37,14 @@ const MessageModal: React.FC<Props> = ({
 	userPageId,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
-
-	const ref = useRef<HTMLDivElement>(null);
+	const [page, setPage] = useState<number>(0);
 
 	const {
 		messages,
 		messagesError,
 		isMessagesLoading,
+		hasNextPage,
+		messagesLengthRef,
 		setMessagesLoading,
 		setMessages,
 		setMessagesError,
@@ -54,14 +55,16 @@ const MessageModal: React.FC<Props> = ({
 	useEffect(() => {
 		if (!isOpen) return;
 		const loadAndMarkRead = async () => {
-			await fetchMessages(conversation.interlocutorId);
-			toggleScrollTrigger((prev) => !prev);
-
+			await fetchMessages(conversation.interlocutorId, setErrors, page === 0 ? 20 : 10);
+			if (page === 0) {
+				toggleScrollTrigger((prev) => !prev);
+			}
 			if (conversation.unread) {
 				await markMessagesRead(conversation.interlocutorId);
 				updateUnreadRef.current = true;
 				toggleReloadTrigger((prev) => !prev);
 			}
+			messagesSetRef.current = true;
 		};
 		void loadAndMarkRead();
 	}, [
@@ -69,6 +72,7 @@ const MessageModal: React.FC<Props> = ({
 		conversation.interlocutorId,
 		conversation.unread,
 		updateUnreadRef,
+		page,
 		toggleReloadTrigger,
 		fetchMessages,
 		markMessagesRead,
@@ -97,14 +101,37 @@ const MessageModal: React.FC<Props> = ({
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
-	const bottomRef = useRef<HTMLDivElement>(null);
+	const listRef = useRef<HTMLDivElement>(null);
+	const hasReachedBottom = useRef<boolean>(false);
+	const messagesSetRef = useRef<boolean>(false);
 
 	useLayoutEffect(() => {
-		if (isOpen) {
-			requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }));
-		}
-	}, [isOpen, scrollTrigger]);
+		requestAnimationFrame(() => {
+			if (!listRef.current || !messagesSetRef.current) return;
+			listRef.current.scrollTo({
+				top: listRef.current.scrollHeight,
+				behavior: hasReachedBottom.current ? "smooth" : "auto",
+			});
+			if (!hasReachedBottom.current) {
+				hasReachedBottom.current = true;
+			}
+		});
+	}, [scrollTrigger]);
 
+	const observer = useRef<IntersectionObserver>();
+	const lastMessageRef = useCallback(
+		(message: HTMLElement | null) => {
+			if (observer.current) observer.current.disconnect();
+			observer.current = new IntersectionObserver((messages) => {
+				if (isMessagesLoading || !messagesSetRef.current) return;
+				if (messages[0].isIntersecting && hasNextPage) {
+					setPage((page) => page + 1);
+				}
+			});
+			if (message) observer.current.observe(message);
+		},
+		[isMessagesLoading, hasNextPage]
+	);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -141,15 +168,21 @@ const MessageModal: React.FC<Props> = ({
 							<Typography variant="subtitle1">{messagesError}</Typography>
 						) : (
 							<Grid2
-								ref={ref}
 								sx={{
 									overflowY: "auto",
 									maxHeight: 390,
 									scrollbarGutter: "stable",
 								}}
+								ref={listRef}
 							>
-								{messages.map((message) => (
+								{isMessagesLoading && (
+									<FlexBox>
+										<CircularProgress thickness={5} />
+									</FlexBox>
+								)}
+								{messages.map((message, index) => (
 									<Message
+										ref={index === 0 ? lastMessageRef : null}
 										key={message.uuid}
 										userId={userId}
 										message={message}
@@ -163,12 +196,6 @@ const MessageModal: React.FC<Props> = ({
 										userPageId={userPageId}
 									/>
 								))}
-								{isMessagesLoading && (
-									<FlexBox>
-										<CircularProgress thickness={5} />
-									</FlexBox>
-								)}
-								<Box ref={bottomRef} />
 							</Grid2>
 						)}
 						{!messagesError && (
@@ -184,6 +211,7 @@ const MessageModal: React.FC<Props> = ({
 								triggerRefresh={triggerRefresh}
 								updateUnreadRef={updateUnreadRef}
 								userPageId={userPageId}
+								messagesLengthRef={messagesLengthRef}
 							/>
 						)}
 					</Grid2>

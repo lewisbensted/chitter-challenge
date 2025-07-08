@@ -70,9 +70,9 @@ const CheetModal: React.FC<Props> = ({
 	const observer = useRef<IntersectionObserver>();
 	const lastReplyRef = useCallback(
 		(cheet: HTMLElement | null) => {
-			if (isRepliesLoading) return;
 			if (observer.current) observer.current.disconnect();
 			observer.current = new IntersectionObserver((cheets) => {
+				if (isRepliesLoading) return;
 				if (cheets[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
