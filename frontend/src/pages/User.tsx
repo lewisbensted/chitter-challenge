@@ -34,7 +34,6 @@ const User: React.FC = () => {
 	const {
 		cheets,
 		isCheetsLoading,
-		cheetsLengthRef,
 		cheetsError,
 		hasNextPage,
 		setCheetsError,
@@ -90,7 +89,7 @@ const User: React.FC = () => {
 			setConversationsLoading(false);
 			return;
 		}
-		void fetchConversationsData(setErrors, setComponentLoading, updateUnreadRef, id);
+		void fetchConversationsData(setComponentLoading, updateUnreadRef, id);
 	}, [id, userId, reloadConversationsTrigger, fetchConversationsData, setConversationsLoading]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -192,7 +191,6 @@ const User: React.FC = () => {
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
-								cheetsLengthRef={cheetsLengthRef}
 							/>
 						)}
 						{selectedCheet && (

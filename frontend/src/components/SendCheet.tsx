@@ -19,7 +19,6 @@ interface Props {
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
-	cheetsLengthRef: React.MutableRefObject<number>;
 }
 
 const SendCheet: React.FC<Props> = ({
@@ -29,7 +28,6 @@ const SendCheet: React.FC<Props> = ({
 	setErrors,
 	setComponentLoading,
 	triggerScroll,
-	cheetsLengthRef,
 }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
@@ -44,7 +42,7 @@ const SendCheet: React.FC<Props> = ({
 				withCredentials: true,
 			});
 			setCheets((cheets) => [newCheet.data, ...cheets]);
-			cheetsLengthRef.current++;
+
 			triggerScroll((prev) => !prev);
 			setCheetsError("");
 		} catch (error) {

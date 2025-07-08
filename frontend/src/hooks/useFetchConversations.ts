@@ -13,7 +13,6 @@ interface UseFetchConversationsReturn {
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
 	fetchConversationsData: (
-		setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 		updateUnreadRef: React.MutableRefObject<boolean>,
 		pageUserId?: string
@@ -52,7 +51,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 
 	const fetchConversationsData = useCallback(
 		async (
-			setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 			setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 			updateUnreadRef: React.MutableRefObject<boolean>,
 			pageUserId?: string

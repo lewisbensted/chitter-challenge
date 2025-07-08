@@ -23,7 +23,6 @@ const Homepage: React.FC = () => {
 	const {
 		cheets,
 		isCheetsLoading,
-		cheetsLengthRef,
 		cheetsError,
 		setCheetsError,
 		setCheets,
@@ -140,7 +139,6 @@ const Homepage: React.FC = () => {
 								setCheetsError={setCheetsError}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
-								cheetsLengthRef={cheetsLengthRef}
 								triggerScroll={toggleScrollTrigger}
 							/>
 						)}

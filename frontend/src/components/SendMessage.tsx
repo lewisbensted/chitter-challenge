@@ -23,7 +23,6 @@ interface Props {
 	triggerRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 	updateUnreadRef: React.MutableRefObject<boolean>;
 	userPageId?: string;
-	messagesLengthRef: React.MutableRefObject<number>;
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -38,7 +37,6 @@ const SendMessage: React.FC<Props> = ({
 	triggerRefresh,
 	updateUnreadRef,
 	userPageId,
-	messagesLengthRef
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -59,7 +57,6 @@ const SendMessage: React.FC<Props> = ({
 			if (!userPageId) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
-			messagesLengthRef.current++;
 
 			setMessagesError("");
 			triggerRefresh((prev) => !prev);

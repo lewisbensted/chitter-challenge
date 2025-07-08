@@ -44,7 +44,6 @@ const MessageModal: React.FC<Props> = ({
 		messagesError,
 		isMessagesLoading,
 		hasNextPage,
-		messagesLengthRef,
 		setMessagesLoading,
 		setMessages,
 		setMessagesError,
@@ -64,7 +63,7 @@ const MessageModal: React.FC<Props> = ({
 				updateUnreadRef.current = true;
 				toggleReloadTrigger((prev) => !prev);
 			}
-			messagesSetRef.current = true;
+			setMessagesSet(true)
 		};
 		void loadAndMarkRead();
 	}, [
@@ -78,7 +77,7 @@ const MessageModal: React.FC<Props> = ({
 		markMessagesRead,
 	]);
 
-	const [refresh, triggerRefresh] = useState<boolean>(false);
+	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
 
 	const hasRefreshedMessages = useRef(false);
 	const prevUnreadRef = useRef<boolean>();
@@ -97,17 +96,17 @@ const MessageModal: React.FC<Props> = ({
 		if (prevUnread) {
 			void load();
 		}
-	}, [refresh, conversation.interlocutorId, isOpen, fetchMessages, conversation.unread]);
+	}, [refreshMessagesTrigger, conversation.interlocutorId, isOpen, fetchMessages, conversation.unread]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
 	const listRef = useRef<HTMLDivElement>(null);
 	const hasReachedBottom = useRef<boolean>(false);
-	const messagesSetRef = useRef<boolean>(false);
 
+	const [isMessagesSet, setMessagesSet]= useState<boolean>(false)
 	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
-			if (!listRef.current || !messagesSetRef.current) return;
+			if (!listRef.current || !isMessagesSet) return;
 			listRef.current.scrollTo({
 				top: listRef.current.scrollHeight,
 				behavior: hasReachedBottom.current ? "smooth" : "auto",
@@ -116,21 +115,21 @@ const MessageModal: React.FC<Props> = ({
 				hasReachedBottom.current = true;
 			}
 		});
-	}, [scrollTrigger]);
+	}, [scrollTrigger, isMessagesSet]);
 
 	const observer = useRef<IntersectionObserver>();
 	const lastMessageRef = useCallback(
 		(message: HTMLElement | null) => {
 			if (observer.current) observer.current.disconnect();
 			observer.current = new IntersectionObserver((messages) => {
-				if (isMessagesLoading || !messagesSetRef.current) return;
+				if (isMessagesLoading || !isMessagesSet) return;
 				if (messages[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
 			});
 			if (message) observer.current.observe(message);
 		},
-		[isMessagesLoading, hasNextPage]
+		[isMessagesLoading, hasNextPage, isMessagesSet]
 	);
 
 	return (
@@ -208,10 +207,9 @@ const MessageModal: React.FC<Props> = ({
 								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
-								triggerRefresh={triggerRefresh}
+								triggerRefresh={toggleRefreshMessages}
 								updateUnreadRef={updateUnreadRef}
 								userPageId={userPageId}
-								messagesLengthRef={messagesLengthRef}
 							/>
 						)}
 					</Grid2>

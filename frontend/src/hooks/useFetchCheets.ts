@@ -7,7 +7,6 @@ import { handleErrors, logErrors } from "../utils/handleErrors";
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
 	isCheetsLoading: boolean;
-	cheetsLengthRef: React.MutableRefObject<number>;
 	cheetsError: string;
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
@@ -25,28 +24,35 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const [cheetsError, setCheetsError] = useState<string>("");
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
-	const cheetsLengthRef = useRef<number>(0);
+	const hasLoadedOnceRef = useRef<boolean>(false);
 
 	const fetchCheets = useCallback(
 		async (setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number, userId?: string) => {
 			try {
 				setCheetsLoading(true);
 
-				const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
+
 				const res = await axios.get<ICheet[]>(
-					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?${cursorParam}&take=${take}`,
+					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?${params}`,
 					{
 						withCredentials: true,
 					}
 				);
 
 				const newCheets = res.data;
-				setHasNextPage(newCheets.length < take ? false : true);
+
+				if (!hasLoadedOnceRef.current) {
+					hasLoadedOnceRef.current = true;
+				}
+
+				setHasNextPage(newCheets.length >= take);
 
 				if (newCheets.length) {
 					setCheets((cheets) => {
 						const updatedCheets = [...cheets, ...newCheets];
-						cheetsLengthRef.current = updatedCheets.length;
 						return updatedCheets;
 					});
 
@@ -54,7 +60,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 				}
 				setCheetsError("");
 			} catch (error) {
-				if (cheetsLengthRef.current === 0) {
+				if (!hasLoadedOnceRef.current) {
 					logErrors(error);
 					setCheetsError("An unexpected error occured while loading cheets.");
 				} else {
@@ -71,7 +77,6 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	return {
 		cheets,
 		isCheetsLoading,
-		cheetsLengthRef,
 		cheetsError,
 		setCheets,
 		setCheetsError,

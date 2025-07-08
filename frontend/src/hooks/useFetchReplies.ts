@@ -28,19 +28,27 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
+	const hasLoadedOnceRef = useRef<boolean>(false);
 
 	const fetchReplies = useCallback(
 		async (cheetId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number) => {
 			try {
 				setRepliesLoading(true);
-				const res = await axios.get<IReply[]>(
-					`${serverURL}/cheets/${cheetId}/replies?${cursorRef.current ? `cursor=${cursorRef.current}` : ""}&take=${take}`,
-					{
-						withCredentials: true,
-					}
-				);
+
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
+
+				const res = await axios.get<IReply[]>(`${serverURL}/cheets/${cheetId}/replies?${params}`, {
+					withCredentials: true,
+				});
 				const newReplies = res.data;
-				setHasNextPage(newReplies.length < take ? false : true);
+
+				if (!hasLoadedOnceRef.current) {
+					hasLoadedOnceRef.current = true;
+				}
+
+				setHasNextPage(newReplies.length >= take);
 
 				if (newReplies.length) {
 					setReplies((replies) => {
@@ -51,7 +59,7 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 					cursorRef.current = newReplies[newReplies.length - 1].uuid;
 				}
 			} catch (error) {
-				if (repliesLengthRef.current === 0) {
+				if (!hasLoadedOnceRef.current) {
 					logErrors(error);
 					setRepliesError("An unexpected error occured while loading replies.");
 				} else {

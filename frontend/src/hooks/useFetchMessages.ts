@@ -10,43 +10,55 @@ const useFetchMessages = () => {
 	const [messagesError, setMessagesError] = useState<string>("");
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
-	const messagesLengthRef = useRef<number>(0);
+	const hasLoadedOnceRef = useRef<boolean>(false);
 
 	const fetchMessages = useCallback(
 		async (interlocutorId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take?: number) => {
 			try {
-				setMessagesLoading(true);
-
-				const cursorParam = take ? (cursorRef.current ? `cursor=${cursorRef.current}` : "") : 0;
-				const takeNum = take ?? messagesLengthRef.current;
-				const res = await axios.get<IMessage[]>(
-					`${serverURL}/messages/${interlocutorId}?${cursorParam}&take=${takeNum}`,
-					{
-						withCredentials: true,
-					}
-				);
-				const newMessages = res.data;
 				if (take) {
-					setHasNextPage(newMessages.length < take ? false : true);
+					setMessagesLoading(true);
+
+					const params = new URLSearchParams();
+					if (cursorRef.current) params.append("cursor", cursorRef.current);
+					params.append("take", take.toString());
+
+					const res = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}?${params}`, {
+						withCredentials: true,
+					});
+					const newMessages = res.data;
+					if (!hasLoadedOnceRef.current) {
+						hasLoadedOnceRef.current = true;
+					}
+
+					setHasNextPage(newMessages.length >= take );
 					if (newMessages.length) {
 						setMessages((message) => {
-							const updatedMessages = [...newMessages, ...message];
-							messagesLengthRef.current = updatedMessages.length;
-							return updatedMessages;
+							
+							return [...newMessages, ...message];
 						});
 						cursorRef.current = newMessages[0].uuid;
 					}
 				} else {
-					setMessages(newMessages);
+					setMessages((messages) => {
+						const updatedMessages = messages.map((message) =>
+							message.sender.uuid === interlocutorId && !message.messageStatus.isRead
+								? {
+										...message,
+										messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
+									}
+								: message
+						);
+						return updatedMessages;
+					});
 				}
 
 				setMessagesError("");
 			} catch (error) {
-				if (messagesLengthRef.current === 0) {
+				if (!hasLoadedOnceRef.current) {
 					logErrors(error);
-					setMessagesError("An unexpected error occured while loading cheets.");
+					setMessagesError("An unexpected error occurred while loading messages.");
 				} else {
-					handleErrors(error, "loading cheets", setErrors);
+					handleErrors(error, "loading messages", setErrors);
 					setHasNextPage(false);
 				}
 			} finally {
@@ -75,7 +87,6 @@ const useFetchMessages = () => {
 		messagesError,
 		isMessagesLoading,
 		hasNextPage,
-		messagesLengthRef,
 		setMessages,
 		setMessagesError,
 		setMessagesLoading,
