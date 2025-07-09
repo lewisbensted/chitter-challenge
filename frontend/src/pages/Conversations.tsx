@@ -34,7 +34,7 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		if (!userId) return;
-		void fetchConversationsData(setComponentLoading, updateUnreadRef);
+		void fetchConversationsData(updateUnreadRef);
 	}, [userId, reloadConversationsTrigger, setConversationsError, fetchConversationsData]);
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();

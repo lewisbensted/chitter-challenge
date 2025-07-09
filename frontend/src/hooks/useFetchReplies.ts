@@ -3,6 +3,7 @@ import { IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { handleErrors, logErrors } from "../utils/handleErrors";
+import { useIsMounted } from "../utils/isMounted";
 
 interface UseFetchRepliesReturn {
 	replies: IReply[];
@@ -30,6 +31,8 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 	const repliesLengthRef = useRef<number>(0);
 	const hasLoadedOnceRef = useRef<boolean>(false);
 
+	const isMounted = useIsMounted();
+
 	const fetchReplies = useCallback(
 		async (cheetId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number) => {
 			try {
@@ -42,32 +45,34 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 				const res = await axios.get<IReply[]>(`${serverURL}/cheets/${cheetId}/replies?${params}`, {
 					withCredentials: true,
 				});
+
 				const newReplies = res.data;
 
 				if (!hasLoadedOnceRef.current) {
 					hasLoadedOnceRef.current = true;
 				}
+				if (isMounted()) {
+					setHasNextPage(newReplies.length >= take);
 
-				setHasNextPage(newReplies.length >= take);
-
-				if (newReplies.length) {
-					setReplies((replies) => {
-						const updated = [...replies, ...newReplies];
-						repliesLengthRef.current = updated.length;
-						return updated;
-					});
-					cursorRef.current = newReplies[newReplies.length - 1].uuid;
+					if (newReplies.length) {
+						setReplies((replies) => {
+							const updated = [...replies, ...newReplies];
+							repliesLengthRef.current = updated.length;
+							return updated;
+						});
+						cursorRef.current = newReplies[newReplies.length - 1].uuid;
+					}
 				}
 			} catch (error) {
 				if (!hasLoadedOnceRef.current) {
 					logErrors(error);
-					setRepliesError("An unexpected error occured while loading replies.");
+					if (isMounted()) setRepliesError("An unexpected error occured while loading replies.");
 				} else {
 					handleErrors(error, "loading replies", setErrors);
-					setHasNextPage(false);
+					if (isMounted()) setHasNextPage(false);
 				}
 			} finally {
-				setRepliesLoading(false);
+				if (isMounted()) setRepliesLoading(false);
 			}
 		},
 		[]

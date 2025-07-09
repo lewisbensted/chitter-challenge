@@ -73,15 +73,17 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					}
 				);
 
-				const updatedMessages = messages.map((message) =>
-					message.uuid === updatedMessage.data.uuid ? updatedMessage.data : message
+				setMessages((prevMessages) =>
+					prevMessages.map((message) =>
+						message.uuid === updatedMessage.data.uuid ? updatedMessage.data : message
+					)
 				);
-				setMessages(updatedMessages);
 			} catch (error) {
 				handleErrors(error, "editing the message", setErrors);
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
+
 				setComponentLoading(false);
 			}
 		};
@@ -96,19 +98,15 @@ const Message = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-				const updatedMessages = messages.map((message) =>
+				setMessages((prevMessages) => prevMessages.map((message) =>
 					message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
-				);
+				));
+				if (isEditing) setEditing(false);
 
-				setMessages(updatedMessages);
 				updateUnreadRef.current = false;
-
-				const isLastMessage = messages[messages.length - 1].uuid === message.uuid ? true : false;
+				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
 				if (isLastMessage && !userPageId) {
 					toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
-				}
-				if (isEditing) {
-					setEditing(false);
 				}
 			} catch (error) {
 				handleErrors(error, "deleting the message", setErrors);

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@emotion/react";
 import theme from "../styles/theme";
 import { PriorityHigh } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
+import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
 	userId?: string | null;
@@ -35,7 +36,8 @@ const Conversation: React.FC<Props> = ({ userId, conversation, isDisabled, setSe
 										onClick={(event) => {
 											event.stopPropagation();
 										}}
-										href={`/users/${conversation.interlocutorId}`}
+										to={`/users/${conversation.interlocutorId}`}
+										component={RouterLink}
 									>
 										{conversation.interlocutorUsername}
 									</Link>

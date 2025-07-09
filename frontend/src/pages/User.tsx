@@ -31,15 +31,8 @@ const User: React.FC = () => {
 
 	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
 
-	const {
-		cheets,
-		isCheetsLoading,
-		cheetsError,
-		hasNextPage,
-		setCheetsError,
-		setCheets,
-		fetchCheets,
-	} = useFetchCheets();
+	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, fetchCheets } =
+		useFetchCheets();
 
 	const {
 		isUnreadMessages,
@@ -89,7 +82,7 @@ const User: React.FC = () => {
 			setConversationsLoading(false);
 			return;
 		}
-		void fetchConversationsData(setComponentLoading, updateUnreadRef, id);
+		void fetchConversationsData(updateUnreadRef, id);
 	}, [id, userId, reloadConversationsTrigger, fetchConversationsData, setConversationsLoading]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -165,7 +158,6 @@ const User: React.FC = () => {
 										ref={cheets.length === index + 1 ? lastCheetRef : undefined}
 										key={cheet.uuid}
 										cheet={cheet}
-										cheets={cheets}
 										userId={userId}
 										setCheets={setCheets}
 										setErrors={setErrors}

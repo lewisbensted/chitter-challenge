@@ -113,7 +113,6 @@ const Homepage: React.FC = () => {
 										ref={cheets.length === index + 1 ? lastCheetRef : null}
 										key={cheet.uuid}
 										cheet={cheet}
-										cheets={cheets}
 										userId={userId}
 										setCheets={setCheets}
 										setErrors={setErrors}

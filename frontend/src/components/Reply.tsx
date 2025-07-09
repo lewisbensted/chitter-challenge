@@ -23,6 +23,8 @@ import { format } from "date-fns";
 import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
+import { Link as RouterLink } from "react-router-dom";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	isDisabled: boolean;
@@ -30,14 +32,13 @@ interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	reply: IReply;
-	replies: IReply[];
 	cheetId: string;
 	userId?: string | null;
 	numberOfReplies: number;
 }
 
 const Reply = forwardRef<HTMLDivElement, Props>(
-	({ reply, replies, cheetId, isDisabled, setComponentLoading, setReplies, setErrors, userId }, ref) => {
+	({ reply, cheetId, isDisabled, setComponentLoading, setReplies, setErrors, userId }, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
@@ -51,6 +52,8 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 
 		const editReply: SubmitHandler<{ text: string }> = async (data) => {
 			try {
+				setEditLoading(true);
+				setComponentLoading(true);
 				const updatedReply = await axios.put<IReply>(
 					`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}`,
 					data,
@@ -58,17 +61,17 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-				const updatedReplies = replies.map((reply) =>
-					reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply
-				);
 
-				setReplies(updatedReplies);
+				setReplies((prevReplies) => prevReplies.map((reply) =>
+					reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply
+				));
 			} catch (error) {
 				handleErrors(error, "editing the reply", setErrors);
 			} finally {
 				setEditLoading(false);
-				setComponentLoading(false);
 				setEditing(false);
+
+				setComponentLoading(false);
 			}
 		};
 
@@ -79,8 +82,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 				await axios.delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
 					withCredentials: true,
 				});
-				const updatedReplies = replies.filter((r) => r.uuid !== reply.uuid);
-				setReplies(updatedReplies);
+				setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
 			} catch (error) {
 				handleErrors(error, "deleting the reply", setErrors);
 			} finally {
@@ -102,7 +104,9 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 								<Grid2 container>
 									<Grid2 size={6}>
 										<Typography>
-											<Link href={`/users/${reply.user.uuid}`}>{reply.user.username}</Link>
+											<Link to={`/users/${reply.user.uuid}`} component={RouterLink}>
+												{reply.user.username}
+											</Link>
 										</Typography>
 									</Grid2>
 									<Grid2 size={6}>

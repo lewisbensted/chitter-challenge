@@ -3,6 +3,7 @@ import { serverURL } from "../config/config";
 import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
 import { logErrors } from "../utils/handleErrors";
+import { useIsMounted } from "../utils/isMounted";
 
 interface UseFetchConversationsReturn {
 	conversations: IConversation[];
@@ -13,7 +14,6 @@ interface UseFetchConversationsReturn {
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
 	fetchConversationsData: (
-		setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 		updateUnreadRef: React.MutableRefObject<boolean>,
 		pageUserId?: string
 	) => Promise<void>;
@@ -26,6 +26,8 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
 	const [conversationsError, setConversationsError] = useState<string>("");
 
+	const isMounted = useIsMounted();
+
 	const fetchUnread = async () => {
 		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
 		return res.data;
@@ -34,11 +36,11 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const fetchAndSetUnread = useCallback(async () => {
 		try {
 			const unread = await fetchUnread();
-			setUnreadMessages(unread);
+			if (isMounted()) setUnreadMessages(unread);
 		} catch (error) {
 			logErrors(error);
 		} finally {
-			setConversationsLoading(false);
+			if (isMounted()) setConversationsLoading(false);
 		}
 	}, []);
 
@@ -51,33 +53,30 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 
 	const fetchConversationsData = useCallback(
 		async (
-			setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>,
 			updateUnreadRef: React.MutableRefObject<boolean>,
 			pageUserId?: string
 		) => {
-			setComponentLoading(true);
 			const [conversationsResult, unreadResult] = await Promise.allSettled([
 				fetchConversations(pageUserId),
 				updateUnreadRef.current ? fetchUnread() : Promise.resolve(undefined),
 			]);
 
 			if (conversationsResult.status === "fulfilled") {
-				setConversations(conversationsResult.value);
+				if (isMounted()) setConversations(conversationsResult.value);
 			} else {
 				logErrors(conversationsResult.reason);
-				setConversationsError("An unexpected error occured while loading conversations.");
+				if (isMounted()) setConversationsError("An unexpected error occured while loading conversations.");
 			}
 
 			if (updateUnreadRef.current) {
 				if (unreadResult.status === "fulfilled") {
-					setUnreadMessages(unreadResult.value);
+					if (isMounted()) setUnreadMessages(unreadResult.value);
 				} else {
 					logErrors(unreadResult.reason);
 				}
 			}
 
-			setComponentLoading(false);
-			setConversationsLoading(false);
+			if (isMounted()) setConversationsLoading(false);
 		},
 		[]
 	);

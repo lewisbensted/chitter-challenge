@@ -3,6 +3,7 @@ import { IMessage } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { handleErrors, logErrors } from "../utils/handleErrors";
+import { useIsMounted } from "../utils/isMounted";
 
 const useFetchMessages = () => {
 	const [messages, setMessages] = useState<IMessage[]>([]);
@@ -12,57 +13,43 @@ const useFetchMessages = () => {
 	const cursorRef = useRef<string>();
 	const hasLoadedOnceRef = useRef<boolean>(false);
 
+	const isMounted = useIsMounted();
+
 	const fetchMessages = useCallback(
-		async (interlocutorId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take?: number) => {
+		async (interlocutorId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number) => {
 			try {
-				if (take) {
-					setMessagesLoading(true);
+				setMessagesLoading(true);
 
-					const params = new URLSearchParams();
-					if (cursorRef.current) params.append("cursor", cursorRef.current);
-					params.append("take", take.toString());
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
 
-					const res = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}?${params}`, {
-						withCredentials: true,
-					});
-					const newMessages = res.data;
-					if (!hasLoadedOnceRef.current) {
-						hasLoadedOnceRef.current = true;
-					}
-
-					setHasNextPage(newMessages.length >= take );
-					if (newMessages.length) {
-						setMessages((message) => {
-							
-							return [...newMessages, ...message];
-						});
-						cursorRef.current = newMessages[0].uuid;
-					}
-				} else {
-					setMessages((messages) => {
-						const updatedMessages = messages.map((message) =>
-							message.sender.uuid === interlocutorId && !message.messageStatus.isRead
-								? {
-										...message,
-										messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
-									}
-								: message
-						);
-						return updatedMessages;
-					});
+				const res = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}?${params}`, {
+					withCredentials: true,
+				});
+				const newMessages = res.data;
+				if (!hasLoadedOnceRef.current) {
+					hasLoadedOnceRef.current = true;
 				}
 
-				setMessagesError("");
+				if (isMounted()) {
+					setHasNextPage(newMessages.length >= take);
+					if (newMessages.length) {
+						setMessages((prevMessages) => [...newMessages, ...prevMessages]);
+						cursorRef.current = newMessages[0].uuid;
+					}
+					setMessagesError("");
+				}
 			} catch (error) {
 				if (!hasLoadedOnceRef.current) {
 					logErrors(error);
-					setMessagesError("An unexpected error occurred while loading messages.");
+					if (isMounted()) setMessagesError("An unexpected error occurred while loading messages.");
 				} else {
 					handleErrors(error, "loading messages", setErrors);
-					setHasNextPage(false);
+					if (isMounted()) setHasNextPage(false);
 				}
 			} finally {
-				setMessagesLoading(false);
+				if (isMounted()) setMessagesLoading(false);
 			}
 		},
 		[]
@@ -82,6 +69,20 @@ const useFetchMessages = () => {
 		}
 	}, []);
 
+	const refreshMessages = useCallback((interlocutorId: string) => {
+		setMessages((messages) => {
+			const updatedMessages = messages.map((message) =>
+				message.sender.uuid === interlocutorId && !message.messageStatus.isRead
+					? {
+						...message,
+						messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
+					}
+					: message
+			);
+			return updatedMessages;
+		});
+	}, []);
+
 	return {
 		messages,
 		messagesError,
@@ -91,6 +92,7 @@ const useFetchMessages = () => {
 		setMessagesError,
 		setMessagesLoading,
 		fetchMessages,
+		refreshMessages,
 		markMessagesRead,
 	};
 };

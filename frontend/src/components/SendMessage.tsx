@@ -20,7 +20,6 @@ interface Props {
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
-	triggerRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 	updateUnreadRef: React.MutableRefObject<boolean>;
 	userPageId?: string;
 }
@@ -34,7 +33,6 @@ const SendMessage: React.FC<Props> = ({
 	setComponentLoading,
 	triggerScroll,
 	setMessagesError,
-	triggerRefresh,
 	updateUnreadRef,
 	userPageId,
 }) => {
@@ -51,7 +49,7 @@ const SendMessage: React.FC<Props> = ({
 			const newMessage = await axios.post<IMessage>(`${serverURL}/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
-			setMessages((messages) => [...messages, newMessage.data]);
+			setMessages((prevMessages) => [...prevMessages, newMessage.data]);
 			triggerScroll((prev) => !prev);
 			updateUnreadRef.current = false;
 			if (!userPageId) {
@@ -59,7 +57,6 @@ const SendMessage: React.FC<Props> = ({
 			}
 
 			setMessagesError("");
-			triggerRefresh((prev) => !prev);
 		} catch (error) {
 			handleErrors(error, "sending message", setErrors);
 		} finally {

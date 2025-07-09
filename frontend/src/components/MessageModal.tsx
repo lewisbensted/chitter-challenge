@@ -11,6 +11,7 @@ import { Grid2, Link, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
+import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
 	userId?: string | null;
@@ -49,6 +50,7 @@ const MessageModal: React.FC<Props> = ({
 		setMessagesError,
 		fetchMessages,
 		markMessagesRead,
+		refreshMessages,
 	} = useFetchMessages();
 
 	useEffect(() => {
@@ -63,7 +65,7 @@ const MessageModal: React.FC<Props> = ({
 				updateUnreadRef.current = true;
 				toggleReloadTrigger((prev) => !prev);
 			}
-			setMessagesSet(true)
+			setMessagesSet(true);
 		};
 		void loadAndMarkRead();
 	}, [
@@ -88,22 +90,22 @@ const MessageModal: React.FC<Props> = ({
 
 		if (!isOpen || hasRefreshedMessages.current || prevUnread === undefined) return;
 
-		const load = async () => {
-			await fetchMessages(conversation.interlocutorId, setErrors);
+		const load = () => {
+			refreshMessages(conversation.interlocutorId);
 			hasRefreshedMessages.current = true;
 		};
 
 		if (prevUnread) {
-			void load();
+			load();
 		}
-	}, [refreshMessagesTrigger, conversation.interlocutorId, isOpen, fetchMessages, conversation.unread]);
+	}, [refreshMessagesTrigger, conversation.interlocutorId, isOpen, refreshMessages, conversation.unread]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
 	const listRef = useRef<HTMLDivElement>(null);
 	const hasReachedBottom = useRef<boolean>(false);
 
-	const [isMessagesSet, setMessagesSet]= useState<boolean>(false)
+	const [isMessagesSet, setMessagesSet] = useState<boolean>(false);
 	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
 			if (!listRef.current || !isMessagesSet) return;
@@ -132,9 +134,17 @@ const MessageModal: React.FC<Props> = ({
 		[isMessagesLoading, hasNextPage, isMessagesSet]
 	);
 
+
 	return (
 		<ThemeProvider theme={theme}>
-			<Dialog open={isOpen} fullWidth maxWidth="md">
+			<Dialog
+				open={isOpen}
+				fullWidth
+				maxWidth="md"
+				onClick={() => {
+					toggleRefreshMessages((prev) => !prev);
+				}}
+			>
 				<ErrorModal
 					errors={errors}
 					closeModal={() => {
@@ -158,7 +168,7 @@ const MessageModal: React.FC<Props> = ({
 							{userPageId ? (
 								conversation.interlocutorUsername
 							) : (
-								<Link href={`/users/${conversation.interlocutorId}`}>
+								<Link to={`/users/${conversation.interlocutorId}`} component={RouterLink}>
 									{conversation.interlocutorUsername}
 								</Link>
 							)}
@@ -207,7 +217,6 @@ const MessageModal: React.FC<Props> = ({
 								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
-								triggerRefresh={toggleRefreshMessages}
 								updateUnreadRef={updateUnreadRef}
 								userPageId={userPageId}
 							/>

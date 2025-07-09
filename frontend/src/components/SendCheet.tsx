@@ -33,6 +33,7 @@ const SendCheet: React.FC<Props> = ({
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
+
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
@@ -41,7 +42,7 @@ const SendCheet: React.FC<Props> = ({
 			const newCheet = await axios.post<ICheet>(`${serverURL + (id ? `/users/${id}` : "")}/cheets`, data, {
 				withCredentials: true,
 			});
-			setCheets((cheets) => [newCheet.data, ...cheets]);
+			setCheets((prevCheets) => [newCheet.data, ...prevCheets]);
 
 			triggerScroll((prev) => !prev);
 			setCheetsError("");

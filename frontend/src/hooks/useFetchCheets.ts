@@ -3,6 +3,7 @@ import { ICheet } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { handleErrors, logErrors } from "../utils/handleErrors";
+import { useIsMounted } from "../utils/isMounted";
 
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
@@ -26,17 +27,16 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const cursorRef = useRef<string>();
 	const hasLoadedOnceRef = useRef<boolean>(false);
 
+	const isMounted = useIsMounted();
+
 	const fetchCheets = useCallback(
 		async (setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number, userId?: string) => {
 			try {
 				setCheetsLoading(true);
 
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
-
+				const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
 				const res = await axios.get<ICheet[]>(
-					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?${params}`,
+					`${serverURL}${userId ? `/users/${userId}` : ""}/cheets?${cursorParam}&take=${take}`,
 					{
 						withCredentials: true,
 					}
@@ -48,27 +48,26 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 					hasLoadedOnceRef.current = true;
 				}
 
-				setHasNextPage(newCheets.length >= take);
+				if (isMounted()) {
+					setHasNextPage(newCheets.length >= take);
 
-				if (newCheets.length) {
-					setCheets((cheets) => {
-						const updatedCheets = [...cheets, ...newCheets];
-						return updatedCheets;
-					});
+					if (newCheets.length) {
+						setCheets((prevCheets) => [...prevCheets, ...newCheets]);
 
-					cursorRef.current = newCheets[newCheets.length - 1].uuid;
+						cursorRef.current = newCheets[newCheets.length - 1].uuid;
+					}
+					setCheetsError("");
 				}
-				setCheetsError("");
 			} catch (error) {
 				if (!hasLoadedOnceRef.current) {
 					logErrors(error);
-					setCheetsError("An unexpected error occured while loading cheets.");
+					if (isMounted()) setCheetsError("An unexpected error occured while loading cheets.");
 				} else {
 					handleErrors(error, "loading cheets", setErrors);
-					setHasNextPage(false);
+					if (isMounted()) setHasNextPage(false);
 				}
 			} finally {
-				setCheetsLoading(false);
+				if (isMounted()) setCheetsLoading(false);
 			}
 		},
 		[]

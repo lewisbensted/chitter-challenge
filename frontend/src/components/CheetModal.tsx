@@ -28,7 +28,6 @@ interface Props {
 const CheetModal: React.FC<Props> = ({
 	userId,
 	cheet,
-	cheets,
 	isOpen,
 	setCheets,
 	setComponentLoading,
@@ -106,7 +105,6 @@ const CheetModal: React.FC<Props> = ({
 					<Grid2 marginInline={3} size={12}>
 						<Cheet
 							cheet={cheet}
-							cheets={cheets}
 							userId={userId}
 							setCheets={setCheets}
 							setErrors={setErrors}
@@ -130,7 +128,6 @@ const CheetModal: React.FC<Props> = ({
 										userId={userId}
 										cheetId={cheet.uuid}
 										reply={reply}
-										replies={replies}
 										setReplies={setReplies}
 										setErrors={setErrors}
 										setComponentLoading={setComponentLoading}

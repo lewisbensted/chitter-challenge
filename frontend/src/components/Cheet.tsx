@@ -22,12 +22,12 @@ import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
+import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
 	userId?: string | null;
 	cheet: ICheet;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
-	cheets: ICheet[];
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,7 +38,7 @@ interface Props {
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
 	(
-		{ userId, cheet, cheets, setErrors, setCheets, setComponentLoading, isDisabled, isModalView, setSelectedCheet },
+		{ userId, cheet, setErrors, setCheets, setComponentLoading, isDisabled, isModalView, setSelectedCheet },
 		ref
 	) => {
 		const { id } = useParams();
@@ -64,10 +64,10 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-				const updatedCheets = cheets.map((cheet) =>
-					cheet.uuid === updatedCheet.data.uuid ? updatedCheet.data : cheet
+
+				setCheets((prevCheets) =>
+					prevCheets.map((cheet) => (cheet.uuid === updatedCheet.data.uuid ? updatedCheet.data : cheet))
 				);
-				setCheets(updatedCheets);
 				if (isModalView) {
 					setSelectedCheet(updatedCheet.data);
 				}
@@ -88,8 +88,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 					withCredentials: true,
 				});
 
-				const updatedCheets = cheets.filter((c) => c.uuid !== cheet.uuid);
-				setCheets(updatedCheets);
+				setCheets((prevCheets) => prevCheets.filter((c) => c.uuid !== cheet.uuid));
 				setSelectedCheet(null);
 			} catch (error) {
 				handleErrors(error, "deleting the cheet", setErrors);
@@ -114,7 +113,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 								<Grid2 container>
 									<Grid2 size={6}>
 										<Typography>
-											<Link href={`/users/${cheet.user.uuid}`}>{cheet.user.username}</Link>
+											<Link component={RouterLink} to={`/users/${cheet.user.uuid}`}>
+												{cheet.user.username}
+											</Link>
 										</Typography>
 									</Grid2>
 									<Grid2 size={6}>
