@@ -21,8 +21,8 @@ interface Props {
 	closeModal: () => void;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	updateUnreadRef: React.MutableRefObject<boolean>;
+	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 }
 
@@ -33,8 +33,8 @@ const MessageModal: React.FC<Props> = ({
 	isDisabled,
 	closeModal,
 	setComponentLoading,
-	toggleReloadTrigger,
-	updateUnreadRef,
+	toggleUnreadTrigger,
+	toggleConversationsTrigger,
 	userPageId,
 }) => {
 	const [errors, setErrors] = useState<string[]>([]);
@@ -62,8 +62,8 @@ const MessageModal: React.FC<Props> = ({
 			}
 			if (conversation.unread) {
 				await markMessagesRead(conversation.interlocutorId);
-				updateUnreadRef.current = true;
-				toggleReloadTrigger((prev) => !prev);
+				toggleUnreadTrigger((prev) => !prev);
+				toggleConversationsTrigger((prev) => !prev);
 			}
 			setMessagesSet(true);
 		};
@@ -72,11 +72,11 @@ const MessageModal: React.FC<Props> = ({
 		isOpen,
 		conversation.interlocutorId,
 		conversation.unread,
-		updateUnreadRef,
 		page,
-		toggleReloadTrigger,
 		fetchMessages,
 		markMessagesRead,
+		toggleConversationsTrigger,
+		toggleUnreadTrigger
 	]);
 
 	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
@@ -200,8 +200,7 @@ const MessageModal: React.FC<Props> = ({
 										isDisabled={isDisabled || isMessagesLoading}
 										setComponentLoading={setComponentLoading}
 										setErrors={setErrors}
-										toggleReloadTrigger={toggleReloadTrigger}
-										updateUnreadRef={updateUnreadRef}
+										toggleReloadTrigger={toggleConversationsTrigger}
 										userPageId={userPageId}
 									/>
 								))}
@@ -211,13 +210,12 @@ const MessageModal: React.FC<Props> = ({
 							<SendMessage
 								recipientId={conversation.interlocutorId}
 								isDisabled={isDisabled || isMessagesLoading}
-								toggleReloadTrigger={toggleReloadTrigger}
+								toggleReloadTrigger={toggleConversationsTrigger}
 								setMessages={setMessages}
 								setErrors={setErrors}
 								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
-								updateUnreadRef={updateUnreadRef}
 								userPageId={userPageId}
 							/>
 						)}

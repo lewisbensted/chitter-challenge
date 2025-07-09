@@ -11,8 +11,9 @@ interface Props {
 	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	updateUnreadRef: React.MutableRefObject<boolean>;
+	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	
 }
 
 const ConversationIcon: React.FC<Props> = ({
@@ -21,8 +22,9 @@ const ConversationIcon: React.FC<Props> = ({
 	isDisabled,
 	setComponentLoading,
 	setConversations,
-	toggleReloadTrigger,
-	updateUnreadRef,
+	toggleConversationsTrigger,
+	toggleUnreadTrigger,
+
 }) => {
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
 
@@ -40,8 +42,8 @@ const ConversationIcon: React.FC<Props> = ({
 						setSelectedConversation(null);
 					}}
 					setConversations={setConversations}
-					toggleReloadTrigger={toggleReloadTrigger}
-					updateUnreadRef={updateUnreadRef}
+					toggleConversationsTrigger={toggleConversationsTrigger}
+					toggleUnreadTrigger={toggleUnreadTrigger}
 					userPageId={conversation.interlocutorId}
 				/>
 			)}

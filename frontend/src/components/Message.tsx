@@ -30,7 +30,6 @@ interface Props {
 	isDisabled: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	updateUnreadRef: React.MutableRefObject<boolean>;
 	userPageId?: string;
 }
 
@@ -45,7 +44,6 @@ const Message = forwardRef<HTMLDivElement, Props>(
 			isDisabled,
 			setComponentLoading,
 			toggleReloadTrigger,
-			updateUnreadRef,
 			userPageId,
 		},
 		ref
@@ -102,11 +100,9 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
 				));
 				if (isEditing) setEditing(false);
-
-				updateUnreadRef.current = false;
 				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
 				if (isLastMessage && !userPageId) {
-					toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
+					toggleReloadTrigger((prev) => !prev);
 				}
 			} catch (error) {
 				handleErrors(error, "deleting the message", setErrors);

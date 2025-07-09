@@ -24,7 +24,6 @@ import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
-import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	isDisabled: boolean;

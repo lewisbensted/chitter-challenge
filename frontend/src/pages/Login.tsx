@@ -3,7 +3,6 @@ import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import ErrorModal from "../components/ErrorModal";
-import Layout from "./Layout";
 import { serverURL } from "../config/config";
 import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -11,7 +10,7 @@ import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import Login from "@mui/icons-material/Login";
-import useValidateUser from "../hooks/useValidateUser";
+import { useAuth } from "../contexts/AuthContext";
 
 interface LoginFormFields {
 	username: string;
@@ -21,78 +20,76 @@ interface LoginFormFields {
 const SignIn: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<LoginFormFields>();
 	const navigate = useNavigate();
+	const { setComponentLoading } = useAuth();
 
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
 	const [errors, setErrors] = useState<string[]>([]);
 
-	const { userId, isValidateLoading, setUserId, setValidateLoading, validateUser } = useValidateUser();
+	const { userId, isValidateLoading, setUserId } = useAuth();
 
 	useEffect(() => {
-		void validateUser(setErrors, { isLoggedIn: true });
-	}, [validateUser]);
+		if (userId && !isValidateLoading) {
+			navigate("/");
+		}
+	}, [userId, isValidateLoading, navigate]);
 
 	const onSubmit: SubmitHandler<LoginFormFields> = async (data) => {
 		setFormLoading(true);
+		setComponentLoading(true);
 		reset();
 		try {
-			await axios.post(`${serverURL}/login`, data, { withCredentials: true });
+			const res = await axios.post<string>(`${serverURL}/login`, data, { withCredentials: true });
+			setUserId(res.data);
 			navigate("/");
 		} catch (error) {
 			handleErrors(error, "logging in", setErrors);
 		} finally {
 			setFormLoading(false);
+			setComponentLoading(false);
 		}
 	};
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Layout
-				isValidationLoading={isValidateLoading}
-				isDisabled={isFormLoading}
-				setPageLoading={setValidateLoading}
-				userId={userId}
-				setUserId={setUserId}
-			>
-				<Box>
-					<ErrorModal
-						errors={errors}
-						closeModal={() => {
-							setErrors([]);
-						}}
-					/>
+			<Box>
+				<ErrorModal
+					errors={errors}
+					closeModal={() => {
+						setErrors([]);
+					}}
+				/>
 
-					{isValidateLoading ? (
-						<FlexBox>
-							<CircularProgress thickness={5} />
-						</FlexBox>
-					) : (
-						<Fragment>
-							<Typography variant="h4">Sign In</Typography>
-							<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-								<Grid2 size={12} container display="block">
-									<Typography variant="subtitle1">Username:</Typography>
-									<TextField type="text" {...register("username")}></TextField>
+				{isValidateLoading ? (
+					<FlexBox>
+						<CircularProgress thickness={5} />
+					</FlexBox>
+				) : (
+					<Fragment>
+						<Typography variant="h4">Sign In</Typography>
+						<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+							<Grid2 size={12} container display="block">
+								<Typography variant="subtitle1">Username:</Typography>
+								<TextField type="text" {...register("username")}></TextField>
 
-									<Typography variant="subtitle1">Password:</Typography>
-									<TextField type="text" {...register("password")}></TextField>
-								</Grid2>
-								<Grid2 size={12}>
-									<FlexBox>
-										<Button type="submit" disabled={!!userId} variant="contained">
-											<Typography variant="button" color="inherit">
-												Sign in
-											</Typography>
-											<IconButton color="inherit">
-												<Login />
-											</IconButton>
-										</Button>
-									</FlexBox>
-								</Grid2>
+								<Typography variant="subtitle1">Password:</Typography>
+								<TextField type="text" {...register("password")}></TextField>
 							</Grid2>
-						</Fragment>
-					)}
-				</Box>
-			</Layout>
+							<Grid2 size={12}>
+								<FlexBox>
+									<Button type="submit" disabled={!!userId} variant="contained">
+										<Typography variant="button" color="inherit">
+											Sign in
+										</Typography>
+										<IconButton color="inherit">
+											<Login />
+										</IconButton>
+									</Button>
+								</FlexBox>
+							</Grid2>
+						</Grid2>
+					</Fragment>
+				)}
+			</Box>
 		</ThemeProvider>
 	);
 };

@@ -3,13 +3,13 @@ import { serverURL } from "../config/config";
 import { handleErrors } from "./handleErrors";
 
 const logout = async (
-	setPageLoading: React.Dispatch<React.SetStateAction<boolean>>,
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>,
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 	redirect: () => void
 ) => {
 	try {
-		setPageLoading(true);
+		setLoading(true);
 		await axios.delete(`${serverURL}/logout`, { withCredentials: true });
 		setUserId(null);
 		redirect();
@@ -21,7 +21,7 @@ const logout = async (
 			handleErrors(error, "logging out", setErrors);
 		}
 	} finally {
-		setPageLoading(false);
+		setLoading(false);
 	}
 };
 

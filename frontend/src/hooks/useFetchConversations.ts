@@ -7,90 +7,49 @@ import { useIsMounted } from "../utils/isMounted";
 
 interface UseFetchConversationsReturn {
 	conversations: IConversation[];
-	isUnreadMessages: boolean | undefined;
 	conversationsError: string | undefined;
 	isConversationsLoading: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
-	fetchConversationsData: (
-		updateUnreadRef: React.MutableRefObject<boolean>,
-		pageUserId?: string
-	) => Promise<void>;
-	fetchAndSetUnread: () => void;
+	fetchConversations: (pageUserId?: string) => Promise<void>;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [conversations, setConversations] = useState<IConversation[]>([]);
 	const [isConversationsLoading, setConversationsLoading] = useState<boolean>(true);
-	const [isUnreadMessages, setUnreadMessages] = useState<boolean>();
+
 	const [conversationsError, setConversationsError] = useState<string>("");
 
 	const isMounted = useIsMounted();
 
-	const fetchUnread = async () => {
-		const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
-		return res.data;
-	};
-
-	const fetchAndSetUnread = useCallback(async () => {
+	const fetchConversations = useCallback(async (pageUserId?: string) => {
 		try {
-			const unread = await fetchUnread();
-			if (isMounted()) setUnreadMessages(unread);
+			const res = await axios.get<IConversation[]>(
+				`${serverURL}/conversations${pageUserId ? "/" + pageUserId : ""}`,
+				{
+					withCredentials: true,
+				}
+			);
+			if (isMounted()) setConversations(res.data);
 		} catch (error) {
 			logErrors(error);
+			if (isMounted()) setConversationsError("An unexpected error occured while loading conversations.");
 		} finally {
 			if (isMounted()) setConversationsLoading(false);
 		}
 	}, []);
 
-	const fetchConversations = async (id?: string) => {
-		const res = await axios.get<IConversation[]>(`${serverURL}/conversations${id ? "/" + id : ""}`, {
-			withCredentials: true,
-		});
-		return res.data;
-	};
 
-	const fetchConversationsData = useCallback(
-		async (
-			updateUnreadRef: React.MutableRefObject<boolean>,
-			pageUserId?: string
-		) => {
-			const [conversationsResult, unreadResult] = await Promise.allSettled([
-				fetchConversations(pageUserId),
-				updateUnreadRef.current ? fetchUnread() : Promise.resolve(undefined),
-			]);
-
-			if (conversationsResult.status === "fulfilled") {
-				if (isMounted()) setConversations(conversationsResult.value);
-			} else {
-				logErrors(conversationsResult.reason);
-				if (isMounted()) setConversationsError("An unexpected error occured while loading conversations.");
-			}
-
-			if (updateUnreadRef.current) {
-				if (unreadResult.status === "fulfilled") {
-					if (isMounted()) setUnreadMessages(unreadResult.value);
-				} else {
-					logErrors(unreadResult.reason);
-				}
-			}
-
-			if (isMounted()) setConversationsLoading(false);
-		},
-		[]
-	);
 
 	return {
 		conversations,
-		isUnreadMessages,
 		isConversationsLoading,
 		conversationsError,
 		setConversationsError,
 		setConversations,
 		setConversationsLoading,
-		fetchAndSetUnread,
-		fetchConversationsData,
+		fetchConversations,
 	};
 };
 

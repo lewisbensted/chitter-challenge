@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import logout from "../utils/logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import DrawerElement from "../components/DrawerElement";
@@ -13,35 +13,37 @@ import AppRegistration from "@mui/icons-material/AppRegistration";
 import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
-
-interface Props {
-	isDisabled: boolean;
-	userId?: string | null;
-	setPageLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
-	isValidationLoading: boolean;
-	children: React.JSX.Element;
-	isUnreadMessages?: boolean;
-}
+import { useAuth } from "../contexts/AuthContext";
 
 const drawerWidth = 200;
 
-const Layout: React.FC<Props> = ({
-	children,
-	isDisabled,
-	setPageLoading,
-	userId,
-	setUserId,
-	isValidationLoading,
-	isUnreadMessages,
-}) => {
+const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
 	const [errors, setErrors] = useState<string[]>([]);
+	const {
+		userId,
+		setUserId,
+		validateUser,
+		isValidateLoading,
+		isComponentLoading,
+		isUnreadLoading,
+		isUnreadMessages,
+		setComponentLoading,
+		fetchUnread,
+	} = useAuth();
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		validateUser();
+	}, [validateUser]);
+
+	useEffect(() => {
+		fetchUnread();
+	}, [userId, fetchUnread]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -75,23 +77,23 @@ const Layout: React.FC<Props> = ({
 							isDrawerOpen={isDrawerOpen}
 						></DrawerElement>
 						<Divider />
-						{!isValidationLoading &&
+						{!(isValidateLoading || isUnreadLoading) &&
 							(userId ? (
 								<Fragment>
 									<DrawerElement
 										link="/conversations"
 										text="Messages"
 										icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
-										isDisabled={isDisabled}
+										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
 										text="Log out"
 										icon={<Logout />}
-										isDisabled={isDisabled}
+										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
-											await logout(setPageLoading, setUserId, setErrors, () => {
+											await logout(setComponentLoading, setUserId, setErrors, () => {
 												navigate("/login");
 											});
 										}}
@@ -103,14 +105,14 @@ const Layout: React.FC<Props> = ({
 										link="/register"
 										text="Register"
 										icon={<AppRegistration />}
-										isDisabled={isDisabled}
+										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
 										link="/login"
 										text="Log in"
 										icon={<Login />}
-										isDisabled={isDisabled}
+										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 									/>
 								</Fragment>
@@ -120,12 +122,12 @@ const Layout: React.FC<Props> = ({
 							link="/"
 							text="Home"
 							icon={<Home />}
-							isDisabled={isDisabled}
+							isDisabled={isComponentLoading}
 							isDrawerOpen={isDrawerOpen}
 						/>
 					</List>
 				</Drawer>
-				{children}
+				<Outlet />
 			</Box>
 		</ThemeProvider>
 	);
