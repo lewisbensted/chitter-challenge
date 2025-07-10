@@ -2,8 +2,9 @@ import { useCallback, useRef, useState } from "react";
 import { ICheet } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
+import { useError } from "../contexts/ErrorContext";
 
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
@@ -12,7 +13,6 @@ interface UseFetchCheetsReturn {
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	fetchCheets: (
-		setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 		take: number,
 		userId?: string
 	) => Promise<void>;
@@ -27,10 +27,12 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const cursorRef = useRef<string>();
 	const hasLoadedOnceRef = useRef<boolean>(false);
 
+	const { handleErrors } = useError();
+
 	const isMounted = useIsMounted();
 
 	const fetchCheets = useCallback(
-		async (setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number, userId?: string) => {
+		async (take: number, userId?: string) => {
 			try {
 				setCheetsLoading(true);
 
@@ -63,7 +65,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 					logErrors(error);
 					if (isMounted()) setCheetsError("An unexpected error occured while loading cheets.");
 				} else {
-					handleErrors(error, "loading cheets", setErrors);
+					handleErrors(error, "loading cheets");
 					if (isMounted()) setHasNextPage(false);
 				}
 			} finally {

@@ -6,7 +6,7 @@ import ListItemButton from "@mui/material/ListItemButton/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText/ListItemText";
 import theme from "../styles/theme";
-import { Link, ThemeProvider } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
@@ -23,8 +23,7 @@ const DrawerElement: React.FC<Props> = ({ link, icon, isDisabled, isDrawerOpen, 
 		<ListItem>
 			<ListItemButton
 				onClick={onClick}
-				component = {RouterLink}
-				to={link ?? ""}
+				{...(link ? { component: RouterLink, to: link } : { component: "div" })}
 				sx={{
 					justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center",
 					pointerEvents: isDisabled ? "none" : undefined,
@@ -33,11 +32,7 @@ const DrawerElement: React.FC<Props> = ({ link, icon, isDisabled, isDrawerOpen, 
 				<ListItemIcon sx={{ justifyContent: "center" }}>
 					<IconButton>{icon}</IconButton>
 				</ListItemIcon>
-				{isDrawerOpen && (
-					<Link>
-						<ListItemText primary={text} />
-					</Link>
-				)}
+				{isDrawerOpen && <ListItemText primary={text} />}
 			</ListItemButton>
 		</ListItem>
 	</ThemeProvider>

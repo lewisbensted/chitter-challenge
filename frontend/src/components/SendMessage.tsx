@@ -3,13 +3,13 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	recipientId: string;
@@ -28,7 +28,6 @@ const SendMessage: React.FC<Props> = ({
 	isDisabled,
 	toggleReloadTrigger,
 	setMessages,
-	setErrors,
 	setComponentLoading,
 	triggerScroll,
 	setMessagesError,
@@ -37,7 +36,7 @@ const SendMessage: React.FC<Props> = ({
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
-	
+	const { handleErrors } = useError();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
@@ -55,7 +54,7 @@ const SendMessage: React.FC<Props> = ({
 
 			setMessagesError("");
 		} catch (error) {
-			handleErrors(error, "sending message", setErrors);
+			handleErrors(error, "sending message");
 		} finally {
 			setSubmitLoading(false);
 			setComponentLoading(false);

@@ -3,13 +3,13 @@ import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ICheet, IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
 import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	selectedCheet: ICheet;
@@ -28,7 +28,6 @@ const SendReply: React.FC<Props> = ({
 	selectedCheet,
 	isDisabled,
 	setReplies,
-	setErrors,
 	setComponentLoading,
 	triggerScroll,
 	repliesLengthRef,
@@ -38,6 +37,8 @@ const SendReply: React.FC<Props> = ({
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
+
+	const { handleErrors } = useError();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
@@ -66,7 +67,7 @@ const SendReply: React.FC<Props> = ({
 			repliesLengthRef.current++;
 			setRepliesError("");
 		} catch (error) {
-			handleErrors(error, "sending the reply", setErrors);
+			handleErrors(error, "sending the reply");
 		} finally {
 			setSubmitLoading(false);
 			setComponentLoading(false);

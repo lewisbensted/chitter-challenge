@@ -10,7 +10,7 @@ router.post("/", async (req: Request, res: Response) => {
 	const { username, password } = req.body as { username: string | undefined; password: string | undefined };
 	try {
 		if (authenticate(req)) {
-			res.status(403).json(["Already logged in."]);
+			res.status(403).json({ errors: ["Already logged in."] });
 		} else if (!username || !password) {
 			const errors: string[] = [];
 			if (!username) {
@@ -19,7 +19,7 @@ router.post("/", async (req: Request, res: Response) => {
 			if (!password) {
 				errors.push("Password not provided.");
 			}
-			res.status(400).json(errors);
+			res.status(400).json({ errors: errors });
 		} else {
 			const user = await prisma.user.findUnique({
 				where: { username: username },
@@ -31,15 +31,15 @@ router.post("/", async (req: Request, res: Response) => {
 					res.cookie("session_id", req.sessionID);
 					res.status(200).json(user.uuid);
 				} else {
-					res.status(401).json(["Incorrect password."]);
+					res.status(401).json({ errors: ["Incorrect password."] });
 				}
 			} else {
-				res.status(404).json(["User does not exist."]);
+				res.status(404).json({ errors: ["User does not exist."] });
 			}
 		}
 	} catch (error) {
 		console.error("Error logging in:\n" + logError(error));
-		res.status(500).json(["An unexpected error occured."]);
+		res.status(500).json({ errors: ["An unexpected error occured."] });
 	}
 });
 

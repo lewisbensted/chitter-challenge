@@ -2,7 +2,8 @@ import React from "react";
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { logErrors } from "../utils/processErrors";
+import { useError } from "./ErrorContext";
 
 interface AuthContextType {
 	userId: string | null | undefined;
@@ -24,9 +25,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [userId, setUserId] = useState<string | null>();
 	const [isValidateLoading, setValidateLoading] = useState(true);
 	const [isComponentLoading, setComponentLoading] = useState(false);
-	const [errors, setErrors] = useState<string[]>([]);
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
 	const [isUnreadLoading, setUnreadLoading] = useState<boolean>(false);
+
+	const { handleErrors } = useError();
 
 	const fetchUnread = useCallback(async () => {
 		if (userId === undefined) {
@@ -56,12 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			if (axios.isAxiosError(error) && error.response?.status === 401) {
 				setUserId(null);
 			} else {
-				handleErrors(error, "fetching page information", setErrors);
+				handleErrors(error, "fetching page information");
 			}
 		} finally {
 			setValidateLoading(false);
 		}
-	}, []);
+	}, [handleErrors]);
 
 	return (
 		<AuthContext.Provider
@@ -87,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
 	const context = useContext(AuthContext);
 	if (!context) {
-		throw new Error("useAuth must be used within an AuthProvider");
+		throw new Error("useAuth must be used within an AuthProvider.");
 	}
 	return context;
 };

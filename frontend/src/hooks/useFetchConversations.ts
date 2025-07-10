@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { IConversation } from "../interfaces/interfaces";
-import { logErrors } from "../utils/handleErrors";
+import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 
 interface UseFetchConversationsReturn {
@@ -39,8 +39,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 			if (isMounted()) setConversationsLoading(false);
 		}
 	}, []);
-
-
 
 	return {
 		conversations,

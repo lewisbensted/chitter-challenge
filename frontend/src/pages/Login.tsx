@@ -4,13 +4,13 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import FlexBox from "../styles/FlexBox";
-import { Box, Button, Grid2, IconButton, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import Login from "@mui/icons-material/Login";
 import { useAuth } from "../contexts/AuthContext";
+import { useError } from "../contexts/ErrorContext";
 
 interface LoginFormFields {
 	username: string;
@@ -20,16 +20,15 @@ interface LoginFormFields {
 const SignIn: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<LoginFormFields>();
 	const navigate = useNavigate();
-	const { setComponentLoading } = useAuth();
-
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
-	const [errors, setErrors] = useState<string[]>([]);
 
-	const { userId, isValidateLoading, setUserId } = useAuth();
+	const { errors, clearErrors, handleErrors } = useError();
+
+	const { userId, isValidateLoading, setUserId, setComponentLoading } = useAuth();
 
 	useEffect(() => {
 		if (userId && !isValidateLoading) {
-			navigate("/");
+			void navigate("/");
 		}
 	}, [userId, isValidateLoading, navigate]);
 
@@ -40,9 +39,9 @@ const SignIn: React.FC = () => {
 		try {
 			const res = await axios.post<string>(`${serverURL}/login`, data, { withCredentials: true });
 			setUserId(res.data);
-			navigate("/");
+			void navigate("/");
 		} catch (error) {
-			handleErrors(error, "logging in", setErrors);
+			handleErrors(error, "logging in");
 		} finally {
 			setFormLoading(false);
 			setComponentLoading(false);
@@ -52,12 +51,7 @@ const SignIn: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Box>
-				<ErrorModal
-					errors={errors}
-					closeModal={() => {
-						setErrors([]);
-					}}
-				/>
+				<ErrorModal errors={errors} closeModal={clearErrors} />
 
 				{isValidateLoading ? (
 					<FlexBox>
@@ -76,14 +70,17 @@ const SignIn: React.FC = () => {
 							</Grid2>
 							<Grid2 size={12}>
 								<FlexBox>
-									<Button type="submit" disabled={!!userId} variant="contained">
-										<Typography variant="button" color="inherit">
-											Sign in
-										</Typography>
-										<IconButton color="inherit">
+									{isFormLoading ? (
+										<CircularProgress size="2.1rem" thickness={6} />
+									) : (
+										<Button type="submit" disabled={!!userId} variant="contained">
+											<Typography variant="button" color="inherit">
+												Sign in
+											</Typography>
+
 											<Login />
-										</IconButton>
-									</Button>
+										</Button>
+									)}
 								</FlexBox>
 							</Grid2>
 						</Grid2>

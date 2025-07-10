@@ -4,13 +4,13 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 import FlexBox from "../styles/FlexBox";
 import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	isDisabled: boolean;
@@ -25,7 +25,6 @@ const SendCheet: React.FC<Props> = ({
 	isDisabled,
 	setCheets,
 	setCheetsError,
-	setErrors,
 	setComponentLoading,
 	triggerScroll,
 }) => {
@@ -33,6 +32,7 @@ const SendCheet: React.FC<Props> = ({
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
+	const { handleErrors } = useError();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
@@ -47,7 +47,7 @@ const SendCheet: React.FC<Props> = ({
 			triggerScroll((prev) => !prev);
 			setCheetsError("");
 		} catch (error) {
-			handleErrors(error, "sending cheet", setErrors);
+			handleErrors(error, "sending cheet");
 		} finally {
 			setSubmitLoading(false);
 			setComponentLoading(false);

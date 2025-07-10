@@ -87,10 +87,10 @@ router.put("/:replyId", authMiddleware, async (req: EditReplyRequest, res: Respo
 					return res.status(200).json(targetReply);
 				}
 			} else {
-				res.status(403).json(["Cheet IDs do not match."]);
+				res.status(403).json({ errors: ["Cheet IDs do not match."] });
 			}
 		} else {
-			res.status(403).json(["Cannot update someone else's reply."]);
+			res.status(403).json({ errors: ["Cannot update someone else's reply."] });
 		}
 	} catch (error) {
 		console.error("Error updating reply in the database:\n" + logError(error));
@@ -114,10 +114,10 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 				});
 				res.sendStatus(204);
 			} else {
-				res.status(403).json(["Cheet IDs do not match."]);
+				res.status(403).json({errors:["Cheet IDs do not match."]});
 			}
 		} else {
-			res.status(403).json(["Cannot delete someone else's reply."]);
+			res.status(403).json({errors:["Cannot delete someone else's reply."]});
 		}
 	} catch (error) {
 		console.error("Error deleting reply from database:\n" + logError(error));

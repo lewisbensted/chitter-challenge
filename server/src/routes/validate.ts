@@ -9,7 +9,7 @@ router.get("/", authMiddleware, (req: Request, res: Response) => {
 		res.status(200).json(req.session.user!.uuid);
 	} catch (error) {
 		console.error("Error authenticating user:\n" + logError(error));
-		res.status(500).json(["An unexpected error occured."]);
+		res.status(500).json({ errors: ["An unexpected error occured."] });
 	}
 });
 

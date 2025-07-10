@@ -4,7 +4,6 @@ import { IMessage } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import {
 	Box,
 	Card,
@@ -20,6 +19,7 @@ import {
 import { Delete, Done, Edit } from "@mui/icons-material";
 import theme from "../styles/theme";
 import { formatDate } from "../utils/formatDate";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	userId?: string | null;
@@ -35,23 +35,15 @@ interface Props {
 
 const Message = forwardRef<HTMLDivElement, Props>(
 	(
-		{
-			userId,
-			message,
-			messages,
-			setErrors,
-			setMessages,
-			isDisabled,
-			setComponentLoading,
-			toggleReloadTrigger,
-			userPageId,
-		},
+		{ userId, message, messages, setMessages, isDisabled, setComponentLoading, toggleReloadTrigger, userPageId },
 		ref
 	) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 		const [isEditing, setEditing] = useState<boolean>(false);
+
+		const { handleErrors } = useError();
 
 		useEffect(() => {
 			if (isEditing && message.text) {
@@ -77,7 +69,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					)
 				);
 			} catch (error) {
-				handleErrors(error, "editing the message", setErrors);
+				handleErrors(error, "editing the message");
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
@@ -96,16 +88,18 @@ const Message = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-				setMessages((prevMessages) => prevMessages.map((message) =>
-					message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
-				));
+				setMessages((prevMessages) =>
+					prevMessages.map((message) =>
+						message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
+					)
+				);
 				if (isEditing) setEditing(false);
 				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
 				if (isLastMessage && !userPageId) {
 					toggleReloadTrigger((prev) => !prev);
 				}
 			} catch (error) {
-				handleErrors(error, "deleting the message", setErrors);
+				handleErrors(error, "deleting the message");
 			} finally {
 				setDeleteLoading(false);
 				setComponentLoading(false);

@@ -16,9 +16,9 @@ router.post("/", async (req: RegisterUserRequest, res: Response) => {
 	} catch (error) {
 		console.error("Error saving user to the database:\n" + logError(error));
 		if (error instanceof ZodError) {
-			res.status(400).json(error.errors.map((err) => err.message));
+			res.status(400).json({ errors: error.errors.map((err) => err.message) });
 		} else {
-			res.status(500).json(["An unexpected error occured."]);
+			res.status(500).json({ errors: ["An unexpected error occured."] });
 		}
 	}
 });

@@ -8,7 +8,7 @@ router.delete("/", (req: Request, res: Response) => {
 		req.session.destroy((error: unknown) => {
 			if (error) {
 				console.error("Error logging out:\n" + logError(error));
-				res.status(500).json(["An unexpected error occured."]);
+				res.status(500).json({ errors: ["An unexpected error occured."] });
 			} else {
 				Object.keys(req.cookies).forEach((key) => {
 					res.clearCookie(key);
@@ -17,7 +17,7 @@ router.delete("/", (req: Request, res: Response) => {
 			}
 		});
 	} else {
-		res.status(403).json(["Not logged in."]);
+		res.status(403).json({ errors: ["Not logged in."] });
 	}
 });
 

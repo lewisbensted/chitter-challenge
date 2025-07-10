@@ -12,6 +12,7 @@ import Cheet from "./Cheet";
 import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
 import useFetchReplies from "../hooks/useFetchReplies";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	userId?: string | null;
@@ -35,7 +36,7 @@ const CheetModal: React.FC<Props> = ({
 	numberOfCheets,
 	setSelectedCheet,
 }) => {
-	const [errors, setErrors] = useState<string[]>([]);
+	const { errors, setErrors, clearErrors } = useError();
 	const [page, setPage] = useState<number>(0);
 
 	const {
@@ -52,7 +53,7 @@ const CheetModal: React.FC<Props> = ({
 
 	useEffect(() => {
 		if (isOpen) {
-			void fetchReplies(cheet.uuid, setErrors, page === 0 ? 10 : 5);
+			void fetchReplies(cheet.uuid, page === 0 ? 10 : 5);
 		}
 	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
 
@@ -86,9 +87,7 @@ const CheetModal: React.FC<Props> = ({
 			<Dialog open={isOpen} fullWidth maxWidth="md">
 				<ErrorModal
 					errors={errors}
-					closeModal={() => {
-						setErrors([]);
-					}}
+					closeModal={clearErrors}
 				/>
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />

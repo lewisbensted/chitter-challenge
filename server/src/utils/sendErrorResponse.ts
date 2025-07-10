@@ -4,11 +4,11 @@ import { ZodError } from "zod";
 
 export const sendErrorResponse = (error: unknown, res: Response) => {
 	if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
-		res.status(404).json([error.meta?.cause]);
+		res.status(404).json({ errors: [error.meta?.cause] });
 	} else if (error instanceof ZodError) {
 		const errors = error.errors.map((err) => err.message);
-		res.status(400).json(errors);
+		res.status(400).json({errors: errors});
 	} else {
-		res.status(500).json(["An unexpected error occured."]);
+		res.status(500).json({ errors: ["An unexpected error occured."] });
 	}
 };

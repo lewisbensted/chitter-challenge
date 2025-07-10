@@ -10,10 +10,11 @@ import useFetchCheets from "../hooks/useFetchCheets";
 import CheetModal from "../components/CheetModal";
 import { ICheet } from "../interfaces/interfaces";
 import { useAuth } from "../contexts/AuthContext";
+import { useError } from "../contexts/ErrorContext";
 
 const Homepage: React.FC = () => {
 	const { userId, isValidateLoading, isComponentLoading, setComponentLoading } = useAuth();
-	const [errors, setErrors] = useState<string[]>([]);
+	const { errors, setErrors, clearErrors } = useError();
 	const [page, setPage] = useState<number>(0);
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
@@ -21,7 +22,7 @@ const Homepage: React.FC = () => {
 		useFetchCheets();
 
 	useEffect(() => {
-		void fetchCheets(setErrors, page === 0 ? 10 : 5);
+		void fetchCheets(page === 0 ? 10 : 5);
 	}, [page, fetchCheets]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -56,11 +57,8 @@ const Homepage: React.FC = () => {
 		<Box>
 			<ErrorModal
 				errors={errors}
-				closeModal={() => {
-					setErrors([]);
-				}}
+				closeModal={clearErrors}
 			/>
-			<Typography variant="h4">Welcome to Chitter</Typography>
 
 			{isValidateLoading ? (
 				<FlexBox>
@@ -68,6 +66,7 @@ const Homepage: React.FC = () => {
 				</FlexBox>
 			) : (
 				<Fragment>
+					<Typography variant="h4">Welcome to Chitter</Typography>
 					{cheetsError ? (
 						<Typography variant="subtitle1">{cheetsError}</Typography>
 					) : (

@@ -3,7 +3,6 @@ import axios from "axios";
 import { IReply } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Edit from "@mui/icons-material/Edit";
 import Done from "@mui/icons-material/Done";
@@ -24,6 +23,7 @@ import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	isDisabled: boolean;
@@ -37,11 +37,13 @@ interface Props {
 }
 
 const Reply = forwardRef<HTMLDivElement, Props>(
-	({ reply, cheetId, isDisabled, setComponentLoading, setReplies, setErrors, userId }, ref) => {
+	({ reply, cheetId, isDisabled, setComponentLoading, setReplies, userId }, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+		const { handleErrors } = useError();
 
 		useEffect(() => {
 			if (isEditing) {
@@ -61,11 +63,11 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 					}
 				);
 
-				setReplies((prevReplies) => prevReplies.map((reply) =>
-					reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply
-				));
+				setReplies((prevReplies) =>
+					prevReplies.map((reply) => (reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply))
+				);
 			} catch (error) {
-				handleErrors(error, "editing the reply", setErrors);
+				handleErrors(error, "editing the reply");
 			} finally {
 				setEditLoading(false);
 				setEditing(false);
@@ -83,7 +85,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 				});
 				setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
 			} catch (error) {
-				handleErrors(error, "deleting the reply", setErrors);
+				handleErrors(error, "deleting the reply");
 			} finally {
 				setDeleteLoading(false);
 				setComponentLoading(false);

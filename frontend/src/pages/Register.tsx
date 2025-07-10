@@ -4,15 +4,14 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import ErrorModal from "../components/ErrorModal";
 import SuccessModal from "../components/SuccessModal";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import AppRegistration from "@mui/icons-material/AppRegistration";
-import IconButton from "@mui/material/IconButton/IconButton";
 import FlexBox from "../styles/FlexBox";
 import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useError } from "../contexts/ErrorContext";
 
 interface RegisterFormFields {
 	firstName: string;
@@ -26,14 +25,14 @@ const Register: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<RegisterFormFields>();
 
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
-	const [errors, setErrors] = useState<string[]>([]);
+	const { errors, clearErrors, handleErrors } = useError();
 	const [isSuccessOpen, setSuccessOpen] = useState<boolean>(false);
 	const { userId, isValidateLoading, setComponentLoading } = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (userId && !isValidateLoading) {
-			navigate("/");
+			void navigate("/");
 		}
 	}, [userId, isValidateLoading, navigate]);
 
@@ -45,7 +44,7 @@ const Register: React.FC = () => {
 			await axios.post(`${serverURL}/register`, data);
 			setSuccessOpen(true);
 		} catch (error) {
-			handleErrors(error, "registering the user", setErrors);
+			handleErrors(error, "registering the user");
 		} finally {
 			setFormLoading(false);
 			setComponentLoading(false);
@@ -55,12 +54,7 @@ const Register: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Box>
-				<ErrorModal
-					errors={errors}
-					closeModal={() => {
-						setErrors([]);
-					}}
-				/>
+				<ErrorModal errors={errors} closeModal={clearErrors} />
 				<SuccessModal
 					isOpen={isSuccessOpen}
 					message="Account created."
@@ -87,22 +81,19 @@ const Register: React.FC = () => {
 								<TextField type="text" {...register("password")}></TextField>
 								<Typography variant="subtitle1">E-mail:</Typography>
 								<TextField type="text" {...register("email")}></TextField>
-								{isFormLoading ? (
-									<FlexBox>
-										<CircularProgress thickness={5} />
-									</FlexBox>
-								) : (
-									<FlexBox>
+								<FlexBox>
+									{isFormLoading ? (
+										<CircularProgress size="2.1rem" thickness={6} />
+									) : (
 										<Button type="submit" disabled={!!userId} variant="contained">
 											<Typography variant="button" color="inherit">
 												Register
 											</Typography>
-											<IconButton color="inherit">
-												<AppRegistration />
-											</IconButton>
+
+											<AppRegistration />
 										</Button>
-									</FlexBox>
-								)}
+									)}
+								</FlexBox>
 							</Grid2>
 						</Grid2>
 					</Fragment>

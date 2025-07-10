@@ -72,10 +72,10 @@ router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Respo
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 			if (targetCheet.createdAt < oneHourAgo) {
-				return res.status(400).json(["Cheet cannot be updated (time limit exceeded)."]);
+				return res.status(400).json({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
 			}
 			if (targetCheet.cheetStatus?.hasReplies) {
-				return res.status(400).json(["Cannot update a cheet with replies."]);
+				return res.status(400).json({ errors: ["Cannot update a cheet with replies."] });
 			}
 			if (req.body.text !== targetCheet.text) {
 				const updatedCheet = await prisma.cheet.update({
@@ -91,7 +91,7 @@ router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Respo
 				return res.status(200).json(targetCheet);
 			}
 		} else {
-			res.status(403).json(["Cannot update someone else's cheet."]);
+			res.status(403).json({ errors: ["Cannot update someone else's cheet."] });
 		}
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));
@@ -117,7 +117,7 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 
 			res.sendStatus(204);
 		} else {
-			res.status(403).json(["Cannot delete someone else's cheet."]);
+			res.status(403).json({ errors: ["Cannot delete someone else's cheet."] });
 		}
 	} catch (error) {
 		console.error("Error deleting cheet from the database:\n" + logError(error));

@@ -2,8 +2,9 @@ import { useCallback, useRef, useState } from "react";
 import { IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
+import { useError } from "../contexts/ErrorContext";
 
 interface UseFetchRepliesReturn {
 	replies: IReply[];
@@ -15,7 +16,6 @@ interface UseFetchRepliesReturn {
 	setRepliesLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	fetchReplies: (
 		cheetId: string,
-		setErrors: React.Dispatch<React.SetStateAction<string[]>>,
 		take: number,
 		userId?: string
 	) => Promise<void>;
@@ -30,11 +30,12 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
 	const hasLoadedOnceRef = useRef<boolean>(false);
+	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
 
 	const fetchReplies = useCallback(
-		async (cheetId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number) => {
+		async (cheetId: string, take: number) => {
 			try {
 				setRepliesLoading(true);
 
@@ -68,7 +69,7 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 					logErrors(error);
 					if (isMounted()) setRepliesError("An unexpected error occured while loading replies.");
 				} else {
-					handleErrors(error, "loading replies", setErrors);
+					handleErrors(error, "loading replies");
 					if (isMounted()) setHasNextPage(false);
 				}
 			} finally {

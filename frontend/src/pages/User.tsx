@@ -5,7 +5,6 @@ import { ICheet, IUser } from "../interfaces/interfaces";
 import ErrorModal from "../components/ErrorModal";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Box, Grid2, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
@@ -15,10 +14,10 @@ import useFetchCheets from "../hooks/useFetchCheets";
 import useFetchConversations from "../hooks/useFetchConversations";
 import CheetModal from "../components/CheetModal";
 import { useAuth } from "../contexts/AuthContext";
+import { useError } from "../contexts/ErrorContext";
 
 const User: React.FC = () => {
 	const [username, setUsername] = useState<string>();
-	const [errors, setErrors] = useState<string[]>([]);
 	const [page, setPage] = useState<number>(0);
 	const [isUserLoading, setUserLoading] = useState(true);
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
@@ -30,14 +29,11 @@ const User: React.FC = () => {
 	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, fetchCheets } =
 		useFetchCheets();
 
-	const { fetchConversations, conversations, isConversationsLoading, setConversations } =
-		useFetchConversations();
+	const { fetchConversations, conversations, isConversationsLoading, setConversations } = useFetchConversations();
 
-	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, fetchUnread } =
-		useAuth();
+	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, fetchUnread } = useAuth();
 
-	console.log(userId);
-
+	const { errors, setErrors, clearErrors, handleErrors } = useError();
 
 	useEffect(() => {
 		if (!id) return;
@@ -47,20 +43,20 @@ const User: React.FC = () => {
 				setUsername(res.data.username);
 			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 404) {
-					navigate("/");
+					void navigate("/");
 				} else {
-					handleErrors(error, "fetching page information", setErrors);
+					handleErrors(error, "fetching page information");
 				}
 			} finally {
 				setUserLoading(false);
 			}
 		};
 		void fetchUser();
-	}, [id, navigate]);
+	}, [id, navigate, handleErrors]);
 
 	useEffect(() => {
 		if (!id) return;
-		void fetchCheets(setErrors, page === 0 ? 10 : 5, id);
+		void fetchCheets(page === 0 ? 10 : 5, id);
 	}, [id, page, fetchCheets]);
 
 	const isFirstLoad = useRef(true);
@@ -70,7 +66,7 @@ const User: React.FC = () => {
 			isFirstLoad.current = false;
 			return;
 		}
-		fetchUnread();
+		void fetchUnread();
 	}, [reloadUnreadTrigger, fetchUnread]);
 
 	const [reloadConversationsTrigger, toggleConversationTrigger] = useState<boolean>(false);
@@ -106,12 +102,7 @@ const User: React.FC = () => {
 
 	return (
 		<Box>
-			<ErrorModal
-				errors={errors}
-				closeModal={() => {
-					setErrors([]);
-				}}
-			/>
+			<ErrorModal errors={errors} closeModal={clearErrors} />
 			{isValidateLoading || isUserLoading || isConversationsLoading ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />
@@ -129,7 +120,7 @@ const User: React.FC = () => {
 								setConversations={() => {
 									setConversations(conversations);
 								}}
-								toggleUnreadTrigger = {toggleUnreadTrigger}
+								toggleUnreadTrigger={toggleUnreadTrigger}
 								toggleConversationsTrigger={toggleConversationTrigger}
 							/>
 						)}

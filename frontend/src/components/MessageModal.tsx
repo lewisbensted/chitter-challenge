@@ -12,6 +12,7 @@ import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
 import { Link as RouterLink } from "react-router-dom";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	userId?: string | null;
@@ -37,7 +38,7 @@ const MessageModal: React.FC<Props> = ({
 	toggleConversationsTrigger,
 	userPageId,
 }) => {
-	const [errors, setErrors] = useState<string[]>([]);
+	const { errors, setErrors, clearErrors } = useError();
 	const [page, setPage] = useState<number>(0);
 
 	const {
@@ -56,7 +57,7 @@ const MessageModal: React.FC<Props> = ({
 	useEffect(() => {
 		if (!isOpen) return;
 		const loadAndMarkRead = async () => {
-			await fetchMessages(conversation.interlocutorId, setErrors, page === 0 ? 20 : 10);
+			await fetchMessages(conversation.interlocutorId, page === 0 ? 20 : 10);
 			if (page === 0) {
 				toggleScrollTrigger((prev) => !prev);
 			}
@@ -147,9 +148,7 @@ const MessageModal: React.FC<Props> = ({
 			>
 				<ErrorModal
 					errors={errors}
-					closeModal={() => {
-						setErrors([]);
-					}}
+					closeModal={clearErrors}
 				/>
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />

@@ -2,10 +2,27 @@ import { useCallback, useRef, useState } from "react";
 import { IMessage } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
-import { handleErrors, logErrors } from "../utils/handleErrors";
+import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
+import { useError } from "../contexts/ErrorContext";
 
-const useFetchMessages = () => {
+interface UseFetchMessagesReturn {
+	messages: IMessage[];
+	isMessagesLoading: boolean;
+	messagesError: string;
+	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
+	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
+	fetchMessages: (
+		interlocutorId: string,
+		take: number
+	) => Promise<void>;
+	hasNextPage: boolean;
+	setMessagesLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	refreshMessages: (interlocutorId: string) => void;
+	markMessagesRead: (interlocutorId: string) => Promise<void>;
+}
+
+const useFetchMessages = (): UseFetchMessagesReturn => {
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [messagesError, setMessagesError] = useState<string>("");
@@ -13,10 +30,12 @@ const useFetchMessages = () => {
 	const cursorRef = useRef<string>();
 	const hasLoadedOnceRef = useRef<boolean>(false);
 
+	const { handleErrors } = useError();
+
 	const isMounted = useIsMounted();
 
 	const fetchMessages = useCallback(
-		async (interlocutorId: string, setErrors: React.Dispatch<React.SetStateAction<string[]>>, take: number) => {
+		async (interlocutorId: string, take: number) => {
 			try {
 				setMessagesLoading(true);
 
@@ -45,7 +64,7 @@ const useFetchMessages = () => {
 					logErrors(error);
 					if (isMounted()) setMessagesError("An unexpected error occurred while loading messages.");
 				} else {
-					handleErrors(error, "loading messages", setErrors);
+					handleErrors(error, "loading messages");
 					if (isMounted()) setHasNextPage(false);
 				}
 			} finally {

@@ -114,10 +114,10 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			if (targetMessage.messageStatus?.isRead) {
-				return res.status(400).json(["Cannot update a message after it has been read."]);
+				return res.status(400).json({ errors: ["Cannot update a message after it has been read."] });
 			}
 			if (targetMessage.messageStatus?.isDeleted) {
-				return res.status(400).json(["Cannot update a deleted message."]);
+				return res.status(400).json({ errors: ["Cannot update a deleted message."] });
 			}
 			if (req.body.text !== targetMessage.text) {
 				const updatedMessage = await prisma.message.update({
@@ -131,7 +131,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 				return res.status(200).json(targetMessage);
 			}
 		} else {
-			res.status(403).json(["Cannot update someone else's message."]);
+			res.status(403).json({ errors: ["Cannot update someone else's message."] });
 		}
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));
@@ -159,7 +159,7 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 			});
 			res.status(200).json({ ...deletedMessage.message, text: null });
 		} else {
-			res.status(403).json(["Cannot delete someone else's message."]);
+			res.status(403).json({ errors: ["Cannot delete someone else's message."] });
 		}
 	} catch (error) {
 		console.error("Error deleting cheet from the database:\n" + logError(error));

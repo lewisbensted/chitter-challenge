@@ -8,9 +8,10 @@ import { IConversation } from "../interfaces/interfaces";
 import MessageModal from "../components/MessageModal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useError } from "../contexts/ErrorContext";
 
 const Conversations: React.FC = () => {
-	const [errors, setErrors] = useState<string[]>([]);
+	const { errors, clearErrors } = useError();
 	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 
 	const navigate = useNavigate();
@@ -28,9 +29,9 @@ const Conversations: React.FC = () => {
 
 	useEffect(() => {
 		if (!userId && !isValidateLoading) {
-			navigate("/");
+			void navigate("/");
 		}
-	}, [userId]);
+	}, [userId, isValidateLoading, navigate]);
 
 	const isFirstLoad = useRef(true);
 	const [reloadUnreadTrigger, toggleUnreadTrigger] = useState<boolean>(false);
@@ -39,8 +40,8 @@ const Conversations: React.FC = () => {
 			isFirstLoad.current = false;
 			return;
 		}
-		fetchUnread();
-	}, [reloadUnreadTrigger]);
+		void fetchUnread();
+	}, [reloadUnreadTrigger, fetchUnread]);
 
 	useEffect(() => {
 		void fetchConversations();
@@ -52,9 +53,7 @@ const Conversations: React.FC = () => {
 		<Box>
 			<ErrorModal
 				errors={errors}
-				closeModal={() => {
-					setErrors([]);
-				}}
+				closeModal={clearErrors}
 			/>
 
 			{isConversationsLoading || isValidateLoading ? (

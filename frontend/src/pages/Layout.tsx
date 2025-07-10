@@ -18,12 +18,13 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 import { useAuth } from "../contexts/AuthContext";
+import { useError } from "../contexts/ErrorContext";
 
 const drawerWidth = 200;
 
 const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
-	const [errors, setErrors] = useState<string[]>([]);
+	const { errors, clearErrors, handleErrors } = useError();
 	const {
 		userId,
 		setUserId,
@@ -32,17 +33,17 @@ const Layout: React.FC = () => {
 		isComponentLoading,
 		isUnreadLoading,
 		isUnreadMessages,
-		setComponentLoading,
+		setValidateLoading,
 		fetchUnread,
 	} = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		validateUser();
+		void validateUser();
 	}, [validateUser]);
 
 	useEffect(() => {
-		fetchUnread();
+		void fetchUnread();
 	}, [userId, fetchUnread]);
 
 	return (
@@ -50,9 +51,7 @@ const Layout: React.FC = () => {
 			<CssBaseline />
 			<ErrorModal
 				errors={errors}
-				closeModal={() => {
-					setErrors([]);
-				}}
+				closeModal={clearErrors}
 			/>
 			<Box display="flex" justifyContent="center">
 				<Drawer
@@ -93,9 +92,15 @@ const Layout: React.FC = () => {
 										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
-											await logout(setComponentLoading, setUserId, setErrors, () => {
-												navigate("/login");
-											});
+											await logout(
+												setValidateLoading,
+												setUserId,
+												handleErrors,
+												() => {
+													void navigate("/login");
+												},
+						
+											);
 										}}
 									/>
 								</Fragment>

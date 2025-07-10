@@ -19,10 +19,10 @@ import {
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { handleErrors } from "../utils/handleErrors";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	userId?: string | null;
@@ -37,15 +37,13 @@ interface Props {
 }
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
-	(
-		{ userId, cheet, setErrors, setCheets, setComponentLoading, isDisabled, isModalView, setSelectedCheet },
-		ref
-	) => {
+	({ userId, cheet, setCheets, setComponentLoading, isDisabled, isModalView, setSelectedCheet }, ref) => {
 		const { id } = useParams();
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+		const { handleErrors } = useError();
 
 		useEffect(() => {
 			if (isEditing) {
@@ -72,7 +70,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 					setSelectedCheet(updatedCheet.data);
 				}
 			} catch (error) {
-				handleErrors(error, "editing the cheet", setErrors);
+				handleErrors(error, "editing the cheet");
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
@@ -91,7 +89,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				setCheets((prevCheets) => prevCheets.filter((c) => c.uuid !== cheet.uuid));
 				setSelectedCheet(null);
 			} catch (error) {
-				handleErrors(error, "deleting the cheet", setErrors);
+				handleErrors(error, "deleting the cheet");
 			} finally {
 				setDeleteLoading(false);
 				setComponentLoading(false);
