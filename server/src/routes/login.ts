@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { authenticate } from "../utils/authenticate.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router.post("/", async (req: Request, res: Response) => {
 		}
 	} catch (error) {
 		console.error("Error logging in:\n" + logError(error));
-		res.status(500).json({ errors: ["An unexpected error occured."] });
+		sendErrorResponse(error, res);
 	}
 });
 

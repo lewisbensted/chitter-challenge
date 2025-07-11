@@ -90,9 +90,7 @@ const Conversations: React.FC = () => {
 					isOpen={!!selectedConversation}
 					isDisabled={isComponentLoading || isConversationsLoading}
 					setComponentLoading={setComponentLoading}
-					closeModal={() => {
-						setSelectedConversation(null);
-					}}
+					setSelectedConversation={setSelectedConversation}
 					setConversations={setConversations}
 					toggleConversationsTrigger={toggleConversationsTrigger}
 					toggleUnreadTrigger={toggleUnreadTrigger}

@@ -13,7 +13,6 @@ interface Props {
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	
 }
 
 const ConversationIcon: React.FC<Props> = ({
@@ -24,10 +23,8 @@ const ConversationIcon: React.FC<Props> = ({
 	setConversations,
 	toggleConversationsTrigger,
 	toggleUnreadTrigger,
-
 }) => {
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
-
 
 	return (
 		<Fragment>
@@ -38,9 +35,7 @@ const ConversationIcon: React.FC<Props> = ({
 					isOpen={!!selectedConversation}
 					isDisabled={isDisabled}
 					setComponentLoading={setComponentLoading}
-					closeModal={() => {
-						setSelectedConversation(null);
-					}}
+					setSelectedConversation={setSelectedConversation}
 					setConversations={setConversations}
 					toggleConversationsTrigger={toggleConversationsTrigger}
 					toggleUnreadTrigger={toggleUnreadTrigger}

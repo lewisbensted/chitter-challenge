@@ -19,7 +19,7 @@ interface Props {
 	conversation: IConversation;
 	isOpen: boolean;
 	isDisabled: boolean;
-	closeModal: () => void;
+	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,7 +32,7 @@ const MessageModal: React.FC<Props> = ({
 	conversation,
 	isOpen,
 	isDisabled,
-	closeModal,
+	setSelectedConversation,
 	setComponentLoading,
 	toggleUnreadTrigger,
 	toggleConversationsTrigger,
@@ -46,7 +46,6 @@ const MessageModal: React.FC<Props> = ({
 		messagesError,
 		isMessagesLoading,
 		hasNextPage,
-		setMessagesLoading,
 		setMessages,
 		setMessagesError,
 		fetchMessages,
@@ -77,7 +76,7 @@ const MessageModal: React.FC<Props> = ({
 		fetchMessages,
 		markMessagesRead,
 		toggleConversationsTrigger,
-		toggleUnreadTrigger
+		toggleUnreadTrigger,
 	]);
 
 	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
@@ -135,7 +134,6 @@ const MessageModal: React.FC<Props> = ({
 		[isMessagesLoading, hasNextPage, isMessagesSet]
 	);
 
-
 	return (
 		<ThemeProvider theme={theme}>
 			<Dialog
@@ -146,17 +144,13 @@ const MessageModal: React.FC<Props> = ({
 					toggleRefreshMessages((prev) => !prev);
 				}}
 			>
-				<ErrorModal
-					errors={errors}
-					closeModal={clearErrors}
-				/>
+				<ErrorModal errors={errors} closeModal={clearErrors} />
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
 						<IconButton
 							onClick={() => {
-								setMessagesLoading(false);
-								closeModal();
+								setSelectedConversation(null);
 							}}
 						>
 							<Close />

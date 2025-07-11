@@ -1,9 +1,9 @@
 import express, { Response } from "express";
-import { ZodError } from "zod";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { RegisterUserRequest } from "../../types/requests.js";
 import { Prisma } from "@prisma/client";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router();
 
@@ -15,11 +15,7 @@ router.post("/", async (req: RegisterUserRequest, res: Response) => {
 		res.status(201).json(newUser);
 	} catch (error) {
 		console.error("Error saving user to the database:\n" + logError(error));
-		if (error instanceof ZodError) {
-			res.status(400).json({ errors: error.errors.map((err) => err.message) });
-		} else {
-			res.status(500).json({ errors: ["An unexpected error occured."] });
-		}
+		sendErrorResponse(error, res);
 	}
 });
 

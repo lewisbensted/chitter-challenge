@@ -45,7 +45,6 @@ const CheetModal: React.FC<Props> = ({
 		isRepliesLoading,
 		repliesLengthRef,
 		hasNextPage,
-		setRepliesLoading,
 		setRepliesError,
 		setReplies,
 		fetchReplies,
@@ -85,16 +84,12 @@ const CheetModal: React.FC<Props> = ({
 	return (
 		<ThemeProvider theme={theme}>
 			<Dialog open={isOpen} fullWidth maxWidth="md">
-				<ErrorModal
-					errors={errors}
-					closeModal={clearErrors}
-				/>
+				<ErrorModal errors={errors} closeModal={clearErrors} />
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
 						<IconButton
 							onClick={() => {
-								setRepliesLoading(false);
 								setSelectedCheet(null);
 							}}
 						>

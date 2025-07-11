@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { logError } from "../utils/logError.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ router.delete("/", (req: Request, res: Response) => {
 		req.session.destroy((error: unknown) => {
 			if (error) {
 				console.error("Error logging out:\n" + logError(error));
-				res.status(500).json({ errors: ["An unexpected error occured."] });
+				sendErrorResponse(error, res);
 			} else {
 				Object.keys(req.cookies).forEach((key) => {
 					res.clearCookie(key);
