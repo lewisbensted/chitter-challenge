@@ -29,9 +29,9 @@ const User: React.FC = () => {
 	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, fetchCheets } =
 		useFetchCheets();
 
-	const { fetchConversations, conversations, isConversationsLoading, setConversations } = useFetchConversations();
+	const { conversations, isConversationsLoading, setConversations, toggleConversationsTrigger } = useFetchConversations(id);
 
-	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, fetchUnread } = useAuth();
+	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, toggleUnreadTrigger } = useAuth();
 
 	const { errors, setErrors, clearErrors, handleErrors } = useError();
 
@@ -58,22 +58,6 @@ const User: React.FC = () => {
 		if (!id) return;
 		void fetchCheets(page === 0 ? 10 : 5, id);
 	}, [id, page, fetchCheets]);
-
-	const isFirstLoad = useRef(true);
-	const [reloadUnreadTrigger, toggleUnreadTrigger] = useState<boolean>(false);
-	useEffect(() => {
-		if (isFirstLoad.current) {
-			isFirstLoad.current = false;
-			return;
-		}
-		void fetchUnread();
-	}, [reloadUnreadTrigger, fetchUnread]);
-
-	const [reloadConversationsTrigger, toggleConversationTrigger] = useState<boolean>(false);
-	useEffect(() => {
-		if (!id) return;
-		void fetchConversations(id);
-	}, [id, reloadConversationsTrigger, fetchConversations]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
@@ -121,7 +105,7 @@ const User: React.FC = () => {
 									setConversations(conversations);
 								}}
 								toggleUnreadTrigger={toggleUnreadTrigger}
-								toggleConversationsTrigger={toggleConversationTrigger}
+								toggleConversationsTrigger={toggleConversationsTrigger}
 							/>
 						)}
 					</Typography>

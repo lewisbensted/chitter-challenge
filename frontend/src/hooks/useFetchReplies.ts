@@ -14,11 +14,7 @@ interface UseFetchRepliesReturn {
 	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	setRepliesLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	fetchReplies: (
-		cheetId: string,
-		take: number,
-		userId?: string
-	) => Promise<void>;
+	fetchReplies: (cheetId: string, take: number, userId?: string) => Promise<void>;
 	hasNextPage: boolean;
 }
 
@@ -34,50 +30,48 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchReplies = useCallback(
-		async (cheetId: string, take: number) => {
-			try {
-				setRepliesLoading(true);
+	const fetchReplies = useCallback(async (cheetId: string, take: number) => {
+		try {
+			setRepliesLoading(true);
 
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
 
-				const res = await axios.get<IReply[]>(`${serverURL}/cheets/${cheetId}/replies?${params}`, {
-					withCredentials: true,
-				});
+			const res = await axios.get<IReply[]>(`${serverURL}/cheets/${cheetId}/replies?${params}`, {
+				withCredentials: true,
+			});
 
-				const newReplies = res.data;
+			const newReplies = res.data;
 
-				if (!hasLoadedOnceRef.current) {
-					hasLoadedOnceRef.current = true;
-				}
-				if (isMounted()) {
-					setHasNextPage(newReplies.length >= take);
-
-					if (newReplies.length) {
-						setReplies((replies) => {
-							const updated = [...replies, ...newReplies];
-							repliesLengthRef.current = updated.length;
-							return updated;
-						});
-						cursorRef.current = newReplies[newReplies.length - 1].uuid;
-					}
-				}
-			} catch (error) {
-				if (!hasLoadedOnceRef.current) {
-					logErrors(error);
-					if (isMounted()) setRepliesError("An unexpected error occured while loading replies.");
-				} else {
-					handleErrors(error, "loading replies");
-					if (isMounted()) setHasNextPage(false);
-				}
-			} finally {
-				if (isMounted()) setRepliesLoading(false);
+			if (!hasLoadedOnceRef.current) {
+				hasLoadedOnceRef.current = true;
 			}
-		},
-		[]
-	);
+			if (isMounted()) {
+				setHasNextPage(newReplies.length >= take);
+
+				if (newReplies.length) {
+					setReplies((replies) => {
+						const updated = [...replies, ...newReplies];
+						repliesLengthRef.current = updated.length;
+						return updated;
+					});
+					cursorRef.current = newReplies[newReplies.length - 1].uuid;
+				}
+				setRepliesError("");
+			}
+		} catch (error) {
+			if (!hasLoadedOnceRef.current) {
+				logErrors(error);
+				if (isMounted()) setRepliesError("An unexpected error occured while loading replies.");
+			} else {
+				handleErrors(error, "loading replies");
+				if (isMounted()) setHasNextPage(false);
+			}
+		} finally {
+			if (isMounted()) setRepliesLoading(false);
+		}
+	}, []);
 
 	return {
 		replies,

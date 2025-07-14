@@ -33,6 +33,7 @@ const Layout: React.FC = () => {
 		isComponentLoading,
 		isUnreadLoading,
 		isUnreadMessages,
+		reloadUnreadTrigger,
 		setValidateLoading,
 		fetchUnread,
 	} = useAuth();
@@ -44,7 +45,7 @@ const Layout: React.FC = () => {
 
 	useEffect(() => {
 		void fetchUnread();
-	}, [userId, fetchUnread]);
+	}, [userId, reloadUnreadTrigger, fetchUnread]);
 
 	return (
 		<ThemeProvider theme={theme}>

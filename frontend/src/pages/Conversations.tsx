@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import ErrorModal from "../components/ErrorModal";
 import Conversation from "../components/Conversation";
 import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
@@ -12,19 +12,17 @@ import { useError } from "../contexts/ErrorContext";
 
 const Conversations: React.FC = () => {
 	const { errors, clearErrors } = useError();
-	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 
 	const navigate = useNavigate();
 
-	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, fetchUnread } = useAuth();
+	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, toggleUnreadTrigger } = useAuth();
 
 	const {
 		conversations,
 		isConversationsLoading,
 		conversationsError,
-		setConversationsError,
 		setConversations,
-		fetchConversations,
+		toggleConversationsTrigger
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -33,28 +31,12 @@ const Conversations: React.FC = () => {
 		}
 	}, [userId, isValidateLoading, navigate]);
 
-	const isFirstLoad = useRef(true);
-	const [reloadUnreadTrigger, toggleUnreadTrigger] = useState<boolean>(false);
-	useEffect(() => {
-		if (isFirstLoad.current) {
-			isFirstLoad.current = false;
-			return;
-		}
-		void fetchUnread();
-	}, [reloadUnreadTrigger, fetchUnread]);
-
-	useEffect(() => {
-		void fetchConversations();
-	}, [reloadConversationsTrigger, setConversationsError, fetchConversations]);
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
 
 	return (
 		<Box>
-			<ErrorModal
-				errors={errors}
-				closeModal={clearErrors}
-			/>
+			<ErrorModal errors={errors} closeModal={clearErrors} />
 
 			{isConversationsLoading || isValidateLoading ? (
 				<FlexBox>

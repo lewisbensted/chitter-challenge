@@ -15,8 +15,10 @@ interface AuthContextType {
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	isUnreadMessages: boolean;
 	isUnreadLoading: boolean;
+	reloadUnreadTrigger: boolean;
 	fetchUnread: () => Promise<void>;
 	setUnreadLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [isComponentLoading, setComponentLoading] = useState(false);
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
 	const [isUnreadLoading, setUnreadLoading] = useState<boolean>(false);
+	const [reloadUnreadTrigger, toggleUnreadTrigger] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
 
@@ -79,6 +82,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				isUnreadMessages,
 				fetchUnread,
 				setUnreadLoading,
+				toggleUnreadTrigger,
+				reloadUnreadTrigger
 			}}
 		>
 			{children}

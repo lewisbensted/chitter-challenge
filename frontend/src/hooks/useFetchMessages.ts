@@ -5,6 +5,7 @@ import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { useError } from "../contexts/ErrorContext";
+import toast from "react-hot-toast";
 
 interface UseFetchMessagesReturn {
 	messages: IMessage[];
@@ -12,10 +13,7 @@ interface UseFetchMessagesReturn {
 	messagesError: string;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	fetchMessages: (
-		interlocutorId: string,
-		take: number
-	) => Promise<void>;
+	fetchMessages: (interlocutorId: string, take: number) => Promise<void>;
 	hasNextPage: boolean;
 	setMessagesLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	refreshMessages: (interlocutorId: string) => void;
@@ -34,46 +32,44 @@ const useFetchMessages = (): UseFetchMessagesReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchMessages = useCallback(
-		async (interlocutorId: string, take: number) => {
-			try {
-				setMessagesLoading(true);
+	const fetchMessages = useCallback(async (interlocutorId: string, take: number) => {
+		try {
+			setMessagesLoading(true);
 
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
 
-				const res = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}?${params}`, {
-					withCredentials: true,
-				});
-				const newMessages = res.data;
-				if (!hasLoadedOnceRef.current) {
-					hasLoadedOnceRef.current = true;
-				}
-
-				if (isMounted()) {
-					setHasNextPage(newMessages.length >= take);
-					if (newMessages.length) {
-						setMessages((prevMessages) => [...newMessages, ...prevMessages]);
-						cursorRef.current = newMessages[0].uuid;
-					}
-					setMessagesError("");
-				}
-			} catch (error) {
-				if (!hasLoadedOnceRef.current) {
-					logErrors(error);
-					if (isMounted()) setMessagesError("An unexpected error occurred while loading messages.");
-				} else {
-					handleErrors(error, "loading messages");
-					if (isMounted()) setHasNextPage(false);
-				}
-			} finally {
-				if (isMounted()) setMessagesLoading(false);
+			const res = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}?${params}`, {
+				withCredentials: true,
+			});
+			const newMessages = res.data;
+			if (!hasLoadedOnceRef.current) {
+				hasLoadedOnceRef.current = true;
 			}
-		},
-		[]
-	);
 
+			if (isMounted()) {
+				setHasNextPage(newMessages.length >= take);
+				if (newMessages.length) {
+					setMessages((prevMessages) => [...newMessages, ...prevMessages]);
+					cursorRef.current = newMessages[0].uuid;
+				}
+				setMessagesError("");
+			}
+		} catch (error) {
+			if (!hasLoadedOnceRef.current) {
+				logErrors(error);
+				if (isMounted()) setMessagesError("An unexpected error occurred while loading messages.");
+			} else {
+				handleErrors(error, "loading messages");
+				if (isMounted()) setHasNextPage(false);
+			}
+		} finally {
+			if (isMounted()) setMessagesLoading(false);
+		}
+	}, []);
+
+	const markMessagesFailed = useRef(false);
 	const markMessagesRead = useCallback(async (interlocutorId: string) => {
 		try {
 			await axios.put(
@@ -84,11 +80,14 @@ const useFetchMessages = (): UseFetchMessagesReturn => {
 				}
 			);
 		} catch (error) {
+			toast("Failed to mark messages read - may be displaying outdated information.");
+			markMessagesFailed.current = true;
 			logErrors(error);
 		}
 	}, []);
 
 	const refreshMessages = useCallback((interlocutorId: string) => {
+		if (markMessagesFailed.current) return;
 		setMessages((messages) => {
 			const updatedMessages = messages.map((message) =>
 				message.sender.uuid === interlocutorId && !message.messageStatus.isRead

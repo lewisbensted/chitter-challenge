@@ -25,7 +25,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 	const [cheetsError, setCheetsError] = useState<string>("");
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
-	const hasLoadedOnceRef = useRef<boolean>(false);
+	const isFirstLoad = useRef<boolean>(true);
 
 	const { handleErrors } = useError();
 
@@ -46,8 +46,8 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 
 				const newCheets = res.data;
 
-				if (!hasLoadedOnceRef.current) {
-					hasLoadedOnceRef.current = true;
+				if (isFirstLoad.current) {
+					isFirstLoad.current = false;
 				}
 
 				if (isMounted()) {
@@ -61,7 +61,7 @@ const useFetchCheets = (): UseFetchCheetsReturn => {
 					setCheetsError("");
 				}
 			} catch (error) {
-				if (!hasLoadedOnceRef.current) {
+				if (isFirstLoad.current) {
 					logErrors(error);
 					if (isMounted()) setCheetsError("An unexpected error occured while loading cheets.");
 				} else {
