@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import logout from "../utils/logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import DrawerElement from "../components/DrawerElement";
@@ -14,22 +14,37 @@ import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 import { Outlet, useNavigate } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CircularProgress, CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
+import FlexBox from "../styles/FlexBox";
 
 const drawerWidth = 200;
 
 const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
 	const { errors, clearErrors, handleErrors } = useError();
-	const { userId, setUserId, isValidateLoading, isComponentLoading, setValidateLoading } = useAuth();
+	const {
+		userId,
+		setUserId,
+		isValidateLoading,
+		isComponentLoading,
+		isLoggingOut,
+		setLoggingOut,
+	} = useAuth();
 
-	const { isUnreadLoading, isUnreadMessages } = useLayout();
+	const { isUnreadLoading, isUnreadMessages, isLoadingTimer, setLoadingTimer } = useLayout();
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		if (userId === null && isLoggingOut) {
+			void navigate("/login");
+		}
+	}, [userId, isLoggingOut, navigate]);
+
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -58,7 +73,7 @@ const Layout: React.FC = () => {
 							isDrawerOpen={isDrawerOpen}
 						></DrawerElement>
 						<Divider />
-						{!(isValidateLoading || isUnreadLoading) &&
+						{!(isValidateLoading || isUnreadLoading || isLoadingTimer) &&
 							(userId ? (
 								<Fragment>
 									<DrawerElement
@@ -74,9 +89,7 @@ const Layout: React.FC = () => {
 										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
-											await logout(setValidateLoading, setUserId, handleErrors, () => {
-												void navigate("/login");
-											});
+											await logout( setUserId, handleErrors, setLoggingOut, setLoadingTimer);
 										}}
 									/>
 								</Fragment>
@@ -108,7 +121,14 @@ const Layout: React.FC = () => {
 						/>
 					</List>
 				</Drawer>
-				<Outlet />
+
+				{isLoggingOut || isValidateLoading || isLoadingTimer ? (
+					<FlexBox>
+						<CircularProgress thickness={5} />
+					</FlexBox>
+				) : (
+					<Outlet />
+				)}
 			</Box>
 		</ThemeProvider>
 	);

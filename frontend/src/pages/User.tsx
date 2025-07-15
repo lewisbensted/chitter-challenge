@@ -6,7 +6,7 @@ import ErrorModal from "../components/ErrorModal";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Box, Grid2, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
@@ -15,6 +15,7 @@ import useFetchConversations from "../hooks/useFetchConversations";
 import CheetModal from "../components/CheetModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
+import ScrollGrid from "../styles/ScrollGrid";
 
 const User: React.FC = () => {
 	const [username, setUsername] = useState<string>();
@@ -31,7 +32,7 @@ const User: React.FC = () => {
 	const { conversations, isConversationsLoading, setConversations, toggleConversationsTrigger } =
 		useFetchConversations(id);
 
-	const { userId, isValidateLoading, isComponentLoading } = useAuth();
+	const { userId, isComponentLoading } = useAuth();
 
 	const { errors, setErrors, clearErrors, handleErrors } = useError();
 
@@ -83,7 +84,7 @@ const User: React.FC = () => {
 	return (
 		<Box>
 			<ErrorModal errors={errors} closeModal={clearErrors} />
-			{isValidateLoading || isUserLoading || isConversationsLoading ? (
+			{isUserLoading || isConversationsLoading ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />
 				</FlexBox>
@@ -109,7 +110,7 @@ const User: React.FC = () => {
 					{cheetsError ? (
 						<Typography variant="subtitle1">{cheetsError}</Typography>
 					) : (
-						<Grid2 ref={listRef} sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+						<ScrollGrid ref={listRef} >
 							{cheets.map((cheet, index) => (
 								<Cheet
 									ref={cheets.length === index + 1 ? lastCheetRef : undefined}
@@ -130,7 +131,7 @@ const User: React.FC = () => {
 									<CircularProgress thickness={5} />
 								</FlexBox>
 							)}
-						</Grid2>
+						</ScrollGrid>
 					)}
 					{userId === id && !cheetsError && (
 						<SendCheet

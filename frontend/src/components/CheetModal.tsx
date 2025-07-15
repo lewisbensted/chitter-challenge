@@ -14,6 +14,7 @@ import FlexBox from "../styles/FlexBox";
 import useFetchReplies from "../hooks/useFetchReplies";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import ScrollGrid from "../styles/ScrollGrid";
 
 interface Props {
 	cheet: ICheet;
@@ -104,7 +105,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 						{repliesError ? (
 							<Typography variant="subtitle1">{repliesError}</Typography>
 						) : (
-							<Grid2 ref={listRef} sx={{ overflowY: "auto", maxHeight: 390 }}>
+							<ScrollGrid ref={listRef} height={350}>
 								{replies.map((reply, index) => (
 									<Reply
 										ref={replies.length === index + 1 ? lastReplyRef : null}
@@ -122,7 +123,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 										<CircularProgress thickness={5} />
 									</FlexBox>
 								)}
-							</Grid2>
+							</ScrollGrid>
 						)}
 
 						{userId && !repliesError && (

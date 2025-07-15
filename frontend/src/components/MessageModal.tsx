@@ -14,6 +14,7 @@ import useFetchMessages from "../hooks/useFetchMessages";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
+import ScrollGrid from "../styles/ScrollGrid";
 
 interface Props {
 	conversation: IConversation;
@@ -161,14 +162,7 @@ const MessageModal: React.FC<Props> = ({
 						{messagesError ? (
 							<Typography variant="subtitle1">{messagesError}</Typography>
 						) : (
-							<Grid2
-								sx={{
-									overflowY: "auto",
-									maxHeight: 390,
-									scrollbarGutter: "stable",
-								}}
-								ref={listRef}
-							>
+							<ScrollGrid ref={listRef} height={350}>
 								{isMessagesLoading && (
 									<FlexBox>
 										<CircularProgress thickness={5} />
@@ -187,7 +181,7 @@ const MessageModal: React.FC<Props> = ({
 										userPageId={userPageId}
 									/>
 								))}
-							</Grid2>
+							</ScrollGrid>
 						)}
 						{!messagesError && (
 							<SendMessage

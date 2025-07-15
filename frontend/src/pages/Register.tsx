@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ErrorModal from "../components/ErrorModal";
@@ -62,42 +62,35 @@ const Register: React.FC = () => {
 						setSuccessOpen(false);
 					}}
 				/>
-				{isValidateLoading ? (
-					<FlexBox>
-						<CircularProgress thickness={5} />
-					</FlexBox>
-				) : (
-					<Fragment>
-						<Typography variant="h4">Register</Typography>
-						<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-							<Grid2 size={12} container display="block">
-								<Typography variant="subtitle1">First Name:</Typography>
-								<TextField type="text" {...register("firstName")}></TextField>
-								<Typography variant="subtitle1">Last Name:</Typography>
-								<TextField type="text" {...register("lastName")}></TextField>
-								<Typography variant="subtitle1">Username:</Typography>
-								<TextField type="text" {...register("username")}></TextField>
-								<Typography variant="subtitle1">Password:</Typography>
-								<TextField type="text" {...register("password")}></TextField>
-								<Typography variant="subtitle1">E-mail:</Typography>
-								<TextField type="text" {...register("email")}></TextField>
-								<FlexBox>
-									{isFormLoading ? (
-										<CircularProgress size="2.1rem" thickness={6} />
-									) : (
-										<Button type="submit" disabled={!!userId} variant="contained">
-											<Typography variant="button" color="inherit">
-												Register
-											</Typography>
 
-											<AppRegistration />
-										</Button>
-									)}
-								</FlexBox>
-							</Grid2>
-						</Grid2>
-					</Fragment>
-				)}
+				<Typography variant="h4">Register</Typography>
+				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+					<Grid2 size={12} container display="block">
+						<Typography variant="subtitle1">First Name:</Typography>
+						<TextField type="text" {...register("firstName")}></TextField>
+						<Typography variant="subtitle1">Last Name:</Typography>
+						<TextField type="text" {...register("lastName")}></TextField>
+						<Typography variant="subtitle1">Username:</Typography>
+						<TextField type="text" {...register("username")}></TextField>
+						<Typography variant="subtitle1">Password:</Typography>
+						<TextField type="text" {...register("password")}></TextField>
+						<Typography variant="subtitle1">E-mail:</Typography>
+						<TextField type="text" {...register("email")}></TextField>
+						<FlexBox>
+							{isFormLoading ? (
+								<CircularProgress size="2.1rem" thickness={6} />
+							) : (
+								<Button type="submit" disabled={!!userId} variant="contained">
+									<Typography variant="button" color="inherit">
+										Register
+									</Typography>
+
+									<AppRegistration />
+								</Button>
+							)}
+						</FlexBox>
+					</Grid2>
+				</Grid2>
 			</Box>
 		</ThemeProvider>
 	);

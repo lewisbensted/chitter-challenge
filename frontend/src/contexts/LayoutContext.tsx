@@ -12,6 +12,8 @@ interface LayoutContextType {
 	fetchUnread: () => Promise<void>;
 	setUnreadLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
+	isLoadingTimer: boolean;
+	setLoadingTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -46,15 +48,24 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 		void fetchUnread();
 	}, [userId, reloadUnreadTrigger, fetchUnread]);
 
+	const [isLoadingTimer, setLoadingTimer] = useState<boolean>(true);
+	useEffect(() => {
+		setTimeout(() => {
+			setLoadingTimer(false);
+		}, 500);
+	}, [userId]);
+
 	return (
 		<LayoutContext.Provider
 			value={{
 				isUnreadLoading,
 				isUnreadMessages,
+				isLoadingTimer,
 				fetchUnread,
 				setUnreadLoading,
 				toggleUnreadTrigger,
 				reloadUnreadTrigger,
+				setLoadingTimer,
 			}}
 		>
 			{children}

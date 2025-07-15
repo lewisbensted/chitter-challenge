@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
 import ErrorModal from "../components/ErrorModal";
 import Conversation from "../components/Conversation";
-import { Box, CircularProgress, Grid2, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchConversations from "../hooks/useFetchConversations";
 import { IConversation } from "../interfaces/interfaces";
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
+import ScrollGrid from "../styles/ScrollGrid";
 
 const Conversations: React.FC = () => {
 	const { errors, clearErrors } = useError();
@@ -41,7 +42,7 @@ const Conversations: React.FC = () => {
 		<Box>
 			<ErrorModal errors={errors} closeModal={clearErrors} />
 
-			{isConversationsLoading || isValidateLoading ? (
+			{isConversationsLoading ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />
 				</FlexBox>
@@ -52,7 +53,7 @@ const Conversations: React.FC = () => {
 						{conversationsError ? (
 							<Typography variant="subtitle1">{conversationsError}</Typography>
 						) : (
-							<Grid2 sx={{ overflowY: "auto", maxHeight: 500, scrollbarGutter: "stable" }}>
+							<ScrollGrid>
 								{conversations.map((conversation) => (
 									<Conversation
 										key={conversation.interlocutorId}
@@ -62,7 +63,7 @@ const Conversations: React.FC = () => {
 										setSelectedConversation={setSelectedConversation}
 									/>
 								))}
-							</Grid2>
+							</ScrollGrid>
 						)}
 					</Fragment>
 				)

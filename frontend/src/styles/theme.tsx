@@ -30,7 +30,7 @@ const theme = createTheme({
 		MuiCssBaseline: {
 			styleOverrides: (theme) =>({
 				"*::-webkit-scrollbar": {
-					width: "8px",
+					width: "5px",
 				},
 				"*::-webkit-scrollbar-thumb": {
 					backgroundColor: theme.palette.primary.main,
@@ -40,7 +40,8 @@ const theme = createTheme({
 					backgroundColor: "#f0f0f0",
 				},
 				body: {
-					scrollbarWidth: "auto",
+					scrollbarWidth: "thin",
+					scrollbarGutter:"stable",
 					scrollbarColor: `${theme.palette.primary.main} #f0f0f0`,
 				},
 			}),
