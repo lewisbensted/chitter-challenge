@@ -24,26 +24,26 @@ import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
 	isDisabled: boolean;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	reply: IReply;
 	cheetId: string;
-	userId?: string | null;
 	numberOfReplies: number;
 }
 
 const Reply = forwardRef<HTMLDivElement, Props>(
-	({ reply, cheetId, isDisabled, setComponentLoading, setReplies, userId }, ref) => {
+	({ reply, cheetId, isDisabled, setReplies}, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
 		const { handleErrors } = useError();
+		const { userId, setComponentLoading } = useAuth();
 
 		useEffect(() => {
 			if (isEditing) {

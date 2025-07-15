@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
-import { logErrors } from "../utils/processErrors";
 import { useError } from "./ErrorContext";
 
 interface AuthContextType {
@@ -13,12 +12,6 @@ interface AuthContextType {
 	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
 	isComponentLoading: boolean;
 	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	isUnreadMessages: boolean;
-	isUnreadLoading: boolean;
-	reloadUnreadTrigger: boolean;
-	fetchUnread: () => Promise<void>;
-	setUnreadLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,30 +20,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [userId, setUserId] = useState<string | null>();
 	const [isValidateLoading, setValidateLoading] = useState(true);
 	const [isComponentLoading, setComponentLoading] = useState(false);
-	const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
-	const [isUnreadLoading, setUnreadLoading] = useState<boolean>(false);
-	const [reloadUnreadTrigger, toggleUnreadTrigger] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
-
-	const fetchUnread = useCallback(async () => {
-		if (userId === undefined) {
-			return;
-		} else if (userId === null) {
-			setUnreadLoading(false);
-			return;
-		}
-		try {
-			setUnreadLoading(true);
-			const res = await axios.get<boolean>(`${serverURL}/messages/unread`, { withCredentials: true });
-
-			setUnreadMessages(res.data);
-		} catch (error) {
-			logErrors(error);
-		} finally {
-			setUnreadLoading(false);
-		}
-	}, [userId]);
 
 	const validateUser = useCallback(async () => {
 		try {
@@ -68,6 +39,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		}
 	}, [handleErrors]);
 
+	useEffect(() => {
+		void validateUser();
+	}, [validateUser]);
+
 	return (
 		<AuthContext.Provider
 			value={{
@@ -78,12 +53,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				isComponentLoading,
 				setComponentLoading,
 				setValidateLoading,
-				isUnreadLoading,
-				isUnreadMessages,
-				fetchUnread,
-				setUnreadLoading,
-				toggleUnreadTrigger,
-				reloadUnreadTrigger
 			}}
 		>
 			{children}

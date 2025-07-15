@@ -11,28 +11,33 @@ interface UseFetchMessagesReturn {
 	messages: IMessage[];
 	isMessagesLoading: boolean;
 	messagesError: string;
+	page:number;
+	refreshMessagesTrigger: boolean;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	fetchMessages: (interlocutorId: string, take: number) => Promise<void>;
+	fetchMessages: (take: number) => Promise<void>;
 	hasNextPage: boolean;
-	setMessagesLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	refreshMessages: (interlocutorId: string) => void;
-	markMessagesRead: (interlocutorId: string) => Promise<void>;
+	refreshMessages: () => void;
+	markMessagesRead: () => Promise<void>;
+	setPage: React.Dispatch<React.SetStateAction<number>>;
+	toggleRefreshMessages: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const useFetchMessages = (): UseFetchMessagesReturn => {
+const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
 	const [messagesError, setMessagesError] = useState<string>("");
+	const [page, setPage] = useState<number>(0);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
 	const hasLoadedOnceRef = useRef<boolean>(false);
+	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
 
-	const fetchMessages = useCallback(async (interlocutorId: string, take: number) => {
+	const fetchMessages = useCallback(async (take: number) => {
 		try {
 			setMessagesLoading(true);
 
@@ -70,7 +75,7 @@ const useFetchMessages = (): UseFetchMessagesReturn => {
 	}, []);
 
 	const markMessagesFailed = useRef(false);
-	const markMessagesRead = useCallback(async (interlocutorId: string) => {
+	const markMessagesRead = useCallback(async () => {
 		try {
 			await axios.put(
 				`${serverURL}/messages/read/${interlocutorId}`,
@@ -86,7 +91,7 @@ const useFetchMessages = (): UseFetchMessagesReturn => {
 		}
 	}, []);
 
-	const refreshMessages = useCallback((interlocutorId: string) => {
+	const refreshMessages = useCallback(() => {
 		if (markMessagesFailed.current) return;
 		setMessages((messages) => {
 			const updatedMessages = messages.map((message) =>
@@ -101,17 +106,22 @@ const useFetchMessages = (): UseFetchMessagesReturn => {
 		});
 	}, []);
 
+	
+
 	return {
 		messages,
 		messagesError,
 		isMessagesLoading,
 		hasNextPage,
+		page,
+		refreshMessagesTrigger,
+		toggleRefreshMessages,
 		setMessages,
 		setMessagesError,
-		setMessagesLoading,
 		fetchMessages,
 		refreshMessages,
 		markMessagesRead,
+		setPage
 	};
 };
 

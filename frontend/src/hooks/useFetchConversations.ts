@@ -10,11 +10,7 @@ interface UseFetchConversationsReturn {
 	conversations: IConversation[];
 	conversationsError: string | undefined;
 	isConversationsLoading: boolean;
-	reloadConversationsTrigger: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	setConversationsError: React.Dispatch<React.SetStateAction<string>>;
-	fetchConversations: (pageUserId?: string) => Promise<void>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -58,18 +54,14 @@ const useFetchConversations = (pageUserId?: string): UseFetchConversationsReturn
 				isFirstLoad.current = false;
 			}
 		});
-	}, [reloadConversationsTrigger, setConversationsError, fetchConversations]);
+	}, [reloadConversationsTrigger, fetchConversations]);
 
 	return {
 		conversations,
 		isConversationsLoading,
 		conversationsError,
-		reloadConversationsTrigger,
 		toggleConversationsTrigger,
-		setConversationsError,
 		setConversations,
-		setConversationsLoading,
-		fetchConversations,
 	};
 };
 

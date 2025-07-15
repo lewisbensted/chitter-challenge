@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useLayoutEffect, useRef, useState } from "react";
 import SendCheet from "../components/SendCheet";
 import ErrorModal from "../components/ErrorModal";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -13,17 +13,12 @@ import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 
 const Homepage: React.FC = () => {
-	const { userId, isValidateLoading, isComponentLoading, setComponentLoading } = useAuth();
+	const { userId, isValidateLoading, isComponentLoading } = useAuth();
 	const { errors, setErrors, clearErrors } = useError();
-	const [page, setPage] = useState<number>(0);
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
-	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, fetchCheets, hasNextPage } =
+	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, setPage, hasNextPage } =
 		useFetchCheets();
-
-	useEffect(() => {
-		void fetchCheets(page === 0 ? 10 : 5);
-	}, [page, fetchCheets]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
@@ -49,7 +44,7 @@ const Homepage: React.FC = () => {
 			});
 			if (cheet) observer.current.observe(cheet);
 		},
-		[isCheetsLoading, hasNextPage]
+		[isCheetsLoading, hasNextPage, setPage]
 	);
 
 
@@ -79,7 +74,6 @@ const Homepage: React.FC = () => {
 									userId={userId}
 									setCheets={setCheets}
 									setErrors={setErrors}
-									setComponentLoading={setComponentLoading}
 									isDisabled={isComponentLoading || isCheetsLoading}
 									isModalView={false}
 									numberOfCheets={cheets.length}
@@ -100,7 +94,6 @@ const Homepage: React.FC = () => {
 							setCheets={setCheets}
 							setCheetsError={setCheetsError}
 							setErrors={setErrors}
-							setComponentLoading={setComponentLoading}
 							triggerScroll={toggleScrollTrigger}
 						/>
 					)}
@@ -109,11 +102,9 @@ const Homepage: React.FC = () => {
 						<CheetModal
 							cheet={selectedCheet}
 							cheets={cheets}
-							userId={userId}
 							isOpen={!!selectedCheet}
 							setCheets={setCheets}
 							isDisabled={isComponentLoading || isCheetsLoading}
-							setComponentLoading={setComponentLoading}
 							numberOfCheets={cheets.length}
 							setSelectedCheet={setSelectedCheet}
 						/>

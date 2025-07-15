@@ -11,13 +11,13 @@ import FlexBox from "../styles/FlexBox";
 import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import { useError } from "../contexts/ErrorContext";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
 	isDisabled: boolean;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -25,7 +25,6 @@ const SendCheet: React.FC<Props> = ({
 	isDisabled,
 	setCheets,
 	setCheetsError,
-	setComponentLoading,
 	triggerScroll,
 }) => {
 	const { id } = useParams();
@@ -33,6 +32,7 @@ const SendCheet: React.FC<Props> = ({
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
+	const { setComponentLoading } = useAuth();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {

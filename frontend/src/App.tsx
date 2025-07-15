@@ -9,6 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
 import Layout from "./pages/Layout";
 import { Toaster } from "react-hot-toast";
+import { LayoutProvider } from "./contexts/LayoutContext";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -32,8 +33,10 @@ const router = createBrowserRouter(
 const App = () => (
 	<ErrorProvider>
 		<AuthProvider>
-			<Toaster position="top-right" />
-			<RouterProvider router={router} />
+			<LayoutProvider>
+				<Toaster position="top-right" />
+				<RouterProvider router={router} />
+			</LayoutProvider>
 		</AuthProvider>
 	</ErrorProvider>
 );

@@ -23,6 +23,7 @@ import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
 	userId?: string | null;
@@ -30,20 +31,20 @@ interface Props {
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isDisabled: boolean;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	isModalView: boolean;
 	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
-	({ userId, cheet, setCheets, setComponentLoading, isDisabled, isModalView, setSelectedCheet }, ref) => {
+	({ cheet, setCheets, isDisabled, isModalView, setSelectedCheet }, ref) => {
 		const { id } = useParams();
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 		const { handleErrors } = useError();
+		const { userId, setComponentLoading } = useAuth();
 
 		useEffect(() => {
 			if (isEditing) {

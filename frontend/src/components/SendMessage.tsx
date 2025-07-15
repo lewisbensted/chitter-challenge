@@ -10,6 +10,7 @@ import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material"
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
 	recipientId: string;
@@ -17,7 +18,6 @@ interface Props {
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	userPageId?: string;
@@ -28,7 +28,6 @@ const SendMessage: React.FC<Props> = ({
 	isDisabled,
 	toggleReloadTrigger,
 	setMessages,
-	setComponentLoading,
 	triggerScroll,
 	setMessagesError,
 	userPageId,
@@ -37,6 +36,7 @@ const SendMessage: React.FC<Props> = ({
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
+	const { setComponentLoading } = useAuth();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {

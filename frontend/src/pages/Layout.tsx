@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import logout from "../utils/logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import DrawerElement from "../components/DrawerElement";
@@ -19,41 +19,22 @@ import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
+import { useLayout } from "../contexts/LayoutContext";
 
 const drawerWidth = 200;
 
 const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
 	const { errors, clearErrors, handleErrors } = useError();
-	const {
-		userId,
-		setUserId,
-		validateUser,
-		isValidateLoading,
-		isComponentLoading,
-		isUnreadLoading,
-		isUnreadMessages,
-		reloadUnreadTrigger,
-		setValidateLoading,
-		fetchUnread,
-	} = useAuth();
+	const { userId, setUserId, isValidateLoading, isComponentLoading, setValidateLoading } = useAuth();
+
+	const { isUnreadLoading, isUnreadMessages } = useLayout();
 	const navigate = useNavigate();
-
-	useEffect(() => {
-		void validateUser();
-	}, [validateUser]);
-
-	useEffect(() => {
-		void fetchUnread();
-	}, [userId, reloadUnreadTrigger, fetchUnread]);
 
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<ErrorModal
-				errors={errors}
-				closeModal={clearErrors}
-			/>
+			<ErrorModal errors={errors} closeModal={clearErrors} />
 			<Box display="flex" justifyContent="center">
 				<Drawer
 					open={isDrawerOpen}
@@ -93,15 +74,9 @@ const Layout: React.FC = () => {
 										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
-											await logout(
-												setValidateLoading,
-												setUserId,
-												handleErrors,
-												() => {
-													void navigate("/login");
-												},
-						
-											);
+											await logout(setValidateLoading, setUserId, handleErrors, () => {
+												void navigate("/login");
+											});
 										}}
 									/>
 								</Fragment>

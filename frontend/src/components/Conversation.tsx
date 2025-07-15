@@ -7,16 +7,19 @@ import theme from "../styles/theme";
 import { PriorityHigh } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
-	userId?: string | null;
 	conversation: IConversation;
 	isDisabled: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 }
 
-const Conversation: React.FC<Props> = ({ userId, conversation, isDisabled, setSelectedConversation }) => {
+const Conversation: React.FC<Props> = ({ conversation, isDisabled, setSelectedConversation }) => {
+
+	const { userId } = useAuth();
+
 	const createdAt = new Date(conversation.latestMessage!.createdAt);
 
 	return (

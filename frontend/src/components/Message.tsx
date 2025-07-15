@@ -20,22 +20,21 @@ import { Delete, Done, Edit } from "@mui/icons-material";
 import theme from "../styles/theme";
 import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
-	userId?: string | null;
 	message: IMessage;
 	messages: IMessage[];
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	isDisabled: boolean;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 }
 
 const Message = forwardRef<HTMLDivElement, Props>(
 	(
-		{ userId, message, messages, setMessages, isDisabled, setComponentLoading, toggleReloadTrigger, userPageId },
+		{ message, messages, setMessages, isDisabled, toggleReloadTrigger, userPageId },
 		ref
 	) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
@@ -44,6 +43,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 		const [isEditing, setEditing] = useState<boolean>(false);
 
 		const { handleErrors } = useError();
+		const { userId, setComponentLoading } = useAuth();
 
 		useEffect(() => {
 			if (isEditing && message.text) {

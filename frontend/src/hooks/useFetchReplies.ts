@@ -11,18 +11,21 @@ interface UseFetchRepliesReturn {
 	isRepliesLoading: boolean;
 	repliesLengthRef: React.MutableRefObject<number>;
 	repliesError: string;
+	page:number;
 	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
-	setRepliesLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	fetchReplies: (cheetId: string, take: number, userId?: string) => Promise<void>;
+	fetchReplies: (take: number, userId?: string) => Promise<void>;
 	hasNextPage: boolean;
+	setPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const useFetchReplies = (): UseFetchRepliesReturn => {
+
+const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 	const [replies, setReplies] = useState<IReply[]>([]);
 	const [repliesError, setRepliesError] = useState<string>("");
 	const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
 	const [hasNextPage, setHasNextPage] = useState(false);
+	const [page, setPage] = useState<number>(0);
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
 	const hasLoadedOnceRef = useRef<boolean>(false);
@@ -30,7 +33,7 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchReplies = useCallback(async (cheetId: string, take: number) => {
+	const fetchReplies = useCallback(async (take: number) => {
 		try {
 			setRepliesLoading(true);
 
@@ -73,14 +76,16 @@ const useFetchReplies = (): UseFetchRepliesReturn => {
 		}
 	}, []);
 
+
 	return {
 		replies,
 		isRepliesLoading,
 		repliesError,
 		repliesLengthRef,
 		hasNextPage,
+		page,
+		setPage,
 		setReplies,
-		setRepliesLoading,
 		setRepliesError,
 		fetchReplies,
 	};

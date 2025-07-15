@@ -9,13 +9,16 @@ import MessageModal from "../components/MessageModal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
+import { useLayout } from "../contexts/LayoutContext";
 
 const Conversations: React.FC = () => {
 	const { errors, clearErrors } = useError();
 
 	const navigate = useNavigate();
 
-	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, toggleUnreadTrigger } = useAuth();
+	const { userId, isValidateLoading, isComponentLoading } = useAuth();
+
+	useLayout();
 
 	const {
 		conversations,
@@ -53,7 +56,6 @@ const Conversations: React.FC = () => {
 								{conversations.map((conversation) => (
 									<Conversation
 										key={conversation.interlocutorId}
-										userId={userId}
 										conversation={conversation}
 										isDisabled={isComponentLoading}
 										setConversations={setConversations}
@@ -67,15 +69,12 @@ const Conversations: React.FC = () => {
 			)}
 			{selectedConversation && (
 				<MessageModal
-					userId={userId}
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
 					isDisabled={isComponentLoading || isConversationsLoading}
-					setComponentLoading={setComponentLoading}
 					setSelectedConversation={setSelectedConversation}
 					setConversations={setConversations}
 					toggleConversationsTrigger={toggleConversationsTrigger}
-					toggleUnreadTrigger={toggleUnreadTrigger}
 				/>
 			)}
 		</Box>

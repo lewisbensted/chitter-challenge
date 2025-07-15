@@ -13,55 +13,54 @@ import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
+import { useLayout } from "../contexts/LayoutContext";
 
 interface Props {
-	userId?: string | null;
 	conversation: IConversation;
 	isOpen: boolean;
 	isDisabled: boolean;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
-	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 }
 
 const MessageModal: React.FC<Props> = ({
-	userId,
 	conversation,
 	isOpen,
 	isDisabled,
 	setSelectedConversation,
-	setComponentLoading,
-	toggleUnreadTrigger,
 	toggleConversationsTrigger,
 	userPageId,
 }) => {
 	const { errors, setErrors, clearErrors } = useError();
-	const [page, setPage] = useState<number>(0);
+	const { toggleUnreadTrigger } = useLayout();
 
 	const {
 		messages,
 		messagesError,
 		isMessagesLoading,
 		hasNextPage,
+		page,
+		refreshMessagesTrigger,
+		toggleRefreshMessages,
 		setMessages,
 		setMessagesError,
 		fetchMessages,
 		markMessagesRead,
 		refreshMessages,
-	} = useFetchMessages();
+		setPage
+	} = useFetchMessages(conversation.interlocutorId);
 
 	useEffect(() => {
 		if (!isOpen) return;
 		const loadAndMarkRead = async () => {
-			await fetchMessages(conversation.interlocutorId, page === 0 ? 20 : 10);
+			await fetchMessages(page === 0 ? 20 : 10);
 			if (page === 0) {
 				toggleScrollTrigger((prev) => !prev);
 			}
 			if (conversation.unread) {
-				await markMessagesRead(conversation.interlocutorId);
+				await markMessagesRead();
 				toggleUnreadTrigger((prev) => !prev);
 				toggleConversationsTrigger((prev) => !prev);
 			}
@@ -70,7 +69,6 @@ const MessageModal: React.FC<Props> = ({
 		void loadAndMarkRead();
 	}, [
 		isOpen,
-		conversation.interlocutorId,
 		conversation.unread,
 		page,
 		fetchMessages,
@@ -78,8 +76,6 @@ const MessageModal: React.FC<Props> = ({
 		toggleConversationsTrigger,
 		toggleUnreadTrigger,
 	]);
-
-	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
 
 	const hasRefreshedMessages = useRef(false);
 	const prevUnreadRef = useRef<boolean>();
@@ -90,15 +86,11 @@ const MessageModal: React.FC<Props> = ({
 
 		if (!isOpen || hasRefreshedMessages.current || prevUnread === undefined) return;
 
-		const load = () => {
-			refreshMessages(conversation.interlocutorId);
-			hasRefreshedMessages.current = true;
-		};
-
 		if (prevUnread) {
-			load();
+			refreshMessages();
+			hasRefreshedMessages.current = true;
 		}
-	}, [refreshMessagesTrigger, conversation.interlocutorId, isOpen, refreshMessages, conversation.unread]);
+	}, [refreshMessagesTrigger, isOpen, refreshMessages, conversation.unread]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
@@ -131,7 +123,7 @@ const MessageModal: React.FC<Props> = ({
 			});
 			if (message) observer.current.observe(message);
 		},
-		[isMessagesLoading, hasNextPage, isMessagesSet]
+		[isMessagesLoading, hasNextPage, isMessagesSet, setPage]
 	);
 
 	return (
@@ -186,12 +178,10 @@ const MessageModal: React.FC<Props> = ({
 									<Message
 										ref={index === 0 ? lastMessageRef : null}
 										key={message.uuid}
-										userId={userId}
 										message={message}
 										messages={messages}
 										setMessages={setMessages}
 										isDisabled={isDisabled || isMessagesLoading}
-										setComponentLoading={setComponentLoading}
 										setErrors={setErrors}
 										toggleReloadTrigger={toggleConversationsTrigger}
 										userPageId={userPageId}
@@ -206,7 +196,6 @@ const MessageModal: React.FC<Props> = ({
 								toggleReloadTrigger={toggleConversationsTrigger}
 								setMessages={setMessages}
 								setErrors={setErrors}
-								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								setMessagesError={setMessagesError}
 								userPageId={userPageId}

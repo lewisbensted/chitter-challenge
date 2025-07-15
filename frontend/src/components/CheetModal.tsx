@@ -13,31 +13,21 @@ import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
 import useFetchReplies from "../hooks/useFetchReplies";
 import { useError } from "../contexts/ErrorContext";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
-	userId?: string | null;
 	cheet: ICheet;
 	cheets: ICheet[];
 	isOpen: boolean;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isDisabled: boolean;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
-const CheetModal: React.FC<Props> = ({
-	userId,
-	cheet,
-	isOpen,
-	setCheets,
-	setComponentLoading,
-	isDisabled,
-	numberOfCheets,
-	setSelectedCheet,
-}) => {
+const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, numberOfCheets, setSelectedCheet }) => {
 	const { errors, setErrors, clearErrors } = useError();
-	const [page, setPage] = useState<number>(0);
+	const { userId } = useAuth();
 
 	const {
 		replies,
@@ -47,14 +37,16 @@ const CheetModal: React.FC<Props> = ({
 		hasNextPage,
 		setRepliesError,
 		setReplies,
+		setPage,
 		fetchReplies,
-	} = useFetchReplies();
+		page,
+	} = useFetchReplies(cheet.uuid);
 
 	useEffect(() => {
 		if (isOpen) {
-			void fetchReplies(cheet.uuid, page === 0 ? 10 : 5);
+			void fetchReplies(page === 0 ? 10 : 5);
 		}
-	}, [isOpen, page, cheet.uuid, setComponentLoading, fetchReplies]);
+	}, [isOpen, page, fetchReplies]);
 
 	const listRef = useRef<HTMLDivElement>(null);
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -78,7 +70,7 @@ const CheetModal: React.FC<Props> = ({
 			});
 			if (cheet) observer.current.observe(cheet);
 		},
-		[isRepliesLoading, hasNextPage]
+		[isRepliesLoading, hasNextPage, setPage]
 	);
 
 	return (
@@ -102,7 +94,6 @@ const CheetModal: React.FC<Props> = ({
 							userId={userId}
 							setCheets={setCheets}
 							setErrors={setErrors}
-							setComponentLoading={setComponentLoading}
 							isDisabled={isDisabled || isRepliesLoading}
 							isModalView={true}
 							numberOfCheets={numberOfCheets}
@@ -119,12 +110,10 @@ const CheetModal: React.FC<Props> = ({
 										ref={replies.length === index + 1 ? lastReplyRef : null}
 										key={reply.uuid}
 										isDisabled={isDisabled || isRepliesLoading}
-										userId={userId}
 										cheetId={cheet.uuid}
 										reply={reply}
 										setReplies={setReplies}
 										setErrors={setErrors}
-										setComponentLoading={setComponentLoading}
 										numberOfReplies={replies.length}
 									/>
 								))}
@@ -142,7 +131,6 @@ const CheetModal: React.FC<Props> = ({
 								isDisabled={isDisabled || isRepliesLoading}
 								setReplies={setReplies}
 								setErrors={setErrors}
-								setComponentLoading={setComponentLoading}
 								triggerScroll={toggleScrollTrigger}
 								repliesLengthRef={repliesLengthRef}
 								setRepliesError={setRepliesError}

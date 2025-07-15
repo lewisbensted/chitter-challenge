@@ -18,7 +18,6 @@ import { useError } from "../contexts/ErrorContext";
 
 const User: React.FC = () => {
 	const [username, setUsername] = useState<string>();
-	const [page, setPage] = useState<number>(0);
 	const [isUserLoading, setUserLoading] = useState(true);
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
@@ -26,12 +25,13 @@ const User: React.FC = () => {
 
 	const navigate = useNavigate();
 
-	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, fetchCheets } =
-		useFetchCheets();
+	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage } =
+		useFetchCheets(id);
 
-	const { conversations, isConversationsLoading, setConversations, toggleConversationsTrigger } = useFetchConversations(id);
+	const { conversations, isConversationsLoading, setConversations, toggleConversationsTrigger } =
+		useFetchConversations(id);
 
-	const { userId, isValidateLoading, isComponentLoading, setComponentLoading, toggleUnreadTrigger } = useAuth();
+	const { userId, isValidateLoading, isComponentLoading } = useAuth();
 
 	const { errors, setErrors, clearErrors, handleErrors } = useError();
 
@@ -54,10 +54,6 @@ const User: React.FC = () => {
 		void fetchUser();
 	}, [id, navigate, handleErrors]);
 
-	useEffect(() => {
-		if (!id) return;
-		void fetchCheets(page === 0 ? 10 : 5, id);
-	}, [id, page, fetchCheets]);
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
@@ -81,7 +77,7 @@ const User: React.FC = () => {
 			});
 			if (cheet) observer.current.observe(cheet);
 		},
-		[isCheetsLoading, hasNextPage]
+		[isCheetsLoading, hasNextPage, setPage]
 	);
 
 	return (
@@ -97,14 +93,14 @@ const User: React.FC = () => {
 						{username}
 						{userId && userId !== id && conversations[0] && (
 							<ConversationIcon
-								userId={userId}
+								
 								conversation={conversations[0]}
 								isDisabled={isComponentLoading || isConversationsLoading}
-								setComponentLoading={setComponentLoading}
+								
 								setConversations={() => {
 									setConversations(conversations);
 								}}
-								toggleUnreadTrigger={toggleUnreadTrigger}
+								
 								toggleConversationsTrigger={toggleConversationsTrigger}
 							/>
 						)}
@@ -122,7 +118,7 @@ const User: React.FC = () => {
 									userId={userId}
 									setCheets={setCheets}
 									setErrors={setErrors}
-									setComponentLoading={setComponentLoading}
+									
 									isDisabled={isComponentLoading || isCheetsLoading}
 									isModalView={false}
 									numberOfCheets={cheets.length}
@@ -142,7 +138,7 @@ const User: React.FC = () => {
 							isDisabled={isComponentLoading || isCheetsLoading}
 							setCheets={setCheets}
 							setErrors={setErrors}
-							setComponentLoading={setComponentLoading}
+						
 							triggerScroll={toggleScrollTrigger}
 						/>
 					)}
@@ -150,11 +146,10 @@ const User: React.FC = () => {
 						<CheetModal
 							cheet={selectedCheet}
 							cheets={cheets}
-							userId={userId}
 							isOpen={!!selectedCheet}
 							setCheets={setCheets}
 							isDisabled={isComponentLoading || isCheetsLoading}
-							setComponentLoading={setComponentLoading}
+							
 							numberOfCheets={cheets.length}
 							setSelectedCheet={setSelectedCheet}
 						/>
