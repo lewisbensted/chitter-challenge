@@ -1,0 +1,43 @@
+{
+	"name": "chitter",
+	"version": "1.0.0",
+	"description": "A mock Twitter app built with Express and React.",
+	"scripts": {
+		"install-all": "npm install && npm --prefix server install && npm --prefix frontend install",
+		"lint": "npx eslint .",
+		"migrate:dev": "npm --prefix server run migrate:dev",
+		"start:dev": "concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"npm --prefix frontend start\"",
+		"migrate:test": "npm --prefix server run migrate:test",
+		"start:test": "concurrently --names Backend,Frontend \"npm --prefix server run start:test\" \"npm --prefix frontend start\"",
+		"migrate:prod": "npm --prefix server run migrate:prod",
+		"start:prod": "npm --prefix frontend build && npm --prefix server run start:prod"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lewisbensted/chitter-challenge.git"
+	},
+	"author": "Lewis Bensted",
+	"license": "ISC",
+	"homepage": "https://github.com/lewisbensted/chitter-challenge#readme",
+	"engines": {
+		"node": ">=20.17.0",
+		"npm": ">=10"
+	},
+	"dependencies": {
+		"concurrently": "^9.2.0",
+		"dotenv-cli": "^7.4.2",
+		"dotenv-expand": "^11.0.6"
+	},
+	"devDependencies": {
+		"@stylistic/eslint-plugin": "^2.13.0",
+		"@typescript-eslint/eslint-plugin": "^8.19.1",
+		"@typescript-eslint/parser": "^8.19.1",
+		"eslint": "^9.29.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-only-warn": "^1.1.0",
+		"eslint-plugin-prettier": "^5.2.1",
+		"eslint-plugin-react": "^7.37.4",
+		"eslint-plugin-react-hooks": "^5.1.0",
+		"typescript-eslint": "^8.20.0"
+	}
+}

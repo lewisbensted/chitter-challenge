@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  uuid            String      @default(uuid()) @db.VarChar(36) @unique
+  firstName       String      @map(name: "first_name")
+  lastName        String      @map(name: "last_name")
+  email           String      @unique
+  username        String      @unique @db.VarChar(30)
+  passwordHash    String      @db.Char(60) @map(name: "password_hash")
+  cheets          Cheet[]
+  replies         Reply[]
+  sender          Message[]   @relation("sender")
+  recipient       Message[]   @relation("recipient")
+
+  @@map("Users")
+}
+
+model Cheet {
+  id          Int           @id @default(autoincrement())
+  uuid        String        @default(uuid()) @db.VarChar(36) @unique
+  user        User          @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId      String          @map(name: "user_id")
+  text        String        @db.VarChar(50)
+  createdAt   DateTime      @default(now()) @map(name: "created_at")
+  updatedAt   DateTime      @updatedAt @map(name: "updated_at")
+  cheetStatus CheetStatus?  
+  replies     Reply[]
+
+  @@map("Cheets")
+  @@index([createdAt])
+}
+
+model CheetStatus {
+  cheetId     String        @id
+  hasReplies  Boolean       @default(false) @map(name: "has_replies")
+  cheet       Cheet         @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
+
+  @@map("Cheet_Status")
+}
+
+model Reply {
+  id          Int         @id @default(autoincrement())
+  uuid        String      @default(uuid()) @db.VarChar(36) @unique
+  user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId      String         @map(name: "user_id")
+  cheet       Cheet       @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
+  cheetId     String         @map(name: "cheet_id")
+  text        String      @db.VarChar(50)
+  createdAt   DateTime    @default(now()) @map(name: "created_at")
+  updatedAt   DateTime    @updatedAt @map(name: "updated_at")
+
+  @@map("Replies")
+  @@index([createdAt])
+}
+
+model Message {
+  id                  Int             @id @default(autoincrement())
+  uuid                String          @default(uuid()) @db.VarChar(36) @unique
+  sender              User            @relation(name: "sender", fields: [senderId], references: [uuid], onDelete: Cascade)
+  senderId            String          @map(name: "sender_id")
+  recipient           User            @relation(name:"recipient", fields: [recipientId], references: [uuid], onDelete: Cascade)
+  recipientId         String          @map(name: "recipient_id")
+  text                String          @db.VarChar(200)
+  createdAt           DateTime        @default(now()) @map(name: "created_at")
+  updatedAt           DateTime        @updatedAt @map(name: "updated_at")
+  messageStatus       MessageStatus?  
+
+  @@map("Messages")   
+  @@index([createdAt])   
+}
+
+model MessageStatus {
+  messageId     String        @id
+  isRead        Boolean       @default(false) @map(name: "is_read")
+  isDeleted     Boolean       @default(false) @map(name: "is_deleted")
+  message       Message       @relation(fields: [messageId], references: [uuid], onDelete: Cascade)
+
+  @@map("Message_Status")
+}
+
+
+

@@ -1,0 +1,75 @@
+import React, { useEffect } from "react";
+import { createContext, ReactNode, useCallback, useContext, useState } from "react";
+import { serverURL } from "../config/config";
+import axios from "axios";
+import { useError } from "./ErrorContext";
+
+interface AuthContextType {
+	userId: string | null | undefined;
+	isValidateLoading: boolean;
+	setValidateLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	validateUser: () => Promise<void>;
+	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+	isComponentLoading: boolean;
+	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	isLoggingOut: boolean;
+	setLoggingOut: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+	const [userId, setUserId] = useState<string | null>();
+	const [isValidateLoading, setValidateLoading] = useState(true);
+	const [isComponentLoading, setComponentLoading] = useState(false);
+	const [isLoggingOut, setLoggingOut] = useState<boolean>(false);
+
+	const { handleErrors } = useError();
+
+	const validateUser = useCallback(async () => {
+		try {
+			setValidateLoading(true);
+			const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
+			setUserId(res.data);
+		} catch (error) {
+			if (axios.isAxiosError(error) && error.response?.status === 401) {
+				setUserId(null);
+			} else {
+				handleErrors(error, "fetching page information");
+			}
+		} finally {
+			setValidateLoading(false);
+		}
+	}, [handleErrors]);
+
+	useEffect(() => {
+		void validateUser();
+	}, [validateUser]);
+
+
+	return (
+		<AuthContext.Provider
+			value={{
+				userId,
+				isValidateLoading,
+				validateUser,
+				setUserId,
+				isComponentLoading,
+				setComponentLoading,
+				setValidateLoading,
+				isLoggingOut,
+				setLoggingOut
+			}}
+		>
+			{children}
+		</AuthContext.Provider>
+	);
+};
+
+export const useAuth = () => {
+	const context = useContext(AuthContext);
+	if (!context) {
+		throw new Error("useAuth must be used within an AuthProvider.");
+	}
+	return context;
+};
