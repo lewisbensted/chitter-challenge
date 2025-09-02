@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Response } from "express";
 import { ZodError } from "zod";
 

@@ -73,7 +73,7 @@ const Register: React.FC = () => {
 						<Typography variant="subtitle1">Username:</Typography>
 						<TextField type="text" {...register("username")}></TextField>
 						<Typography variant="subtitle1">Password:</Typography>
-						<TextField type="text" {...register("password")}></TextField>
+						<TextField type="password" {...register("password")}></TextField>
 						<Typography variant="subtitle1">E-mail:</Typography>
 						<TextField type="text" {...register("email")}></TextField>
 						<FlexBox>

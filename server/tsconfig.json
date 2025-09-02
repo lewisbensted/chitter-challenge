@@ -11,6 +11,8 @@
 		"strict": true,
 		"strictNullChecks": true, 
 		"skipLibCheck": true,
-		"typeRoots": ["./types"]
+		"typeRoots": ["./types"],
+		"noEmit": true,
+		"allowImportingTsExtensions": true
 	}
 }

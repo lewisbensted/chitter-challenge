@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
-import { logError } from "../utils/logError.js";
-import prisma from "../../prisma/prismaClient.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
-import { ExtendedCheetClient, ExtendedUserClient } from "../../types/extendedClients.js";
+import { authMiddleware } from "../middleware/authMiddleware.ts";
+import { logError } from "../utils/logError.ts";
+import prisma from "../../prisma/prismaClient.ts";
+import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
+import { EditCheetRequest, SendCheetRequest } from "../../types/requests.ts";
+import { ExtendedCheetClient, ExtendedUserClient } from "../../types/extendedClients.ts";
 
 const router = express.Router({ mergeParams: true });
 
@@ -71,14 +71,13 @@ router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Respo
 		}
 		const targetCheet = await cheetClient.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
-			include: { user: true, cheetStatus: true },
 		});
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 			if (targetCheet.createdAt < oneHourAgo) {
 				return res.status(400).json({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
 			}
-			if (targetCheet.cheetStatus?.hasReplies) {
+			if (targetCheet.cheetStatus.hasReplies) {
 				return res.status(400).json({ errors: ["Cannot update a cheet with replies."] });
 			}
 			if (req.body.text !== targetCheet.text) {
@@ -110,7 +109,6 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 		}
 		const targetCheet = await cheetClient.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
-			include: { user: true },
 		});
 		if (targetCheet.user.uuid === req.session.user!.uuid) {
 			await cheetClient.delete({

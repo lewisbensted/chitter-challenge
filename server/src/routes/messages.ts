@@ -1,22 +1,21 @@
 import express, { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { logError } from "../utils/logError.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
-import { messageFilters } from "../../prisma/extensions/messageExtension.js";
-import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
-import { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.js";
+import prisma from "../../prisma/prismaClient.ts";
+import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
+import { logError } from "../utils/logError.ts";
+import { authMiddleware } from "../middleware/authMiddleware.ts";
+import { EditMessageRequest, SendMessageRequest } from "../../types/requests.ts";
+import { ExtendedMessageClient, ExtendedUserClient, ExtendedMessageStatusClient } from "../../types/extendedClients.ts";
 
 const router = express.Router({ mergeParams: true });
 
 const userClient = prisma.user as unknown as ExtendedUserClient;
 const messageClient = prisma.message as unknown as ExtendedMessageClient;
+const messageStatusClient = prisma.messageStatus as unknown as ExtendedMessageStatusClient;
 
 export const fetchMessages = async (userId: string, interlocutorId: string, cursor?: string, take?: number) => {
 	take = isNaN(take!) ? 20 : take;
 
 	const messages = await messageClient.findMany({
-		include: { messageStatus: true },
 		where: {
 			OR: [
 				{ senderId: userId, recipientId: interlocutorId },
@@ -65,7 +64,7 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 		);
 		const formattedMessages = messages.map((message) => ({
 			...message,
-			text: message.messageStatus?.isDeleted ? null : message.text,
+			text: message.messageStatus.isDeleted ? null : message.text,
 		}));
 		res.status(200).json(formattedMessages);
 	} catch (error) {
@@ -94,7 +93,6 @@ router.post("/:recipientId", authMiddleware, async (req: SendMessageRequest, res
 				recipientId: recipient.uuid,
 				text: req.body.text,
 			},
-			include: { sender: true, recipient: true },
 		});
 		const status = await prisma.messageStatus.create({
 			data: {
@@ -114,13 +112,12 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 		await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await messageClient.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
-			include: { messageStatus: true, sender: true, recipient: true },
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
-			if (targetMessage.messageStatus?.isRead) {
+			if (targetMessage.messageStatus.isRead) {
 				return res.status(400).json({ errors: ["Cannot update a message after it has been read."] });
 			}
-			if (targetMessage.messageStatus?.isDeleted) {
+			if (targetMessage.messageStatus.isDeleted) {
 				return res.status(400).json({ errors: ["Cannot update a deleted message."] });
 			}
 			if (req.body.text !== targetMessage.text) {
@@ -148,20 +145,10 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 		await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await messageClient.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
-			include: { sender: true },
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
-			const deletedMessage = await prisma.messageStatus.update({
-				where: {
-					messageId: targetMessage.uuid,
-				},
-				data: { isDeleted: true },
-
-				include: {
-					message: messageFilters,
-				},
-			});
-			res.status(200).json({ ...deletedMessage.message, text: null });
+			const deletedMessage = await messageStatusClient.softDelete(targetMessage.uuid);
+			res.status(200).json({ ...deletedMessage, text: null });
 		} else {
 			res.status(403).json({ errors: ["Cannot delete someone else's message."] });
 		}

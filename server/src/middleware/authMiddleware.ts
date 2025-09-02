@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { authenticate } from "../utils/authenticate.js";
+import { authenticate } from "../utils/authenticate.ts";
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 	if (authenticate(req)) {

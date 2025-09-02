@@ -65,7 +65,7 @@ const SignIn: React.FC = () => {
 						<TextField type="text" {...register("username")}></TextField>
 
 						<Typography variant="subtitle1">Password:</Typography>
-						<TextField type="text" {...register("password")}></TextField>
+						<TextField type="password" {...register("password")}></TextField>
 					</Grid2>
 					<Grid2 size={12}>
 						<FlexBox>

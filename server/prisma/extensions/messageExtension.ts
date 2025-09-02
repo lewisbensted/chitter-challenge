@@ -1,7 +1,8 @@
 import { Prisma } from "@prisma/client";
-import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.js";
-import { userFilters } from "./userExtension.js";
-import { IMessage } from "../../types/responses.js";
+import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.ts";
+import { userFilters } from "./userExtension.ts";
+import { IMessage } from "../../types/responses.ts";
+import prisma from "../prismaClient.ts";
 
 export const messageFilters = {
 	include: {
@@ -45,6 +46,23 @@ export const messageExtension = Prisma.defineExtension({
 				const parsedData = await UpdateMessageSchema.parseAsync(args.data);
 				const message = await query({ ...args, data: parsedData, ...messageFilters });
 				return message as unknown as IMessage;
+			},
+		},
+	},
+});
+
+export const messageStatusExtension = Prisma.defineExtension({
+	model: {
+		messageStatus: {
+			async softDelete(messageId: string): Promise<IMessage> {
+				const message = await prisma.messageStatus.update({
+					where: { messageId: messageId },
+					data: { isDeleted: true },
+					include: {
+						message: true,
+					},
+				});
+				return message.message as unknown as IMessage;
 			},
 		},
 	},

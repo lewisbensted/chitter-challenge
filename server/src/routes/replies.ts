@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
-import { logError } from "../utils/logError.js";
-import prisma from "../../prisma/prismaClient.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { EditReplyRequest, SendReplyRequest } from "../../types/requests.js";
-import { ExtendedCheetClient, ExtendedReplyClient } from "../../types/extendedClients.js";
+import { authMiddleware } from "../middleware/authMiddleware.ts";
+import { logError } from "../utils/logError.ts";
+import prisma from "../../prisma/prismaClient.ts";
+import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
+import { EditReplyRequest, SendReplyRequest } from "../../types/requests.ts";
+import { ExtendedCheetClient, ExtendedReplyClient } from "../../types/extendedClients.ts";
 
 const router = express.Router({ mergeParams: true });
 
@@ -41,7 +41,6 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", authMiddleware, async (req: SendReplyRequest, res: Response) => {
 	try {
 		const cheet = await cheetClient.findUniqueOrThrow({
-			include: { cheetStatus: true },
 			where: { uuid: req.params.cheetId },
 		});
 		const newReply = await replyClient.create({
@@ -51,7 +50,7 @@ router.post("/", authMiddleware, async (req: SendReplyRequest, res: Response) =>
 				cheetId: cheet.uuid,
 			},
 		});
-		if (!cheet.cheetStatus?.hasReplies) {
+		if (!cheet.cheetStatus.hasReplies) {
 			await prisma.cheetStatus.update({
 				where: {
 					cheetId: cheet.uuid,
@@ -73,7 +72,6 @@ router.put("/:replyId", authMiddleware, async (req: EditReplyRequest, res: Respo
 		await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const targetReply = await replyClient.findUniqueOrThrow({
 			where: { uuid: req.params.replyId },
-			include: { cheet: true, user: true },
 		});
 		if (targetReply.user.uuid === req.session.user!.uuid) {
 			if (targetReply.cheet.uuid === req.params.cheetId) {
@@ -106,7 +104,6 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 	try {
 		await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const targetReply = await replyClient.findUniqueOrThrow({
-			include: { cheet: true, user: true },
 			where: { uuid: req.params.replyId },
 		});
 		if (targetReply.user.uuid === req.session.user!.uuid) {
@@ -118,10 +115,10 @@ router.delete("/:replyId", authMiddleware, async (req: Request, res: Response) =
 				});
 				res.sendStatus(204);
 			} else {
-				res.status(403).json({errors:["Cheet IDs do not match."]});
+				res.status(403).json({ errors: ["Cheet IDs do not match."] });
 			}
 		} else {
-			res.status(403).json({errors:["Cannot delete someone else's reply."]});
+			res.status(403).json({ errors: ["Cannot delete someone else's reply."] });
 		}
 	} catch (error) {
 		console.error("Error deleting reply from database:\n" + logError(error));

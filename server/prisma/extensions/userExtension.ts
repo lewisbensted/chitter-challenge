@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import { UserSchema } from "../../src/schemas/user.schema.js";
+import { UserSchema } from "../../src/schemas/user.schema.ts";
 import bcrypt from "bcrypt";
-import { IUser } from "../../types/responses.js";
+import { IUser } from "../../types/responses.ts";
 
 export const userFilters = {
 	omit: { id: true, passwordHash: true },

@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import { CreateReplySchema, UpdateReplySchema } from "../../src/schemas/reply.schema.js";
-import { userFilters } from "./userExtension.js";
-import { IReply } from "../../types/responses.js";
+import { CreateReplySchema, UpdateReplySchema } from "../../src/schemas/reply.schema.ts";
+import { userFilters } from "./userExtension.ts";
+import { IReply } from "../../types/responses.ts";
 
 const replyFilters = {
 	include: { cheet: { omit: { id: true, userId: true } }, user: userFilters },

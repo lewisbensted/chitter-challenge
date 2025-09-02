@@ -1,11 +1,10 @@
 import express, { Request, Response } from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
-import { logError } from "../utils/logError.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { User } from "@prisma/client";
-import prisma from "../../prisma/prismaClient.js";
-import { IConversation, IUser } from "../../types/responses.js";
-import { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.js";
+import { authMiddleware } from "../middleware/authMiddleware.ts";
+import { logError } from "../utils/logError.ts";
+import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
+import prisma from "../../prisma/prismaClient.ts";
+import { IConversation, IUser } from "../../types/responses.ts";
+import { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.ts";
 
 const router = express.Router({ mergeParams: true });
 
@@ -14,7 +13,6 @@ const messageClient = prisma.message as unknown as ExtendedMessageClient;
 
 export const fetchConversations = async (userId: string, interlocutor?: IUser) => {
 	const messages = await messageClient.findMany({
-		include: { messageStatus: true, sender: true, recipient: true },
 		where: {
 			OR: [
 				{ sender: { uuid: userId }, recipient: interlocutor ? { uuid: interlocutor.uuid } : undefined },
@@ -24,11 +22,10 @@ export const fetchConversations = async (userId: string, interlocutor?: IUser) =
 		orderBy: { createdAt: "desc" },
 	});
 
-
 	if (interlocutor) {
 		let unread = false;
 		for (const message of messages) {
-			if (message.recipient.uuid === userId && !(message.messageStatus?.isRead) && !message.messageStatus.isDeleted) {
+			if (message.recipient.uuid === userId && !(message.messageStatus.isRead) && !message.messageStatus.isDeleted) {
 				unread = true;
 				break;
 			}
@@ -44,19 +41,19 @@ export const fetchConversations = async (userId: string, interlocutor?: IUser) =
 					interlocutorUsername: otherUser.username,
 					unread: false,
 					latestMessage: {
-						text: message.messageStatus?.isDeleted ? null : message.text,
+						text: message.messageStatus.isDeleted ? null : message.text,
 						senderId: message.sender.uuid,
 						createdAt: message.createdAt,
 						messageStatus: {
-							isRead: message.messageStatus?.isRead ,
-							isDeleted: message.messageStatus?.isDeleted,
+							isRead: message.messageStatus.isRead ,
+							isDeleted: message.messageStatus.isDeleted,
 						},
 					},
 				});
 			}
 
 			if (
-				!(message.messageStatus?.isRead) &&
+				!(message.messageStatus.isRead) &&
 				message.recipient.uuid === userId &&
 				!(message.messageStatus.isDeleted)
 			) {
