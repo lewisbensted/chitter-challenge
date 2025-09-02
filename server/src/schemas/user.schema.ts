@@ -1,5 +1,6 @@
 import { z } from "zod";
 import prisma from "../../prisma/prismaClient.js";
+import { ExtendedUserClient } from "../../types/extendedClients.js";
 
 export const firstNameExp1 = /^[a-zA-Z -]*$/;
 export const firstNameExp2 = /^([^- ]*|[^- ]{2,}(( |-)[^- ]{2,})?)$/; // Maximum of 2 words separated by a hypen or a space.
@@ -10,6 +11,7 @@ export const passwordExp1 = /^(?=.*?[a-zA-Z])(?=.*?[0-9])(?=.*?[$&+,:;=?@#|'<>.^
 export const passwordExp2 = /^\S*$/;
 
 const isTestEnv = process.env.NODE_ENV === "test";
+
 
 export const UserSchema = z
 	.object({
@@ -34,7 +36,8 @@ export const UserSchema = z
 			.trim()
 			.email("Invalid email address.")
 			.refine(async (email) => {
-				const user = await prisma.user.findUnique({ where: { email: email } });
+				const userClient = prisma.user as unknown as ExtendedUserClient;
+				const user = await userClient.findUnique({ where: { email: email } });
 				return !user;
 			}, "Email address already taken."),
 		username: z
@@ -43,7 +46,8 @@ export const UserSchema = z
 			.min(5, "Username too short. Must be at least 5 characters.")
 			.max(30, "Username too long. Must be less than 30 characters.")
 			.refine(async (username) => {
-				const user = await prisma.user.findUnique({
+				const userClient = prisma.user as unknown as ExtendedUserClient;
+				const user = await userClient.findUnique({
 					where: { username: username },
 				});
 				return !user;

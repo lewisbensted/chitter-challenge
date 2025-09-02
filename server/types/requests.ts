@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { ICheet, IMessage, IReply, IUser } from "./responses";
 
-interface RegisterUserRequestBody {
+export interface RegisterUserRequestBody {
 	firstName: string;
 	lastName: string;
 	username: string;

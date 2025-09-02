@@ -1,7 +1,7 @@
 import "express-session";
 
 interface SessionUser {
-	id: number;
+	//id: number;
 	uuid: string;
 }
 

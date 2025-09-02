@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { CreateReplySchema, UpdateReplySchema } from "../../src/schemas/reply.schema.js";
 import { userFilters } from "./userExtension.js";
+import { IReply } from "../../types/responses.js";
 
 const replyFilters = {
 	include: { cheet: { omit: { id: true, userId: true } }, user: userFilters },
@@ -10,25 +11,36 @@ const replyFilters = {
 export const replyExtension = Prisma.defineExtension({
 	query: {
 		reply: {
-			async findUniqueOrThrow({ args, query }) {
-				return query({
+			async findUniqueOrThrow({ args, query }): Promise<IReply> {
+				const reply = await query({
 					...args,
 					...replyFilters,
 				});
+				return reply as unknown as IReply;
 			},
-			async findMany({ args, query }) {
-				return query({
+			async findMany({ args, query }): Promise<IReply[]> {
+				const replies = await query({
 					...args,
 					...replyFilters,
 				});
+				return replies as unknown as IReply[];
 			},
-			async create({ args, query }) {
+			async create({ args, query }): Promise<IReply> {
 				const parsedData = await CreateReplySchema.parseAsync(args.data);
-				return query({ ...args, data: parsedData, ...replyFilters });
+				const reply = await query({ ...args, data: parsedData, ...replyFilters });
+				return reply as unknown as IReply;
 			},
-			async update({ args, query }) {
+			async update({ args, query }): Promise<IReply> {
 				const parsedData = await UpdateReplySchema.parseAsync(args.data);
-				return query({ ...args, data: parsedData, ...replyFilters });
+				const reply = await query({ ...args, data: parsedData, ...replyFilters });
+				return reply as unknown as IReply;
+			},
+			async delete({ args, query }): Promise<IReply> {
+				const cheet = await query({
+					...args,
+					...replyFilters,
+				});
+				return cheet as unknown as IReply;
 			},
 		},
 	},

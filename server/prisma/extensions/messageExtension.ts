@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.js";
 import { userFilters } from "./userExtension.js";
+import { IMessage } from "../../types/responses.js";
 
 export const messageFilters = {
 	include: {
@@ -14,31 +15,36 @@ export const messageFilters = {
 export const messageExtension = Prisma.defineExtension({
 	query: {
 		message: {
-			async findFirst({ args, query }) {
-				return query({
+			async findFirst({ args, query }): Promise<IMessage | null> {
+				const message = await query({
 					...args,
 					...messageFilters,
 				});
+				return message as unknown as IMessage | null;
 			},
-			async findMany({ args, query }) {
-				return query({
+			async findMany({ args, query }): Promise<IMessage[]> {
+				const messages = await query({
 					...args,
 					...messageFilters,
 				});
+				return messages as unknown as IMessage[];
 			},
-			async findUniqueOrThrow({ args, query }) {
-				return query({
+			async findUniqueOrThrow({ args, query }): Promise<IMessage> {
+				const message = await query({
 					...args,
 					...messageFilters,
 				});
+				return message as unknown as IMessage;
 			},
-			async create({ args, query }) {
+			async create({ args, query }): Promise<IMessage> {
 				const parsedData = await CreateMessageSchema.parseAsync(args.data);
-				return query({ ...args, data: parsedData, ...messageFilters });
+				const message = await query({ ...args, data: parsedData, ...messageFilters });
+				return message as unknown as IMessage;
 			},
-			async update({ args, query }) {
+			async update({ args, query }): Promise<IMessage> {
 				const parsedData = await UpdateMessageSchema.parseAsync(args.data);
-				return query({ ...args, data: parsedData, ...messageFilters });
+				const message = await query({ ...args, data: parsedData, ...messageFilters });
+				return message as unknown as IMessage;
 			},
 		},
 	},

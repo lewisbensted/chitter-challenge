@@ -4,6 +4,9 @@ import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { authenticate } from "../utils/authenticate.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import { ExtendedUserClient } from "../../types/extendedClients.js";
+
+const userClient = prisma.user as unknown as ExtendedUserClient;
 
 const router = express.Router();
 
@@ -22,12 +25,12 @@ router.post("/", async (req: Request, res: Response) => {
 			}
 			res.status(400).json({ errors: errors });
 		} else {
-			const user = await prisma.user.findUnique({
+			const user = await userClient.findUnique({
 				where: { username: username },
 			});
 			if (user) {
 				if (bcrypt.compareSync(password, user.passwordHash)) {
-					req.session.user = { id: user.id, uuid: user.uuid };
+					req.session.user = { uuid: user.uuid };
 					res.cookie("user_id", req.session.user.uuid);
 					res.cookie("session_id", req.sessionID);
 					res.status(200).json(user.uuid);

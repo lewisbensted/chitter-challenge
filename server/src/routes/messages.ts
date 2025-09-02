@@ -5,13 +5,17 @@ import { logError } from "../utils/logError.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { messageFilters } from "../../prisma/extensions/messageExtension.js";
 import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
+import { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
+
+const userClient = prisma.user as unknown as ExtendedUserClient;
+const messageClient = prisma.message as unknown as ExtendedMessageClient;
 
 export const fetchMessages = async (userId: string, interlocutorId: string, cursor?: string, take?: number) => {
 	take = isNaN(take!) ? 20 : take;
 
-	const messages = await prisma.message.findMany({
+	const messages = await messageClient.findMany({
 		include: { messageStatus: true },
 		where: {
 			OR: [
@@ -40,7 +44,7 @@ export const readMessages = async (userId: string, interlocutorId: string) => {
 
 router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		const unreadMessages = await prisma.message.findFirst({
+		const unreadMessages = await messageClient.findFirst({
 			where: { recipientId: req.session.user!.uuid, messageStatus: { isRead: false, isDeleted: false } },
 		});
 		res.status(200).json(!!unreadMessages);
@@ -52,7 +56,7 @@ router.get("/unread", authMiddleware, async (req: Request, res: Response) => {
 
 router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const messages = await fetchMessages(
 			req.session.user!.uuid,
 			recipient.uuid,
@@ -72,7 +76,7 @@ router.get("/:recipientId", authMiddleware, async (req: Request, res: Response) 
 
 router.put("/read/:recipientId", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		await readMessages(req.session.user!.uuid, recipient.uuid);
 		res.sendStatus(200);
 	} catch (error) {
@@ -83,8 +87,8 @@ router.put("/read/:recipientId", authMiddleware, async (req: Request, res: Respo
 
 router.post("/:recipientId", authMiddleware, async (req: SendMessageRequest, res: Response) => {
 	try {
-		const recipient = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const newMessage = await prisma.message.create({
+		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+		const newMessage = await messageClient.create({
 			data: {
 				senderId: req.session.user!.uuid,
 				recipientId: recipient.uuid,
@@ -107,8 +111,8 @@ router.post("/:recipientId", authMiddleware, async (req: SendMessageRequest, res
 
 router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditMessageRequest, res: Response) => {
 	try {
-		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const targetMessage = await prisma.message.findUniqueOrThrow({
+		await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+		const targetMessage = await messageClient.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
 			include: { messageStatus: true, sender: true, recipient: true },
 		});
@@ -120,7 +124,7 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 				return res.status(400).json({ errors: ["Cannot update a deleted message."] });
 			}
 			if (req.body.text !== targetMessage.text) {
-				const updatedMessage = await prisma.message.update({
+				const updatedMessage = await messageClient.update({
 					where: {
 						uuid: targetMessage.uuid,
 					},
@@ -141,8 +145,8 @@ router.put("/:recipientId/message/:messageId", authMiddleware, async (req: EditM
 
 router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const targetMessage = await prisma.message.findUniqueOrThrow({
+		await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
+		const targetMessage = await messageClient.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
 			include: { sender: true },
 		});

@@ -4,12 +4,16 @@ import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { User } from "@prisma/client";
 import prisma from "../../prisma/prismaClient.js";
-import { IConversation } from "../../types/responses.js";
+import { IConversation, IUser } from "../../types/responses.js";
+import { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
 
-export const fetchConversations = async (userId: string, interlocutor?: User) => {
-	const messages = await prisma.message.findMany({
+const userClient = prisma.user as unknown as ExtendedUserClient;
+const messageClient = prisma.message as unknown as ExtendedMessageClient;
+
+export const fetchConversations = async (userId: string, interlocutor?: IUser) => {
+	const messages = await messageClient.findMany({
 		include: { messageStatus: true, sender: true, recipient: true },
 		where: {
 			OR: [
@@ -24,7 +28,7 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 	if (interlocutor) {
 		let unread = false;
 		for (const message of messages) {
-			if (message.recipient.uuid === userId && message.messageStatus?.isRead===false && !message.messageStatus.isDeleted) {
+			if (message.recipient.uuid === userId && !(message.messageStatus?.isRead) && !message.messageStatus.isDeleted) {
 				unread = true;
 				break;
 			}
@@ -44,15 +48,15 @@ export const fetchConversations = async (userId: string, interlocutor?: User) =>
 						senderId: message.sender.uuid,
 						createdAt: message.createdAt,
 						messageStatus: {
-							isRead: message.messageStatus?.isRead ===true ,
-							isDeleted: message.messageStatus?.isDeleted === true,
+							isRead: message.messageStatus?.isRead ,
+							isDeleted: message.messageStatus?.isDeleted,
 						},
 					},
 				});
 			}
 
 			if (
-				message.messageStatus?.isRead ===false &&
+				!(message.messageStatus?.isRead) &&
 				message.recipient.uuid === userId &&
 				!(message.messageStatus.isDeleted)
 			) {
@@ -78,7 +82,7 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
 
 router.get("/:userId", authMiddleware, async (req: Request, res: Response) => {
 	try {
-		const user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
+		const user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		const conversation = await fetchConversations(req.session.user!.uuid, user);
 		res.status(200).json(conversation);
 	} catch (error) {
