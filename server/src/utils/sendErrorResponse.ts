@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 import { Response } from "express";
 import { ZodError } from "zod";
 
@@ -8,7 +8,7 @@ const constraintMap = {
 };
 
 export const sendErrorResponse = (error: unknown, res: Response) => {
-	if (error instanceof PrismaClientKnownRequestError) {
+	if (error instanceof Prisma.PrismaClientKnownRequestError) {
 		switch (error.code) {
 			case "P2002": {
 				const constraint = error.meta?.target as string;

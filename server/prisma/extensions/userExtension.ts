@@ -24,7 +24,7 @@ export const userExtension = Prisma.defineExtension({
 				});
 				return user as unknown as IUser;
 			},
-			async create({ args, query }: { args: Prisma.UserCreateArgs; query: any }): Promise<IUser> {
+			async create({ args, query }): Promise<IUser> {
 				const parsedData = await UserSchema.parseAsync(args.data);
 
 				const { password, ...rest } = parsedData;

@@ -116,7 +116,6 @@ router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) =
 					uuid: targetCheet.uuid,
 				},
 			});
-
 			res.sendStatus(204);
 		} else {
 			res.status(403).json({ errors: ["Cannot delete someone else's cheet."] });

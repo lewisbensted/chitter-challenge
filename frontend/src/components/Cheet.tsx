@@ -1,6 +1,5 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { ICheet } from "../interfaces/interfaces";
-import { format } from "date-fns";
 import { useParams } from "react-router-dom";
 import theme from "../styles/theme";
 import {
@@ -119,10 +118,10 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 									</Grid2>
 									<Grid2 size={6}>
 										<Typography variant="body2" justifyContent="flex-end">
-											{format(createdAt, "HH:mm dd/MM/yy")}
+											{formatDate(createdAt, isModalView)}
 										</Typography>
 									</Grid2>
-									<Grid2 size={isEdited ? 10 : 12}>
+									<Grid2 size={isEdited ? 9 : 12}>
 										{isEditing ? (
 											<Box
 												component="form"
@@ -141,10 +140,10 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 										)}
 									</Grid2>
 									{isEdited && (
-										<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
+										<Grid2 size={3} container justifyContent="flex-end" marginTop={0.4}>
 											<Typography variant="body2">
 												<Edit fontSize="small" color="primary" />
-												{formatDate(updatedAt)}
+												{isModalView ? formatDate(updatedAt) : ""}
 											</Typography>
 										</Grid2>
 									)}

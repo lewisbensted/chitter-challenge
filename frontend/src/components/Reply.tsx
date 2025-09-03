@@ -18,7 +18,6 @@ import {
 	ThemeProvider,
 	Typography,
 } from "@mui/material";
-import { format } from "date-fns";
 import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
@@ -112,7 +111,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 									</Grid2>
 									<Grid2 size={6}>
 										<Typography variant="body2" justifyContent="flex-end">
-											{format(createdAt, "HH:mm dd/MM/yy")}
+											{formatDate(createdAt)}
 										</Typography>
 									</Grid2>
 									<Grid2 size={isEdited ? 10 : 12}>
