@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
-import { IConversation } from "../interfaces/interfaces";
+import type { IConversation } from "../interfaces/interfaces";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import toast from "react-hot-toast";

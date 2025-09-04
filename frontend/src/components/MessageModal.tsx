@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { IConversation } from "../interfaces/interfaces";
+import type { IConversation } from "../interfaces/interfaces";
 import Message from "./Message";
 import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";

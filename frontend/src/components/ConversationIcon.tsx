@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { IConversation } from "../interfaces/interfaces";
+import type { IConversation } from "../interfaces/interfaces";
 import MessageModal from "./MessageModal";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Chat from "@mui/icons-material/Chat";

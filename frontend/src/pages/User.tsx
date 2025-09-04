@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { ICheet, IUser } from "../interfaces/interfaces";
+import type { ICheet, IUser } from "../interfaces/interfaces";
 import ErrorModal from "../components/ErrorModal";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";

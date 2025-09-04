@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { authMiddleware } from "../middleware/authMiddleware.ts";
-import { logError } from "../utils/logError.ts";
-import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { logError } from "../utils/logError.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router();
 

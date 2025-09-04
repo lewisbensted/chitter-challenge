@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ICheet } from "../interfaces/interfaces";
+import type { ICheet } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { logErrors } from "../utils/processErrors";

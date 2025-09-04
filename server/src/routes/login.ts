@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { logError } from "../utils/logError.ts";
-import prisma from "../../prisma/prismaClient.ts";
-import { authenticate } from "../utils/authenticate.ts";
-import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
-import { ExtendedUserClient } from "../../types/extendedClients.ts";
+import { logError } from "../utils/logError.js";
+import prisma from "../../prisma/prismaClient.js";
+import { authenticate } from "../utils/authenticate.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
 const userClient = prisma.user as unknown as ExtendedUserClient;
 

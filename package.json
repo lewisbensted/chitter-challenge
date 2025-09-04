@@ -7,10 +7,9 @@
 		"lint": "npx eslint .",
 		"migrate:dev": "npm --prefix server run migrate:dev",
 		"start:dev": "concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"npm --prefix frontend start\"",
-		"migrate:test": "npm --prefix server run migrate:test",
-		"start:test": "concurrently --names Backend,Frontend \"npm --prefix server run start:test\" \"npm --prefix frontend start\"",
+		"build:prod": "concurrently --names Frontend,Backend \"npm --prefix frontend run build\" \"npm --prefix server run build:prod\"",
 		"migrate:prod": "npm --prefix server run migrate:prod",
-		"start:prod": "npm --prefix frontend build && npm --prefix server run start:prod"
+		"start:prod": "npm --prefix server run start:prod"
 	},
 	"repository": {
 		"type": "git",

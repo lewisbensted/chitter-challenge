@@ -1,5 +1,5 @@
 import axios from "axios";
-import { extractData } from "./extractData";
+import { extractData } from "./extractErrorData";
 
 export const logErrors = (error: unknown) => {
 	if (axios.isAxiosError(error)) {

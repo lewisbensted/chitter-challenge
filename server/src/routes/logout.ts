@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
-import { logError } from "../utils/logError.ts";
-import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
+import { logError } from "../utils/logError.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router();
 

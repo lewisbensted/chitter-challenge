@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IMessage } from "../interfaces/interfaces";
+import type { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";

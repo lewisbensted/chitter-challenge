@@ -8,7 +8,7 @@ import { Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchCheets from "../hooks/useFetchCheets";
 import CheetModal from "../components/CheetModal";
-import { ICheet } from "../interfaces/interfaces";
+import type { ICheet } from "../interfaces/interfaces";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 import ScrollGrid from "../styles/ScrollGrid";

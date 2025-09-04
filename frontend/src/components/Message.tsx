@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect } from "react";
 import { useState } from "react";
-import { IMessage } from "../interfaces/interfaces";
+import type { IMessage } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";

@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-import { authMiddleware } from "../middleware/authMiddleware.ts";
-import { logError } from "../utils/logError.ts";
-import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
-import prisma from "../../prisma/prismaClient.ts";
-import { IConversation, IUser } from "../../types/responses.ts";
-import { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.ts";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { logError } from "../utils/logError.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import prisma from "../../prisma/prismaClient.js";
+import type { IConversation, IUser } from "../../types/responses.js";
+import type { ExtendedMessageClient, ExtendedUserClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
 

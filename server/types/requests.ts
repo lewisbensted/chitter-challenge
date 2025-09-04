@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { ICheet, IMessage, IReply, IUser } from "./responses";
+import type { ICheet, IMessage, IReply, IUser } from "./responses.js";
 
 export interface RegisterUserRequestBody {
 	firstName: string;

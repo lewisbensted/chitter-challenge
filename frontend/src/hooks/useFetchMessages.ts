@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { IMessage } from "../interfaces/interfaces";
+import type { IMessage } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { logErrors } from "../utils/processErrors";

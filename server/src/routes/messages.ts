@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient.ts";
-import { sendErrorResponse } from "../utils/sendErrorResponse.ts";
-import { logError } from "../utils/logError.ts";
-import { authMiddleware } from "../middleware/authMiddleware.ts";
-import { EditMessageRequest, SendMessageRequest } from "../../types/requests.ts";
-import { ExtendedMessageClient, ExtendedUserClient, ExtendedMessageStatusClient } from "../../types/extendedClients.ts";
+import prisma from "../../prisma/prismaClient.js";
+import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import { logError } from "../utils/logError.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
+import type { ExtendedMessageClient, ExtendedUserClient, ExtendedMessageStatusClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
 

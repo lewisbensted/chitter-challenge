@@ -1,8 +1,8 @@
 import { Prisma } from "@prisma/client";
-import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.ts";
-import { userFilters } from "./userExtension.ts";
-import { IMessage } from "../../types/responses.ts";
-import prisma from "../prismaClient.ts";
+import { CreateMessageSchema, UpdateMessageSchema } from "../../src/schemas/message.schema.js";
+import { userFilters } from "./userExtension.js";
+import type { IMessage } from "../../types/responses.js";
+import prisma from "../prismaClient.js";
 
 export const messageFilters = {
 	include: {

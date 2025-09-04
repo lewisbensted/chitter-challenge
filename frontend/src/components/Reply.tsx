@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import axios from "axios";
-import { IReply } from "../interfaces/interfaces";
+import type { IReply } from "../interfaces/interfaces";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";

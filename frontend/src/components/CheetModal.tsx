@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ICheet } from "../interfaces/interfaces";
+import type { ICheet } from "../interfaces/interfaces";
 import ErrorModal from "./ErrorModal";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";

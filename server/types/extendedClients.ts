@@ -1,6 +1,6 @@
-import prisma from "../prisma/prismaClient.ts";
-import { RegisterUserRequestBody } from "./requests.ts";
-import { IUser, ICheet, IReply, IMessage } from "./responses.ts";
+import prisma from "../prisma/prismaClient.js";
+import { RegisterUserRequestBody } from "./requests.js";
+import type { IUser, ICheet, IReply, IMessage } from "./responses.js";
 
 export interface ExtendedUserClient {
 	findUniqueOrThrow(args: Parameters<typeof prisma.user.findUniqueOrThrow>[0]): Promise<IUser>;

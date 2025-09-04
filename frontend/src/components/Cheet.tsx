@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useState } from "react";
-import { ICheet } from "../interfaces/interfaces";
+import type { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
 import theme from "../styles/theme";
 import {

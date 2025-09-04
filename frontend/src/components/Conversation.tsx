@@ -1,5 +1,5 @@
 import React from "react";
-import { IConversation } from "../interfaces/interfaces";
+import type { IConversation } from "../interfaces/interfaces";
 import { Card, CardActionArea, CardContent, Grid2, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
 import { ThemeProvider } from "@emotion/react";

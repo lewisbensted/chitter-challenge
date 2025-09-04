@@ -4,7 +4,7 @@ import Conversation from "../components/Conversation";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchConversations from "../hooks/useFetchConversations";
-import { IConversation } from "../interfaces/interfaces";
+import type { IConversation } from "../interfaces/interfaces";
 import MessageModal from "../components/MessageModal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";

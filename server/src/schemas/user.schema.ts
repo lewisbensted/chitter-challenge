@@ -1,6 +1,6 @@
 import { z } from "zod";
-import prisma from "../../prisma/prismaClient.ts";
-import { ExtendedUserClient } from "../../types/extendedClients.ts";
+import prisma from "../../prisma/prismaClient.js";
+import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
 export const firstNameExp1 = /^[a-zA-Z -]*$/;
 export const firstNameExp2 = /^([^- ]*|[^- ]{2,}(( |-)[^- ]{2,})?)$/; // Maximum of 2 words separated by a hypen or a space.

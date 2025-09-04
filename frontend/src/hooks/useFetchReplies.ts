@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { IReply } from "../interfaces/interfaces";
+import type { IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { logErrors } from "../utils/processErrors";
