@@ -43,7 +43,7 @@ const SendMessage: React.FC<Props> = ({
 			setSubmitLoading(true);
 			setComponentLoading(true);
 			reset();
-			const newMessage = await axios.post<IMessage>(`${serverURL}/messages/${recipientId}`, data, {
+			const newMessage = await axios.post<IMessage>(`${serverURL}/api/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
 			setMessages((prevMessages) => [...prevMessages, newMessage.data]);

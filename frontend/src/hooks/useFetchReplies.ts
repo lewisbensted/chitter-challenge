@@ -41,7 +41,7 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 			if (cursorRef.current) params.append("cursor", cursorRef.current);
 			params.append("take", take.toString());
 
-			const res = await axios.get<IReply[]>(`${serverURL}/cheets/${cheetId}/replies?${params}`, {
+			const res = await axios.get<IReply[]>(`${serverURL}/api/cheets/${cheetId}/replies?${params}`, {
 				withCredentials: true,
 			});
 

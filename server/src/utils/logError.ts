@@ -1,4 +1,4 @@
-import { PrismaClientInitializationError, PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { PrismaClientInitializationError, PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 import { ZodError } from "zod";
 
 export const logError = (error: unknown) => (

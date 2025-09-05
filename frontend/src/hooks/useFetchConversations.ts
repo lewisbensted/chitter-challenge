@@ -27,7 +27,7 @@ const useFetchConversations = (pageUserId?: string): UseFetchConversationsReturn
 	const fetchConversations = useCallback(async () => {
 		try {
 			const res = await axios.get<IConversation[]>(
-				`${serverURL}/conversations${pageUserId ? "/" + pageUserId : ""}`,
+				`${serverURL}/api/conversations${pageUserId ? "/" + pageUserId : ""}`,
 				{
 					withCredentials: true,
 				}

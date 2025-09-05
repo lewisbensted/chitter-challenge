@@ -13,6 +13,7 @@ router.get("/:userId", async (req: Request, res: Response) => {
 		const user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		res.json(user);
 	} catch (error) {
+		console.log(error)
 		console.error("Error retrieving user from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}

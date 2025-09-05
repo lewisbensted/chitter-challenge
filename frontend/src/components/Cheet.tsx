@@ -56,7 +56,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				setEditLoading(true);
 				setComponentLoading(true);
 				const updatedCheet = await axios.put<ICheet>(
-					`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`,
+					`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`,
 					data,
 					{
 						withCredentials: true,
@@ -82,7 +82,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			try {
 				setDeleteLoading(true);
 				setComponentLoading(true);
-				await axios.delete(`${serverURL + (id ? `/users/${id}/` : "/")}cheets/${cheet.uuid}`, {
+				await axios.delete(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`, {
 					withCredentials: true,
 				});
 

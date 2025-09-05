@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const validateUser = useCallback(async () => {
 		try {
 			setValidateLoading(true);
-			const res = await axios.get<string>(`${serverURL}/validate`, { withCredentials: true });
+			const res = await axios.get<string>(`${serverURL}/api/validate`, { withCredentials: true });
 			setUserId(res.data);
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 401) {

@@ -11,7 +11,7 @@ const logout = async (
 		setLoggingOut(true);
 		setLoadingTimer(true);
 
-		await axios.delete(`${serverURL}/logout`, { withCredentials: true });
+		await axios.delete(`${serverURL}/api/logout`, { withCredentials: true });
 		setUserId(null);
 	} catch (error) {
 		if (axios.isAxiosError(error) && error.response?.status === 403) {

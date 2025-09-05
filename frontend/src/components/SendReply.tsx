@@ -45,7 +45,7 @@ const SendReply: React.FC<Props> = ({
 			setSubmitLoading(true);
 			setComponentLoading(true);
 			reset();
-			const newReply = await axios.post<IReply>(`${serverURL}/cheets/${selectedCheet.uuid}/replies`, data, {
+			const newReply = await axios.post<IReply>(`${serverURL}/api/cheets/${selectedCheet.uuid}/replies`, data, {
 				withCredentials: true,
 			});
 

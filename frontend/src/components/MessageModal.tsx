@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { IConversation } from "../interfaces/interfaces";
 import Message from "./Message";
-import ErrorModal from "./ErrorModal";
 import SendMessage from "./SendMessage";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -137,7 +136,6 @@ const MessageModal: React.FC<Props> = ({
 					toggleRefreshMessages((prev) => !prev);
 				}}
 			>
-				<ErrorModal errors={errors} closeModal={clearErrors} />
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">

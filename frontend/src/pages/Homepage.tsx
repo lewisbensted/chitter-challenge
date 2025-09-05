@@ -1,6 +1,5 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import SendCheet from "../components/SendCheet";
-import ErrorModal from "../components/ErrorModal";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
@@ -15,7 +14,7 @@ import ScrollGrid from "../styles/ScrollGrid";
 
 const Homepage: React.FC = () => {
 	const { userId, isComponentLoading } = useAuth();
-	const { errors, setErrors, clearErrors } = useError();
+	const { setErrors } = useError();
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
 	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, setPage, hasNextPage } = useFetchCheets();
@@ -49,7 +48,6 @@ const Homepage: React.FC = () => {
 
 	return (
 		<Box>
-			<ErrorModal errors={errors} closeModal={clearErrors} />
 
 			<Typography variant="h4">Welcome to Chitter</Typography>
 			{cheetsError ? (

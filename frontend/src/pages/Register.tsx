@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import ErrorModal from "../components/ErrorModal";
 import SuccessModal from "../components/SuccessModal";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -25,7 +24,7 @@ const Register: React.FC = () => {
 	const { register, handleSubmit, reset } = useForm<RegisterFormFields>();
 
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
-	const { errors, clearErrors, handleErrors } = useError();
+	const { handleErrors } = useError();
 	const [isSuccessOpen, setSuccessOpen] = useState<boolean>(false);
 	const { userId, isValidateLoading, setComponentLoading } = useAuth();
 	const navigate = useNavigate();
@@ -41,7 +40,7 @@ const Register: React.FC = () => {
 		setComponentLoading(true);
 		reset();
 		try {
-			await axios.post(`${serverURL}/register`, data);
+			await axios.post(`${serverURL}/api/register`, data);
 			setSuccessOpen(true);
 		} catch (error) {
 			handleErrors(error, "registering the user");
@@ -54,7 +53,7 @@ const Register: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Box>
-				<ErrorModal errors={errors} closeModal={clearErrors} />
+			
 				<SuccessModal
 					isOpen={isSuccessOpen}
 					message="Account created."

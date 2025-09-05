@@ -55,7 +55,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 				setEditLoading(true);
 				setComponentLoading(true);
 				const updatedReply = await axios.put<IReply>(
-					`${serverURL}/cheets/${cheetId}/replies/${reply.uuid}`,
+					`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`,
 					data,
 					{
 						withCredentials: true,
@@ -79,7 +79,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(
 			try {
 				setDeleteLoading(true);
 				setComponentLoading(true);
-				await axios.delete(`${serverURL}/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
+				await axios.delete(`${serverURL}/api/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
 					withCredentials: true,
 				});
 				setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));

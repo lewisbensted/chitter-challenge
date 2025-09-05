@@ -35,8 +35,9 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 			setCheetsLoading(true);
 
 			const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
+			console.log(`${serverURL}${pageUserId ? `/users/${pageUserId}` : ""}/api/cheets?${cursorParam}&take=${take}`)
 			const res = await axios.get<ICheet[]>(
-				`${serverURL}${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${cursorParam}&take=${take}`,
+				`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${cursorParam}&take=${take}`,
 				{
 					withCredentials: true,
 				}

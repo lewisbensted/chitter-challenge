@@ -17,7 +17,7 @@ import path from "path";
 import cors from "cors";
 import conversations from "./routes/conversations.js";
 import user from "./routes/user.js";
-import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
+import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 const SessionStore = MySQLStore(expressSession);
@@ -50,22 +50,6 @@ try {
 	checkValidPort(Number(SERVER_PORT), "server");
 	const PROJECT_ROOT = path.resolve(__dirname, "../../..");
 
-	if (process.env.NODE_ENV === "production") {
-		const buildPath = path.join(PROJECT_ROOT, "frontend", "build");
-		app.use(express.static(buildPath));
-		app.get("*", (_req, res) => {
-			res.sendFile(path.join(buildPath, "index.html"));
-		});
-	} else {
-		checkValidPort(Number(FRONTEND_PORT), "frontend");
-		app.use(
-			cors({
-				origin: `http://localhost:${FRONTEND_PORT}`,
-				credentials: true,
-			})
-		);
-	}
-
 	app.use(cookieParser());
 	app.use(
 		session({
@@ -77,19 +61,38 @@ try {
 		})
 	);
 
-	app.use("/user", express.json(), user);
-	app.use("/register", express.json(), register);
-	app.use("/login", express.json(), login);
-	app.use("/validate", validate);
-	app.use("/logout", logout);
-	app.use("/cheets", express.json(), cheets);
-	app.use("/conversations", express.json(), conversations);
-	app.use("/users/:userId/cheets", express.json(), cheets);
-	app.use("/cheets/:cheetId/replies", express.json(), replies);
-	app.use("/messages", express.json(), messages);
-	app.all("*", (_req, res) => {
+	if (process.env.NODE_ENV !== "production") {
+		checkValidPort(Number(FRONTEND_PORT), "frontend");
+		app.use(
+			cors({
+				origin: `http://localhost:${FRONTEND_PORT}`,
+				credentials: true,
+			})
+		);
+	}
+
+	app.use("/api/user", express.json(), user);
+	app.use("/api/register", express.json(), register);
+	app.use("/api/login", express.json(), login);
+	app.use("/api/validate", validate);
+	app.use("/api/logout", logout);
+	app.use("/api/cheets", express.json(), cheets);
+	app.use("/api/conversations", express.json(), conversations);
+	app.use("/api/users/:userId/cheets", express.json(), cheets);
+	app.use("/api/cheets/:cheetId/replies", express.json(), replies);
+	app.use("/api/messages", express.json(), messages);
+	app.all("/api/*", (_req, res) => {
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });
 	});
+
+	if (process.env.NODE_ENV === "production") {
+		const buildPath = path.join(PROJECT_ROOT, "frontend", "build");
+		app.use(express.static(buildPath));
+		app.get("*", (_req, res) => {
+			res.sendFile(path.join(buildPath, "index.html"));
+		});
+	}
+
 	app.listen(SERVER_PORT, () => {
 		console.log(`\nServer running on port ${SERVER_PORT}.\n`);
 	}).on("error", (error) => {

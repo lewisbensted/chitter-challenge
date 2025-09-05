@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import ErrorModal from "../components/ErrorModal";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import FlexBox from "../styles/FlexBox";
@@ -41,7 +40,7 @@ const SignIn: React.FC = () => {
 		setLoadingTimer(true);
 		reset();
 		try {
-			const res = await axios.post<string>(`${serverURL}/login`, data, { withCredentials: true });
+			const res = await axios.post<string>(`${serverURL}/api/login`, data, { withCredentials: true });
 			setUserId(res.data);
 			void navigate("/");
 		} catch (error) {
@@ -56,8 +55,6 @@ const SignIn: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Box>
-				<ErrorModal errors={errors} closeModal={clearErrors} />
-
 				<Typography variant="h4">Sign In</Typography>
 				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
 					<Grid2 size={12} container display="block">
@@ -76,7 +73,6 @@ const SignIn: React.FC = () => {
 									<Typography variant="button" color="inherit">
 										Sign in
 									</Typography>
-
 									<Login />
 								</Button>
 							)}

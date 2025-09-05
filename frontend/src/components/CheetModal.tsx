@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
-import ErrorModal from "./ErrorModal";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
@@ -77,7 +76,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 	return (
 		<ThemeProvider theme={theme}>
 			<Dialog open={isOpen} fullWidth maxWidth="md">
-				<ErrorModal errors={errors} closeModal={clearErrors} />
+				
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">

@@ -2,7 +2,6 @@ import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useSt
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ICheet, IUser } from "../interfaces/interfaces";
-import ErrorModal from "../components/ErrorModal";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -40,7 +39,7 @@ const User: React.FC = () => {
 		if (!id) return;
 		const fetchUser = async () => {
 			try {
-				const res = await axios.get<IUser>(`${serverURL}/user/${id}`, { withCredentials: true });
+				const res = await axios.get<IUser>(`${serverURL}/api/user/${id}`, { withCredentials: true });
 				setUsername(res.data.username);
 			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 404) {
@@ -83,7 +82,7 @@ const User: React.FC = () => {
 
 	return (
 		<Box>
-			<ErrorModal errors={errors} closeModal={clearErrors} />
+			
 			{isUserLoading || isConversationsLoading ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />

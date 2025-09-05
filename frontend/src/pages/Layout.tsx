@@ -22,19 +22,15 @@ import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
 import FlexBox from "../styles/FlexBox";
 
-const drawerWidth = 200;
+const DRAWER_WIDTH = 200;
 
 const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
+	const drawerWidth = isDrawerOpen ? DRAWER_WIDTH : DRAWER_WIDTH / 2;
+	console.log(drawerWidth);
+
 	const { errors, clearErrors, handleErrors } = useError();
-	const {
-		userId,
-		setUserId,
-		isValidateLoading,
-		isComponentLoading,
-		isLoggingOut,
-		setLoggingOut,
-	} = useAuth();
+	const { userId, setUserId, isValidateLoading, isComponentLoading, isLoggingOut, setLoggingOut } = useAuth();
 
 	const { isUnreadLoading, isUnreadMessages, isLoadingTimer, setLoadingTimer } = useLayout();
 	const navigate = useNavigate();
@@ -45,17 +41,16 @@ const Layout: React.FC = () => {
 		}
 	}, [userId, isLoggingOut, navigate]);
 
-
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<ErrorModal errors={errors} closeModal={clearErrors} />
-			<Box display="flex" justifyContent="center">
+			{/* <ErrorModal errors={errors} closeModal={clearErrors} offset={drawerWidth}/> */}
+			<Box>
 				<Drawer
 					open={isDrawerOpen}
 					variant="permanent"
-					sx={{ width: isDrawerOpen ? drawerWidth : drawerWidth / 2 }}
-					slotProps={{ paper: { sx: { width: isDrawerOpen ? drawerWidth : drawerWidth / 2 } } }}
+					sx={{ width: drawerWidth }}
+					slotProps={{ paper: { sx: { width: drawerWidth } } }}
 				>
 					<List>
 						<DrawerElement
@@ -63,11 +58,11 @@ const Layout: React.FC = () => {
 							onClick={
 								isDrawerOpen
 									? () => {
-										setDrawerOpen(false);
-									}
+											setDrawerOpen(false);
+										}
 									: () => {
-										setDrawerOpen(true);
-									}
+											setDrawerOpen(true);
+										}
 							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}
@@ -89,7 +84,7 @@ const Layout: React.FC = () => {
 										isDisabled={isComponentLoading}
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
-											await logout( setUserId, handleErrors, setLoggingOut, setLoadingTimer);
+											await logout(setUserId, handleErrors, setLoggingOut, setLoadingTimer);
 										}}
 									/>
 								</Fragment>
@@ -127,7 +122,10 @@ const Layout: React.FC = () => {
 						<CircularProgress thickness={5} />
 					</FlexBox>
 				) : (
-					<Outlet />
+					<Box display="flex" justifyContent={"center"} alignItems="center">
+						<ErrorModal errors={errors} closeModal={clearErrors} />
+						<Outlet />
+					</Box>
 				)}
 			</Box>
 		</ThemeProvider>

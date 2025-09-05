@@ -21,12 +21,7 @@ interface Props {
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SendCheet: React.FC<Props> = ({
-	isDisabled,
-	setCheets,
-	setCheetsError,
-	triggerScroll,
-}) => {
+const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, triggerScroll }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -39,7 +34,7 @@ const SendCheet: React.FC<Props> = ({
 			setSubmitLoading(true);
 			setComponentLoading(true);
 			reset();
-			const newCheet = await axios.post<ICheet>(`${serverURL + (id ? `/users/${id}` : "")}/cheets`, data, {
+			const newCheet = await axios.post<ICheet>(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets`, data, {
 				withCredentials: true,
 			});
 			setCheets((prevCheets) => [newCheet.data, ...prevCheets]);

@@ -59,7 +59,7 @@ export const messageStatusExtension = Prisma.defineExtension({
 					where: { messageId: messageId },
 					data: { isDeleted: true },
 					include: {
-						message: true,
+						message: messageFilters,
 					},
 				});
 				return message.message as unknown as IMessage;

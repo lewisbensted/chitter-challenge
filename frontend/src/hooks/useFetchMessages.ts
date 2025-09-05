@@ -45,7 +45,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			if (cursorRef.current) params.append("cursor", cursorRef.current);
 			params.append("take", take.toString());
 
-			const res = await axios.get<IMessage[]>(`${serverURL}/messages/${interlocutorId}?${params}`, {
+			const res = await axios.get<IMessage[]>(`${serverURL}/api/messages/${interlocutorId}?${params}`, {
 				withCredentials: true,
 			});
 			const newMessages = res.data;
@@ -78,7 +78,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const markMessagesRead = useCallback(async () => {
 		try {
 			await axios.put(
-				`${serverURL}/messages/read/${interlocutorId}`,
+				`${serverURL}/api/messages/read/${interlocutorId}`,
 				{},
 				{
 					withCredentials: true,

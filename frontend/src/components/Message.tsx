@@ -56,7 +56,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				setEditLoading(true);
 				setComponentLoading(true);
 				const updatedMessage = await axios.put<IMessage>(
-					`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
+					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					data,
 					{
 						withCredentials: true,
@@ -83,7 +83,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				setDeleteLoading(true);
 				setComponentLoading(true);
 				const deletedMessage = await axios.delete<IMessage>(
-					`${serverURL}/messages/${message.recipient.uuid}/message/${message.uuid}`,
+					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					{
 						withCredentials: true,
 					}

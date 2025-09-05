@@ -35,10 +35,10 @@ router.post("/", async (req: Request, res: Response) => {
 					res.cookie("session_id", req.sessionID);
 					res.status(200).json(user.uuid);
 				} else {
-					res.status(401).json({ errors: ["Incorrect password."] });
+					res.status(401).json({ errors: ["Invalid username or password."] });
 				}
 			} else {
-				res.status(404).json({ errors: ["User does not exist."] });
+				res.status(401).json({ errors: ["Invalid username or password."] });
 			}
 		}
 	} catch (error) {

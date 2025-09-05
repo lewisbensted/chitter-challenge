@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect, useState } from "react";
-import ErrorModal from "../components/ErrorModal";
 import Conversation from "../components/Conversation";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
@@ -40,8 +39,6 @@ const Conversations: React.FC = () => {
 
 	return (
 		<Box>
-			<ErrorModal errors={errors} closeModal={clearErrors} />
-
 			{isConversationsLoading ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />

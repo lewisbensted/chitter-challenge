@@ -56,6 +56,7 @@ router.post("/", authMiddleware, async (req: SendCheetRequest, res: Response) =>
 			data: {
 				cheetId: newCheet.uuid,
 			},
+			omit: { cheetId: true },
 		});
 		res.status(201).json({ ...newCheet, cheetStatus: status });
 	} catch (error) {
