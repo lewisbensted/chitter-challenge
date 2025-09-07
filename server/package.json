@@ -5,12 +5,12 @@
     "main": "app.ts",
     "type": "module",
     "scripts": {
-        "reset:dev": "dotenv -e ../.env.development -r dotenv-expand/config -- npx prisma migrate reset",
-        "migrate:dev": "dotenv -e ../.env.development -r dotenv-expand/config -- npx prisma migrate dev --name inititalise",
-        "start:dev": "cross-env NODE_ENV=development nodemon src/app.ts",
+        "reset:dev": "dotenv -e ../.env.dev -r dotenv-expand/config -- npx prisma migrate reset",
+        "migrate:dev": "dotenv -e ../.env.dev -r dotenv-expand/config -- npx prisma migrate dev --name inititalise",
+        "start:dev": "cross-env NODE_ENV=dev nodemon src/app.ts",
         "build:prod": "tsc --project tsconfig.prod.json && npx prisma generate",
-        "migrate:prod": "dotenv -e ../.env.production -r dotenv-expand/config -- npx prisma migrate deploy",
-        "start:prod": "cross-env NODE_ENV=production node dist/src/app.js"
+        "migrate:prod": "dotenv -e ../.env.prod -r dotenv-expand/config -- npx prisma migrate deploy",
+        "start:prod": "cross-env NODE_ENV=prod node dist/src/app.js"
     },
     "license": "ISC",
     "devDependencies": {

@@ -27,7 +27,6 @@ const DRAWER_WIDTH = 200;
 const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);
 	const drawerWidth = isDrawerOpen ? DRAWER_WIDTH : DRAWER_WIDTH / 2;
-	console.log(drawerWidth);
 
 	const { errors, clearErrors, handleErrors } = useError();
 	const { userId, setUserId, isValidateLoading, isComponentLoading, isLoggingOut, setLoggingOut } = useAuth();

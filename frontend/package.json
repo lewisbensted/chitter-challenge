@@ -31,8 +31,8 @@
 		"web-vitals": "^2.1.4"
 	},
 	"scripts": {
-		"start": "dotenv -e ../.env.development -r dotenv-expand/config -- react-scripts start",
-		"build": "dotenv -e ../.env.production -r dotenv-expand/config -- react-scripts build",
+		"start": "dotenv -e ../.env.dev -r dotenv-expand/config -- react-scripts start",
+		"build": "dotenv -e ../.env.prod -r dotenv-expand/config -- react-scripts build",
 		"test": "react-scripts test"
 	},
 	"browserslist": {

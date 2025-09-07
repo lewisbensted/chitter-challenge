@@ -61,7 +61,7 @@ try {
 		})
 	);
 
-	if (process.env.NODE_ENV !== "production") {
+	if (process.env.NODE_ENV !== "prod") {
 		checkValidPort(Number(FRONTEND_PORT), "frontend");
 		app.use(
 			cors({
@@ -85,7 +85,7 @@ try {
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });
 	});
 
-	if (process.env.NODE_ENV === "production") {
+	if (process.env.NODE_ENV === "prod") {
 		const buildPath = path.join(PROJECT_ROOT, "frontend", "build");
 		app.use(express.static(buildPath));
 		app.get("*", (_req, res) => {

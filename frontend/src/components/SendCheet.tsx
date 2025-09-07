@@ -45,7 +45,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, tri
 			handleErrors(error, "sending cheet");
 		} finally {
 			setSubmitLoading(false);
-			setComponentLoading(false);
+			//setComponentLoading(false);
 		}
 	};
 
