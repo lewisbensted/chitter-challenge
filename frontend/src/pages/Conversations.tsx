@@ -7,12 +7,10 @@ import type { IConversation } from "../interfaces/interfaces";
 import MessageModal from "../components/MessageModal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
 import ScrollGrid from "../styles/ScrollGrid";
 
 const Conversations: React.FC = () => {
-	const { errors, clearErrors } = useError();
 
 	const navigate = useNavigate();
 

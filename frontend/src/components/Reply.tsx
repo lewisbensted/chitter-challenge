@@ -24,6 +24,8 @@ import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useLayout } from "../contexts/LayoutContext";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	isDisabled: boolean;
@@ -34,168 +36,172 @@ interface Props {
 	numberOfReplies: number;
 }
 
-const Reply = forwardRef<HTMLDivElement, Props>(
-	({ reply, cheetId, isDisabled, setReplies}, ref) => {
-		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
-		const [isEditing, setEditing] = useState<boolean>(false);
-		const [isEditLoading, setEditLoading] = useState<boolean>(false);
-		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
+const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, setReplies }, ref) => {
+	const { register, handleSubmit, setValue } = useForm<{ text: string }>();
+	const [isEditing, setEditing] = useState<boolean>(false);
+	const [isEditLoading, setEditLoading] = useState<boolean>(false);
+	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-		const { handleErrors } = useError();
-		const { userId, setComponentLoading } = useAuth();
+	const { handleErrors } = useError();
+	const { userId, setComponentLoading } = useAuth();
 
-		useEffect(() => {
-			if (isEditing) {
-				setValue("text", reply.text);
-			}
-		}, [isEditing, reply.text, setValue]);
+	const { openSnackbar } = useLayout();
 
-		const editReply: SubmitHandler<{ text: string }> = async (data) => {
-			try {
-				setEditLoading(true);
-				setComponentLoading(true);
-				const updatedReply = await axios.put<IReply>(
-					`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`,
-					data,
-					{
-						withCredentials: true,
-					}
-				);
+	const isMounted = useIsMounted();
 
-				setReplies((prevReplies) =>
-					prevReplies.map((reply) => (reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply))
-				);
-			} catch (error) {
-				handleErrors(error, "editing the reply");
-			} finally {
-				setEditLoading(false);
-				setEditing(false);
+	useEffect(() => {
+		if (isEditing) {
+			setValue("text", reply.text);
+		}
+	}, [isEditing, reply.text, setValue]);
 
-				setComponentLoading(false);
-			}
-		};
-
-		const deleteReply = async () => {
-			try {
-				setDeleteLoading(true);
-				setComponentLoading(true);
-				await axios.delete(`${serverURL}/api/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
+	const editReply: SubmitHandler<{ text: string }> = async (data) => {
+		try {
+			setEditLoading(true);
+			setComponentLoading(true);
+			const updatedReply = await axios.put<IReply>(
+				`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`,
+				data,
+				{
 					withCredentials: true,
-				});
-				setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
-			} catch (error) {
-				handleErrors(error, "deleting the reply");
-			} finally {
-				setDeleteLoading(false);
-				setComponentLoading(false);
-			}
-		};
+				}
+			);
 
-		const createdAt = new Date(reply.createdAt);
-		const updatedAt = new Date(reply.updatedAt);
-		const isEdited = updatedAt > createdAt;
+			setReplies((prevReplies) =>
+				prevReplies.map((reply) => (reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply))
+			);
+		} catch (error) {
+			if (isMounted.current) handleErrors(error, "editing reply");
+			else openSnackbar("Failed to edit reply");
+		} finally {
+			setEditLoading(false);
+			setEditing(false);
 
-		return (
-			<ThemeProvider theme={theme}>
-				<Card ref={ref}>
-					<Grid2 container>
-						<Grid2 size={userId ? 10.5 : 12}>
-							<CardContent>
-								<Grid2 container>
-									<Grid2 size={6}>
-										<Typography>
-											<Link to={`/users/${reply.user.uuid}`} component={RouterLink}>
-												{reply.user.username}
-											</Link>
-										</Typography>
-									</Grid2>
-									<Grid2 size={6}>
-										<Typography variant="body2" justifyContent="flex-end">
-											{formatDate(createdAt)}
-										</Typography>
-									</Grid2>
-									<Grid2 size={isEdited ? 10 : 12}>
-										{isEditing ? (
-											<Box
-												component="form"
-												onSubmit={handleSubmit((data) => {
-													if (isDisabled) {
-														return;
-													}
-													editReply(data);
-												})}
-												id={`edit-reply-${reply.uuid}`}
-											>
-												<TextField {...register("text")} type="text" variant="standard" />
-											</Box>
-										) : (
-											<Typography>{reply.text}</Typography>
-										)}
-									</Grid2>
-									{isEdited && (
-										<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
-											<Typography variant="body2">
-												<Edit fontSize="small" color="primary" />
-												{formatDate(updatedAt)}
-											</Typography>
-										</Grid2>
+			setComponentLoading(false);
+		}
+	};
+
+	const deleteReply = async () => {
+		try {
+			setDeleteLoading(true);
+			setComponentLoading(true);
+			await axios.delete(`${serverURL}/api/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
+				withCredentials: true,
+			});
+			setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
+		} catch (error) {
+			if (isMounted.current) handleErrors(error, "deleting reply");
+			else openSnackbar("Failed to delete reply");
+		} finally {
+			setDeleteLoading(false);
+			setComponentLoading(false);
+		}
+	};
+
+	const createdAt = new Date(reply.createdAt);
+	const updatedAt = new Date(reply.updatedAt);
+	const isEdited = updatedAt > createdAt;
+
+	return (
+		<ThemeProvider theme={theme}>
+			<Card ref={ref}>
+				<Grid2 container>
+					<Grid2 size={userId ? 10.5 : 12}>
+						<CardContent>
+							<Grid2 container>
+								<Grid2 size={6}>
+									<Typography>
+										<Link to={`/users/${reply.user.uuid}`} component={RouterLink}>
+											{reply.user.username}
+										</Link>
+									</Typography>
+								</Grid2>
+								<Grid2 size={6}>
+									<Typography variant="body2" justifyContent="flex-end">
+										{formatDate(createdAt)}
+									</Typography>
+								</Grid2>
+								<Grid2 size={isEdited ? 10 : 12}>
+									{isEditing ? (
+										<Box
+											component="form"
+											onSubmit={handleSubmit((data) => {
+												if (isDisabled) {
+													return;
+												}
+												editReply(data);
+											})}
+											id={`edit-reply-${reply.uuid}`}
+										>
+											<TextField {...register("text")} type="text" variant="standard" />
+										</Box>
+									) : (
+										<Typography>{reply.text}</Typography>
 									)}
 								</Grid2>
-							</CardContent>
-						</Grid2>
-						<Grid2 size={1.5} container justifyContent={"space-between"}>
-							<CardActions>
-								<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
-									<Grid2 size={1}>
-										{userId === reply.user.uuid &&
-											(isEditLoading ? (
-												<Box paddingTop={1.3} paddingLeft={1.4}>
-													<CircularProgress size="1.3rem" thickness={6} />
-												</Box>
-											) : isEditing ? (
-												<IconButton
-													type="submit"
-													form={`edit-reply-${reply.uuid}`}
-													key={`edit-reply-${reply.uuid}`}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
-												>
-													<Done />
-												</IconButton>
-											) : (
-												<IconButton
-													onClick={() => {
-														setEditing(true);
-													}}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
-												>
-													<Edit />
-												</IconButton>
-											))}
+								{isEdited && (
+									<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
+										<Typography variant="body2">
+											<Edit fontSize="small" color="primary" />
+											{formatDate(updatedAt)}
+										</Typography>
 									</Grid2>
-									<Grid2 size={1}>
-										{userId === reply.user.uuid &&
-											(isDeleteLoading ? (
-												<Box paddingTop={1.3} paddingLeft={1}>
-													<CircularProgress size="1.3rem" thickness={6} />
-												</Box>
-											) : (
-												<IconButton
-													onClick={deleteReply}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
-												>
-													<Delete />
-												</IconButton>
-											))}
-									</Grid2>
-								</Grid2>
-							</CardActions>
-						</Grid2>
+								)}
+							</Grid2>
+						</CardContent>
 					</Grid2>
-				</Card>
-			</ThemeProvider>
-		);
-	}
-);
+					<Grid2 size={1.5} container justifyContent={"space-between"}>
+						<CardActions>
+							<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
+								<Grid2 size={1}>
+									{userId === reply.user.uuid &&
+										(isEditLoading ? (
+											<Box paddingTop={1.3} paddingLeft={1.4}>
+												<CircularProgress size="1.3rem" thickness={6} />
+											</Box>
+										) : isEditing ? (
+											<IconButton
+												type="submit"
+												form={`edit-reply-${reply.uuid}`}
+												key={`edit-reply-${reply.uuid}`}
+												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+											>
+												<Done />
+											</IconButton>
+										) : (
+											<IconButton
+												onClick={() => {
+													setEditing(true);
+												}}
+												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+											>
+												<Edit />
+											</IconButton>
+										))}
+								</Grid2>
+								<Grid2 size={1}>
+									{userId === reply.user.uuid &&
+										(isDeleteLoading ? (
+											<Box paddingTop={1.3} paddingLeft={1}>
+												<CircularProgress size="1.3rem" thickness={6} />
+											</Box>
+										) : (
+											<IconButton
+												onClick={deleteReply}
+												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+											>
+												<Delete />
+											</IconButton>
+										))}
+								</Grid2>
+							</Grid2>
+						</CardActions>
+					</Grid2>
+				</Grid2>
+			</Card>
+		</ThemeProvider>
+	);
+});
 
 Reply.displayName = "Reply";
 

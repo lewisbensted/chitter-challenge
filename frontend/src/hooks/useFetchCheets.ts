@@ -35,7 +35,6 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 			setCheetsLoading(true);
 
 			const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
-			console.log(`${serverURL}${pageUserId ? `/users/${pageUserId}` : ""}/api/cheets?${cursorParam}&take=${take}`)
 			const res = await axios.get<ICheet[]>(
 				`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${cursorParam}&take=${take}`,
 				{
@@ -49,7 +48,7 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 				isFirstLoad.current = false;
 			}
 
-			if (isMounted()) {
+			if (isMounted.current) {
 				setHasNextPage(newCheets.length >= take);
 
 				if (newCheets.length) {
@@ -62,13 +61,13 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 		} catch (error) {
 			if (isFirstLoad.current) {
 				logErrors(error);
-				if (isMounted()) setCheetsError("An unexpected error occured while loading cheets.");
+				if (isMounted.current) setCheetsError("An unexpected error occured while loading cheets.");
 			} else {
 				handleErrors(error, "loading cheets");
-				if (isMounted()) setHasNextPage(false);
+				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
-			if (isMounted()) setCheetsLoading(false);
+			if (isMounted.current) setCheetsLoading(false);
 		}
 	}, []);
 

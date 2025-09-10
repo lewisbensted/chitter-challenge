@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import SuccessModal from "../components/SuccessModal";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import AppRegistration from "@mui/icons-material/AppRegistration";
@@ -11,6 +10,7 @@ import theme from "../styles/theme";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
+import { useLayout } from "../contexts/LayoutContext";
 
 interface RegisterFormFields {
 	firstName: string;
@@ -21,12 +21,14 @@ interface RegisterFormFields {
 }
 
 const Register: React.FC = () => {
-	const { register, handleSubmit, reset } = useForm<RegisterFormFields>();
+	const { register, handleSubmit } = useForm<RegisterFormFields>();
 
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
 	const { handleErrors } = useError();
-	const [isSuccessOpen, setSuccessOpen] = useState<boolean>(false);
 	const { userId, isValidateLoading, setComponentLoading } = useAuth();
+	const {
+		openSnackbar,
+	} = useLayout();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -38,13 +40,15 @@ const Register: React.FC = () => {
 	const onSubmit: SubmitHandler<RegisterFormFields> = async (data) => {
 		setFormLoading(true);
 		setComponentLoading(true);
-		reset();
 		try {
 			await axios.post(`${serverURL}/api/register`, data);
-			setSuccessOpen(true);
+			setTimeout(() => {
+				openSnackbar("Account created");
+				void navigate("/login");
+				setComponentLoading(false);
+			}, 500);
 		} catch (error) {
 			handleErrors(error, "registering the user");
-		} finally {
 			setFormLoading(false);
 			setComponentLoading(false);
 		}
@@ -52,16 +56,7 @@ const Register: React.FC = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Box>
-			
-				<SuccessModal
-					isOpen={isSuccessOpen}
-					message="Account created."
-					closeModal={() => {
-						setSuccessOpen(false);
-					}}
-				/>
-
+			<Box width="400px">
 				<Typography variant="h4">Register</Typography>
 				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
 					<Grid2 size={12} container display="block">

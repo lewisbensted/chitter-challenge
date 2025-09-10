@@ -33,7 +33,7 @@ const MessageModal: React.FC<Props> = ({
 	toggleConversationsTrigger,
 	userPageId,
 }) => {
-	const { errors, setErrors, clearErrors } = useError();
+	const { setErrors } = useError();
 	const { toggleUnreadTrigger } = useLayout();
 
 	const {

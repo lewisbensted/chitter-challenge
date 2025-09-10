@@ -32,19 +32,19 @@ const useFetchConversations = (pageUserId?: string): UseFetchConversationsReturn
 					withCredentials: true,
 				}
 			);
-			if (isMounted()) {
+			if (isMounted.current) {
 				setConversations(res.data);
 				setConversationsError("");
 			}
 		} catch (error) {
 			if (isFirstLoad.current) {
 				logErrors(error);
-				if (isMounted()) setConversationsError("An unexpected error occured while loading conversations.");
+				if (isMounted.current) setConversationsError("An unexpected error occured while loading conversations.");
 			} else {
 				toast("Failed to refresh conversations - may be displaying outdated information.");
 			}
 		} finally {
-			if (isMounted()) setConversationsLoading(false);
+			if (isMounted.current) setConversationsLoading(false);
 		}
 	}, []);
 

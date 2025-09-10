@@ -6,6 +6,8 @@ import { logErrors } from "../utils/processErrors";
 import { useAuth } from "./AuthContext";
 
 interface LayoutContextType {
+	isSnackbarOpen: boolean;
+	snackbarMessage: string;
 	isUnreadMessages: boolean;
 	isUnreadLoading: boolean;
 	reloadUnreadTrigger: boolean;
@@ -14,6 +16,8 @@ interface LayoutContextType {
 	toggleUnreadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	isLoadingTimer: boolean;
 	setLoadingTimer: React.Dispatch<React.SetStateAction<boolean>>;
+	openSnackbar: (message: string) => void;
+	closeSnackbar: () => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -22,8 +26,20 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 	const [isUnreadMessages, setUnreadMessages] = useState<boolean>(false);
 	const [isUnreadLoading, setUnreadLoading] = useState<boolean>(false);
 	const [reloadUnreadTrigger, toggleUnreadTrigger] = useState<boolean>(false);
+	const [isSnackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+	const [snackbarMessage, setSnackbarMessage] = useState<string>("");
 
 	const { userId } = useAuth();
+
+	const openSnackbar = (message: string) => {
+		setSnackbarOpen(true);
+		setSnackbarMessage(message);
+	};
+
+	const closeSnackbar = () => {
+		setSnackbarOpen(false);
+		setSnackbarMessage("");
+	};
 
 	const fetchUnread = useCallback(async () => {
 		if (userId === undefined) {
@@ -58,6 +74,10 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 	return (
 		<LayoutContext.Provider
 			value={{
+				snackbarMessage,
+				isSnackbarOpen,
+				openSnackbar,
+				closeSnackbar,
 				isUnreadLoading,
 				isUnreadMessages,
 				isLoadingTimer,

@@ -12,6 +12,8 @@ import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material"
 import theme from "../styles/theme";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useIsMounted } from "../utils/isMounted";
+import { useLayout } from "../contexts/LayoutContext";
 
 interface Props {
 	isDisabled: boolean;
@@ -28,24 +30,27 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, tri
 
 	const { handleErrors } = useError();
 	const { setComponentLoading } = useAuth();
+	const { openSnackbar } = useLayout();
+
+	const isMounted = useIsMounted();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
 			setComponentLoading(true);
-			reset();
 			const newCheet = await axios.post<ICheet>(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets`, data, {
 				withCredentials: true,
 			});
 			setCheets((prevCheets) => [newCheet.data, ...prevCheets]);
-
 			triggerScroll((prev) => !prev);
 			setCheetsError("");
+			reset();
 		} catch (error) {
-			handleErrors(error, "sending cheet");
+			if (isMounted.current) handleErrors(error, "sending cheet");
+			else openSnackbar("Failed to send cheet");
 		} finally {
 			setSubmitLoading(false);
-			//setComponentLoading(false);
+			setComponentLoading(false);
 		}
 	};
 

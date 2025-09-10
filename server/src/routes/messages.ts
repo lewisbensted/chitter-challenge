@@ -148,7 +148,6 @@ router.delete("/:recipientId/message/:messageId", authMiddleware, async (req: Re
 		});
 		if (targetMessage.sender.uuid === req.session.user!.uuid) {
 			const deletedMessage = await messageStatusClient.softDelete(targetMessage.uuid);
-			console.log(deletedMessage)
 			res.status(200).json({ ...deletedMessage, text: null });
 		} else {
 			res.status(403).json({ errors: ["Cannot delete someone else's message."] });

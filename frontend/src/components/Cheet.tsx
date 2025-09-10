@@ -23,6 +23,8 @@ import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useLayout } from "../contexts/LayoutContext";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	userId?: string | null;
@@ -44,6 +46,10 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 		const { handleErrors } = useError();
 		const { userId, setComponentLoading } = useAuth();
+
+		const { openSnackbar } = useLayout();
+
+		const isMounted = useIsMounted();
 
 		useEffect(() => {
 			if (isEditing) {
@@ -70,7 +76,8 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 					setSelectedCheet(updatedCheet.data);
 				}
 			} catch (error) {
-				handleErrors(error, "editing the cheet");
+				if (isMounted.current) handleErrors(error, "editing cheet");
+				else openSnackbar("Failed to edit cheet");
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
@@ -89,7 +96,8 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				setCheets((prevCheets) => prevCheets.filter((c) => c.uuid !== cheet.uuid));
 				setSelectedCheet(null);
 			} catch (error) {
-				handleErrors(error, "deleting the cheet");
+				if (isMounted.current) handleErrors(error, "deleting cheet");
+				else openSnackbar("Failed to delete cheet");
 			} finally {
 				setDeleteLoading(false);
 				setComponentLoading(false);

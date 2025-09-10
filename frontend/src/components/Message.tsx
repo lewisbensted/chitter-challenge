@@ -21,6 +21,8 @@ import theme from "../styles/theme";
 import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useIsMounted } from "../utils/isMounted";
+import { useLayout } from "../contexts/LayoutContext";
 
 interface Props {
 	message: IMessage;
@@ -33,10 +35,7 @@ interface Props {
 }
 
 const Message = forwardRef<HTMLDivElement, Props>(
-	(
-		{ message, messages, setMessages, isDisabled, toggleReloadTrigger, userPageId },
-		ref
-	) => {
+	({ message, messages, setMessages, isDisabled, toggleReloadTrigger, userPageId }, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
@@ -44,6 +43,10 @@ const Message = forwardRef<HTMLDivElement, Props>(
 
 		const { handleErrors } = useError();
 		const { userId, setComponentLoading } = useAuth();
+
+		const { openSnackbar } = useLayout();
+
+		const isMounted = useIsMounted();
 
 		useEffect(() => {
 			if (isEditing && message.text) {
@@ -69,11 +72,11 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					)
 				);
 			} catch (error) {
-				handleErrors(error, "editing the message");
+				if (isMounted.current) handleErrors(error, "editing message");
+				else openSnackbar("Failed to edit message");
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
-
 				setComponentLoading(false);
 			}
 		};
@@ -99,7 +102,8 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					toggleReloadTrigger((prev) => !prev);
 				}
 			} catch (error) {
-				handleErrors(error, "deleting the message");
+				if (isMounted.current) handleErrors(error, "deleting message");
+				else openSnackbar("Failed to delete message");
 			} finally {
 				setDeleteLoading(false);
 				setComponentLoading(false);

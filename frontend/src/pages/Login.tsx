@@ -18,11 +18,11 @@ interface LoginFormFields {
 }
 
 const SignIn: React.FC = () => {
-	const { register, handleSubmit, reset } = useForm<LoginFormFields>();
+	const { register, handleSubmit } = useForm<LoginFormFields>();
 	const navigate = useNavigate();
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
 
-	const { errors, clearErrors, handleErrors } = useError();
+	const { handleErrors } = useError();
 
 	const { userId, isValidateLoading, setUserId, setComponentLoading } = useAuth();
 
@@ -37,15 +37,13 @@ const SignIn: React.FC = () => {
 	const onSubmit: SubmitHandler<LoginFormFields> = async (data) => {
 		setFormLoading(true);
 		setComponentLoading(true);
-		setLoadingTimer(true);
-		reset();
 		try {
 			const res = await axios.post<string>(`${serverURL}/api/login`, data, { withCredentials: true });
 			setUserId(res.data);
+			setLoadingTimer(true);
 			void navigate("/");
 		} catch (error) {
 			handleErrors(error, "logging in");
-			setLoadingTimer(false);
 		} finally {
 			setFormLoading(false);
 			setComponentLoading(false);
@@ -54,7 +52,7 @@ const SignIn: React.FC = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Box>
+			<Box width="400px">
 				<Typography variant="h4">Sign In</Typography>
 				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
 					<Grid2 size={12} container display="block">

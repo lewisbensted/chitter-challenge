@@ -14,7 +14,7 @@ import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 import { Outlet, useNavigate } from "react-router-dom";
-import { CircularProgress, CssBaseline, ThemeProvider } from "@mui/material";
+import { CircularProgress, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 import { useAuth } from "../contexts/AuthContext";
@@ -31,7 +31,15 @@ const Layout: React.FC = () => {
 	const { errors, clearErrors, handleErrors } = useError();
 	const { userId, setUserId, isValidateLoading, isComponentLoading, isLoggingOut, setLoggingOut } = useAuth();
 
-	const { isUnreadLoading, isUnreadMessages, isLoadingTimer, setLoadingTimer } = useLayout();
+	const {
+		isSnackbarOpen,
+		snackbarMessage,
+		closeSnackbar,
+		isUnreadLoading,
+		isUnreadMessages,
+		isLoadingTimer,
+		setLoadingTimer,
+	} = useLayout();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -43,7 +51,6 @@ const Layout: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			{/* <ErrorModal errors={errors} closeModal={clearErrors} offset={drawerWidth}/> */}
 			<Box>
 				<Drawer
 					open={isDrawerOpen}
@@ -74,7 +81,7 @@ const Layout: React.FC = () => {
 										link="/conversations"
 										text="Messages"
 										icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
-										isDisabled={isComponentLoading}
+										isDisabled={false}
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
@@ -116,6 +123,12 @@ const Layout: React.FC = () => {
 					</List>
 				</Drawer>
 
+				<Snackbar
+					open={isSnackbarOpen}
+					onClose={closeSnackbar}
+					message={snackbarMessage}
+					autoHideDuration={3000}
+				/>
 				{isLoggingOut || isValidateLoading || isLoadingTimer ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />

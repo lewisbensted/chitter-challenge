@@ -53,7 +53,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				hasLoadedOnceRef.current = true;
 			}
 
-			if (isMounted()) {
+			if (isMounted.current) {
 				setHasNextPage(newMessages.length >= take);
 				if (newMessages.length) {
 					setMessages((prevMessages) => [...newMessages, ...prevMessages]);
@@ -64,13 +64,13 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 		} catch (error) {
 			if (!hasLoadedOnceRef.current) {
 				logErrors(error);
-				if (isMounted()) setMessagesError("An unexpected error occurred while loading messages.");
+				if (isMounted.current) setMessagesError("An unexpected error occurred while loading messages.");
 			} else {
 				handleErrors(error, "loading messages");
-				if (isMounted()) setHasNextPage(false);
+				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
-			if (isMounted()) setMessagesLoading(false);
+			if (isMounted.current) setMessagesLoading(false);
 		}
 	}, []);
 

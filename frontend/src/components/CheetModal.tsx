@@ -26,7 +26,7 @@ interface Props {
 }
 
 const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, numberOfCheets, setSelectedCheet }) => {
-	const { errors, setErrors, clearErrors } = useError();
+	const { setErrors } = useError();
 	const { userId } = useAuth();
 
 	const {

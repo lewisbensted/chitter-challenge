@@ -50,7 +50,7 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 			if (!hasLoadedOnceRef.current) {
 				hasLoadedOnceRef.current = true;
 			}
-			if (isMounted()) {
+			if (isMounted.current) {
 				setHasNextPage(newReplies.length >= take);
 
 				if (newReplies.length) {
@@ -66,13 +66,13 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 		} catch (error) {
 			if (!hasLoadedOnceRef.current) {
 				logErrors(error);
-				if (isMounted()) setRepliesError("An unexpected error occured while loading replies.");
+				if (isMounted.current) setRepliesError("An unexpected error occured while loading replies.");
 			} else {
 				handleErrors(error, "loading replies");
-				if (isMounted()) setHasNextPage(false);
+				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
-			if (isMounted()) setRepliesLoading(false);
+			if (isMounted.current) setRepliesLoading(false);
 		}
 	}, []);
 

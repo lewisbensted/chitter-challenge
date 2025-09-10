@@ -33,7 +33,7 @@ const User: React.FC = () => {
 
 	const { userId, isComponentLoading } = useAuth();
 
-	const { errors, setErrors, clearErrors, handleErrors } = useError();
+	const { setErrors, handleErrors } = useError();
 
 	useEffect(() => {
 		if (!id) return;

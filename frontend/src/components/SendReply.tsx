@@ -11,6 +11,8 @@ import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useLayout } from "../contexts/LayoutContext";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	selectedCheet: ICheet;
@@ -39,12 +41,14 @@ const SendReply: React.FC<Props> = ({
 
 	const { handleErrors } = useError();
 	const { setComponentLoading } = useAuth();
+	const { openSnackbar } = useLayout();
+
+	const isMounted = useIsMounted();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
 			setComponentLoading(true);
-			reset();
 			const newReply = await axios.post<IReply>(`${serverURL}/api/cheets/${selectedCheet.uuid}/replies`, data, {
 				withCredentials: true,
 			});
@@ -66,8 +70,10 @@ const SendReply: React.FC<Props> = ({
 			}
 			repliesLengthRef.current++;
 			setRepliesError("");
+			reset();
 		} catch (error) {
-			handleErrors(error, "sending the reply");
+			if (isMounted.current) handleErrors(error, "sending the reply");
+			else openSnackbar("Failed to send reply");
 		} finally {
 			setSubmitLoading(false);
 			setComponentLoading(false);

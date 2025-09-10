@@ -11,6 +11,8 @@ import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useLayout } from "../contexts/LayoutContext";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	recipientId: string;
@@ -37,12 +39,14 @@ const SendMessage: React.FC<Props> = ({
 
 	const { handleErrors } = useError();
 	const { setComponentLoading } = useAuth();
+	const { openSnackbar } = useLayout();
+
+	const isMounted = useIsMounted();
 
 	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
 			setComponentLoading(true);
-			reset();
 			const newMessage = await axios.post<IMessage>(`${serverURL}/api/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
@@ -51,10 +55,11 @@ const SendMessage: React.FC<Props> = ({
 			if (!userPageId) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
-
 			setMessagesError("");
+			reset();
 		} catch (error) {
-			handleErrors(error, "sending message");
+			if (isMounted.current) handleErrors(error, "sending message");
+			else openSnackbar("Failed to send message");
 		} finally {
 			setSubmitLoading(false);
 			setComponentLoading(false);
