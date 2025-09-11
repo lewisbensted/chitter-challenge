@@ -7,14 +7,12 @@ import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 
 interface Props {
 	conversation: IConversation;
-	isDisabled: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ConversationIcon: React.FC<Props> = ({
 	conversation,
-	isDisabled,
 	setConversations,
 	toggleConversationsTrigger,
 }) => {
@@ -26,7 +24,6 @@ const ConversationIcon: React.FC<Props> = ({
 				<MessageModal
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
-					isDisabled={isDisabled}
 					setSelectedConversation={setSelectedConversation}
 					setConversations={setConversations}
 					toggleConversationsTrigger={toggleConversationsTrigger}

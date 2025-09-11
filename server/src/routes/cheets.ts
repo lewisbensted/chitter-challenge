@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authenticater } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
@@ -41,7 +41,7 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-router.post("/", authMiddleware, async (req: SendCheetRequest, res: Response) => {
+router.post("/", authenticater, async (req: SendCheetRequest, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -65,7 +65,7 @@ router.post("/", authMiddleware, async (req: SendCheetRequest, res: Response) =>
 	}
 });
 
-router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Response) => {
+router.put("/:cheetId", authenticater, async (req: EditCheetRequest, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -103,7 +103,7 @@ router.put("/:cheetId", authMiddleware, async (req: EditCheetRequest, res: Respo
 	}
 });
 
-router.delete("/:cheetId", authMiddleware, async (req: Request, res: Response) => {
+router.delete("/:cheetId", authenticater, async (req: Request, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });

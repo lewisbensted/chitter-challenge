@@ -10,7 +10,7 @@ const userClient = prisma.user as unknown as ExtendedUserClient;
 
 const router = express.Router();
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/",  async (req: Request, res: Response) => {
 	const { username, password } = req.body as { username: string | undefined; password: string | undefined };
 	try {
 		if (authenticate(req)) {

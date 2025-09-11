@@ -24,7 +24,7 @@ const SignIn: React.FC = () => {
 
 	const { handleErrors } = useError();
 
-	const { userId, isValidateLoading, setUserId, setComponentLoading } = useAuth();
+	const { userId, isValidateLoading, setUserId} = useAuth();
 
 	const { setLoadingTimer } = useLayout();
 
@@ -36,7 +36,6 @@ const SignIn: React.FC = () => {
 
 	const onSubmit: SubmitHandler<LoginFormFields> = async (data) => {
 		setFormLoading(true);
-		setComponentLoading(true);
 		try {
 			const res = await axios.post<string>(`${serverURL}/api/login`, data, { withCredentials: true });
 			setUserId(res.data);
@@ -46,7 +45,6 @@ const SignIn: React.FC = () => {
 			handleErrors(error, "logging in");
 		} finally {
 			setFormLoading(false);
-			setComponentLoading(false);
 		}
 	};
 

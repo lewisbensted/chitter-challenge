@@ -11,33 +11,28 @@ import FlexBox from "../styles/FlexBox";
 import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../styles/theme";
 import { useError } from "../contexts/ErrorContext";
-import { useAuth } from "../contexts/AuthContext";
 import { useIsMounted } from "../utils/isMounted";
-import { useLayout } from "../contexts/LayoutContext";
+import toast from "react-hot-toast";
 
 interface Props {
-	isDisabled: boolean;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, triggerScroll }) => {
+const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
-	const { setComponentLoading } = useAuth();
-	const { openSnackbar } = useLayout();
 
 	const isMounted = useIsMounted();
 
-	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
+	const sendCheet: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
-			setComponentLoading(true);
 			const newCheet = await axios.post<ICheet>(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets`, data, {
 				withCredentials: true,
 			});
@@ -47,10 +42,9 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, tri
 			reset();
 		} catch (error) {
 			if (isMounted.current) handleErrors(error, "sending cheet");
-			else openSnackbar("Failed to send cheet");
+			else toast("Failed to send cheet");
 		} finally {
 			setSubmitLoading(false);
-			setComponentLoading(false);
 		}
 	};
 
@@ -60,12 +54,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, tri
 				<Grid2
 					container
 					component="form"
-					onSubmit={handleSubmit((data) => {
-						if (isDisabled) {
-							return;
-						}
-						onSubmit(data);
-					})}
+					onSubmit={handleSubmit(sendCheet)}
 				>
 					<Grid2 size={2} />
 					<Grid2 container size={8}>
@@ -82,7 +71,7 @@ const SendCheet: React.FC<Props> = ({ isDisabled, setCheets, setCheetsError, tri
 								<CircularProgress size="2.1rem" thickness={6} />
 							</Box>
 						) : (
-							<IconButton type="submit" sx={{ pointerEvents: isDisabled ? "none" : undefined }}>
+							<IconButton type="submit">
 								<Send fontSize="large" />
 							</IconButton>
 						)}

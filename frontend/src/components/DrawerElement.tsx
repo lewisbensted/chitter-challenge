@@ -13,7 +13,7 @@ interface Props {
 	link?: string;
 	icon: ReactNode;
 	text?: string;
-	isDisabled: boolean;
+	isDisabled?: boolean;
 	isDrawerOpen: boolean;
 	onClick?: () => void;
 }

@@ -31,7 +31,7 @@ const User: React.FC = () => {
 	const { conversations, isConversationsLoading, setConversations, toggleConversationsTrigger } =
 		useFetchConversations(id);
 
-	const { userId, isComponentLoading } = useAuth();
+	const { userId } = useAuth();
 
 	const { setErrors, handleErrors } = useError();
 
@@ -93,14 +93,10 @@ const User: React.FC = () => {
 						{username}
 						{userId && userId !== id && conversations[0] && (
 							<ConversationIcon
-								
 								conversation={conversations[0]}
-								isDisabled={isComponentLoading || isConversationsLoading}
-								
 								setConversations={() => {
 									setConversations(conversations);
-								}}
-								
+								}}	
 								toggleConversationsTrigger={toggleConversationsTrigger}
 							/>
 						)}
@@ -118,8 +114,6 @@ const User: React.FC = () => {
 									userId={userId}
 									setCheets={setCheets}
 									setErrors={setErrors}
-									
-									isDisabled={isComponentLoading || isCheetsLoading}
 									isModalView={false}
 									numberOfCheets={cheets.length}
 									setSelectedCheet={setSelectedCheet}
@@ -135,7 +129,6 @@ const User: React.FC = () => {
 					{userId === id && !cheetsError && (
 						<SendCheet
 							setCheetsError={setCheetsError}
-							isDisabled={isComponentLoading || isCheetsLoading}
 							setCheets={setCheets}
 							setErrors={setErrors}
 						
@@ -148,8 +141,6 @@ const User: React.FC = () => {
 							cheets={cheets}
 							isOpen={!!selectedCheet}
 							setCheets={setCheets}
-							isDisabled={isComponentLoading || isCheetsLoading}
-							
 							numberOfCheets={cheets.length}
 							setSelectedCheet={setSelectedCheet}
 						/>

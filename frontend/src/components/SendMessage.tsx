@@ -10,13 +10,11 @@ import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material"
 import theme from "../styles/theme";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
-import { useAuth } from "../contexts/AuthContext";
-import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
+import toast from "react-hot-toast";
 
 interface Props {
 	recipientId: string;
-	isDisabled: boolean;
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
@@ -27,7 +25,6 @@ interface Props {
 
 const SendMessage: React.FC<Props> = ({
 	recipientId,
-	isDisabled,
 	toggleReloadTrigger,
 	setMessages,
 	triggerScroll,
@@ -38,15 +35,12 @@ const SendMessage: React.FC<Props> = ({
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
-	const { setComponentLoading } = useAuth();
-	const { openSnackbar } = useLayout();
 
 	const isMounted = useIsMounted();
 
-	const onSubmit: SubmitHandler<{ text: string }> = async (data) => {
+	const sendMessage: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
-			setComponentLoading(true);
 			const newMessage = await axios.post<IMessage>(`${serverURL}/api/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
@@ -59,26 +53,16 @@ const SendMessage: React.FC<Props> = ({
 			reset();
 		} catch (error) {
 			if (isMounted.current) handleErrors(error, "sending message");
-			else openSnackbar("Failed to send message");
+			else toast("Failed to send message");
 		} finally {
 			setSubmitLoading(false);
-			setComponentLoading(false);
 		}
 	};
 
 	return (
 		<ThemeProvider theme={theme}>
 			<FlexBox>
-				<Grid2
-					container
-					component="form"
-					onSubmit={handleSubmit((data) => {
-						if (isDisabled) {
-							return;
-						}
-						onSubmit(data);
-					})}
-				>
+				<Grid2 container component="form" onSubmit={handleSubmit(sendMessage)}>
 					<Grid2 size={2} />
 					<Grid2 container size={8}>
 						<Grid2 size={12}>
@@ -94,7 +78,7 @@ const SendMessage: React.FC<Props> = ({
 								<CircularProgress size="2.1rem" thickness={6} />
 							</Box>
 						) : (
-							<IconButton type="submit" sx={{ pointerEvents: isDisabled ? "none" : undefined }}>
+							<IconButton type="submit">
 								<Send fontSize="large" />
 							</IconButton>
 						)}

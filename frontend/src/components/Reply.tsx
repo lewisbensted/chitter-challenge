@@ -26,9 +26,9 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
+import toast from "react-hot-toast";
 
 interface Props {
-	isDisabled: boolean;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	reply: IReply;
@@ -36,16 +36,16 @@ interface Props {
 	numberOfReplies: number;
 }
 
-const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, setReplies }, ref) => {
+const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies }, ref) => {
 	const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 	const [isEditing, setEditing] = useState<boolean>(false);
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
 	const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
-	const { userId, setComponentLoading } = useAuth();
+	const { userId } = useAuth();
 
-	const { openSnackbar } = useLayout();
+	useLayout();
 
 	const isMounted = useIsMounted();
 
@@ -58,7 +58,6 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, s
 	const editReply: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setEditLoading(true);
-			setComponentLoading(true);
 			const updatedReply = await axios.put<IReply>(
 				`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`,
 				data,
@@ -72,29 +71,25 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, s
 			);
 		} catch (error) {
 			if (isMounted.current) handleErrors(error, "editing reply");
-			else openSnackbar("Failed to edit reply");
+			else toast("Failed to edit reply");
 		} finally {
 			setEditLoading(false);
 			setEditing(false);
-
-			setComponentLoading(false);
 		}
 	};
 
 	const deleteReply = async () => {
 		try {
 			setDeleteLoading(true);
-			setComponentLoading(true);
 			await axios.delete(`${serverURL}/api/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
 				withCredentials: true,
 			});
 			setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
 		} catch (error) {
 			if (isMounted.current) handleErrors(error, "deleting reply");
-			else openSnackbar("Failed to delete reply");
+			else toast("Failed to delete reply");
 		} finally {
 			setDeleteLoading(false);
-			setComponentLoading(false);
 		}
 	};
 
@@ -125,12 +120,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, s
 									{isEditing ? (
 										<Box
 											component="form"
-											onSubmit={handleSubmit((data) => {
-												if (isDisabled) {
-													return;
-												}
-												editReply(data);
-											})}
+											onSubmit={handleSubmit(editReply)}
 											id={`edit-reply-${reply.uuid}`}
 										>
 											<TextField {...register("text")} type="text" variant="standard" />
@@ -164,7 +154,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, s
 												type="submit"
 												form={`edit-reply-${reply.uuid}`}
 												key={`edit-reply-${reply.uuid}`}
-												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
 											>
 												<Done />
 											</IconButton>
@@ -173,7 +163,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, s
 												onClick={() => {
 													setEditing(true);
 												}}
-												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
 											>
 												<Edit />
 											</IconButton>
@@ -188,7 +178,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, isDisabled, s
 										) : (
 											<IconButton
 												onClick={deleteReply}
-												sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+												sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
 											>
 												<Delete />
 											</IconButton>

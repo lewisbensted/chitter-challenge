@@ -25,29 +25,30 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
+import toast from "react-hot-toast";
 
 interface Props {
 	userId?: string | null;
 	cheet: ICheet;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	isDisabled: boolean;
 	isModalView: boolean;
 	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
+	setCheetLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
-	({ cheet, setCheets, isDisabled, isModalView, setSelectedCheet }, ref) => {
+	({ cheet, setCheets, isModalView, setSelectedCheet, setCheetLoading }, ref) => {
 		const { id } = useParams();
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 		const { handleErrors } = useError();
-		const { userId, setComponentLoading } = useAuth();
+		const { userId } = useAuth();
 
-		const { openSnackbar } = useLayout();
+		useLayout();
 
 		const isMounted = useIsMounted();
 
@@ -60,7 +61,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const editCheet: SubmitHandler<{ text: string }> = async (data) => {
 			try {
 				setEditLoading(true);
-				setComponentLoading(true);
+				if (setCheetLoading) setCheetLoading(true);
 				const updatedCheet = await axios.put<ICheet>(
 					`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`,
 					data,
@@ -77,18 +78,18 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				}
 			} catch (error) {
 				if (isMounted.current) handleErrors(error, "editing cheet");
-				else openSnackbar("Failed to edit cheet");
+				else toast("Failed to edit cheet");
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
-				setComponentLoading(false);
+				if (setCheetLoading) setCheetLoading(false);
 			}
 		};
 
 		const deleteCheet = async () => {
 			try {
 				setDeleteLoading(true);
-				setComponentLoading(true);
+				if (setCheetLoading) setCheetLoading(true);
 				await axios.delete(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`, {
 					withCredentials: true,
 				});
@@ -97,10 +98,10 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				setSelectedCheet(null);
 			} catch (error) {
 				if (isMounted.current) handleErrors(error, "deleting cheet");
-				else openSnackbar("Failed to delete cheet");
+				else toast("Failed to delete cheet");
 			} finally {
 				setDeleteLoading(false);
-				setComponentLoading(false);
+				if (setCheetLoading) setCheetLoading(false);
 			}
 		};
 
@@ -133,12 +134,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 										{isEditing ? (
 											<Box
 												component="form"
-												onSubmit={handleSubmit((data) => {
-													if (isDisabled) {
-														return;
-													}
-													editCheet(data);
-												})}
+												onSubmit={handleSubmit(editCheet)}
 												id={`edit-cheet-${cheet.uuid}`}
 											>
 												<TextField {...register("text")} type="text" variant="standard" />
@@ -189,7 +185,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													disabled={isEditDisabled}
 													form={`edit-cheet-${cheet.uuid}`}
 													key={`edit-cheet-${cheet.uuid}`}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
 												>
 													<Done />
 												</IconButton>
@@ -198,8 +194,8 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													onClick={() => {
 														setEditing(true);
 													}}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
 													disabled={isEditDisabled}
+													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
 												>
 													<Edit />
 												</IconButton>
@@ -214,7 +210,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 											) : (
 												<IconButton
 													onClick={deleteCheet}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+													sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
 												>
 													<Delete />
 												</IconButton>

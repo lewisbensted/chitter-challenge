@@ -18,7 +18,6 @@ import ScrollGrid from "../styles/ScrollGrid";
 interface Props {
 	conversation: IConversation;
 	isOpen: boolean;
-	isDisabled: boolean;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,7 +27,6 @@ interface Props {
 const MessageModal: React.FC<Props> = ({
 	conversation,
 	isOpen,
-	isDisabled,
 	setSelectedConversation,
 	toggleConversationsTrigger,
 	userPageId,
@@ -173,7 +171,6 @@ const MessageModal: React.FC<Props> = ({
 										message={message}
 										messages={messages}
 										setMessages={setMessages}
-										isDisabled={isDisabled || isMessagesLoading}
 										setErrors={setErrors}
 										toggleReloadTrigger={toggleConversationsTrigger}
 										userPageId={userPageId}
@@ -184,7 +181,6 @@ const MessageModal: React.FC<Props> = ({
 						{!messagesError && (
 							<SendMessage
 								recipientId={conversation.interlocutorId}
-								isDisabled={isDisabled || isMessagesLoading}
 								toggleReloadTrigger={toggleConversationsTrigger}
 								setMessages={setMessages}
 								setErrors={setErrors}

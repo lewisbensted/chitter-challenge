@@ -18,6 +18,7 @@ import cors from "cors";
 import conversations from "./routes/conversations.js";
 import user from "./routes/user.js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
+import { rateLimiter } from "./middleware/rateLimit.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 const SessionStore = MySQLStore(expressSession);
@@ -71,16 +72,19 @@ try {
 		);
 	}
 
-	app.use("/api/user", express.json(), user);
-	app.use("/api/register", express.json(), register);
-	app.use("/api/login", express.json(), login);
-	app.use("/api/validate", validate);
-	app.use("/api/logout", logout);
-	app.use("/api/cheets", express.json(), cheets);
-	app.use("/api/conversations", express.json(), conversations);
-	app.use("/api/users/:userId/cheets", express.json(), cheets);
-	app.use("/api/cheets/:cheetId/replies", express.json(), replies);
-	app.use("/api/messages", express.json(), messages);
+	const authLimiter = rateLimiter(1000 * 60, 5);
+	const generalLimiter = rateLimiter(1000 * 60 * 10, 200);
+
+	app.use("/api/user", generalLimiter, express.json(), user);
+	app.use("/api/register", authLimiter, express.json(), register);
+	app.use("/api/login", authLimiter, express.json(), login);
+	app.use("/api/validate", generalLimiter, validate);
+	app.use("/api/logout", generalLimiter, logout);
+	app.use("/api/cheets", generalLimiter, express.json(), cheets);
+	app.use("/api/conversations", generalLimiter, express.json(), conversations);
+	app.use("/api/users/:userId/cheets", generalLimiter, express.json(), cheets);
+	app.use("/api/cheets/:cheetId/replies", generalLimiter, express.json(), replies);
+	app.use("/api/messages", generalLimiter, express.json(), messages);
 	app.all("/api/*", (_req, res) => {
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });
 	});

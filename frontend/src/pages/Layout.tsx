@@ -14,7 +14,7 @@ import Home from "@mui/icons-material/Home";
 import Login from "@mui/icons-material/Login";
 import MarkUnreadChatAlt from "@mui/icons-material/MarkUnreadChatAlt";
 import { Outlet, useNavigate } from "react-router-dom";
-import { CircularProgress, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
+import { CircularProgress, CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
 import ErrorModal from "../components/ErrorModal";
 import { useAuth } from "../contexts/AuthContext";
@@ -29,12 +29,9 @@ const Layout: React.FC = () => {
 	const drawerWidth = isDrawerOpen ? DRAWER_WIDTH : DRAWER_WIDTH / 2;
 
 	const { errors, clearErrors, handleErrors } = useError();
-	const { userId, setUserId, isValidateLoading, isComponentLoading, isLoggingOut, setLoggingOut } = useAuth();
+	const { userId, setUserId, isValidateLoading, isLoggingOut, setLoggingOut } = useAuth();
 
 	const {
-		isSnackbarOpen,
-		snackbarMessage,
-		closeSnackbar,
 		isUnreadLoading,
 		isUnreadMessages,
 		isLoadingTimer,
@@ -60,15 +57,14 @@ const Layout: React.FC = () => {
 				>
 					<List>
 						<DrawerElement
-							isDisabled={false}
 							onClick={
 								isDrawerOpen
 									? () => {
-											setDrawerOpen(false);
-										}
+										setDrawerOpen(false);
+									}
 									: () => {
-											setDrawerOpen(true);
-										}
+										setDrawerOpen(true);
+									}
 							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}
@@ -81,13 +77,13 @@ const Layout: React.FC = () => {
 										link="/conversations"
 										text="Messages"
 										icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
-										isDisabled={false}
+										
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
 										text="Log out"
 										icon={<Logout />}
-										isDisabled={isComponentLoading}
+										
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
 											await logout(setUserId, handleErrors, setLoggingOut, setLoadingTimer);
@@ -100,14 +96,14 @@ const Layout: React.FC = () => {
 										link="/register"
 										text="Register"
 										icon={<AppRegistration />}
-										isDisabled={isComponentLoading}
+										
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
 										link="/login"
 										text="Log in"
 										icon={<Login />}
-										isDisabled={isComponentLoading}
+										
 										isDrawerOpen={isDrawerOpen}
 									/>
 								</Fragment>
@@ -117,18 +113,12 @@ const Layout: React.FC = () => {
 							link="/"
 							text="Home"
 							icon={<Home />}
-							isDisabled={isComponentLoading}
+							
 							isDrawerOpen={isDrawerOpen}
 						/>
 					</List>
 				</Drawer>
 
-				<Snackbar
-					open={isSnackbarOpen}
-					onClose={closeSnackbar}
-					message={snackbarMessage}
-					autoHideDuration={3000}
-				/>
 				{isLoggingOut || isValidateLoading || isLoadingTimer ? (
 					<FlexBox>
 						<CircularProgress thickness={5} />

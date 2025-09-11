@@ -20,12 +20,11 @@ interface Props {
 	cheets: ICheet[];
 	isOpen: boolean;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	isDisabled: boolean;
 	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
-const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, numberOfCheets, setSelectedCheet }) => {
+const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets, setSelectedCheet }) => {
 	const { setErrors } = useError();
 	const { userId } = useAuth();
 
@@ -41,6 +40,8 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 		fetchReplies,
 		page,
 	} = useFetchReplies(cheet.uuid);
+
+	const [isCheetLoading, setCheetLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -76,7 +77,6 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 	return (
 		<ThemeProvider theme={theme}>
 			<Dialog open={isOpen} fullWidth maxWidth="md">
-				
 				<Grid2 container marginInline={2} marginTop={1}>
 					<Grid2 size={11} />
 					<Grid2 size={1} display="flex" justifyContent="flex-end">
@@ -94,10 +94,10 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 							userId={userId}
 							setCheets={setCheets}
 							setErrors={setErrors}
-							isDisabled={isDisabled || isRepliesLoading}
 							isModalView={true}
 							numberOfCheets={numberOfCheets}
 							setSelectedCheet={setSelectedCheet}
+							setCheetLoading={setCheetLoading}
 						/>
 						<Divider />
 
@@ -109,7 +109,6 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 									<Reply
 										ref={replies.length === index + 1 ? lastReplyRef : null}
 										key={reply.uuid}
-										isDisabled={isDisabled || isRepliesLoading}
 										cheetId={cheet.uuid}
 										reply={reply}
 										setReplies={setReplies}
@@ -128,7 +127,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, isDisabled, num
 						{userId && !repliesError && (
 							<SendReply
 								selectedCheet={cheet}
-								isDisabled={isDisabled || isRepliesLoading}
+								isDisabled={isCheetLoading}
 								setReplies={setReplies}
 								setErrors={setErrors}
 								triggerScroll={toggleScrollTrigger}

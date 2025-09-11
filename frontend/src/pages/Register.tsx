@@ -10,7 +10,7 @@ import theme from "../styles/theme";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
-import { useLayout } from "../contexts/LayoutContext";
+import toast from "react-hot-toast";
 
 interface RegisterFormFields {
 	firstName: string;
@@ -25,10 +25,7 @@ const Register: React.FC = () => {
 
 	const [isFormLoading, setFormLoading] = useState<boolean>(false);
 	const { handleErrors } = useError();
-	const { userId, isValidateLoading, setComponentLoading } = useAuth();
-	const {
-		openSnackbar,
-	} = useLayout();
+	const { userId, isValidateLoading } = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -39,18 +36,15 @@ const Register: React.FC = () => {
 
 	const onSubmit: SubmitHandler<RegisterFormFields> = async (data) => {
 		setFormLoading(true);
-		setComponentLoading(true);
 		try {
 			await axios.post(`${serverURL}/api/register`, data);
 			setTimeout(() => {
-				openSnackbar("Account created");
+				toast("Account created");
 				void navigate("/login");
-				setComponentLoading(false);
 			}, 500);
 		} catch (error) {
 			handleErrors(error, "registering the user");
 			setFormLoading(false);
-			setComponentLoading(false);
 		}
 	};
 

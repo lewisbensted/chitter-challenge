@@ -11,12 +11,12 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
 	conversation: IConversation;
-	isDisabled: boolean;
+	
 	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
 }
 
-const Conversation: React.FC<Props> = ({ conversation, isDisabled, setSelectedConversation }) => {
+const Conversation: React.FC<Props> = ({ conversation,  setSelectedConversation }) => {
 
 	const { userId } = useAuth();
 
@@ -26,7 +26,7 @@ const Conversation: React.FC<Props> = ({ conversation, isDisabled, setSelectedCo
 		<ThemeProvider theme={theme}>
 			<Card>
 				<CardActionArea
-					disabled={isDisabled}
+					
 					onClick={() => {
 						setSelectedConversation(conversation);
 					}}

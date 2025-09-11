@@ -10,8 +10,6 @@ interface AuthContextType {
 	setValidateLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	validateUser: () => Promise<void>;
 	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
-	isComponentLoading: boolean;
-	setComponentLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	isLoggingOut: boolean;
 	setLoggingOut: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -21,7 +19,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [userId, setUserId] = useState<string | null>();
 	const [isValidateLoading, setValidateLoading] = useState(true);
-	const [isComponentLoading, setComponentLoading] = useState(false);
 	const [isLoggingOut, setLoggingOut] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
@@ -54,8 +51,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				isValidateLoading,
 				validateUser,
 				setUserId,
-				isComponentLoading,
-				setComponentLoading,
 				setValidateLoading,
 				isLoggingOut,
 				setLoggingOut

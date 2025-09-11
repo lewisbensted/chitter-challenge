@@ -26,7 +26,7 @@ export const processErrors = (error: unknown, action: string) => {
 		const { errors, code } = extractData(error.response?.data);
 		if (
 			error.response?.status &&
-			[400, 401, 403, 404, 409].includes(error.response.status) &&
+			[400, 401, 403, 404, 409, 429].includes(error.response.status) &&
 			code !== "ROUTE_NOT_FOUND"
 		) {
 			return errors.length > 0 ? errors : [`An unexpected error occurred while ${action}.`];

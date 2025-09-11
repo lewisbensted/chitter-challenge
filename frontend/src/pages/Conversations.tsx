@@ -14,7 +14,7 @@ const Conversations: React.FC = () => {
 
 	const navigate = useNavigate();
 
-	const { userId, isValidateLoading, isComponentLoading } = useAuth();
+	const { userId, isValidateLoading } = useAuth();
 
 	useLayout();
 
@@ -53,7 +53,7 @@ const Conversations: React.FC = () => {
 									<Conversation
 										key={conversation.interlocutorId}
 										conversation={conversation}
-										isDisabled={isComponentLoading}
+										
 										setConversations={setConversations}
 										setSelectedConversation={setSelectedConversation}
 									/>
@@ -67,7 +67,6 @@ const Conversations: React.FC = () => {
 				<MessageModal
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
-					isDisabled={isComponentLoading || isConversationsLoading}
 					setSelectedConversation={setSelectedConversation}
 					setConversations={setConversations}
 					toggleConversationsTrigger={toggleConversationsTrigger}

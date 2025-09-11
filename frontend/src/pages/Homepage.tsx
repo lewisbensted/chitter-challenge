@@ -13,9 +13,10 @@ import { useError } from "../contexts/ErrorContext";
 import ScrollGrid from "../styles/ScrollGrid";
 
 const Homepage: React.FC = () => {
-	const { userId, isComponentLoading } = useAuth();
+	const { userId } = useAuth();
 	const { setErrors } = useError();
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
+
 
 	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, setPage, hasNextPage } = useFetchCheets();
 
@@ -62,7 +63,6 @@ const Homepage: React.FC = () => {
 							userId={userId}
 							setCheets={setCheets}
 							setErrors={setErrors}
-							isDisabled={isComponentLoading || isCheetsLoading}
 							isModalView={false}
 							numberOfCheets={cheets.length}
 							setSelectedCheet={setSelectedCheet}
@@ -78,7 +78,6 @@ const Homepage: React.FC = () => {
 
 			{userId && !cheetsError && (
 				<SendCheet
-					isDisabled={isComponentLoading || isCheetsLoading}
 					setCheets={setCheets}
 					setCheetsError={setCheetsError}
 					setErrors={setErrors}
@@ -92,7 +91,6 @@ const Homepage: React.FC = () => {
 					cheets={cheets}
 					isOpen={!!selectedCheet}
 					setCheets={setCheets}
-					isDisabled={isComponentLoading || isCheetsLoading}
 					numberOfCheets={cheets.length}
 					setSelectedCheet={setSelectedCheet}
 				/>

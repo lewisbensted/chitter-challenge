@@ -23,28 +23,29 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useIsMounted } from "../utils/isMounted";
 import { useLayout } from "../contexts/LayoutContext";
+import toast from "react-hot-toast";
 
 interface Props {
 	message: IMessage;
 	messages: IMessage[];
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	isDisabled: boolean;
+
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 }
 
 const Message = forwardRef<HTMLDivElement, Props>(
-	({ message, messages, setMessages, isDisabled, toggleReloadTrigger, userPageId }, ref) => {
+	({ message, messages, setMessages, toggleReloadTrigger, userPageId }, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 		const [isEditing, setEditing] = useState<boolean>(false);
 
 		const { handleErrors } = useError();
-		const { userId, setComponentLoading } = useAuth();
+		const { userId } = useAuth();
 
-		const { openSnackbar } = useLayout();
+		useLayout();
 
 		const isMounted = useIsMounted();
 
@@ -57,7 +58,6 @@ const Message = forwardRef<HTMLDivElement, Props>(
 		const editMessage: SubmitHandler<{ text: string }> = async (data) => {
 			try {
 				setEditLoading(true);
-				setComponentLoading(true);
 				const updatedMessage = await axios.put<IMessage>(
 					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					data,
@@ -73,18 +73,16 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				);
 			} catch (error) {
 				if (isMounted.current) handleErrors(error, "editing message");
-				else openSnackbar("Failed to edit message");
+				else toast("Failed to edit message");
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
-				setComponentLoading(false);
 			}
 		};
 
 		const deleteMessage = async () => {
 			try {
 				setDeleteLoading(true);
-				setComponentLoading(true);
 				const deletedMessage = await axios.delete<IMessage>(
 					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					{
@@ -103,10 +101,9 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				}
 			} catch (error) {
 				if (isMounted.current) handleErrors(error, "deleting message");
-				else openSnackbar("Failed to delete message");
+				else toast("Failed to delete message");
 			} finally {
 				setDeleteLoading(false);
-				setComponentLoading(false);
 			}
 		};
 
@@ -127,12 +124,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 										{isEditing ? (
 											<Box
 												component="form"
-												onSubmit={handleSubmit((data) => {
-													if (isDisabled) {
-														return;
-													}
-													editMessage(data);
-												})}
+												onSubmit={handleSubmit(editMessage)}
 												id={`edit-message-${message.uuid}`}
 											>
 												<TextField
@@ -201,7 +193,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 														type="submit"
 														form={`edit-message-${message.uuid}`}
 														key={`edit-message-${message.uuid}`}
-														sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+														sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
 													>
 														<Done />
 													</IconButton>
@@ -210,7 +202,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 														onClick={() => {
 															setEditing(true);
 														}}
-														sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+														sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
 													>
 														<Edit />
 													</IconButton>
@@ -225,7 +217,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 											) : message.messageStatus.isRead ? null : (
 												<IconButton
 													onClick={deleteMessage}
-													sx={{ pointerEvents: isDisabled ? "none" : undefined }}
+													sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
 												>
 													<Delete />
 												</IconButton>
