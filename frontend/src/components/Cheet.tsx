@@ -15,7 +15,7 @@ import {
 	ThemeProvider,
 	Typography,
 } from "@mui/material";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { Delete, Done, Edit, OpenInNew } from "@mui/icons-material";

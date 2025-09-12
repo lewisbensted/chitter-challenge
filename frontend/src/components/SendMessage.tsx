@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import type { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";

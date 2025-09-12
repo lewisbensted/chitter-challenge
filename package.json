@@ -7,7 +7,7 @@
 		"lint": "npx eslint .",
 		"reset:dev": "npm --prefix server run reset:dev",
 		"migrate:dev": "npm --prefix server run migrate:dev",
-		"start:dev": "concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"npm --prefix frontend start\"",
+		"start:dev": "concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"npm --prefix frontend run dev\"",
 		"build:prod": "concurrently --names Frontend,Backend \"npm --prefix frontend run build\" \"npm --prefix server run build:prod\"",
 		"migrate:prod": "npm --prefix server run migrate:prod",
 		"start:prod": "npm --prefix server run start:prod"

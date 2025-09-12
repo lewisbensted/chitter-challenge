@@ -1,2 +1,2 @@
 export const serverURL =
-	process.env.NODE_ENV === "prod" ? "" : `http://localhost:${process.env.REACT_APP_SERVER_PORT ?? ""}`;
+	process.env.NODE_ENV === "prod" ? "" : `http://localhost:${import.meta.env.VITE_SERVER_PORT ?? ""}`;

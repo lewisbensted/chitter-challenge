@@ -1,19 +1,22 @@
 {
-	"compilerOptions": {
-		"target": "es6",
-		"lib": ["dom", "dom.iterable", "es2022"],
-		"allowJs": true,
-		"skipLibCheck": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"noFallthroughCasesInSwitch": true,
-		"module": "es2022",
-		"moduleResolution": "node",
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"noEmit": true,
-		"jsx": "react-jsx"
-	}
+  "compilerOptions": {
+    "target": "es2020",                     // Modern JS target for Vite
+    "lib": ["dom", "dom.iterable", "es2022"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",                     // Use native ESM for Vite
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,                         // Vite handles output
+    "jsx": "react-jsx",                      // React 17+ JSX transform
+    "typeRoots": ["./types", "./node_modules/@types"]  // optional, if you have custom types
+  },
+  "include": ["src"],                       // Include source folder
+  "exclude": ["node_modules", "dist"]       // Exclude build/output folders
 }

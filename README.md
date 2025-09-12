@@ -34,8 +34,8 @@ A mock Twitter app where users are able to post "cheets" (messages up to 50 char
 ```sh
   PORT =                # Entry point for frontend (defaults to 3000)
   SERVER_PORT =         # Entry point for server
-
-  REACT_APP_SERVER_URL = http://localhost:${SERVER_PORT}
+  
+  VITE_SERVER_URL = http://localhost:${SERVER_PORT}
 
   DB_NAME =             # Database name in relevant environment
   DB_USER =             # MySQL username

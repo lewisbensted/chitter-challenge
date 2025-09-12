@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import type { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
 import { serverURL } from "../config/config";

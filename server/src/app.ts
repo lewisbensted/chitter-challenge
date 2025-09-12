@@ -46,7 +46,7 @@ try {
 	await prisma.$connect();
 
 	const app = express();
-	const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+	const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 5173;
 	const SERVER_PORT = Number(process.env.SERVER_PORT);
 	checkValidPort(Number(SERVER_PORT), "server");
 	const PROJECT_ROOT = path.resolve(__dirname, "../../..");
@@ -90,7 +90,7 @@ try {
 	});
 
 	if (process.env.NODE_ENV === "prod") {
-		const buildPath = path.join(PROJECT_ROOT, "frontend", "build");
+		const buildPath = path.join(PROJECT_ROOT, "frontend", "dist");
 		app.use(express.static(buildPath));
 		app.get("*", (_req, res) => {
 			res.sendFile(path.join(buildPath, "index.html"));
