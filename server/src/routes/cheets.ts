@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { authenticater } from "../middleware/authMiddleware.js";
+import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
@@ -11,12 +11,18 @@ const router = express.Router({ mergeParams: true });
 const userClient = prisma.user as unknown as ExtendedUserClient;
 const cheetClient = prisma.cheet as unknown as ExtendedCheetClient;
 
-export const fetchCheets = async (userId?: string, cursor?: string, take?: number) => {
-	take = isNaN(take!) ? 10 : take;
+export const fetchCheets = async (sessionUserId?: string, pageUserId?: string, cursor?: string, take?: number) => {
+	take = typeof take === "number" && !isNaN(take) ? take : 10;
+
+	const following:string[] = sessionUserId
+		? (await prisma.follow.findMany({ where: { followerId: sessionUserId } })).map((record) => record.followingId)
+		: [];
+
+	const userFilter = pageUserId ? { uuid: pageUserId } : sessionUserId ? { uuid: { in: [...following, sessionUserId] } } : undefined;
 
 	const cheets = await cheetClient.findMany({
 		where: {
-			user: { uuid: userId },
+			user: userFilter,
 		},
 		orderBy: { createdAt: "desc" },
 		take: take,
@@ -33,7 +39,12 @@ router.get("/", async (req: Request, res: Response) => {
 			user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
 		req.query.take = req.query.take === "" ? undefined : req.query.take;
-		const cheets = await fetchCheets(user?.uuid, req.query.cursor as string, Number(req.query.take));
+		const cheets = await fetchCheets(
+			req.session.user?.uuid,
+			user?.uuid,
+			req.query.cursor as string,
+			Number(req.query.take)
+		);
 		res.status(200).json(cheets);
 	} catch (error) {
 		console.error("Error retrieving cheets from the database:\n" + logError(error));
@@ -41,7 +52,7 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-router.post("/", authenticater, async (req: SendCheetRequest, res: Response) => {
+router.post("/", authenticator, async (req: SendCheetRequest, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -65,7 +76,7 @@ router.post("/", authenticater, async (req: SendCheetRequest, res: Response) => 
 	}
 });
 
-router.put("/:cheetId", authenticater, async (req: EditCheetRequest, res: Response) => {
+router.put("/:cheetId", authenticator, async (req: EditCheetRequest, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
@@ -103,7 +114,7 @@ router.put("/:cheetId", authenticater, async (req: EditCheetRequest, res: Respon
 	}
 });
 
-router.delete("/:cheetId", authenticater, async (req: Request, res: Response) => {
+router.delete("/:cheetId", authenticator, async (req: Request, res: Response) => {
 	try {
 		if (req.params.userId) {
 			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });

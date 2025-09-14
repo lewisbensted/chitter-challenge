@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { authenticater } from "../middleware/authMiddleware.js";
+import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import prisma from "../../prisma/prismaClient.js";
@@ -67,7 +67,7 @@ export const fetchConversations = async (userId: string, interlocutor?: IUser) =
 	}
 };
 
-router.get("/", authenticater, async (req: Request, res: Response) => {
+router.get("/", authenticator, async (req: Request, res: Response) => {
 	try {
 		const conversations = await fetchConversations(req.session.user!.uuid);
 		res.status(200).json(conversations);
@@ -77,7 +77,7 @@ router.get("/", authenticater, async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/:userId", authenticater, async (req: Request, res: Response) => {
+router.get("/:userId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		const conversation = await fetchConversations(req.session.user!.uuid, user);

@@ -5,7 +5,7 @@ import type { ICheet, IUser } from "../interfaces/interfaces";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import ConversationIcon from "../components/ConversationIcon";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
@@ -15,9 +15,11 @@ import CheetModal from "../components/CheetModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 import ScrollGrid from "../styles/ScrollGrid";
+import FollowIcon from "../components/FollowIcon";
 
 const User: React.FC = () => {
-	const [username, setUsername] = useState<string>();
+	const [user, setUser] = useState<IUser>();
+	const [isFollowing, setFollowing] = useState<boolean>();
 	const [isUserLoading, setUserLoading] = useState(true);
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
@@ -39,8 +41,11 @@ const User: React.FC = () => {
 		if (!id) return;
 		const fetchUser = async () => {
 			try {
-				const res = await axios.get<IUser>(`${serverURL}/api/user/${id}`, { withCredentials: true });
-				setUsername(res.data.username);
+				const res = await axios.get<{ user: IUser; isFollowing?: boolean }>(`${serverURL}/api/users/${id}`, {
+					withCredentials: true,
+				});
+				setUser(res.data.user);
+				if (userId) setFollowing(res.data.isFollowing);
 			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 404) {
 					void navigate("/");
@@ -53,7 +58,6 @@ const User: React.FC = () => {
 		};
 		void fetchUser();
 	}, [id, navigate, handleErrors]);
-
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
@@ -82,30 +86,34 @@ const User: React.FC = () => {
 
 	return (
 		<Box>
-			
 			{isUserLoading || isConversationsLoading ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />
 				</FlexBox>
 			) : (
 				<Fragment>
-					<Typography variant="h4" display="flex">
-						{username}
-						{userId && userId !== id && conversations[0] && (
-							<ConversationIcon
-								conversation={conversations[0]}
-								setConversations={() => {
-									setConversations(conversations);
-								}}	
-								toggleConversationsTrigger={toggleConversationsTrigger}
-							/>
-						)}
-					</Typography>
+					{user && (
+						<Typography variant="h4" display="flex">
+							{user.username}
+							{userId && userId !== id && conversations[0] && (
+								<ConversationIcon
+									conversation={conversations[0]}
+									setConversations={() => {
+										setConversations(conversations);
+									}}
+									toggleConversationsTrigger={toggleConversationsTrigger}
+								/>
+							)}
+							{userId && userId !== id && isFollowing!==undefined && (
+								<FollowIcon user={user} isFollowing={isFollowing} setFollowing={setFollowing} />
+							)}
+						</Typography>
+					)}
 
 					{cheetsError ? (
 						<Typography variant="subtitle1">{cheetsError}</Typography>
 					) : (
-						<ScrollGrid ref={listRef} >
+						<ScrollGrid ref={listRef}>
 							{cheets.map((cheet, index) => (
 								<Cheet
 									ref={cheets.length === index + 1 ? lastCheetRef : undefined}
@@ -131,7 +139,6 @@ const User: React.FC = () => {
 							setCheetsError={setCheetsError}
 							setCheets={setCheets}
 							setErrors={setErrors}
-						
 							triggerScroll={toggleScrollTrigger}
 						/>
 					)}

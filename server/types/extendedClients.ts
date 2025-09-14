@@ -3,6 +3,7 @@ import { RegisterUserRequestBody } from "./requests.js";
 import type { IUser, ICheet, IReply, IMessage } from "./responses.js";
 
 export interface ExtendedUserClient {
+	findMany(args: Parameters<typeof prisma.user.findMany>[0]): Promise<IUser[]>;
 	findUniqueOrThrow(args: Parameters<typeof prisma.user.findUniqueOrThrow>[0]): Promise<IUser>;
 	findUnique(args: Parameters<typeof prisma.user.findUnique>[0]): Promise<(IUser & { passwordHash: string }) | null>;
 	create(args: { data: RegisterUserRequestBody }): Promise<IUser>;

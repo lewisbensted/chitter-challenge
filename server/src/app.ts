@@ -16,9 +16,10 @@ import MySQLStore from "express-mysql-session";
 import path from "path";
 import cors from "cors";
 import conversations from "./routes/conversations.js";
-import user from "./routes/user.js";
+import users from "./routes/users.js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 import { rateLimiter } from "./middleware/rateLimit.js";
+import follow from "./routes/follow.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 const SessionStore = MySQLStore(expressSession);
@@ -75,7 +76,8 @@ try {
 	const authLimiter = rateLimiter(1000 * 60, 5);
 	const generalLimiter = rateLimiter(1000 * 60 * 10, 200);
 
-	app.use("/api/user", generalLimiter, express.json(), user);
+	app.use("/api/users", generalLimiter, express.json(), users);
+	app.use("/api/follow/:followingId", generalLimiter, express.json(), follow);
 	app.use("/api/register", authLimiter, express.json(), register);
 	app.use("/api/login", authLimiter, express.json(), login);
 	app.use("/api/validate", generalLimiter, validate);

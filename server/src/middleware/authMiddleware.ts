@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { authenticate } from "../utils/authenticate.js";
 
-export const authenticater = (req: Request, res: Response, next: NextFunction) => {
+export const authenticator = (req: Request, res: Response, next: NextFunction) => {
 	if (authenticate(req)) {
 		next();
 	} else {

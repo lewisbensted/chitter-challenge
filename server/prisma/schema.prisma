@@ -25,15 +25,28 @@ model User {
   replies         Reply[]
   sender          Message[]   @relation("sender")
   recipient       Message[]   @relation("recipient")
+  following       Follow[]    @relation("UserFollowing") 
+  followers       Follow[]    @relation("UserFollowers")
 
   @@map("Users")
+}
+
+model Follow {
+  id              Int           @id @default(autoincrement())
+  followerId      String
+  follower        User          @relation("UserFollowing", fields: [followerId], references: [uuid], onDelete: Cascade)
+  followingId     String
+  following       User          @relation("UserFollowers", fields: [followingId], references: [uuid], onDelete: Cascade)
+  @@unique([followerId, followingId])
+
+  @@map("Follows")
 }
 
 model Cheet {
   id          Int           @id @default(autoincrement())
   uuid        String        @default(uuid()) @db.VarChar(36) @unique
   user        User          @relation(fields: [userId], references: [uuid], onDelete: Cascade)
-  userId      String          @map(name: "user_id")
+  userId      String        @map(name: "user_id")
   text        String        @db.VarChar(50)
   createdAt   DateTime      @default(now()) @map(name: "created_at")
   updatedAt   DateTime      @updatedAt @map(name: "updated_at")

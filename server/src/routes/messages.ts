@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
-import { authenticater } from "../middleware/authMiddleware.js";
+import { authenticator } from "../middleware/authMiddleware.js";
 import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
 import type { ExtendedMessageClient, ExtendedUserClient, ExtendedMessageStatusClient } from "../../types/extendedClients.js";
 
@@ -41,7 +41,7 @@ export const readMessages = async (userId: string, interlocutorId: string) => {
 	return readMessages;
 };
 
-router.get("/unread", authenticater, async (req: Request, res: Response) => {
+router.get("/unread", authenticator, async (req: Request, res: Response) => {
 	try {
 		const unreadMessages = await messageClient.findFirst({
 			where: { recipientId: req.session.user!.uuid, messageStatus: { isRead: false, isDeleted: false } },
@@ -53,7 +53,7 @@ router.get("/unread", authenticater, async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/:recipientId", authenticater, async (req: Request, res: Response) => {
+router.get("/:recipientId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const messages = await fetchMessages(
@@ -73,7 +73,7 @@ router.get("/:recipientId", authenticater, async (req: Request, res: Response) =
 	}
 });
 
-router.put("/read/:recipientId", authenticater, async (req: Request, res: Response) => {
+router.put("/read/:recipientId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		await readMessages(req.session.user!.uuid, recipient.uuid);
@@ -84,7 +84,7 @@ router.put("/read/:recipientId", authenticater, async (req: Request, res: Respon
 	}
 });
 
-router.post("/:recipientId", authenticater, async (req: SendMessageRequest, res: Response) => {
+router.post("/:recipientId", authenticator, async (req: SendMessageRequest, res: Response) => {
 	try {
 		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const newMessage = await messageClient.create({
@@ -107,7 +107,7 @@ router.post("/:recipientId", authenticater, async (req: SendMessageRequest, res:
 	}
 });
 
-router.put("/:recipientId/message/:messageId", authenticater, async (req: EditMessageRequest, res: Response) => {
+router.put("/:recipientId/message/:messageId", authenticator, async (req: EditMessageRequest, res: Response) => {
 	try {
 		await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await messageClient.findUniqueOrThrow({
@@ -140,7 +140,7 @@ router.put("/:recipientId/message/:messageId", authenticater, async (req: EditMe
 	}
 });
 
-router.delete("/:recipientId/message/:messageId", authenticater, async (req: Request, res: Response) => {
+router.delete("/:recipientId/message/:messageId", authenticator, async (req: Request, res: Response) => {
 	try {
 		await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 		const targetMessage = await messageClient.findUniqueOrThrow({

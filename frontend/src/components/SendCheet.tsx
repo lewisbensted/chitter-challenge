@@ -33,9 +33,13 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 	const sendCheet: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
-			const newCheet = await axios.post<ICheet>(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets`, data, {
-				withCredentials: true,
-			});
+			const newCheet = await axios.post<ICheet>(
+				`${serverURL + "/api" + (id ? `/users/${id}` : "")}/cheets`,
+				data,
+				{
+					withCredentials: true,
+				}
+			);
 			setCheets((prevCheets) => [newCheet.data, ...prevCheets]);
 			triggerScroll((prev) => !prev);
 			setCheetsError("");
@@ -51,11 +55,7 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 	return (
 		<ThemeProvider theme={theme}>
 			<FlexBox>
-				<Grid2
-					container
-					component="form"
-					onSubmit={handleSubmit(sendCheet)}
-				>
+				<Grid2 container component="form" onSubmit={handleSubmit(sendCheet)}>
 					<Grid2 size={2} />
 					<Grid2 container size={8}>
 						<Grid2 size={12}>

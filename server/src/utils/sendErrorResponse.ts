@@ -14,7 +14,15 @@ export const sendErrorResponse = (error: unknown, res: Response) => {
 				const constraint = error.meta?.target as string;
 				const fieldName =
 					constraint in constraintMap ? constraintMap[constraint as keyof typeof constraintMap] : constraint;
-				return res.status(409).json({ errors: [`${fieldName} already taken.`] });
+				return res
+					.status(409)
+					.json({
+						errors: [
+							fieldName === "Follows_followerId_followingId_key"
+								? "You are already following this user."
+								: `${fieldName} already taken.`,
+						],
+					});
 			}
 			case "P2025": {
 				const modelName = typeof error.meta?.modelName === "string" ? error.meta.modelName : "Resource";
