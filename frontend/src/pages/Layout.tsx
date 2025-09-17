@@ -21,6 +21,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
 import FlexBox from "../styles/FlexBox";
+import { Search } from "@mui/icons-material";
 
 const DRAWER_WIDTH = 200;
 
@@ -31,12 +32,7 @@ const Layout: React.FC = () => {
 	const { errors, clearErrors, handleErrors } = useError();
 	const { userId, setUserId, isValidateLoading, isLoggingOut, setLoggingOut } = useAuth();
 
-	const {
-		isUnreadLoading,
-		isUnreadMessages,
-		isLoadingTimer,
-		setLoadingTimer,
-	} = useLayout();
+	const { isUnreadLoading, isUnreadMessages, isLoadingTimer, setLoadingTimer } = useLayout();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -55,7 +51,7 @@ const Layout: React.FC = () => {
 					sx={{ width: drawerWidth }}
 					slotProps={{ paper: { sx: { width: drawerWidth } } }}
 				>
-					<List>
+					<List >
 						<DrawerElement
 							onClick={
 								isDrawerOpen
@@ -68,7 +64,7 @@ const Layout: React.FC = () => {
 							}
 							icon={isDrawerOpen ? <MenuOpen /> : <MenuIcon />}
 							isDrawerOpen={isDrawerOpen}
-						></DrawerElement>
+						/>
 						<Divider />
 						{!(isValidateLoading || isUnreadLoading || isLoadingTimer) &&
 							(userId ? (
@@ -77,13 +73,11 @@ const Layout: React.FC = () => {
 										link="/conversations"
 										text="Messages"
 										icon={isUnreadMessages ? <MarkUnreadChatAlt /> : <Chat />}
-										
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
 										text="Log out"
 										icon={<Logout />}
-										
 										isDrawerOpen={isDrawerOpen}
 										onClick={async () => {
 											await logout(setUserId, handleErrors, setLoggingOut, setLoadingTimer);
@@ -96,26 +90,19 @@ const Layout: React.FC = () => {
 										link="/register"
 										text="Register"
 										icon={<AppRegistration />}
-										
 										isDrawerOpen={isDrawerOpen}
 									/>
 									<DrawerElement
 										link="/login"
 										text="Log in"
 										icon={<Login />}
-										
 										isDrawerOpen={isDrawerOpen}
 									/>
 								</Fragment>
 							))}
 						<Divider />
-						<DrawerElement
-							link="/"
-							text="Home"
-							icon={<Home />}
-							
-							isDrawerOpen={isDrawerOpen}
-						/>
+						<DrawerElement link="/search" text="Search" icon={<Search />} isDrawerOpen={isDrawerOpen} />
+						<DrawerElement link="/" text="Home" icon={<Home />} isDrawerOpen={isDrawerOpen} />
 					</List>
 				</Drawer>
 

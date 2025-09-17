@@ -54,5 +54,5 @@ export interface IConversation {
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: boolean;
-	latestMessage?: LatestMessage
+	latestMessage: LatestMessage | null
 }

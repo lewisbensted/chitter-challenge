@@ -7,7 +7,6 @@ import type { IConversation } from "../interfaces/interfaces";
 import MessageModal from "../components/MessageModal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useLayout } from "../contexts/LayoutContext";
 import ScrollGrid from "../styles/ScrollGrid";
 
 const Conversations: React.FC = () => {
@@ -16,13 +15,14 @@ const Conversations: React.FC = () => {
 
 	const { userId, isValidateLoading } = useAuth();
 
-	useLayout();
-
 	const {
 		conversations,
 		isConversationsLoading,
 		conversationsError,
 		setConversations,
+		fetchConversations,
+		isFirstLoad,
+		reloadConversationsTrigger,
 		toggleConversationsTrigger
 	} = useFetchConversations();
 
@@ -32,8 +32,16 @@ const Conversations: React.FC = () => {
 		}
 	}, [userId, isValidateLoading, navigate]);
 
+	useEffect(() => {
+		void fetchConversations().finally(() => {
+			if (isFirstLoad.current) {
+				isFirstLoad.current = false;
+			}
+		});
+	}, [reloadConversationsTrigger, fetchConversations]);
 
-	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>();
+
+	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
 
 	return (
 		<Box>
@@ -53,7 +61,6 @@ const Conversations: React.FC = () => {
 									<Conversation
 										key={conversation.interlocutorId}
 										conversation={conversation}
-										
 										setConversations={setConversations}
 										setSelectedConversation={setSelectedConversation}
 									/>
@@ -68,7 +75,6 @@ const Conversations: React.FC = () => {
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
 					setSelectedConversation={setSelectedConversation}
-					setConversations={setConversations}
 					toggleConversationsTrigger={toggleConversationsTrigger}
 				/>
 			)}

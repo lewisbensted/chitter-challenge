@@ -6,8 +6,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Grid2, Link, ThemeProvider, Typography } from "@mui/material";
-import theme from "../styles/theme";
+import { Grid2, Link, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
 import { Link as RouterLink } from "react-router-dom";
@@ -18,8 +17,7 @@ import ScrollGrid from "../styles/ScrollGrid";
 interface Props {
 	conversation: IConversation;
 	isOpen: boolean;
-	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null | undefined>>;
-	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
+	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 }
@@ -125,74 +123,74 @@ const MessageModal: React.FC<Props> = ({
 	);
 
 	return (
-		<ThemeProvider theme={theme}>
-			<Dialog
-				open={isOpen}
-				fullWidth
-				maxWidth="md"
-				onClick={() => {
-					toggleRefreshMessages((prev) => !prev);
-				}}
-			>
-				<Grid2 container marginInline={2} marginTop={1}>
-					<Grid2 size={11} />
-					<Grid2 size={1} display="flex" justifyContent="flex-end">
-						<IconButton
-							onClick={() => {
-								setSelectedConversation(null);
-							}}
-						>
-							<Close />
-						</IconButton>
-					</Grid2>
-					<Grid2 marginInline={3} size={12}>
-						<Typography variant="h5">
-							{userPageId ? (
-								conversation.interlocutorUsername
-							) : (
-								<Link to={`/users/${conversation.interlocutorId}`} component={RouterLink}>
-									{conversation.interlocutorUsername}
-								</Link>
-							)}
-						</Typography>
-						{messagesError ? (
-							<Typography variant="subtitle1">{messagesError}</Typography>
-						) : (
-							<ScrollGrid ref={listRef} height={350}>
-								{isMessagesLoading && (
-									<FlexBox>
-										<CircularProgress thickness={5} />
-									</FlexBox>
-								)}
-								{messages.map((message, index) => (
-									<Message
-										ref={index === 0 ? lastMessageRef : null}
-										key={message.uuid}
-										message={message}
-										messages={messages}
-										setMessages={setMessages}
-										setErrors={setErrors}
-										toggleReloadTrigger={toggleConversationsTrigger}
-										userPageId={userPageId}
-									/>
-								))}
-							</ScrollGrid>
-						)}
-						{!messagesError && (
-							<SendMessage
-								recipientId={conversation.interlocutorId}
-								toggleReloadTrigger={toggleConversationsTrigger}
-								setMessages={setMessages}
-								setErrors={setErrors}
-								triggerScroll={toggleScrollTrigger}
-								setMessagesError={setMessagesError}
-								userPageId={userPageId}
-							/>
-						)}
-					</Grid2>
+
+		<Dialog
+			open={isOpen}
+			fullWidth
+			maxWidth="md"
+			onClick={() => {
+				toggleRefreshMessages((prev) => !prev);
+			}}
+		>
+			<Grid2 container marginInline={2} marginTop={1}>
+				<Grid2 size={11} />
+				<Grid2 size={1} display="flex" justifyContent="flex-end">
+					<IconButton
+						onClick={() => {
+							setSelectedConversation(null);
+						}}
+					>
+						<Close />
+					</IconButton>
 				</Grid2>
-			</Dialog>
-		</ThemeProvider>
+				<Grid2 marginInline={3} size={12}>
+					<Typography variant="h5">
+						{userPageId ? (
+							conversation.interlocutorUsername
+						) : (
+							<Link to={`/users/${conversation.interlocutorId}`} component={RouterLink}>
+								{conversation.interlocutorUsername}
+							</Link>
+						)}
+					</Typography>
+					{messagesError ? (
+						<Typography variant="subtitle1">{messagesError}</Typography>
+					) : (
+						<ScrollGrid ref={listRef} height={350}>
+							{isMessagesLoading && (
+								<FlexBox>
+									<CircularProgress thickness={5} />
+								</FlexBox>
+							)}
+							{messages.map((message, index) => (
+								<Message
+									ref={index === 0 ? lastMessageRef : null}
+									key={message.uuid}
+									message={message}
+									messages={messages}
+									setMessages={setMessages}
+									setErrors={setErrors}
+									toggleReloadTrigger={toggleConversationsTrigger}
+									userPageId={userPageId}
+								/>
+							))}
+						</ScrollGrid>
+					)}
+					{!messagesError && (
+						<SendMessage
+							recipientId={conversation.interlocutorId}
+							toggleReloadTrigger={toggleConversationsTrigger}
+							setMessages={setMessages}
+							setErrors={setErrors}
+							triggerScroll={toggleScrollTrigger}
+							setMessagesError={setMessagesError}
+							userPageId={userPageId}
+						/>
+					)}
+				</Grid2>
+			</Grid2>
+		</Dialog>
+
 	);
 };
 

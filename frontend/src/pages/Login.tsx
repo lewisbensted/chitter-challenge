@@ -5,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import FlexBox from "../styles/FlexBox";
-import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
-import theme from "../styles/theme";
+import { Box, Button, Grid2, TextField, Typography } from "@mui/material";
 import Login from "@mui/icons-material/Login";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
@@ -49,34 +48,34 @@ const SignIn: React.FC = () => {
 	};
 
 	return (
-		<ThemeProvider theme={theme}>
-			<Box width="400px">
-				<Typography variant="h4">Sign In</Typography>
-				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-					<Grid2 size={12} container display="block">
-						<Typography variant="subtitle1">Username:</Typography>
-						<TextField type="text" {...register("username")}></TextField>
+		
+		<Box width="400px">
+			<Typography variant="h4">Sign In</Typography>
+			<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+				<Grid2 size={12} container display="block">
+					<Typography variant="subtitle1">Username:</Typography>
+					<TextField type="text" {...register("username")}></TextField>
 
-						<Typography variant="subtitle1">Password:</Typography>
-						<TextField type="password" {...register("password")}></TextField>
-					</Grid2>
-					<Grid2 size={12}>
-						<FlexBox>
-							{isFormLoading ? (
-								<CircularProgress size="2.1rem" thickness={6} />
-							) : (
-								<Button type="submit" disabled={!!userId} variant="contained">
-									<Typography variant="button" color="inherit">
-										Sign in
-									</Typography>
-									<Login />
-								</Button>
-							)}
-						</FlexBox>
-					</Grid2>
+					<Typography variant="subtitle1">Password:</Typography>
+					<TextField type="password" {...register("password")}></TextField>
 				</Grid2>
-			</Box>
-		</ThemeProvider>
+				<Grid2 size={12}>
+					<FlexBox>
+						{isFormLoading ? (
+							<CircularProgress size="2.1rem" thickness={6} />
+						) : (
+							<Button type="submit" disabled={!!userId} variant="contained">
+								<Typography variant="button" color="inherit">
+									Sign in
+								</Typography>
+								<Login />
+							</Button>
+						)}
+					</FlexBox>
+				</Grid2>
+			</Grid2>
+		</Box>
+		
 	);
 };
 

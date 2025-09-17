@@ -15,10 +15,8 @@ import {
 	Grid2,
 	Link,
 	TextField,
-	ThemeProvider,
 	Typography,
 } from "@mui/material";
-import theme from "../styles/theme";
 import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
@@ -98,53 +96,53 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 	const isEdited = updatedAt > createdAt;
 
 	return (
-		<ThemeProvider theme={theme}>
-			<Card ref={ref}>
-				<Grid2 container>
-					<Grid2 size={userId ? 10.5 : 12}>
-						<CardContent>
-							<Grid2 container>
-								<Grid2 size={6}>
-									<Typography>
-										<Link to={`/users/${reply.user.uuid}`} component={RouterLink}>
-											{reply.user.username}
-										</Link>
-									</Typography>
-								</Grid2>
-								<Grid2 size={6}>
-									<Typography variant="body2" justifyContent="flex-end">
-										{formatDate(createdAt)}
-									</Typography>
-								</Grid2>
-								<Grid2 size={isEdited ? 10 : 12}>
-									{isEditing ? (
-										<Box
-											component="form"
-											onSubmit={handleSubmit(editReply)}
-											id={`edit-reply-${reply.uuid}`}
-										>
-											<TextField {...register("text")} type="text" variant="standard" />
-										</Box>
-									) : (
-										<Typography>{reply.text}</Typography>
-									)}
-								</Grid2>
-								{isEdited && (
-									<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
-										<Typography variant="body2">
-											<Edit fontSize="small" color="primary" />
-											{formatDate(updatedAt)}
-										</Typography>
-									</Grid2>
+
+		<Card ref={ref}>
+			<Grid2 container>
+				<Grid2 size={userId ? 10.5 : 12}>
+					<CardContent>
+						<Grid2 container>
+							<Grid2 size={6}>
+								<Typography>
+									<Link to={`/users/${reply.user.uuid}`} component={RouterLink}>
+										{reply.user.username}
+									</Link>
+								</Typography>
+							</Grid2>
+							<Grid2 size={6}>
+								<Typography variant="body2" justifyContent="flex-end">
+									{formatDate(createdAt)}
+								</Typography>
+							</Grid2>
+							<Grid2 size={isEdited ? 10 : 12}>
+								{isEditing ? (
+									<Box
+										component="form"
+										onSubmit={handleSubmit(editReply)}
+										id={`edit-reply-${reply.uuid}`}
+									>
+										<TextField {...register("text")} type="text" variant="standard" />
+									</Box>
+								) : (
+									<Typography>{reply.text}</Typography>
 								)}
 							</Grid2>
-						</CardContent>
-					</Grid2>
-					<Grid2 size={1.5} container justifyContent={"space-between"}>
-						<CardActions>
-							<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
-								<Grid2 size={1}>
-									{userId === reply.user.uuid &&
+							{isEdited && (
+								<Grid2 size={2} container justifyContent="flex-end" marginTop={0.4}>
+									<Typography variant="body2">
+										<Edit fontSize="small" color="primary" />
+										{formatDate(updatedAt)}
+									</Typography>
+								</Grid2>
+							)}
+						</Grid2>
+					</CardContent>
+				</Grid2>
+				<Grid2 size={1.5} container justifyContent={"space-between"}>
+					<CardActions>
+						<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
+							<Grid2 size={1}>
+								{userId === reply.user.uuid &&
 										(isEditLoading ? (
 											<Box paddingTop={1.3} paddingLeft={1.4}>
 												<CircularProgress size="1.3rem" thickness={6} />
@@ -168,9 +166,9 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 												<Edit />
 											</IconButton>
 										))}
-								</Grid2>
-								<Grid2 size={1}>
-									{userId === reply.user.uuid &&
+							</Grid2>
+							<Grid2 size={1}>
+								{userId === reply.user.uuid &&
 										(isDeleteLoading ? (
 											<Box paddingTop={1.3} paddingLeft={1}>
 												<CircularProgress size="1.3rem" thickness={6} />
@@ -183,13 +181,13 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 												<Delete />
 											</IconButton>
 										))}
-								</Grid2>
 							</Grid2>
-						</CardActions>
-					</Grid2>
+						</Grid2>
+					</CardActions>
 				</Grid2>
-			</Card>
-		</ThemeProvider>
+			</Grid2>
+		</Card>
+
 	);
 });
 

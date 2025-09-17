@@ -9,8 +9,8 @@ import { logErrors } from "../utils/processErrors";
 
 interface Props {
 	user: IUser;
-	isFollowing: boolean;
-	setFollowing: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+	isFollowing: boolean | null;
+	setFollowing: (isFollowingInput: boolean) => void;
 }
 
 const FollowIcon: React.FC<Props> = ({ user, isFollowing, setFollowing }) => {

@@ -8,6 +8,5 @@
 		"target": "es2022",
 		"sourceMap": false,
 		"allowImportingTsExtensions": false
-	},
-	"include": ["src/**/*", "prisma/**/*.ts"]
+	}
 }

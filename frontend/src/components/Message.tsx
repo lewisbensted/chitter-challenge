@@ -13,16 +13,13 @@ import {
 	Grid2,
 	IconButton,
 	TextField,
-	ThemeProvider,
 	Typography,
 } from "@mui/material";
 import { Delete, Done, Edit } from "@mui/icons-material";
-import theme from "../styles/theme";
 import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useIsMounted } from "../utils/isMounted";
-import { useLayout } from "../contexts/LayoutContext";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -30,7 +27,6 @@ interface Props {
 	messages: IMessage[];
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-
 	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 }
@@ -44,8 +40,6 @@ const Message = forwardRef<HTMLDivElement, Props>(
 
 		const { handleErrors } = useError();
 		const { userId } = useAuth();
-
-		useLayout();
 
 		const isMounted = useIsMounted();
 
@@ -112,124 +106,120 @@ const Message = forwardRef<HTMLDivElement, Props>(
 		const isEdited = updatedAt > createdAt;
 
 		return (
-			<ThemeProvider theme={theme}>
-				<Card ref={ref}>
-					<Grid2 container justifyContent={message.sender.uuid === userId ? "" : "flex-end"}>
-						<Grid2 size={6}>
-							<CardContent>
-								<Grid2 container>
-									<Grid2
-										size={message.messageStatus.isRead && userId === message.sender.uuid ? 11 : 12}
-									>
-										{isEditing ? (
-											<Box
+			<Card ref={ref}>
+				<Grid2 container justifyContent={message.sender.uuid === userId ? "" : "flex-end"}>
+					<Grid2 size={6}>
+						<CardContent>
+							<Grid2 container>
+								<Grid2 size={message.messageStatus.isRead && userId === message.sender.uuid ? 11 : 12}>
+									{isEditing ? (
+										<Box
+											component="form"
+											onSubmit={handleSubmit(editMessage)}
+											id={`edit-message-${message.uuid}`}
+										>
+											<TextField
 												component="form"
-												onSubmit={handleSubmit(editMessage)}
-												id={`edit-message-${message.uuid}`}
-											>
-												<TextField
-													component="form"
-													id="edit-message"
-													{...register("text")}
-													type="text"
-													variant="standard"
-												/>
-											</Box>
-										) : (
-											<Typography
-												justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
-												textAlign={message.sender.uuid === userId ? "left" : "right"}
-												fontWeight={
-													!message.messageStatus.isRead &&
-													message.recipient.uuid === userId &&
-													!message.messageStatus.isDeleted
-														? "bold"
-														: ""
-												}
-												fontStyle={message.messageStatus.isDeleted ? "italic" : "none"}
-											>
-												{message.messageStatus.isDeleted
-													? message.sender.uuid === userId
-														? "You deleted this message."
-														: `${message.sender.username} deleted this message.`
-													: message.text}
-											</Typography>
-										)}
-									</Grid2>
-									{message.sender.uuid === userId && message.messageStatus.isRead && (
-										<Grid2 size={1} display="flex" justifyContent="center">
-											<Done fontSize="small" color="primary" />
-										</Grid2>
-									)}
-									<Grid2 size={12}>
+												id="edit-message"
+												{...register("text")}
+												type="text"
+												variant="standard"
+											/>
+										</Box>
+									) : (
 										<Typography
-											variant="body2"
 											justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
 											textAlign={message.sender.uuid === userId ? "left" : "right"}
+											fontWeight={
+												!message.messageStatus.isRead &&
+												message.recipient.uuid === userId &&
+												!message.messageStatus.isDeleted
+													? "bold"
+													: ""
+											}
+											fontStyle={message.messageStatus.isDeleted ? "italic" : "none"}
 										>
-											{isEdited && !message.messageStatus.isDeleted && (
-												<Edit fontSize="small" color="primary" />
-											)}
-											{formatDate(isEdited ? updatedAt : createdAt)}
+											{message.messageStatus.isDeleted
+												? message.sender.uuid === userId
+													? "You deleted this message."
+													: `${message.sender.username} deleted this message.`
+												: message.text}
 										</Typography>
+									)}
+								</Grid2>
+								{message.sender.uuid === userId && message.messageStatus.isRead && (
+									<Grid2 size={1} display="flex" justifyContent="center">
+										<Done fontSize="small" color="primary" />
+									</Grid2>
+								)}
+								<Grid2 size={12}>
+									<Typography
+										variant="body2"
+										justifyContent={message.sender.uuid === userId ? "" : "flex-end"}
+										textAlign={message.sender.uuid === userId ? "left" : "right"}
+									>
+										{isEdited && !message.messageStatus.isDeleted && (
+											<Edit fontSize="small" color="primary" />
+										)}
+										{formatDate(isEdited ? updatedAt : createdAt)}
+									</Typography>
+								</Grid2>
+							</Grid2>
+						</CardContent>
+					</Grid2>
+
+					{message.sender.uuid === userId && !message.messageStatus.isDeleted && (
+						<Grid2 size={1.5} container>
+							<CardActions>
+								<Grid2 container size={12} columns={2}>
+									<Grid2 size={1}>
+										{isEditLoading ? (
+											<Box paddingTop={1.3} paddingLeft={1.4}>
+												<CircularProgress size="1.3rem" thickness={6} />
+											</Box>
+										) : (
+											!message.messageStatus.isRead &&
+											(isEditing ? (
+												<IconButton
+													type="submit"
+													form={`edit-message-${message.uuid}`}
+													key={`edit-message-${message.uuid}`}
+													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
+												>
+													<Done />
+												</IconButton>
+											) : (
+												<IconButton
+													onClick={() => {
+														setEditing(true);
+													}}
+													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
+												>
+													<Edit />
+												</IconButton>
+											))
+										)}
+									</Grid2>
+									<Grid2 size={1}>
+										{isDeleteLoading ? (
+											<Box paddingTop={1.3} paddingLeft={1}>
+												<CircularProgress size="1.3rem" thickness={6} />
+											</Box>
+										) : message.messageStatus.isRead ? null : (
+											<IconButton
+												onClick={deleteMessage}
+												sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
+											>
+												<Delete />
+											</IconButton>
+										)}
 									</Grid2>
 								</Grid2>
-							</CardContent>
+							</CardActions>
 						</Grid2>
-
-						{message.sender.uuid === userId && !message.messageStatus.isDeleted && (
-							<Grid2 size={1.5} container>
-								<CardActions>
-									<Grid2 container size={12} columns={2}>
-										<Grid2 size={1}>
-											{isEditLoading ? (
-												<Box paddingTop={1.3} paddingLeft={1.4}>
-													<CircularProgress size="1.3rem" thickness={6} />
-												</Box>
-											) : (
-												!message.messageStatus.isRead &&
-												(isEditing ? (
-													<IconButton
-														type="submit"
-														form={`edit-message-${message.uuid}`}
-														key={`edit-message-${message.uuid}`}
-														sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
-													>
-														<Done />
-													</IconButton>
-												) : (
-													<IconButton
-														onClick={() => {
-															setEditing(true);
-														}}
-														sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
-													>
-														<Edit />
-													</IconButton>
-												))
-											)}
-										</Grid2>
-										<Grid2 size={1}>
-											{isDeleteLoading ? (
-												<Box paddingTop={1.3} paddingLeft={1}>
-													<CircularProgress size="1.3rem" thickness={6} />
-												</Box>
-											) : message.messageStatus.isRead ? null : (
-												<IconButton
-													onClick={deleteMessage}
-													sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
-												>
-													<Delete />
-												</IconButton>
-											)}
-										</Grid2>
-									</Grid2>
-								</CardActions>
-							</Grid2>
-						)}
-					</Grid2>
-				</Card>
-			</ThemeProvider>
+					)}
+				</Grid2>
+			</Card>
 		);
 	}
 );

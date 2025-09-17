@@ -1,12 +1,11 @@
 import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import type { ICheet, IUser } from "../interfaces/interfaces";
+import type { ICheet, IConversation, IUser } from "../interfaces/interfaces";
 import SendCheet from "../components/SendCheet";
 import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Box, IconButton, Typography } from "@mui/material";
-import ConversationIcon from "../components/ConversationIcon";
+import { Box, Typography } from "@mui/material";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
 import useFetchCheets from "../hooks/useFetchCheets";
@@ -15,13 +14,15 @@ import CheetModal from "../components/CheetModal";
 import { useAuth } from "../contexts/AuthContext";
 import { useError } from "../contexts/ErrorContext";
 import ScrollGrid from "../styles/ScrollGrid";
-import FollowIcon from "../components/FollowIcon";
+import User from "../components/User";
 
-const User: React.FC = () => {
+const UserPage: React.FC = () => {
 	const [user, setUser] = useState<IUser>();
 	const [isFollowing, setFollowing] = useState<boolean>();
 	const [isUserLoading, setUserLoading] = useState(true);
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
+
+	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
 
 	const { id } = useParams();
 
@@ -30,8 +31,23 @@ const User: React.FC = () => {
 	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage } =
 		useFetchCheets(id);
 
-	const { conversations, isConversationsLoading, setConversations, toggleConversationsTrigger } =
-		useFetchConversations(id);
+	const {
+		conversations,
+		isConversationsLoading,
+		fetchConversations,
+		isFirstLoad,
+		reloadConversationsTrigger,
+		toggleConversationsTrigger,
+	} = useFetchConversations();
+
+	useEffect(() => {
+		if (!id) return;
+		void fetchConversations([id]).finally(() => {
+			if (isFirstLoad.current) {
+				isFirstLoad.current = false;
+			}
+		});
+	}, [reloadConversationsTrigger, fetchConversations]);
 
 	const { userId } = useAuth();
 
@@ -93,21 +109,16 @@ const User: React.FC = () => {
 			) : (
 				<Fragment>
 					{user && (
-						<Typography variant="h4" display="flex">
-							{user.username}
-							{userId && userId !== id && conversations[0] && (
-								<ConversationIcon
-									conversation={conversations[0]}
-									setConversations={() => {
-										setConversations(conversations);
-									}}
-									toggleConversationsTrigger={toggleConversationsTrigger}
-								/>
-							)}
-							{userId && userId !== id && isFollowing!==undefined && (
-								<FollowIcon user={user} isFollowing={isFollowing} setFollowing={setFollowing} />
-							)}
-						</Typography>
+						<User
+							user={user}
+							isFollowing={isFollowing}
+							sessionUserId={userId}
+							setFollowing={setFollowing}
+							conversation={conversations[0]}
+							toggleConversationsTrigger={toggleConversationsTrigger}
+							selectedConversation={selectedConversation}
+							setSelectedConversation={setSelectedConversation}
+						/>
 					)}
 
 					{cheetsError ? (
@@ -158,4 +169,4 @@ const User: React.FC = () => {
 	);
 };
 
-export default User;
+export default UserPage;

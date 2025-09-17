@@ -1,12 +1,10 @@
 import React from "react";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import IconButton from "@mui/material/IconButton/IconButton";
 import ListItem from "@mui/material/ListItem/ListItem";
 import ListItemButton from "@mui/material/ListItemButton/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText/ListItemText";
-import theme from "../styles/theme";
-import { ThemeProvider } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
@@ -19,23 +17,20 @@ interface Props {
 }
 
 const DrawerElement: React.FC<Props> = ({ link, icon, isDisabled, isDrawerOpen, onClick, text }) => (
-	<ThemeProvider theme={theme}>
-		<ListItem>
-			<ListItemButton
-				onClick={onClick}
-				{...(link ? { component: RouterLink, to: link } : { component: "div" })}
-				sx={{
-					justifyContent: isDrawerOpen ? (text ? "left" : "center") : "center",
-					pointerEvents: isDisabled ? "none" : undefined,
-				}}
-			>
-				<ListItemIcon sx={{ justifyContent: "center" }}>
-					<IconButton>{icon}</IconButton>
-				</ListItemIcon>
-				{isDrawerOpen && <ListItemText primary={text} />}
-			</ListItemButton>
-		</ListItem>
-	</ThemeProvider>
+	
+	<ListItem>
+		<ListItemButton
+			onClick={onClick}
+			{...(link ? { component: RouterLink, to: link } : { component: "div" })}
+			sx={{ display: "flex", justifyContent: "center", pointerEvents: isDisabled ? "none" : undefined }}
+		>
+			<ListItemIcon>
+				<IconButton>{icon}</IconButton>
+			</ListItemIcon>
+			{isDrawerOpen && text && <ListItemText primary={text} />}
+		</ListItemButton>
+	</ListItem>
+	
 );
 
 export default DrawerElement;

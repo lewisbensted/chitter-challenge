@@ -1,7 +1,6 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
-import theme from "../styles/theme";
 import {
 	Box,
 	Card,
@@ -12,7 +11,6 @@ import {
 	IconButton,
 	Link,
 	TextField,
-	ThemeProvider,
 	Typography,
 } from "@mui/material";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -112,69 +110,69 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const isEditDisabled = cheet.cheetStatus.hasReplies || createdAt < oneHourAgo;
 
 		return (
-			<ThemeProvider theme={theme}>
-				<Card ref={ref}>
-					<Grid2 container width={isModalView ? "auto" : 750}>
-						<Grid2 size={isModalView ? (userId ? 10.5 : 12) : userId ? 10 : 11}>
-							<CardContent>
-								<Grid2 container>
-									<Grid2 size={6}>
-										<Typography>
-											<Link component={RouterLink} to={`/users/${cheet.user.uuid}`}>
-												{cheet.user.username}
-											</Link>
-										</Typography>
-									</Grid2>
-									<Grid2 size={6}>
-										<Typography variant="body2" justifyContent="flex-end">
-											{formatDate(createdAt, isModalView)}
-										</Typography>
-									</Grid2>
-									<Grid2 size={isEdited ? 9 : 12}>
-										{isEditing ? (
-											<Box
-												component="form"
-												onSubmit={handleSubmit(editCheet)}
-												id={`edit-cheet-${cheet.uuid}`}
-											>
-												<TextField {...register("text")} type="text" variant="standard" />
-											</Box>
-										) : (
-											<Typography>{cheet.text}</Typography>
-										)}
-									</Grid2>
-									{isEdited && (
-										<Grid2 size={3} container justifyContent="flex-end" marginTop={0.4}>
-											<Typography variant="body2">
-												<Edit fontSize="small" color="primary" />
-												{isModalView ? formatDate(updatedAt) : ""}
-											</Typography>
-										</Grid2>
+		
+			<Card ref={ref}>
+				<Grid2 container width={isModalView ? "auto" : 750}>
+					<Grid2 size={isModalView ? (userId ? 10.5 : 12) : userId ? 10 : 11}>
+						<CardContent>
+							<Grid2 container>
+								<Grid2 size={6}>
+									<Typography>
+										<Link component={RouterLink} to={`/users/${cheet.user.uuid}`}>
+											{cheet.user.username}
+										</Link>
+									</Typography>
+								</Grid2>
+								<Grid2 size={6}>
+									<Typography variant="body2" justifyContent="flex-end">
+										{formatDate(createdAt, isModalView)}
+									</Typography>
+								</Grid2>
+								<Grid2 size={isEdited ? 9 : 12}>
+									{isEditing ? (
+										<Box
+											component="form"
+											onSubmit={handleSubmit(editCheet)}
+											id={`edit-cheet-${cheet.uuid}`}
+										>
+											<TextField {...register("text")} type="text" variant="standard" />
+										</Box>
+									) : (
+										<Typography>{cheet.text}</Typography>
 									)}
 								</Grid2>
-							</CardContent>
-						</Grid2>
-						<Grid2
-							size={isModalView ? (userId ? 1.5 : 0) : userId ? 2 : 1}
-							container
-							justifyContent={isModalView ? "center" : "space-between"}
-						>
-							<CardActions>
-								<Grid2 container size={12} columns={isModalView ? 2 : 3}>
-									<Grid2 size={isModalView ? 0 : 1}>
-										{!isModalView && (
-											<IconButton
-												onClick={() => {
-													setSelectedCheet(cheet);
-												}}
-											>
-												<OpenInNew />
-											</IconButton>
-										)}
+								{isEdited && (
+									<Grid2 size={3} container justifyContent="flex-end" marginTop={0.4}>
+										<Typography variant="body2">
+											<Edit fontSize="small" color="primary" />
+											{isModalView ? formatDate(updatedAt) : ""}
+										</Typography>
 									</Grid2>
+								)}
+							</Grid2>
+						</CardContent>
+					</Grid2>
+					<Grid2
+						size={isModalView ? (userId ? 1.5 : 0) : userId ? 2 : 1}
+						container
+						justifyContent={isModalView ? "center" : "space-between"}
+					>
+						<CardActions>
+							<Grid2 container size={12} columns={isModalView ? 2 : 3}>
+								<Grid2 size={isModalView ? 0 : 1}>
+									{!isModalView && (
+										<IconButton
+											onClick={() => {
+												setSelectedCheet(cheet);
+											}}
+										>
+											<OpenInNew />
+										</IconButton>
+									)}
+								</Grid2>
 
-									<Grid2 size={1}>
-										{userId === cheet.user.uuid &&
+								<Grid2 size={1}>
+									{userId === cheet.user.uuid &&
 											(isEditLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1.4}>
 													<CircularProgress size="1.3rem" thickness={6} />
@@ -200,9 +198,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													<Edit />
 												</IconButton>
 											))}
-									</Grid2>
-									<Grid2 size={1}>
-										{userId === cheet.user.uuid &&
+								</Grid2>
+								<Grid2 size={1}>
+									{userId === cheet.user.uuid &&
 											(isDeleteLoading ? (
 												<Box paddingTop={1.3} paddingLeft={1}>
 													<CircularProgress size="1.3rem" thickness={6} />
@@ -215,13 +213,13 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 													<Delete />
 												</IconButton>
 											))}
-									</Grid2>
 								</Grid2>
-							</CardActions>
-						</Grid2>
+							</Grid2>
+						</CardActions>
 					</Grid2>
-				</Card>
-			</ThemeProvider>
+				</Grid2>
+			</Card>
+
 		);
 	}
 );

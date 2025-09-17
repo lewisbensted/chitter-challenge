@@ -5,8 +5,7 @@ import { serverURL } from "../config/config";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import AppRegistration from "@mui/icons-material/AppRegistration";
 import FlexBox from "../styles/FlexBox";
-import { Box, Button, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
-import theme from "../styles/theme";
+import { Box, Button, Grid2, TextField, Typography } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
@@ -49,38 +48,38 @@ const Register: React.FC = () => {
 	};
 
 	return (
-		<ThemeProvider theme={theme}>
-			<Box width="400px">
-				<Typography variant="h4">Register</Typography>
-				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-					<Grid2 size={12} container display="block">
-						<Typography variant="subtitle1">First Name:</Typography>
-						<TextField type="text" {...register("firstName")}></TextField>
-						<Typography variant="subtitle1">Last Name:</Typography>
-						<TextField type="text" {...register("lastName")}></TextField>
-						<Typography variant="subtitle1">Username:</Typography>
-						<TextField type="text" {...register("username")}></TextField>
-						<Typography variant="subtitle1">Password:</Typography>
-						<TextField type="password" {...register("password")}></TextField>
-						<Typography variant="subtitle1">E-mail:</Typography>
-						<TextField type="text" {...register("email")}></TextField>
-						<FlexBox>
-							{isFormLoading ? (
-								<CircularProgress size="2.1rem" thickness={6} />
-							) : (
-								<Button type="submit" disabled={!!userId} variant="contained">
-									<Typography variant="button" color="inherit">
-										Register
-									</Typography>
+	
+		<Box width="400px">
+			<Typography variant="h4">Register</Typography>
+			<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
+				<Grid2 size={12} container display="block">
+					<Typography variant="subtitle1">First Name:</Typography>
+					<TextField type="text" {...register("firstName")}></TextField>
+					<Typography variant="subtitle1">Last Name:</Typography>
+					<TextField type="text" {...register("lastName")}></TextField>
+					<Typography variant="subtitle1">Username:</Typography>
+					<TextField type="text" {...register("username")}></TextField>
+					<Typography variant="subtitle1">Password:</Typography>
+					<TextField type="password" {...register("password")}></TextField>
+					<Typography variant="subtitle1">E-mail:</Typography>
+					<TextField type="text" {...register("email")}></TextField>
+					<FlexBox>
+						{isFormLoading ? (
+							<CircularProgress size="2.1rem" thickness={6} />
+						) : (
+							<Button type="submit" disabled={!!userId} variant="contained">
+								<Typography variant="button" color="inherit">
+									Register
+								</Typography>
 
-									<AppRegistration />
-								</Button>
-							)}
-						</FlexBox>
-					</Grid2>
+								<AppRegistration />
+							</Button>
+						)}
+					</FlexBox>
 				</Grid2>
-			</Box>
-		</ThemeProvider>
+			</Grid2>
+		</Box>
+	
 	);
 };
 

@@ -6,8 +6,7 @@ import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Box, Grid2, TextField, ThemeProvider, Typography } from "@mui/material";
-import theme from "../styles/theme";
+import { Box, Grid2, TextField, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
@@ -75,36 +74,30 @@ const SendReply: React.FC<Props> = ({
 		}
 	};
 	return (
-		<ThemeProvider theme={theme}>
-			<FlexBox>
-				<Grid2
-					container
-					component="form"
-					onSubmit={handleSubmit(sendReply)}
-				>
-					<Grid2 size={2} />
-					<Grid2 container size={8}>
-						<Grid2 size={12}>
-							<Typography variant="subtitle1">Send a Reply:</Typography>
-						</Grid2>
-						<Grid2 size={12}>
-							<TextField {...register("text")} type="text" variant="standard" />
-						</Grid2>
+		<FlexBox>
+			<Grid2 container component="form" onSubmit={handleSubmit(sendReply)}>
+				<Grid2 size={2} />
+				<Grid2 container size={8}>
+					<Grid2 size={12}>
+						<Typography variant="subtitle1">Send a Reply:</Typography>
 					</Grid2>
-					<Grid2 size={2} container justifyContent="center">
-						{isSubmitLoading ? (
-							<Box paddingTop={3}>
-								<CircularProgress size="2.1rem" thickness={6} />
-							</Box>
-						) : (
-							<IconButton type="submit" sx={{ pointerEvents: isDisabled ? "none" : undefined }}>
-								<Reply fontSize="large" />
-							</IconButton>
-						)}
+					<Grid2 size={12}>
+						<TextField {...register("text")} type="text" variant="standard" />
 					</Grid2>
 				</Grid2>
-			</FlexBox>
-		</ThemeProvider>
+				<Grid2 size={2} container justifyContent="center">
+					{isSubmitLoading ? (
+						<Box paddingTop={3}>
+							<CircularProgress size="2.1rem" thickness={6} />
+						</Box>
+					) : (
+						<IconButton type="submit" sx={{ pointerEvents: isDisabled ? "none" : undefined }}>
+							<Reply fontSize="large" />
+						</IconButton>
+					)}
+				</Grid2>
+			</Grid2>
+		</FlexBox>
 	);
 };
 
