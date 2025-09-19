@@ -9,7 +9,6 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface Props {
 	conversation: IConversation;
-	setConversations: React.Dispatch<React.SetStateAction<Map<string,IConversation>>>;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
 }
 

@@ -31,7 +31,6 @@ const User: React.FC<Props> = ({
 					<FollowIcon
 						onSuccess={onToggleFollow}
 						userEnhanced={userEnhanced}
-						isFollowing={userEnhanced.isFollowing}
 					/>
 				)}
 			</Fragment>

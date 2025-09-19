@@ -16,7 +16,6 @@ import ScrollGrid from "../styles/ScrollGrid";
 
 interface Props {
 	cheet: ICheet;
-	cheets: ICheet[];
 	isOpen: boolean;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	numberOfCheets: number;

@@ -38,7 +38,7 @@ export default tseslint.config(
 			"arrow-body-style": ["warn", "as-needed"],
 			"@typescript-eslint/no-misused-promises": ["warn", { checksVoidReturn: false }],
 			"@typescript-eslint/restrict-template-expressions": ["warn", { allowNumber: true }],
-			"@typescript-eslint/no-non-null-assertion": ["off"]
+			"@typescript-eslint/no-non-null-assertion": ["off"],
 		},
 	},
 	{
@@ -50,6 +50,7 @@ export default tseslint.config(
 		rules: {
 			...reactPlugin.configs.flat.recommended.rules,
 			...reactHooksPlugin.configs.recommended.rules,
+			"react/no-unused-prop-types": "warn"
 		},
 	}
 );

@@ -4,6 +4,8 @@ import axios from "axios";
 import { serverURL } from "../config/config";
 import { useError } from "../contexts/ErrorContext";
 import { useNavigate } from "react-router";
+import { useIsMounted } from "../utils/isMounted";
+import { logErrors } from "../utils/processErrors";
 
 interface UseFetchUserReturn {
 	userEnhanced: UserEnhanced | undefined;
@@ -18,6 +20,7 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 	const { handleErrors } = useError();
 	const navigate = useNavigate();
 
+	const isMounted = useIsMounted();
 
 	const fetchUser = useCallback(async () => {
 		if (!userId) return;
@@ -25,22 +28,22 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 			const res = await axios.get<UserEnhanced>(`${serverURL}/api/users/${userId}`, {
 				withCredentials: true,
 			});
-			setUserEnhanced({ ...res.data });
+			if (isMounted.current) setUserEnhanced({ ...res.data });
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 404) {
 				void navigate("/");
 			} else {
-				handleErrors(error, "fetching page information");
+				logErrors(error);
 			}
 		} finally {
-			setUserLoading(false);
+			if (isMounted.current) setUserLoading(false);
 		}
 	}, [handleErrors, navigate, userId]);
 
 	useEffect(() => {
 		if (!userId) return;
 		void fetchUser();
-	}, [userId, navigate, handleErrors]);
+	}, [userId, navigate, handleErrors, fetchUser]);
 
 	return { userEnhanced, isUserLoading, fetchUser, setUserEnhanced };
 };

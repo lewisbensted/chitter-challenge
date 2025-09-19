@@ -24,6 +24,8 @@ const SearchUser: React.FC = () => {
 		fetchConversations,
 		conversations,
 		setConversations,
+		isConversationsLoading,
+		setConversationsLoading
 	} = useFetchConversations();
 
 	const { register, handleSubmit } = useForm<{ searchString: string }>();
@@ -31,31 +33,34 @@ const SearchUser: React.FC = () => {
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
 
 	useEffect(() => {
+		setConversationsLoading(false);
+	}, [setConversationsLoading]);
+
+	useEffect(() => {
+		if (!users.length) return;
+		const fetchConvos = async () => {
+			await fetchConversations(false, users.map((user) => user.user.uuid));
+		};
+		void fetchConvos();
+	}, [users, fetchConversations]);
+
+	useEffect(() => {
 		if (!selectedConversation) return;
 		const refreshConversations = async () => {
 			const newConvos = new Map(conversations);
-			const refreshedConversation = await fetchConversations([selectedConversation.interlocutorId]);
+			const refreshedConversation = await fetchConversations(true, [selectedConversation.interlocutorId]);
 			if (refreshedConversation) newConvos.set(selectedConversation.interlocutorId, refreshedConversation[0]);
 			setConversations(newConvos);
 		};
 		void refreshConversations();
 	}, [reloadConversationsTrigger, fetchConversations]);
 
-	useEffect(() => {
-		if (!users.length || !userId) return;
-		const fetchConvos = async () => {
-			await fetchConversations(users.map((user) => user.user.uuid));
-		};
-		void fetchConvos();
-	}, [users]);
+	const usersWithConvos = useMemo(() => users.map(({ user, isFollowing }) => ({
+		user,
+		isFollowing,
+		conversation: conversations.get(user.uuid) ?? null,
+	})), [users, conversations]);
 
-	const usersWithConvos = useMemo(() => {
-		return users.map(({ user, isFollowing }) => ({
-			user,
-			isFollowing,
-			conversation: conversations.get(user.uuid) ?? null,
-		}));
-	}, [users, conversations]);
 
 	const onSubmit: SubmitHandler<{ searchString: string }> = async (data) => {
 		await searchUsers(data.searchString);
@@ -89,24 +94,26 @@ const SearchUser: React.FC = () => {
 				</Grid2>
 			</FlexBox>
 			<ScrollGrid ref={listRef}>
-				{usersWithConvos.map((user) => (
-					<User
-						key={user.user.uuid}
-						conversation={user.conversation}
-						sessionUserId={userId}
-						userEnhanced={user}
-						setSelectedConversation={setSelectedConversation}
-						onToggleFollow={(arg: UserEnhanced) => {
-							setUsers((users) => users.map((user) => (user.user.uuid == arg.user.uuid ? arg : user)));
-						}}
-					/>
-				))}
-
-				{/* {isFormLoading && (
-						<FlexBox>
-							<CircularProgress thickness={5} />
-						</FlexBox>
-					)} */}
+				{isSearchLoading || isConversationsLoading ? (
+					<FlexBox>
+						<CircularProgress thickness={5} />
+					</FlexBox>
+				) : (
+					usersWithConvos.map((user) => (
+						<User
+							key={user.user.uuid}
+							conversation={user.conversation}
+							sessionUserId={userId}
+							userEnhanced={user}
+							setSelectedConversation={setSelectedConversation}
+							onToggleFollow={(arg: UserEnhanced) => {
+								setUsers((users) =>
+									users.map((user) => (user.user.uuid === arg.user.uuid ? arg : user))
+								);
+							}}
+						/>
+					))
+				)}
 			</ScrollGrid>
 			{selectedConversation && (
 				<MessageModal

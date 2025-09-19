@@ -31,19 +31,24 @@ const UserPage: React.FC = () => {
 		conversations,
 		isConversationsLoading,
 		fetchConversations,
-		isFirstLoad,
 		reloadConversationsTrigger,
 		toggleConversationsTrigger,
 	} = useFetchConversations();
 
 	useEffect(() => {
 		if (!id) return;
-		void fetchConversations([id]).finally(() => {
-			if (isFirstLoad.current) {
-				isFirstLoad.current = false;
-			}
-		});
-	}, [reloadConversationsTrigger, fetchConversations]);
+		void fetchConversations(false, [id]);
+	}, [id, fetchConversations]);
+
+	const isFirstFetch = useRef(true);
+	useEffect(() => {
+		if (!id) return;
+		if (isFirstFetch.current) {
+			isFirstFetch.current = false;
+			return;
+		}
+		void fetchConversations(true, [id]);
+	}, [id, reloadConversationsTrigger, fetchConversations]);
 
 	const { userId } = useAuth();
 
@@ -82,14 +87,22 @@ const UserPage: React.FC = () => {
 				</FlexBox>
 			) : (
 				<Fragment>
-					{userEnhanced && (
+					{userEnhanced ? (
 						<User
 							userEnhanced={userEnhanced}
 							sessionUserId={userId}
 							conversation={Array.from(conversations.values())[0]}
 							setSelectedConversation={setSelectedConversation}
-							onToggleFollow={(arg: UserEnhanced) => { setUserEnhanced((prev) => (prev ? arg : prev)); }}
+							onToggleFollow={(arg: UserEnhanced) => {
+								setUserEnhanced((prev) => (prev ? arg : prev));
+							}}
 						/>
+					) : (
+						<Box>
+							<Typography variant="subtitle1">
+								Failed to load user information. Displaying cheets only
+							</Typography>
+						</Box>
 					)}
 
 					{cheetsError ? (
@@ -129,7 +142,6 @@ const UserPage: React.FC = () => {
 			{selectedCheet && (
 				<CheetModal
 					cheet={selectedCheet}
-					cheets={cheets}
 					isOpen={!!selectedCheet}
 					setCheets={setCheets}
 					numberOfCheets={cheets.length}

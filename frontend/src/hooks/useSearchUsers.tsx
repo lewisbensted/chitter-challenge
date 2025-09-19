@@ -3,35 +3,37 @@ import type { IUser, UserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import toast from "react-hot-toast";
-import { useError } from "../contexts/ErrorContext";
+import { logErrors } from "../utils/processErrors";
+import { useIsMounted } from "../utils/isMounted";
 
 interface UseSearchUsersReturn {
 	users: { user: IUser; isFollowing: boolean | null }[];
 	isSearchLoading: boolean;
 	searchUsers: (searchString: string) => Promise<void>;
-	setUsers : React.Dispatch<React.SetStateAction<UserEnhanced[]>>;
+	setUsers: React.Dispatch<React.SetStateAction<UserEnhanced[]>>;
 }
 
 const useSearchUsers = (): UseSearchUsersReturn => {
 	const [isSearchLoading, setSearchLoading] = useState<boolean>(false);
-	const [users, setUsers] = useState<{ user: IUser; isFollowing: boolean | null }[]>([]);
-	const { handleErrors } = useError();
+	const [users, setUsers] = useState<UserEnhanced[]>([]);
+
+	const isMounted = useIsMounted();
 
 	const searchUsers = useCallback(async (searchString: string) => {
-		setSearchLoading(true);
+		if (isMounted.current) setSearchLoading(true);
 		try {
-			const res = await axios.get<{ user: IUser; isFollowing: boolean | null }[]>(
-				`${serverURL}/api/users?search=${searchString}`,
-				{ withCredentials: true }
+			const res = await axios.get<UserEnhanced[]>(`${serverURL}/api/users?search=${searchString}`, {
+				withCredentials: true,
+			});
+			const userMap = new Map<string, UserEnhanced>(
+				res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
 			);
-			const userMap = new Map<string, { user: IUser; isFollowing: boolean | null }>(
-				res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing ?? null }])
-			);
-			setUsers(Array.from(userMap.values()));
+			if (isMounted.current) setUsers(Array.from(userMap.values()));
 		} catch (error) {
-			toast("failed to search for users");
+			logErrors(error);
+			if (isMounted.current) toast("Failed to fetch search results, please try again.");
 		} finally {
-			setSearchLoading(false);
+			if (isMounted.current) setSearchLoading(false);
 		}
 	}, []);
 

@@ -35,7 +35,7 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 
 	const fetchReplies = useCallback(async (take: number) => {
 		try {
-			setRepliesLoading(true);
+			if (isMounted.current) setRepliesLoading(true);
 
 			const params = new URLSearchParams();
 			if (cursorRef.current) params.append("cursor", cursorRef.current);

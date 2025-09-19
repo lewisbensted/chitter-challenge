@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import Conversation from "../components/Conversation";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
@@ -10,7 +10,6 @@ import { useAuth } from "../contexts/AuthContext";
 import ScrollGrid from "../styles/ScrollGrid";
 
 const Conversations: React.FC = () => {
-
 	const navigate = useNavigate();
 
 	const { userId, isValidateLoading } = useAuth();
@@ -19,11 +18,9 @@ const Conversations: React.FC = () => {
 		conversations,
 		isConversationsLoading,
 		conversationsError,
-		setConversations,
 		fetchConversations,
-		isFirstLoad,
 		reloadConversationsTrigger,
-		toggleConversationsTrigger
+		toggleConversationsTrigger,
 	} = useFetchConversations();
 
 	useEffect(() => {
@@ -33,13 +30,17 @@ const Conversations: React.FC = () => {
 	}, [userId, isValidateLoading, navigate]);
 
 	useEffect(() => {
-		void fetchConversations().finally(() => {
-			if (isFirstLoad.current) {
-				isFirstLoad.current = false;
-			}
-		});
-	}, [reloadConversationsTrigger, fetchConversations]);
+		void fetchConversations();
+	}, [fetchConversations]);
 
+	const isFirstFetch = useRef(true);
+	useEffect(() => {
+		if (isFirstFetch.current) {
+			isFirstFetch.current = false;
+			return;
+		}
+		void fetchConversations(true);
+	}, [reloadConversationsTrigger, fetchConversations]);
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
 
@@ -61,7 +62,6 @@ const Conversations: React.FC = () => {
 									<Conversation
 										key={conversation.interlocutorId}
 										conversation={conversation}
-										setConversations={setConversations}
 										setSelectedConversation={setSelectedConversation}
 									/>
 								))}

@@ -47,7 +47,6 @@ const SendMessage: React.FC<Props> = ({
 			setMessages((prevMessages) => [...prevMessages, newMessage.data]);
 			triggerScroll((prev) => !prev);
 			if (convosPage) {
-				console.log('here')
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
 			setMessagesError("");

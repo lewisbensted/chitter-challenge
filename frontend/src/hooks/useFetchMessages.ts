@@ -39,7 +39,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 
 	const fetchMessages = useCallback(async (take: number) => {
 		try {
-			setMessagesLoading(true);
+			if (isMounted.current) setMessagesLoading(true);
 
 			const params = new URLSearchParams();
 			if (cursorRef.current) params.append("cursor", cursorRef.current);

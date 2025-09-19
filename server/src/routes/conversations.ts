@@ -59,7 +59,7 @@ export const fetchConversations = async (userId: string, interlocutorIds?: strin
 		for (const id of interlocutorIds) {
 			if (!conversations.has(id)) {
 				const user = await userClient.findUnique({ where: { uuid: id } });
-				if (user) {
+				if (user && user.uuid!==userId) {
 					conversations.set(id, {
 						interlocutorId: user.uuid,
 						interlocutorUsername: user.username,
