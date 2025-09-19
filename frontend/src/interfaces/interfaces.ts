@@ -6,6 +6,12 @@ export interface IUser {
 	email: string
 }
 
+export interface UserEnhanced {
+	user: IUser;
+	isFollowing: boolean | null
+	conversation?: IConversation | null
+}
+
 export interface ICheet {
 	uuid: string;
 	text: string;

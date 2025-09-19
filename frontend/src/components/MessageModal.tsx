@@ -20,6 +20,7 @@ interface Props {
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
+	convosPage?: boolean;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -28,6 +29,7 @@ const MessageModal: React.FC<Props> = ({
 	setSelectedConversation,
 	toggleConversationsTrigger,
 	userPageId,
+	convosPage,
 }) => {
 	const { setErrors } = useError();
 	const { toggleUnreadTrigger } = useLayout();
@@ -45,7 +47,7 @@ const MessageModal: React.FC<Props> = ({
 		fetchMessages,
 		markMessagesRead,
 		refreshMessages,
-		setPage
+		setPage,
 	} = useFetchMessages(conversation.interlocutorId);
 
 	useEffect(() => {
@@ -123,7 +125,6 @@ const MessageModal: React.FC<Props> = ({
 	);
 
 	return (
-
 		<Dialog
 			open={isOpen}
 			fullWidth
@@ -185,12 +186,12 @@ const MessageModal: React.FC<Props> = ({
 							triggerScroll={toggleScrollTrigger}
 							setMessagesError={setMessagesError}
 							userPageId={userPageId}
+							convosPage={convosPage}
 						/>
 					)}
 				</Grid2>
 			</Grid2>
 		</Dialog>
-
 	);
 };
 

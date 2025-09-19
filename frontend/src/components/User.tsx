@@ -1,45 +1,38 @@
 import React from "react";
 import { Typography } from "@mui/material";
-import type { IConversation, IUser } from "../interfaces/interfaces";
+import type { IConversation, UserEnhanced } from "../interfaces/interfaces";
 import ConversationIcon from "./ConversationIcon";
 import FollowIcon from "./FollowIcon";
 import { Fragment } from "react/jsx-runtime";
 
 interface Props {
-	user: IUser;
+	userEnhanced: UserEnhanced;
 	sessionUserId?: string | null;
 	conversation?: IConversation | null;
-	isFollowing?: boolean | null;
-	setFollowing: (isFollowingInput: boolean) => void;
-	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	selectedConversation: IConversation | null;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
+	onToggleFollow: (arg: UserEnhanced) => void;
 }
 
 const User: React.FC<Props> = ({
 	sessionUserId,
-	user,
 	conversation,
-	isFollowing,
-	setFollowing,
-	toggleConversationsTrigger,
-	selectedConversation,
 	setSelectedConversation,
+	onToggleFollow,
+	userEnhanced,
 }) => (
 	<Typography variant="h4">
-		{user.username}
-		{sessionUserId && sessionUserId !== user.uuid && (
+		{userEnhanced.user.username}
+		{sessionUserId && sessionUserId !== userEnhanced.user.uuid && (
 			<Fragment>
 				{conversation && (
-					<ConversationIcon
-						conversation={conversation}
-						toggleConversationsTrigger={toggleConversationsTrigger}
-						selectedConversation={selectedConversation}
-						setSelectedConversation={setSelectedConversation}
-					/>
+					<ConversationIcon conversation={conversation} setSelectedConversation={setSelectedConversation} />
 				)}
-				{isFollowing !== undefined && (
-					<FollowIcon user={user} isFollowing={isFollowing} setFollowing={setFollowing} />
+				{userEnhanced.isFollowing !== null && (
+					<FollowIcon
+						onSuccess={onToggleFollow}
+						userEnhanced={userEnhanced}
+						isFollowing={userEnhanced.isFollowing}
+					/>
 				)}
 			</Fragment>
 		)}

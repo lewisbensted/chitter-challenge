@@ -7,18 +7,18 @@ import { useIsMounted } from "../utils/isMounted";
 import toast from "react-hot-toast";
 
 interface UseFetchConversationsReturn {
-	conversations: IConversation[];
+	conversations: Map<string,IConversation>;
 	conversationsError: string | undefined;
 	isConversationsLoading: boolean;
-	setConversations: React.Dispatch<React.SetStateAction<IConversation[]>>;
+	setConversations: React.Dispatch<React.SetStateAction<Map<string,IConversation>>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	fetchConversations: (userIds?: string[] ) => Promise<IConversation[] | undefined>;
+	fetchConversations: (userIds?: string[] ) => Promise<IConversation[]|undefined>;
 	reloadConversationsTrigger: boolean;
 	isFirstLoad: MutableRefObject<boolean>
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
-	const [conversations, setConversations] = useState<IConversation[]>([]);
+	const [conversations, setConversations] = useState<Map<string,IConversation>>(new Map<string,IConversation>);
 	const [isConversationsLoading, setConversationsLoading] = useState<boolean>(true);
 	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 	const [conversationsError, setConversationsError] = useState<string>("");
@@ -36,7 +36,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				}
 			);
 			if (isMounted.current) {
-				setConversations(res.data);
+				setConversations(new Map(res.data.map(convo=>[convo.interlocutorId, convo])));
 				setConversationsError("");
 			}
 			return res.data;

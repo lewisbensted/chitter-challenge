@@ -57,7 +57,7 @@ const Conversations: React.FC = () => {
 							<Typography variant="subtitle1">{conversationsError}</Typography>
 						) : (
 							<ScrollGrid>
-								{conversations.map((conversation) => (
+								{Array.from(conversations.values()).map((conversation) => (
 									<Conversation
 										key={conversation.interlocutorId}
 										conversation={conversation}
@@ -76,6 +76,7 @@ const Conversations: React.FC = () => {
 					isOpen={!!selectedConversation}
 					setSelectedConversation={setSelectedConversation}
 					toggleConversationsTrigger={toggleConversationsTrigger}
+					convosPage={true}
 				/>
 			)}
 		</Box>

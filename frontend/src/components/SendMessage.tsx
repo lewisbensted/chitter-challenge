@@ -20,6 +20,7 @@ interface Props {
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	userPageId?: string;
+	convosPage?: boolean
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -28,7 +29,7 @@ const SendMessage: React.FC<Props> = ({
 	setMessages,
 	triggerScroll,
 	setMessagesError,
-	userPageId,
+	convosPage
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -45,7 +46,8 @@ const SendMessage: React.FC<Props> = ({
 			});
 			setMessages((prevMessages) => [...prevMessages, newMessage.data]);
 			triggerScroll((prev) => !prev);
-			if (!userPageId) {
+			if (convosPage) {
+				console.log('here')
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
 			setMessagesError("");

@@ -77,23 +77,11 @@ router.get("/", authenticator, async (req: Request, res: Response) => {
 	try {
 		const userIds  = req.query.userIds?(req.query.userIds as string).split(","): undefined;
 		const conversations = await fetchConversations(req.session.user!.uuid, userIds);
-		console.log(conversations);
 		res.status(200).json(conversations);
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
 });
-
-// router.get("/:userId", authenticator, async (req: Request, res: Response) => {
-// 	try {
-// 		const user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-// 		const conversation = await fetchConversations(req.session.user!.uuid, user);
-// 		res.status(200).json(conversation);
-// 	} catch (error) {
-// 		console.error("Error retrieving user from the database:\n" + logError(error));
-// 		sendErrorResponse(error, res);
-// 	}
-// });
 
 export default router;

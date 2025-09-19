@@ -74,7 +74,7 @@ try {
 	}
 
 	const authLimiter = rateLimiter(1000 * 60, 5);
-	const generalLimiter = rateLimiter(1000 * 60 * 10, 200);
+	const generalLimiter = rateLimiter(1000 * 60 * 10, 1000);
 
 	app.use("/api/users", generalLimiter, express.json(), users);
 	app.use("/api/follow/:followingId", generalLimiter, express.json(), follow);

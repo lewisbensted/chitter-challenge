@@ -10,7 +10,7 @@ const userClient = prisma.user as unknown as ExtendedUserClient;
 
 router.get("/", async (req: Request, res: Response) => {
 	try {
-		const userSearch = String(req.query.search || "");
+		const userSearch = String(req.query.search ?? "");
 		if (!userSearch) {
 			return res.status(200).json([]);
 		}
@@ -19,7 +19,7 @@ router.get("/", async (req: Request, res: Response) => {
 			where: {
 				username: {
 					contains: userSearch,
-					// mode: "insensitive"
+					
 				},
 			},
 		});
