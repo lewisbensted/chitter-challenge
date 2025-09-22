@@ -41,7 +41,7 @@ const SignIn: React.FC = () => {
 			setLoadingTimer(true);
 			void navigate("/");
 		} catch (error) {
-			handleErrors(error, "logging in");
+			handleErrors(error, "log in");
 		} finally {
 			setFormLoading(false);
 		}

@@ -40,11 +40,11 @@ const UserPage: React.FC = () => {
 		void fetchConversations(false, [id]);
 	}, [id, fetchConversations]);
 
-	const isFirstFetch = useRef(true);
+	const isFirstLoad = useRef(true);
 	useEffect(() => {
 		if (!id) return;
-		if (isFirstFetch.current) {
-			isFirstFetch.current = false;
+		if (isFirstLoad.current) {
+			isFirstLoad.current = false;
 			return;
 		}
 		void fetchConversations(true, [id]);
@@ -100,7 +100,7 @@ const UserPage: React.FC = () => {
 					) : (
 						<Box>
 							<Typography variant="subtitle1">
-								Failed to load user information. Displaying cheets only
+								Failed to load user information - displaying cheets only.
 							</Typography>
 						</Box>
 					)}

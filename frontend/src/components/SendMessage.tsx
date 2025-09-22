@@ -10,7 +10,6 @@ import { Box, Grid2, TextField, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 
 interface Props {
 	recipientId: string;
@@ -52,8 +51,7 @@ const SendMessage: React.FC<Props> = ({
 			setMessagesError("");
 			reset();
 		} catch (error) {
-			if (isMounted.current) handleErrors(error, "sending message");
-			else toast("Failed to send message");
+			handleErrors(error, "send message", isMounted.current);
 		} finally {
 			setSubmitLoading(false);
 		}

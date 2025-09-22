@@ -25,7 +25,7 @@ const SearchUser: React.FC = () => {
 		conversations,
 		setConversations,
 		isConversationsLoading,
-		setConversationsLoading
+		setConversationsLoading,
 	} = useFetchConversations();
 
 	const { register, handleSubmit } = useForm<{ searchString: string }>();
@@ -39,7 +39,10 @@ const SearchUser: React.FC = () => {
 	useEffect(() => {
 		if (!users.length) return;
 		const fetchConvos = async () => {
-			await fetchConversations(false, users.map((user) => user.user.uuid));
+			await fetchConversations(
+				false,
+				users.map((user) => user.user.uuid)
+			);
 		};
 		void fetchConvos();
 	}, [users, fetchConversations]);
@@ -53,14 +56,17 @@ const SearchUser: React.FC = () => {
 			setConversations(newConvos);
 		};
 		void refreshConversations();
-	}, [reloadConversationsTrigger, fetchConversations]);
+	}, [reloadConversationsTrigger, fetchConversations, setConversations]);
 
-	const usersWithConvos = useMemo(() => users.map(({ user, isFollowing }) => ({
-		user,
-		isFollowing,
-		conversation: conversations.get(user.uuid) ?? null,
-	})), [users, conversations]);
-
+	const usersWithConvos = useMemo(
+		() =>
+			users.map(({ user, isFollowing }) => ({
+				user,
+				isFollowing,
+				conversation: conversations.get(user.uuid) ?? null,
+			})),
+		[users, conversations]
+	);
 
 	const onSubmit: SubmitHandler<{ searchString: string }> = async (data) => {
 		await searchUsers(data.searchString);

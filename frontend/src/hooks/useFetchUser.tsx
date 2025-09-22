@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import type { UserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import { useError } from "../contexts/ErrorContext";
 import { useNavigate } from "react-router";
 import { useIsMounted } from "../utils/isMounted";
 import { logErrors } from "../utils/processErrors";
@@ -17,7 +16,7 @@ interface UseFetchUserReturn {
 const useFetchUser = (userId?: string): UseFetchUserReturn => {
 	const [userEnhanced, setUserEnhanced] = useState<UserEnhanced>();
 	const [isUserLoading, setUserLoading] = useState(true);
-	const { handleErrors } = useError();
+
 	const navigate = useNavigate();
 
 	const isMounted = useIsMounted();
@@ -38,12 +37,12 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 		} finally {
 			if (isMounted.current) setUserLoading(false);
 		}
-	}, [handleErrors, navigate, userId]);
+	}, [ navigate, userId]);
 
 	useEffect(() => {
 		if (!userId) return;
 		void fetchUser();
-	}, [userId, navigate, handleErrors, fetchUser]);
+	}, [userId, navigate, fetchUser]);
 
 	return { userEnhanced, isUserLoading, fetchUser, setUserEnhanced };
 };

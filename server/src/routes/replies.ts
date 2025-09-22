@@ -40,26 +40,22 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", authenticator, async (req: SendReplyRequest, res: Response) => {
 	try {
-		const cheet = await cheetClient.findUniqueOrThrow({
-			where: { uuid: req.params.cheetId },
-		});
 		const newReply = await replyClient.create({
 			data: {
 				userId: req.session.user!.uuid,
 				text: req.body.text,
-				cheetId: cheet.uuid,
+				cheetId: req.params.cheetId,
 			},
 		});
-		if (!cheet.cheetStatus.hasReplies) {
-			await prisma.cheetStatus.update({
-				where: {
-					cheetId: cheet.uuid,
-				},
-				data: {
-					hasReplies: true,
-				},
-			});
-		}
+		await prisma.cheetStatus.updateMany({
+			where: {
+				cheetId: req.params.cheetId,
+				hasReplies: false,
+			},
+			data: {
+				hasReplies: true,
+			},
+		});
 		res.status(201).json(newReply);
 	} catch (error) {
 		console.error("Error adding reply to the database:\n" + logError(error));
@@ -69,7 +65,6 @@ router.post("/", authenticator, async (req: SendReplyRequest, res: Response) => 
 
 router.put("/:replyId", authenticator, async (req: EditReplyRequest, res: Response) => {
 	try {
-		await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const targetReply = await replyClient.findUniqueOrThrow({
 			where: { uuid: req.params.replyId },
 		});
@@ -89,7 +84,10 @@ router.put("/:replyId", authenticator, async (req: EditReplyRequest, res: Respon
 					return res.status(200).json(targetReply);
 				}
 			} else {
-				res.status(403).json({ errors: ["Cheet IDs do not match."] });
+				res.status(403).json({
+					code: "OWNERSHIP_VIOLATION",
+					errors: ["Reply does not belong to specified cheet"],
+				});
 			}
 		} else {
 			res.status(403).json({ errors: ["Cannot update someone else's reply."] });
@@ -102,7 +100,6 @@ router.put("/:replyId", authenticator, async (req: EditReplyRequest, res: Respon
 
 router.delete("/:replyId", authenticator, async (req: Request, res: Response) => {
 	try {
-		await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const targetReply = await replyClient.findUniqueOrThrow({
 			where: { uuid: req.params.replyId },
 		});
@@ -115,7 +112,10 @@ router.delete("/:replyId", authenticator, async (req: Request, res: Response) =>
 				});
 				res.sendStatus(204);
 			} else {
-				res.status(403).json({ errors: ["Cheet IDs do not match."] });
+				res.status(403).json({
+					code: "OWNERSHIP_VIOLATION",
+					errors: ["Reply does not belong to specified cheet"],
+				});
 			}
 		} else {
 			res.status(403).json({ errors: ["Cannot delete someone else's reply."] });

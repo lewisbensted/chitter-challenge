@@ -10,7 +10,7 @@ const userClient = prisma.user as unknown as ExtendedUserClient;
 
 router.get("/", async (req: Request, res: Response) => {
 	try {
-		const userSearch = String(req.query.search ?? "");
+		const userSearch = (req.query.search as string | undefined) ?? "";
 		if (!userSearch) {
 			return res.status(200).json([]);
 		}

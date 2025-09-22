@@ -23,7 +23,6 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 
 interface Props {
 	userId?: string | null;
@@ -75,8 +74,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 					setSelectedCheet(updatedCheet.data);
 				}
 			} catch (error) {
-				if (isMounted.current) handleErrors(error, "editing cheet");
-				else toast("Failed to edit cheet");
+				handleErrors(error, "edit cheet", isMounted.current);
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
@@ -95,8 +93,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				setCheets((prevCheets) => prevCheets.filter((c) => c.uuid !== cheet.uuid));
 				setSelectedCheet(null);
 			} catch (error) {
-				if (isMounted.current) handleErrors(error, "deleting cheet");
-				else toast("Failed to delete cheet");
+				handleErrors(error, "delete cheet", isMounted.current);
 			} finally {
 				setDeleteLoading(false);
 				if (setCheetLoading) setCheetLoading(false);

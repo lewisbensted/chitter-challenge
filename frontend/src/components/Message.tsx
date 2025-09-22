@@ -20,7 +20,6 @@ import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 
 interface Props {
 	message: IMessage;
@@ -66,8 +65,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					)
 				);
 			} catch (error) {
-				if (isMounted.current) handleErrors(error, "editing message");
-				else toast("Failed to edit message");
+				handleErrors(error, "edit message", isMounted.current);
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
@@ -94,8 +92,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 					toggleReloadTrigger((prev) => !prev);
 				}
 			} catch (error) {
-				if (isMounted.current) handleErrors(error, "deleting message");
-				else toast("Failed to delete message");
+				handleErrors(error, "delete message", isMounted.current);
 			} finally {
 				setDeleteLoading(false);
 			}

@@ -54,9 +54,6 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", authenticator, async (req: SendCheetRequest, res: Response) => {
 	try {
-		if (req.params.userId) {
-			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-		}
 		const newCheet = await cheetClient.create({
 			data: {
 				userId: req.session.user!.uuid,
@@ -78,9 +75,6 @@ router.post("/", authenticator, async (req: SendCheetRequest, res: Response) => 
 
 router.put("/:cheetId", authenticator, async (req: EditCheetRequest, res: Response) => {
 	try {
-		if (req.params.userId) {
-			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-		}
 		const targetCheet = await cheetClient.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});
@@ -116,9 +110,6 @@ router.put("/:cheetId", authenticator, async (req: EditCheetRequest, res: Respon
 
 router.delete("/:cheetId", authenticator, async (req: Request, res: Response) => {
 	try {
-		if (req.params.userId) {
-			await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-		}
 		const targetCheet = await cheetClient.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});

@@ -42,7 +42,7 @@ const Register: React.FC = () => {
 				void navigate("/login");
 			}, 500);
 		} catch (error) {
-			handleErrors(error, "registering the user");
+			handleErrors(error, "register");
 			setFormLoading(false);
 		}
 	};

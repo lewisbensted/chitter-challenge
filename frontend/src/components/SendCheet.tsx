@@ -11,7 +11,6 @@ import FlexBox from "../styles/FlexBox";
 import { Box, Grid2, TextField, Typography } from "@mui/material";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 
 interface Props {
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
@@ -44,8 +43,7 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 			setCheetsError("");
 			reset();
 		} catch (error) {
-			if (isMounted.current) handleErrors(error, "sending cheet");
-			else toast("Failed to send cheet");
+			handleErrors(error, "send reply", isMounted.current);
 		} finally {
 			setSubmitLoading(false);
 		}

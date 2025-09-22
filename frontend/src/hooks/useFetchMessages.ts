@@ -29,9 +29,10 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const [messagesError, setMessagesError] = useState<string>("");
 	const [page, setPage] = useState<number>(0);
 	const [hasNextPage, setHasNextPage] = useState(false);
-	const cursorRef = useRef<string>();
-	const hasLoadedOnceRef = useRef<boolean>(false);
 	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
+	const cursorRef = useRef<string>();
+
+	const isFirstLoad = useRef<boolean>(true);
 
 	const { handleErrors } = useError();
 
@@ -49,8 +50,8 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				withCredentials: true,
 			});
 			const newMessages = res.data;
-			if (!hasLoadedOnceRef.current) {
-				hasLoadedOnceRef.current = true;
+			if (isFirstLoad.current) {
+				isFirstLoad.current = false;
 			}
 
 			if (isMounted.current) {
@@ -62,11 +63,11 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				setMessagesError("");
 			}
 		} catch (error) {
-			if (!hasLoadedOnceRef.current) {
+			if (isFirstLoad.current) {
 				logErrors(error);
 				if (isMounted.current) setMessagesError("An unexpected error occurred while loading messages.");
 			} else {
-				handleErrors(error, "loading messages");
+				handleErrors(error, "load messages", false);
 				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
@@ -85,9 +86,9 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				}
 			);
 		} catch (error) {
+			logErrors(error);
 			toast("Failed to mark messages read - may be displaying outdated information.");
 			markMessagesFailed.current = true;
-			logErrors(error);
 		}
 	}, []);
 

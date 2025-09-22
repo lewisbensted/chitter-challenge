@@ -3,8 +3,7 @@ import { Box, CircularProgress, IconButton } from "@mui/material";
 import { PersonAddAlt1, PersonRemove } from "@mui/icons-material";
 import type { UserEnhanced } from "../interfaces/interfaces";
 import { toggleFollow } from "../utils/toggleFollow";
-import toast from "react-hot-toast";
-import { logErrors } from "../utils/processErrors";
+import { useError } from "../contexts/ErrorContext";
 
 interface Props {
 	userEnhanced: UserEnhanced;
@@ -12,17 +11,17 @@ interface Props {
 }
 
 const FollowIcon: React.FC<Props> = ({ userEnhanced, onSuccess }) => {
+	const { handleErrors } = useError();
+
 	const [isLoading, setLoading] = useState<boolean>(false);
 
 	const handleToggle = async () => {
-		console.log(toggleFollow.toString());
 		setLoading(true);
 		try {
 			const toggledUser = await toggleFollow(userEnhanced);
 			onSuccess(toggledUser);
 		} catch (error) {
-			logErrors(error);
-			toast(`Failed to ${userEnhanced.isFollowing ? "unfollow" : "follow"} user, please try again`);
+			handleErrors(error, `${userEnhanced.isFollowing ? "unfollow" : "follow"} user`, false);
 		} finally {
 			setLoading(false);
 		}

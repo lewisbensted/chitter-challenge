@@ -28,7 +28,7 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 	const [page, setPage] = useState<number>(0);
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
-	const hasLoadedOnceRef = useRef<boolean>(false);
+	const isFirstLoad = useRef<boolean>(true);
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
@@ -47,8 +47,8 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 
 			const newReplies = res.data;
 
-			if (!hasLoadedOnceRef.current) {
-				hasLoadedOnceRef.current = true;
+			if (isFirstLoad.current) {
+				isFirstLoad.current = false;
 			}
 			if (isMounted.current) {
 				setHasNextPage(newReplies.length >= take);
@@ -64,11 +64,11 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 				setRepliesError("");
 			}
 		} catch (error) {
-			if (!hasLoadedOnceRef.current) {
+			if (isFirstLoad.current) {
 				logErrors(error);
 				if (isMounted.current) setRepliesError("An unexpected error occured while loading replies.");
 			} else {
-				handleErrors(error, "loading replies");
+				handleErrors(error, "load replies", false);
 				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {

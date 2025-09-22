@@ -24,7 +24,6 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 
 interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
@@ -68,8 +67,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 				prevReplies.map((reply) => (reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply))
 			);
 		} catch (error) {
-			if (isMounted.current) handleErrors(error, "editing reply");
-			else toast("Failed to edit reply");
+			handleErrors(error, "edit reply", isMounted.current);
 		} finally {
 			setEditLoading(false);
 			setEditing(false);
@@ -84,8 +82,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 			});
 			setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
 		} catch (error) {
-			if (isMounted.current) handleErrors(error, "deleting reply");
-			else toast("Failed to delete reply");
+			handleErrors(error, "delete reply", isMounted.current);
 		} finally {
 			setDeleteLoading(false);
 		}

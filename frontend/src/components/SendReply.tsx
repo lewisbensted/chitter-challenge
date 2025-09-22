@@ -10,7 +10,6 @@ import { Box, Grid2, TextField, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 
 interface Props {
 	selectedCheet: ICheet;
@@ -67,8 +66,7 @@ const SendReply: React.FC<Props> = ({
 			setRepliesError("");
 			reset();
 		} catch (error) {
-			if (isMounted.current) handleErrors(error, "sending the reply");
-			else toast("Failed to send reply");
+			handleErrors(error, "send reply", isMounted.current);
 		} finally {
 			setSubmitLoading(false);
 		}

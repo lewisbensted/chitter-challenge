@@ -7,8 +7,6 @@ import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
 
-const userClient = prisma.user as unknown as ExtendedUserClient;
-
 router.post("/", authenticator, async (req: Request, res: Response) => {
 	try {
 		const followerId = req.session.user!.uuid;
@@ -17,8 +15,6 @@ router.post("/", authenticator, async (req: Request, res: Response) => {
 		if (followerId === followingId) {
 			return res.status(400).json({ error: ["You cannot follow yourself."] });
 		}
-
-		await userClient.findUniqueOrThrow({ where: { uuid: req.params.followingId } });
 		await prisma.follow.create({
 			data: {
 				followerId: followerId,

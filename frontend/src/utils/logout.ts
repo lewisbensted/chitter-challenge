@@ -17,7 +17,7 @@ const logout = async (
 		if (axios.isAxiosError(error) && error.response?.status === 403) {
 			setUserId(null);
 		} else {
-			handleErrors(error, "logging out");
+			handleErrors(error, "log out");
 			setLoadingTimer(false);
 		}
 	} finally {

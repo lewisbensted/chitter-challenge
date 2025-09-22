@@ -63,7 +63,7 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 				logErrors(error);
 				if (isMounted.current) setCheetsError("An unexpected error occured while loading cheets.");
 			} else {
-				handleErrors(error, "loading cheets");
+				handleErrors(error, "load cheets", false);
 				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {

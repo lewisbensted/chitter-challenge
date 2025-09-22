@@ -54,7 +54,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		conversations,
 		fetchConversations,
 		reloadConversationsTrigger,
-		//isFirstLoad,
 		isConversationsLoading,
 		conversationsError,
 		toggleConversationsTrigger,

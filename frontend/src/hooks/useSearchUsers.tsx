@@ -2,9 +2,8 @@ import { useCallback, useState } from "react";
 import type { IUser, UserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import toast from "react-hot-toast";
-import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
+import { useError } from "../contexts/ErrorContext";
 
 interface UseSearchUsersReturn {
 	users: { user: IUser; isFollowing: boolean | null }[];
@@ -17,25 +16,29 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 	const [isSearchLoading, setSearchLoading] = useState<boolean>(false);
 	const [users, setUsers] = useState<UserEnhanced[]>([]);
 
+	const { handleErrors } = useError();
+
 	const isMounted = useIsMounted();
 
-	const searchUsers = useCallback(async (searchString: string) => {
-		if (isMounted.current) setSearchLoading(true);
-		try {
-			const res = await axios.get<UserEnhanced[]>(`${serverURL}/api/users?search=${searchString}`, {
-				withCredentials: true,
-			});
-			const userMap = new Map<string, UserEnhanced>(
-				res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
-			);
-			if (isMounted.current) setUsers(Array.from(userMap.values()));
-		} catch (error) {
-			logErrors(error);
-			if (isMounted.current) toast("Failed to fetch search results, please try again.");
-		} finally {
-			if (isMounted.current) setSearchLoading(false);
-		}
-	}, []);
+	const searchUsers = useCallback(
+		async (searchString: string) => {
+			if (isMounted.current) setSearchLoading(true);
+			try {
+				const res = await axios.get<UserEnhanced[]>(`${serverURL}/api/users?search=${searchString}`, {
+					withCredentials: true,
+				});
+				const userMap = new Map<string, UserEnhanced>(
+					res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
+				);
+				if (isMounted.current) setUsers(Array.from(userMap.values()));
+			} catch (error) {
+				if (isMounted.current) handleErrors(error, "search users", false);
+			} finally {
+				if (isMounted.current) setSearchLoading(false);
+			}
+		},
+		[handleErrors]
+	);
 
 	return { users, isSearchLoading, searchUsers, setUsers };
 };

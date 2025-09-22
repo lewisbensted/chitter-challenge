@@ -59,7 +59,7 @@ export const fetchConversations = async (userId: string, interlocutorIds?: strin
 		for (const id of interlocutorIds) {
 			if (!conversations.has(id)) {
 				const user = await userClient.findUnique({ where: { uuid: id } });
-				if (user && user.uuid!==userId) {
+				if (user && user.uuid !== userId) {
 					conversations.set(id, {
 						interlocutorId: user.uuid,
 						interlocutorUsername: user.username,
@@ -75,7 +75,7 @@ export const fetchConversations = async (userId: string, interlocutorIds?: strin
 
 router.get("/", authenticator, async (req: Request, res: Response) => {
 	try {
-		const userIds  = req.query.userIds?(req.query.userIds as string).split(","): undefined;
+		const userIds = req.query.userIds ? (req.query.userIds as string).split(",") : undefined;
 		const conversations = await fetchConversations(req.session.user!.uuid, userIds);
 		res.status(200).json(conversations);
 	} catch (error) {

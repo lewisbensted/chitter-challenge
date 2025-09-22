@@ -33,10 +33,10 @@ const Conversations: React.FC = () => {
 		void fetchConversations();
 	}, [fetchConversations]);
 
-	const isFirstFetch = useRef(true);
+	const isFirstLoad = useRef(true);
 	useEffect(() => {
-		if (isFirstFetch.current) {
-			isFirstFetch.current = false;
+		if (isFirstLoad.current) {
+			isFirstLoad.current = false;
 			return;
 		}
 		void fetchConversations(true);
