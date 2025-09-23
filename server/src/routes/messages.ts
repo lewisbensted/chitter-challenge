@@ -80,7 +80,7 @@ router.get("/:recipientId", authenticator, async (req: Request, res: Response) =
 router.put("/read/:recipientId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const updatedCount = await readMessages(req.session.user!.uuid, req.params.recipientId);
-		if (updatedCount === 0) console.warn(`No messages marked as read`);
+		if (updatedCount === 0) console.warn("No messages marked as read");
 		res.sendStatus(200);
 	} catch (error) {
 		console.error("Error marking messages as read:\n" + logError(error));
@@ -119,22 +119,21 @@ router.put("/:recipientId/message/:messageId", authenticator, async (req: EditMe
 			return res.status(403).json({ code: "OWNERSHIP_VIOLATION", errors: ["Message does not match recipient"] });
 		if (targetMessage.sender.uuid !== req.session.user!.uuid)
 			return res.status(403).json({ errors: ["Cannot update someone else's message."] });
-		if (targetMessage.messageStatus.isRead) 
+		if (targetMessage.messageStatus.isRead)
 			return res.status(400).json({ errors: ["Cannot update a message after it has been read."] });
-		if (targetMessage.messageStatus.isDeleted) 
+		if (targetMessage.messageStatus.isDeleted)
 			return res.status(400).json({ errors: ["Cannot update a deleted message."] });
+
+		if (req.body.text === targetMessage.text) return res.status(200).json(targetMessage);
+
+		const updatedMessage = await messageClient.update({
+			where: {
+				uuid: targetMessage.uuid,
+			},
+			data: { text: req.body.text },
+		});
 		
-		if (req.body.text !== targetMessage.text) {
-			const updatedMessage = await messageClient.update({
-				where: {
-					uuid: targetMessage.uuid,
-				},
-				data: { text: req.body.text },
-			});
-			return res.status(200).json(updatedMessage);
-		} else {
-			return res.status(200).json(targetMessage);
-		}
+		return res.status(200).json(updatedMessage);
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));
 		sendErrorResponse(error, res);

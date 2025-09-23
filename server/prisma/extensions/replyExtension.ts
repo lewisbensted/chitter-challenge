@@ -4,8 +4,8 @@ import { userFilters } from "./userExtension.js";
 import type { IReply } from "../../types/responses.js";
 
 const replyFilters = {
-	include: { cheet: { omit: { id: true, userId: true } }, user: userFilters },
-	omit: { id: true, cheetId: true, userId: true },
+	include: { user: userFilters },
+	omit: { id: true, userId: true },
 };
 
 export const replyExtension = Prisma.defineExtension({

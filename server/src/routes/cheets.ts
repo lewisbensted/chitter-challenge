@@ -14,11 +14,15 @@ const cheetClient = prisma.cheet as unknown as ExtendedCheetClient;
 export const fetchCheets = async (sessionUserId?: string, pageUserId?: string, cursor?: string, take?: number) => {
 	take = typeof take === "number" && !isNaN(take) ? take : 10;
 
-	const following:string[] = sessionUserId
+	const following: string[] = sessionUserId
 		? (await prisma.follow.findMany({ where: { followerId: sessionUserId } })).map((record) => record.followingId)
 		: [];
 
-	const userFilter = pageUserId ? { uuid: pageUserId } : sessionUserId ? { uuid: { in: [...following, sessionUserId] } } : undefined;
+	const userFilter = pageUserId
+		? { uuid: pageUserId }
+		: sessionUserId
+			? { uuid: { in: [...following, sessionUserId] } }
+			: undefined;
 
 	const cheets = await cheetClient.findMany({
 		where: {
@@ -78,30 +82,28 @@ router.put("/:cheetId", authenticator, async (req: EditCheetRequest, res: Respon
 		const targetCheet = await cheetClient.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});
-		if (targetCheet.user.uuid === req.session.user!.uuid) {
-			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
-			if (targetCheet.createdAt < oneHourAgo) {
-				return res.status(400).json({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
-			}
-			if (targetCheet.cheetStatus.hasReplies) {
-				return res.status(400).json({ errors: ["Cannot update a cheet with replies."] });
-			}
-			if (req.body.text !== targetCheet.text) {
-				const updatedCheet = await cheetClient.update({
-					where: {
-						uuid: targetCheet.uuid,
-					},
-					data: {
-						text: req.body.text,
-					},
-				});
-				return res.status(200).json(updatedCheet);
-			} else {
-				return res.status(200).json(targetCheet);
-			}
-		} else {
-			res.status(403).json({ errors: ["Cannot update someone else's cheet."] });
+
+		if (targetCheet.user.uuid !== req.session.user!.uuid)
+			return res.status(403).json({ errors: ["Cannot update someone else's cheet."] });
+
+		const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
+		if (targetCheet.createdAt < oneHourAgo) {
+			return res.status(400).json({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
 		}
+		if (targetCheet.cheetStatus.hasReplies) {
+			return res.status(400).json({ errors: ["Cannot update a cheet with replies."] });
+		}
+		if (req.body.text === targetCheet.text) return res.status(200).json(targetCheet);
+
+		const updatedCheet = await cheetClient.update({
+			where: {
+				uuid: targetCheet.uuid,
+			},
+			data: {
+				text: req.body.text,
+			},
+		});
+		return res.status(200).json(updatedCheet);
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -113,16 +115,14 @@ router.delete("/:cheetId", authenticator, async (req: Request, res: Response) =>
 		const targetCheet = await cheetClient.findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});
-		if (targetCheet.user.uuid === req.session.user!.uuid) {
-			await cheetClient.delete({
-				where: {
-					uuid: targetCheet.uuid,
-				},
-			});
-			res.sendStatus(204);
-		} else {
-			res.status(403).json({ errors: ["Cannot delete someone else's cheet."] });
-		}
+		if (targetCheet.user.uuid !== req.session.user!.uuid)
+			return res.status(403).json({ errors: ["Cannot delete someone else's cheet."] });
+		await cheetClient.delete({
+			where: {
+				uuid: targetCheet.uuid,
+			},
+		});
+		res.sendStatus(204);
 	} catch (error) {
 		console.error("Error deleting cheet from the database:\n" + logError(error));
 		sendErrorResponse(error, res);

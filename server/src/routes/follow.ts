@@ -3,7 +3,6 @@ import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
 import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
 

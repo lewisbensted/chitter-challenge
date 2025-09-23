@@ -27,10 +27,10 @@ export const processErrors = (error: unknown, action: string) => {
 			[400, 401, 403, 409, 429].includes(error.response.status) &&
 			!(code && ["ROUTE_NOT_FOUND", "OWNERSHIP_VIOLATION"].includes(code))
 		) {
-			return errors.length > 0 ? errors : [`An unexpected error has occured - failed to ${action}`];
+			return errors.length > 0 ? errors : [`An unexpected error has occured - failed to ${action}.`];
 		} else if (axios.isAxiosError(error) && error.code === "ERR_NETWORK") {
 			return ["Network Error: Servers unreachable."];
 		}
 	}
-	return [`An unexpected error has occured - failed to ${action}`];
+	return [`An unexpected error has occured - failed to ${action}.`];
 };

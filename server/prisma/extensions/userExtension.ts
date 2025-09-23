@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import type { IUser } from "../../types/responses.js";
 
 export const userFilters = {
-	omit: { id: true, passwordHash: true },
+	omit: { id: true, passwordHash: true, firstName: true, lastName: true, email: true },
 };
 
 export const userExtension = Prisma.defineExtension({
@@ -23,6 +23,13 @@ export const userExtension = Prisma.defineExtension({
 					...userFilters,
 				});
 				return user as unknown as IUser;
+			},
+			async findMany({ args, query }): Promise<IUser[]> {
+				const user = await query({
+					...args,
+					...userFilters,
+				});
+				return user as unknown as IUser[];
 			},
 			async create({ args, query }): Promise<IUser> {
 				const parsedData = await UserSchema.parseAsync(args.data);

@@ -2,38 +2,43 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js
 import { Response } from "express";
 import { ZodError } from "zod";
 
-const constraintMap = {
-	Users_username_key: "Username",
-	Users_email_key: "Email",
+const constraintModelMap: Record<string, string> = {
 	cheet_id: "Cheet",
+	user_id: "User",
+	message_id: "Message",
 	following_id: "User",
+	follower_id: "User",
 	recipient_id: "User",
+	sender_id: "User",
+};
+
+const constraintErrorMap: Record<string, string> = {
+	Users_username_key: "Username already taken.",
+	Users_email_key: "Email address already taken.",
+	Follows_followerId_followingId_key: "You are already following this user.",
 };
 
 export const sendErrorResponse = (error: unknown, res: Response) => {
 	if (error instanceof PrismaClientKnownRequestError) {
 		switch (error.code) {
 			case "P2002": {
-				const constraint = error.meta?.target as string;
-				const fieldName = constraintMap[constraint as keyof typeof constraintMap] ?? constraint;
+				const constraint = typeof error.meta?.target === "string" ? error.meta.target : undefined;
+				const errorMessage = constraint ? constraintErrorMap[constraint] : "";
 				return res.status(409).json({
-					errors: [
-						fieldName === "Follows_followerId_followingId_key"
-							? "You are already following this user."
-							: `${fieldName} already taken.`,
-					],
+					errors: errorMessage ? [errorMessage] : [],
 				});
+			}
+			case "P2003": {
+				const constraint =
+					Array.isArray(error.meta?.constraint) && typeof error.meta.constraint[0] == "string"
+						? error.meta.constraint[0]
+						: undefined;
+				const model = constraint ? constraintModelMap[constraint] : undefined;
+				return res.status(404).json({ errors: [`Related resource not found${model ? `: ${model}` : ""}.`] });
 			}
 			case "P2025": {
 				const modelName = typeof error.meta?.modelName === "string" ? error.meta.modelName : undefined;
 				return res.status(404).json({ errors: [`Resource not found${modelName ? `: ${modelName}` : ""}.`] });
-			}
-			case "P2003": {
-				const constraint = Array.isArray(error.meta?.constraint) ? error.meta.constraint[0] : undefined;
-				const modelName = constraintMap[constraint as keyof typeof constraintMap] ?? constraint;
-				return res
-					.status(404)
-					.json({ errors: [`Related resource not found${modelName ? `: ${modelName}` : ""}.`] });
 			}
 			default:
 				break;

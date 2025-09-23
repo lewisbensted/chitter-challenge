@@ -1,9 +1,6 @@
 export interface IUser {
 	uuid: string;
 	username: string;
-	firstName: string;
-	lastName: string;
-	email: string
 }
 
 export interface ICheet {
@@ -12,10 +9,10 @@ export interface ICheet {
 	createdAt: Date;
 	updatedAt: Date;
 	user: IUser;
-	cheetStatus: CheetStatus;
+	cheetStatus: ICheetStatus;
 }
 
-export interface CheetStatus {
+export interface ICheetStatus {
 	hasReplies: boolean;
 }
 
@@ -24,7 +21,7 @@ export interface IReply {
 	text: string;
 	createdAt: Date;
 	updatedAt: Date;
-	cheet: ICheet;
+	cheetId: string;
 	user: IUser;
 }
 
@@ -35,24 +32,24 @@ export interface IMessage {
 	text: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	messageStatus: MessageStatus;
+	messageStatus: IMessageStatus;
 }
 
-export interface MessageStatus {
+export interface IMessageStatus {
 	isRead: boolean;
 	isDeleted: boolean;
 }
 
-export interface LatestMessage {
+export interface ILatestMessage {
 	text: string | null;
 	senderId: string;
 	createdAt: Date;
-	messageStatus: MessageStatus;
+	messageStatus: IMessageStatus;
 }
 
 export interface IConversation {
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: boolean;
-	latestMessage: LatestMessage | null
+	latestMessage: ILatestMessage | null
 }

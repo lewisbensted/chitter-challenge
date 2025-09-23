@@ -68,30 +68,23 @@ router.put("/:replyId", authenticator, async (req: EditReplyRequest, res: Respon
 		const targetReply = await replyClient.findUniqueOrThrow({
 			where: { uuid: req.params.replyId },
 		});
-		if (targetReply.user.uuid === req.session.user!.uuid) {
-			if (targetReply.cheet.uuid === req.params.cheetId) {
-				if (req.body.text !== targetReply.text) {
-					const updatedReply = await replyClient.update({
-						where: {
-							uuid: targetReply.uuid,
-						},
-						data: {
-							text: req.body.text,
-						},
-					});
-					return res.status(200).json(updatedReply);
-				} else {
-					return res.status(200).json(targetReply);
-				}
-			} else {
-				res.status(403).json({
-					code: "OWNERSHIP_VIOLATION",
-					errors: ["Reply does not belong to specified cheet"],
-				});
-			}
-		} else {
-			res.status(403).json({ errors: ["Cannot update someone else's reply."] });
-		}
+		if (targetReply.user.uuid !== req.session.user!.uuid)
+			return res.status(403).json({ errors: ["Cannot update someone else's reply."] });
+		if (targetReply.cheetId !== req.params.cheetId)
+			return res.status(403).json({
+				code: "OWNERSHIP_VIOLATION",
+				errors: ["Reply does not belong to specified cheet"],
+			});
+		if (req.body.text === targetReply.text) return res.status(200).json(targetReply);
+		const updatedReply = await replyClient.update({
+			where: {
+				uuid: targetReply.uuid,
+			},
+			data: {
+				text: req.body.text,
+			},
+		});
+		return res.status(200).json(updatedReply);
 	} catch (error) {
 		console.error("Error updating reply in the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -103,23 +96,20 @@ router.delete("/:replyId", authenticator, async (req: Request, res: Response) =>
 		const targetReply = await replyClient.findUniqueOrThrow({
 			where: { uuid: req.params.replyId },
 		});
-		if (targetReply.user.uuid === req.session.user!.uuid) {
-			if (targetReply.cheet.uuid === req.params.cheetId) {
-				await replyClient.delete({
-					where: {
-						uuid: targetReply.uuid,
-					},
-				});
-				res.sendStatus(204);
-			} else {
-				res.status(403).json({
-					code: "OWNERSHIP_VIOLATION",
-					errors: ["Reply does not belong to specified cheet"],
-				});
-			}
-		} else {
-			res.status(403).json({ errors: ["Cannot delete someone else's reply."] });
-		}
+		if (targetReply.user.uuid !== req.session.user!.uuid)
+			return res.status(403).json({ errors: ["Cannot delete someone else's reply."] });
+		if (targetReply.cheetId !== req.params.cheetId)
+			return res.status(403).json({
+				code: "OWNERSHIP_VIOLATION",
+				errors: ["Reply does not belong to specified cheet"],
+			});
+
+		await replyClient.delete({
+			where: {
+				uuid: targetReply.uuid,
+			},
+		});
+		res.sendStatus(204);
 	} catch (error) {
 		console.error("Error deleting reply from database:\n" + logError(error));
 		sendErrorResponse(error, res);

@@ -77,7 +77,7 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 	const deleteReply = async () => {
 		try {
 			setDeleteLoading(true);
-			await axios.delete(`${serverURL}/api/cheets/${reply.cheet.uuid}/replies/${reply.uuid}`, {
+			await axios.delete(`${serverURL}/api/cheets/${reply.cheetId}/replies/${reply.uuid}`, {
 				withCredentials: true,
 			});
 			setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
