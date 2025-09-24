@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { IUser, UserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
@@ -10,15 +10,22 @@ interface UseSearchUsersReturn {
 	isSearchLoading: boolean;
 	searchUsers: (searchString: string) => Promise<void>;
 	setUsers: React.Dispatch<React.SetStateAction<UserEnhanced[]>>;
+	displayEmpty: boolean;
 }
 
 const useSearchUsers = (): UseSearchUsersReturn => {
 	const [isSearchLoading, setSearchLoading] = useState<boolean>(false);
 	const [users, setUsers] = useState<UserEnhanced[]>([]);
+	const [displayEmpty, setDisplayEmpty] = useState(false);
 
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
+	const displayEmptyRef = useRef(displayEmpty);
+
+	useEffect(() => {
+		displayEmptyRef.current = displayEmpty;
+	}, [displayEmpty]);
 
 	const searchUsers = useCallback(
 		async (searchString: string) => {
@@ -30,17 +37,24 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 				const userMap = new Map<string, UserEnhanced>(
 					res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
 				);
-				if (isMounted.current) setUsers(Array.from(userMap.values()));
+				if (isMounted.current) {
+					setUsers(Array.from(userMap.values()));
+					if (!displayEmptyRef.current) setDisplayEmpty(true);
+				}
 			} catch (error) {
-				if (isMounted.current) handleErrors(error, "search users", false);
+				if (isMounted.current) {
+					setUsers([]);
+					if (displayEmptyRef.current) setDisplayEmpty(false);
+					handleErrors(error, "search users", false);
+				}
 			} finally {
 				if (isMounted.current) setSearchLoading(false);
 			}
 		},
-		[handleErrors]
+		[handleErrors, isMounted]
 	);
 
-	return { users, isSearchLoading, searchUsers, setUsers };
+	return { users, isSearchLoading, searchUsers, setUsers, displayEmpty };
 };
 
 export default useSearchUsers;

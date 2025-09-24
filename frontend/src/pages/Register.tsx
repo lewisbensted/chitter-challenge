@@ -48,21 +48,15 @@ const Register: React.FC = () => {
 	};
 
 	return (
-	
 		<Box width="400px">
 			<Typography variant="h4">Register</Typography>
 			<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
 				<Grid2 size={12} container display="block">
-					<Typography variant="subtitle1">First Name:</Typography>
-					<TextField type="text" {...register("firstName")}></TextField>
-					<Typography variant="subtitle1">Last Name:</Typography>
-					<TextField type="text" {...register("lastName")}></TextField>
-					<Typography variant="subtitle1">Username:</Typography>
-					<TextField type="text" {...register("username")}></TextField>
-					<Typography variant="subtitle1">Password:</Typography>
-					<TextField type="password" {...register("password")}></TextField>
-					<Typography variant="subtitle1">E-mail:</Typography>
-					<TextField type="text" {...register("email")}></TextField>
+					<TextField type="text" {...register("firstName")} label="First name"></TextField>
+					<TextField type="text" {...register("lastName")} label="Last name"></TextField>
+					<TextField type="text" {...register("username")} label="Username"></TextField>
+					<TextField type="password" {...register("password")} label="Password"></TextField>
+					<TextField type="text" {...register("email")} label="E-mail"></TextField>
 					<FlexBox>
 						{isFormLoading ? (
 							<CircularProgress size="2.1rem" thickness={6} />
@@ -79,7 +73,6 @@ const Register: React.FC = () => {
 				</Grid2>
 			</Grid2>
 		</Box>
-	
 	);
 };
 

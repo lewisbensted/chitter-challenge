@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 import FlexBox from "../styles/FlexBox";
-import { Box, Grid2, TextField, Typography } from "@mui/material";
+import { Box, Grid2, TextField } from "@mui/material";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
 
@@ -56,10 +56,7 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 				<Grid2 size={2} />
 				<Grid2 container size={8}>
 					<Grid2 size={12}>
-						<Typography variant="subtitle1">Send a Cheet:</Typography>
-					</Grid2>
-					<Grid2 size={12}>
-						<TextField {...register("text")} type="text" variant="standard" />
+						<TextField {...register("text")} type="text" variant="standard" label='Send cheet'/>
 					</Grid2>
 				</Grid2>
 				<Grid2 size={2} container justifyContent="center">

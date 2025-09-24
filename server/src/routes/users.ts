@@ -34,7 +34,8 @@ router.get("/", async (req: Request, res: Response) => {
 		}
 
 		const returns = users.map((user) => {
-			const isFollowing = req.session.user && req.session.user.uuid !== user.uuid ? follows.some((f) => f === user.uuid) : null;
+			const isFollowing =
+				req.session.user && req.session.user.uuid !== user.uuid ? follows.some((f) => f === user.uuid) : null;
 			return { user: user, isFollowing };
 		});
 
@@ -49,12 +50,15 @@ router.get("/:userId", async (req: Request, res: Response) => {
 	try {
 		const user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		let isFollowing: null | boolean = null;
-		if (req.session.user)
-			isFollowing = !!(await prisma.follow.findUnique({
+		if (req.session.user) {
+			const follow = await prisma.follow.findUnique({
 				where: {
 					followerId_followingId: { followerId: req.session.user.uuid, followingId: req.params.userId },
 				},
-			}));
+				select: { followingId: true },
+			});
+			isFollowing = !!follow;
+		}
 		res.json({ user: user, isFollowing });
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));

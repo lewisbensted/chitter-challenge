@@ -6,7 +6,7 @@ import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Box, Grid2, TextField, Typography } from "@mui/material";
+import { Box, Grid2, TextField } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
@@ -77,10 +77,7 @@ const SendReply: React.FC<Props> = ({
 				<Grid2 size={2} />
 				<Grid2 container size={8}>
 					<Grid2 size={12}>
-						<Typography variant="subtitle1">Send a Reply:</Typography>
-					</Grid2>
-					<Grid2 size={12}>
-						<TextField {...register("text")} type="text" variant="standard" />
+						<TextField {...register("text")} type="text" variant="standard" label='Send reply'/>
 					</Grid2>
 				</Grid2>
 				<Grid2 size={2} container justifyContent="center">

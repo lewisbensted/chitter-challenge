@@ -21,7 +21,7 @@ const theme = createTheme({
 				},
 			],
 		},
-		MuiTextField: { styleOverrides: { root: { width: "100%" } } },
+		MuiTextField: { styleOverrides: { root: { width: "100%", margin: 12 },  },  },
 		MuiIconButton: {
 			defaultProps: {
 				color: "primary",

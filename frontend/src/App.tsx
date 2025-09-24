@@ -28,7 +28,7 @@ const router = createBrowserRouter(
 		future: {
 			relativeSplatPath: true,
 			startTransition: true,
-		} as any,
+		},
 	}
 );
 

@@ -23,7 +23,7 @@ const SignIn: React.FC = () => {
 
 	const { handleErrors } = useError();
 
-	const { userId, isValidateLoading, setUserId} = useAuth();
+	const { userId, isValidateLoading, setUserId } = useAuth();
 
 	const { setLoadingTimer } = useLayout();
 
@@ -48,16 +48,13 @@ const SignIn: React.FC = () => {
 	};
 
 	return (
-		
 		<Box width="400px">
 			<Typography variant="h4">Sign In</Typography>
 			<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
 				<Grid2 size={12} container display="block">
-					<Typography variant="subtitle1">Username:</Typography>
-					<TextField type="text" {...register("username")}></TextField>
+					<TextField type="text" {...register("username")} label="Username"></TextField>
 
-					<Typography variant="subtitle1">Password:</Typography>
-					<TextField type="password" {...register("password")}></TextField>
+					<TextField type="password" {...register("password")} label="Password"></TextField>
 				</Grid2>
 				<Grid2 size={12}>
 					<FlexBox>
@@ -75,7 +72,6 @@ const SignIn: React.FC = () => {
 				</Grid2>
 			</Grid2>
 		</Box>
-		
 	);
 };
 

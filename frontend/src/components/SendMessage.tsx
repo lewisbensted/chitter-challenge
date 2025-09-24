@@ -19,7 +19,7 @@ interface Props {
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	userPageId?: string;
-	convosPage?: boolean
+	convosPage?: boolean;
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -28,7 +28,7 @@ const SendMessage: React.FC<Props> = ({
 	setMessages,
 	triggerScroll,
 	setMessagesError,
-	convosPage
+	convosPage,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
@@ -58,16 +58,12 @@ const SendMessage: React.FC<Props> = ({
 	};
 
 	return (
-
 		<FlexBox>
 			<Grid2 container component="form" onSubmit={handleSubmit(sendMessage)}>
 				<Grid2 size={2} />
 				<Grid2 container size={8}>
 					<Grid2 size={12}>
-						<Typography variant="subtitle1">Send a Message:</Typography>
-					</Grid2>
-					<Grid2 size={12}>
-						<TextField {...register("text")} type="text" variant="standard" />
+						<TextField {...register("text")} type="text" variant="standard" label="Send message" />
 					</Grid2>
 				</Grid2>
 				<Grid2 size={2} container justifyContent="center">
@@ -83,7 +79,6 @@ const SendMessage: React.FC<Props> = ({
 				</Grid2>
 			</Grid2>
 		</FlexBox>
-
 	);
 };
 
