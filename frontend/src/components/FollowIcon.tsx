@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { Box, CircularProgress, IconButton } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { PersonAddAlt1, PersonRemove } from "@mui/icons-material";
-import type { UserEnhanced } from "../interfaces/interfaces";
+import type { IUserEnhanced } from "../interfaces/interfaces";
 import { toggleFollow } from "../utils/toggleFollow";
 import { useError } from "../contexts/ErrorContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
-	userEnhanced: UserEnhanced;
-	onSuccess: (arg: UserEnhanced) => void;
+	userEnhanced: IUserEnhanced;
+	onSuccess: (arg: IUserEnhanced) => void;
 }
 
 const FollowIcon: React.FC<Props> = ({ userEnhanced, onSuccess }) => {
@@ -15,27 +16,39 @@ const FollowIcon: React.FC<Props> = ({ userEnhanced, onSuccess }) => {
 
 	const [isLoading, setLoading] = useState<boolean>(false);
 
+	const [pendingUser, setPendingUser] = useState<IUserEnhanced | null>(null);
+	const [pendingError, setPendingError] = useState<unknown>(null);
+
 	const handleToggle = async () => {
 		setLoading(true);
 		try {
 			const toggledUser = await toggleFollow(userEnhanced);
-			onSuccess(toggledUser);
+			setPendingUser(toggledUser);
 		} catch (error) {
-			handleErrors(error, `${userEnhanced.isFollowing ? "unfollow" : "follow"} user`, false);
+			setPendingError(error);
 		} finally {
 			setLoading(false);
 		}
 	};
 
+	const applyPending = () => {
+		if (pendingUser) {
+			onSuccess(pendingUser);
+			setPendingUser(null);
+		}
+		if (pendingError) {
+			handleErrors(pendingError, `${userEnhanced.isFollowing ? "unfollow" : "follow"} user`, false);
+			setPendingError(null);
+		}
+	};
+
 	return (
 		<Box>
-			{isLoading ? (
-				<CircularProgress size="1.3rem" thickness={6} />
-			) : (
+			<LoadingSpinner isLoading={isLoading} onFinished={applyPending} isLarge={false}>
 				<IconButton onClick={handleToggle}>
 					{userEnhanced.isFollowing ? <PersonRemove /> : <PersonAddAlt1 />}
 				</IconButton>
-			)}
+			</LoadingSpinner>
 		</Box>
 	);
 };

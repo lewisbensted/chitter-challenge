@@ -4,12 +4,12 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import type { ICheet, IReply } from "../interfaces/interfaces";
 import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
-import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Reply from "@mui/icons-material/Reply";
-import { Box, Grid2, TextField } from "@mui/material";
+import { Grid2, TextField } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	selectedCheet: ICheet;
@@ -34,20 +34,33 @@ const SendReply: React.FC<Props> = ({
 	setCheets,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
-	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
+	const [isLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
 
+	const [pendingReply, setPendingReply] = useState<IReply | null>(null);
+	const [pendingError, setPendingError] = useState<unknown>(null);
 	const sendReply: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
 			const newReply = await axios.post<IReply>(`${serverURL}/api/cheets/${selectedCheet.uuid}/replies`, data, {
 				withCredentials: true,
 			});
+			setPendingReply(newReply.data);
+		} catch (error) {
+			setPendingError(error);
+			handleErrors(error, "send reply", isMounted.current);
+		} finally {
+			setSubmitLoading(false);
+		}
+	};
 
-			setReplies((replies) => [newReply.data, ...replies]);
+	const applyPending = () => {
+		if (pendingReply) {
+			setReplies((replies) => [pendingReply, ...replies]);
+			setPendingReply(null);
 			triggerScroll((prev) => !prev);
 			if (repliesLengthRef.current === 0) {
 				setSelectedCheet((cheet) => {
@@ -65,31 +78,32 @@ const SendReply: React.FC<Props> = ({
 			repliesLengthRef.current++;
 			setRepliesError("");
 			reset();
-		} catch (error) {
-			handleErrors(error, "send reply", isMounted.current);
-		} finally {
-			setSubmitLoading(false);
+		}
+		if (pendingError) {
+			handleErrors(pendingError, "send message");
+			setPendingError(null);
 		}
 	};
+
 	return (
 		<FlexBox>
-			<Grid2 container component="form" onSubmit={handleSubmit(sendReply)}>
-				<Grid2 size={2} />
-				<Grid2 container size={8}>
+			<Grid2 container component="form" onSubmit={handleSubmit(sendReply)} display={"flex"} justifyContent={"center"}>
+				<Grid2 container size={8} paddingRight={2}>
 					<Grid2 size={12}>
-						<TextField {...register("text")} type="text" variant="standard" label='Send reply'/>
+						<TextField
+							{...register("text")}
+							type="text"
+							variant="standard"
+							label="Send reply"
+						/>
 					</Grid2>
 				</Grid2>
 				<Grid2 size={2} container justifyContent="center">
-					{isSubmitLoading ? (
-						<Box paddingTop={3}>
-							<CircularProgress size="2.1rem" thickness={6} />
-						</Box>
-					) : (
-						<IconButton type="submit" sx={{ pointerEvents: isDisabled ? "none" : undefined }}>
+					<LoadingSpinner isLoading={isLoading} onFinished={applyPending}>
+						<IconButton type="submit" sx={{ pointerEvents: isDisabled || isLoading? "none" : undefined }}>
 							<Reply fontSize="large" />
 						</IconButton>
-					)}
+					</LoadingSpinner>
 				</Grid2>
 			</Grid2>
 		</FlexBox>

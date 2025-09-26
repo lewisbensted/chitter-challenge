@@ -32,7 +32,7 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 
 	const fetchCheets = useCallback(async (take: number) => {
 		try {
-			if (isMounted.current) setCheetsLoading(true);
+			setCheetsLoading(true);
 
 			const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
 			const res = await axios.get<ICheet[]>(

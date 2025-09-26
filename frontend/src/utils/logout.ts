@@ -1,5 +1,6 @@
 import axios from "axios";
 import { serverURL } from "../config/config";
+import { SPINNER_DURATION } from "../config/layout";
 
 const logout = async (
 	setUserId: React.Dispatch<React.SetStateAction<string | null | undefined>>,
@@ -21,7 +22,7 @@ const logout = async (
 			setLoadingTimer(false);
 		}
 	} finally {
-		setTimeout(()=>{ setLoggingOut(false); }, 500);
+		setTimeout(()=>{ setLoggingOut(false); }, SPINNER_DURATION);
 	}
 };
 

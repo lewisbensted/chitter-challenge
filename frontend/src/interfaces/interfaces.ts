@@ -3,7 +3,7 @@ export interface IUser {
 	username: string;
 }
 
-export interface UserEnhanced {
+export interface IUserEnhanced {
 	user: IUser;
 	isFollowing: boolean | null
 	conversation?: IConversation | null

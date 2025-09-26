@@ -26,7 +26,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const isMounted = useIsMounted();
 
 	const fetchConversations = useCallback(async (isRefresh = false, userIds?: string[]) => {
-		if (isMounted.current && !isRefresh && !isConversationsLoading) setConversationsLoading(true);
+		if (!isRefresh && !isConversationsLoading) setConversationsLoading(true);
 		try {
 			const res = await axios.get<IConversation[]>(
 				`${serverURL}/api/conversations${userIds ? "?userIds=" + userIds.join(",") : ""}`,

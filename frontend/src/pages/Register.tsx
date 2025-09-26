@@ -10,6 +10,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
 import toast from "react-hot-toast";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface RegisterFormFields {
 	firstName: string;
@@ -40,7 +41,7 @@ const Register: React.FC = () => {
 			setTimeout(() => {
 				toast("Account created");
 				void navigate("/login");
-			}, 500);
+			}, SPINNER_DURATION);
 		} catch (error) {
 			handleErrors(error, "register");
 			setFormLoading(false);

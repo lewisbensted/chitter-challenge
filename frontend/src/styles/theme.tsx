@@ -21,14 +21,28 @@ const theme = createTheme({
 				},
 			],
 		},
-		MuiTextField: { styleOverrides: { root: { width: "100%", margin: 12 },  },  },
+		MuiTextField: { styleOverrides: { root: { width: "100%", margin: 12, fontSize: "1.2rem" } } },
+		MuiInputBase: {
+			styleOverrides: {
+				input: {
+					fontSize: "1.2rem",
+				},
+			},
+		},
 		MuiIconButton: {
 			defaultProps: {
 				color: "primary",
 			},
 		},
+		MuiInputLabel: {
+			styleOverrides: {
+				root: {
+					fontSize: "1.2rem",
+				},
+			},
+		},
 		MuiCssBaseline: {
-			styleOverrides: (theme) =>({
+			styleOverrides: (theme) => ({
 				"*::-webkit-scrollbar": {
 					width: "5px",
 				},
@@ -41,7 +55,7 @@ const theme = createTheme({
 				},
 				body: {
 					scrollbarWidth: "thin",
-					scrollbarGutter:"stable",
+					scrollbarGutter: "stable",
 					scrollbarColor: `${theme.palette.primary.main} #f0f0f0`,
 				},
 			}),

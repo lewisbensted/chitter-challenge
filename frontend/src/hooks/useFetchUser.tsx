@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { UserEnhanced } from "../interfaces/interfaces";
+import type { IUserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { useNavigate } from "react-router";
@@ -7,14 +7,14 @@ import { useIsMounted } from "../utils/isMounted";
 import { logErrors } from "../utils/processErrors";
 
 interface UseFetchUserReturn {
-	userEnhanced: UserEnhanced | undefined;
+	userEnhanced: IUserEnhanced | undefined;
 	isUserLoading: boolean;
 	fetchUser: () => Promise<void>;
-	setUserEnhanced: React.Dispatch<React.SetStateAction<UserEnhanced | undefined>>;
+	setUserEnhanced: React.Dispatch<React.SetStateAction<IUserEnhanced | undefined>>;
 }
 
 const useFetchUser = (userId?: string): UseFetchUserReturn => {
-	const [userEnhanced, setUserEnhanced] = useState<UserEnhanced>();
+	const [userEnhanced, setUserEnhanced] = useState<IUserEnhanced>();
 	const [isUserLoading, setUserLoading] = useState(true);
 
 	const navigate = useNavigate();
@@ -24,7 +24,7 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 	const fetchUser = useCallback(async () => {
 		if (!userId) return;
 		try {
-			const res = await axios.get<UserEnhanced>(`${serverURL}/api/users/${userId}`, {
+			const res = await axios.get<IUserEnhanced>(`${serverURL}/api/users/${userId}`, {
 				withCredentials: true,
 			});
 			if (isMounted.current) setUserEnhanced({ ...res.data });

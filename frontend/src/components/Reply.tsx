@@ -6,17 +6,7 @@ import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
 import Edit from "@mui/icons-material/Edit";
 import Done from "@mui/icons-material/Done";
-import {
-	Box,
-	Card,
-	CardActions,
-	CardContent,
-	CircularProgress,
-	Grid2,
-	Link,
-	TextField,
-	Typography,
-} from "@mui/material";
+import { Box, Card, CardActions, CardContent, Grid2, Link, TextField, Typography } from "@mui/material";
 import Delete from "@mui/icons-material/Delete";
 import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
@@ -24,6 +14,7 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
@@ -52,6 +43,9 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 		}
 	}, [isEditing, reply.text, setValue]);
 
+	const [pendingReply, setPendingReply] = useState<IReply | null>(null);
+	const [pendingError, setPendingError] = useState<unknown>(null);
+
 	const editReply: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setEditLoading(true);
@@ -62,12 +56,9 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 					withCredentials: true,
 				}
 			);
-
-			setReplies((prevReplies) =>
-				prevReplies.map((reply) => (reply.uuid === updatedReply.data.uuid ? updatedReply.data : reply))
-			);
+			setPendingReply(updatedReply.data);
 		} catch (error) {
-			handleErrors(error, "edit reply", isMounted.current);
+			setPendingError(error);
 		} finally {
 			setEditLoading(false);
 			setEditing(false);
@@ -80,20 +71,44 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 			await axios.delete(`${serverURL}/api/cheets/${reply.cheetId}/replies/${reply.uuid}`, {
 				withCredentials: true,
 			});
-			setReplies((prevReplies) => prevReplies.filter((r) => r.uuid !== reply.uuid));
+			setPendingReply(reply);
 		} catch (error) {
-			handleErrors(error, "delete reply", isMounted.current);
+			setPendingError(error);
 		} finally {
 			setDeleteLoading(false);
+		}
+	};
+
+	const applyPendingEdit = () => {
+		if (pendingReply) {
+			setReplies((prevReplies) =>
+				prevReplies.map((reply) => (reply.uuid === pendingReply.uuid ? pendingReply : reply))
+			);
+			setPendingReply(null);
+		}
+		if (pendingError) {
+			handleErrors(pendingError, "edit cheet");
+			setPendingError(null);
+		}
+	};
+
+	const applyPendingDelete = () => {
+		if (pendingReply) {
+			setReplies((prevReplies) => prevReplies.filter((reply) => reply.uuid !== pendingReply.uuid));
+			setPendingReply(null);
+		}
+		if (pendingError) {
+			handleErrors(pendingError, "delete cheet");
+			setPendingError(null);
 		}
 	};
 
 	const createdAt = new Date(reply.createdAt);
 	const updatedAt = new Date(reply.updatedAt);
 	const isEdited = updatedAt > createdAt;
+	const isLoading = isEditLoading || isDeleteLoading;
 
 	return (
-
 		<Card ref={ref}>
 			<Grid2 container>
 				<Grid2 size={userId ? 10.5 : 12}>
@@ -139,17 +154,18 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 					<CardActions>
 						<Grid2 container size={12} columns={2} justifyContent={"space-around"}>
 							<Grid2 size={1}>
-								{userId === reply.user.uuid &&
-										(isEditLoading ? (
-											<Box paddingTop={1.3} paddingLeft={1.4}>
-												<CircularProgress size="1.3rem" thickness={6} />
-											</Box>
-										) : isEditing ? (
+								{userId === reply.user.uuid && (
+									<LoadingSpinner
+										isLoading={isEditLoading}
+										onFinished={applyPendingEdit}
+										isLarge={false}
+									>
+										{isEditing ? (
 											<IconButton
 												type="submit"
 												form={`edit-reply-${reply.uuid}`}
 												key={`edit-reply-${reply.uuid}`}
-												sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
+												sx={{ pointerEvents: isLoading ? "none" : undefined }}
 											>
 												<Done />
 											</IconButton>
@@ -158,33 +174,35 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 												onClick={() => {
 													setEditing(true);
 												}}
-												sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
+												sx={{ pointerEvents: isLoading ? "none" : undefined }}
 											>
 												<Edit />
 											</IconButton>
-										))}
+										)}
+									</LoadingSpinner>
+								)}
 							</Grid2>
 							<Grid2 size={1}>
-								{userId === reply.user.uuid &&
-										(isDeleteLoading ? (
-											<Box paddingTop={1.3} paddingLeft={1}>
-												<CircularProgress size="1.3rem" thickness={6} />
-											</Box>
-										) : (
-											<IconButton
-												onClick={deleteReply}
-												sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
-											>
-												<Delete />
-											</IconButton>
-										))}
+								{userId === reply.user.uuid && (
+									<LoadingSpinner
+										isLoading={isDeleteLoading}
+										onFinished={applyPendingDelete}
+										isLarge={false}
+									>
+										<IconButton
+											onClick={deleteReply}
+											sx={{ pointerEvents: isLoading ? "none" : undefined }}
+										>
+											<Delete />
+										</IconButton>
+									</LoadingSpinner>
+								)}
 							</Grid2>
 						</Grid2>
 					</CardActions>
 				</Grid2>
 			</Grid2>
 		</Card>
-
 	);
 });
 

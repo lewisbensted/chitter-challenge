@@ -4,6 +4,7 @@ import { serverURL } from "../config/config";
 import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useAuth } from "./AuthContext";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface LayoutContextType {
 	isUnreadMessages: boolean;
@@ -35,7 +36,6 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			setUnreadLoading(true);
 			const res = await axios.get<boolean>(`${serverURL}/api/messages/unread`, { withCredentials: true });
-
 			setUnreadMessages(res.data);
 		} catch (error) {
 			logErrors(error);
@@ -52,7 +52,7 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 	useEffect(() => {
 		setTimeout(() => {
 			setLoadingTimer(false);
-		}, 500);
+		}, SPINNER_DURATION);
 	}, [userId]);
 
 	return (

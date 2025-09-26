@@ -6,7 +6,6 @@ import {
 	Card,
 	CardActions,
 	CardContent,
-	CircularProgress,
 	Grid2,
 	IconButton,
 	Link,
@@ -23,6 +22,7 @@ import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	userId?: string | null;
@@ -55,6 +55,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			}
 		}, [isEditing, cheet.text, setValue]);
 
+		const [pendingCheet, setPendingCheet] = useState<ICheet | null>(null);
+		const [pendingError, setPendingError] = useState<unknown>(null);
+
 		const editCheet: SubmitHandler<{ text: string }> = async (data) => {
 			try {
 				setEditLoading(true);
@@ -66,18 +69,11 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-
-				setCheets((prevCheets) =>
-					prevCheets.map((cheet) => (cheet.uuid === updatedCheet.data.uuid ? updatedCheet.data : cheet))
-				);
-				if (isModalView) {
-					setSelectedCheet(updatedCheet.data);
-				}
+				setPendingCheet(updatedCheet.data);
 			} catch (error) {
-				handleErrors(error, "edit cheet", isMounted.current);
+				setPendingError(error);
 			} finally {
 				setEditing(false);
-				setEditLoading(false);
 				if (setCheetLoading) setCheetLoading(false);
 			}
 		};
@@ -89,14 +85,41 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				await axios.delete(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`, {
 					withCredentials: true,
 				});
-
-				setCheets((prevCheets) => prevCheets.filter((c) => c.uuid !== cheet.uuid));
-				setSelectedCheet(null);
+				setPendingCheet(cheet);
 			} catch (error) {
+				setPendingError(error);
 				handleErrors(error, "delete cheet", isMounted.current);
 			} finally {
 				setDeleteLoading(false);
 				if (setCheetLoading) setCheetLoading(false);
+			}
+		};
+
+		const applyPendingEdit = () => {
+			if (pendingCheet) {
+				setCheets((prevCheets) =>
+					prevCheets.map((cheet) => (cheet.uuid === pendingCheet.uuid ? pendingCheet : cheet))
+				);
+				if (isModalView) {
+					setSelectedCheet(pendingCheet);
+				}
+				setPendingCheet(null);
+			}
+			if (pendingError) {
+				handleErrors(pendingError, "edit cheet");
+				setPendingError(null);
+			}
+		};
+
+		const applyPendingDelete = () => {
+			if (pendingCheet) {
+				setCheets((prevCheets) => prevCheets.filter((cheet) => cheet.uuid !== pendingCheet.uuid));
+				setSelectedCheet(null);
+				setPendingCheet(null);
+			}
+			if (pendingError) {
+				handleErrors(pendingError, "delete cheet");
+				setPendingError(null);
 			}
 		};
 
@@ -105,9 +128,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const updatedAt = new Date(cheet.updatedAt);
 		const isEdited = updatedAt > createdAt;
 		const isEditDisabled = cheet.cheetStatus.hasReplies || createdAt < oneHourAgo;
+		const isLoading= isEditLoading || isDeleteLoading;
 
 		return (
-		
 			<Card ref={ref}>
 				<Grid2 container width={isModalView ? "auto" : 750}>
 					<Grid2 size={isModalView ? (userId ? 10.5 : 12) : userId ? 10 : 11}>
@@ -169,18 +192,19 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 								</Grid2>
 
 								<Grid2 size={1}>
-									{userId === cheet.user.uuid &&
-											(isEditLoading ? (
-												<Box paddingTop={1.3} paddingLeft={1.4}>
-													<CircularProgress size="1.3rem" thickness={6} />
-												</Box>
-											) : isEditing ? (
+									{userId === cheet.user.uuid && (
+										<LoadingSpinner
+											isLoading={isEditLoading}
+											onFinished={applyPendingEdit}
+											isLarge={false}
+										>
+											{isEditing ? (
 												<IconButton
 													type="submit"
 													disabled={isEditDisabled}
 													form={`edit-cheet-${cheet.uuid}`}
 													key={`edit-cheet-${cheet.uuid}`}
-													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
+													sx={{ pointerEvents: isLoading ? "none" : undefined }}
 												>
 													<Done />
 												</IconButton>
@@ -190,33 +214,35 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 														setEditing(true);
 													}}
 													disabled={isEditDisabled}
-													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
+													sx={{ pointerEvents: isLoading ? "none" : undefined }}
 												>
 													<Edit />
 												</IconButton>
-											))}
+											)}
+										</LoadingSpinner>
+									)}
 								</Grid2>
 								<Grid2 size={1}>
-									{userId === cheet.user.uuid &&
-											(isDeleteLoading ? (
-												<Box paddingTop={1.3} paddingLeft={1}>
-													<CircularProgress size="1.3rem" thickness={6} />
-												</Box>
-											) : (
-												<IconButton
-													onClick={deleteCheet}
-													sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
-												>
-													<Delete />
-												</IconButton>
-											))}
+									{userId === cheet.user.uuid && (
+										<LoadingSpinner
+											isLoading={isDeleteLoading}
+											isLarge={false}
+											onFinished={applyPendingDelete}
+										>
+											<IconButton
+												onClick={deleteCheet}
+												sx={{ pointerEvents: isLoading ? "none" : undefined }}
+											>
+												<Delete />
+											</IconButton>
+										</LoadingSpinner>
+									)}
 								</Grid2>
 							</Grid2>
 						</CardActions>
 					</Grid2>
 				</Grid2>
 			</Card>
-
 		);
 	}
 );

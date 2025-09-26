@@ -4,12 +4,12 @@ import type { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
-import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
-import { Box, Grid2, TextField, Typography } from "@mui/material";
+import { Grid2, TextField } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	recipientId: string;
@@ -31,51 +31,59 @@ const SendMessage: React.FC<Props> = ({
 	convosPage,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
-	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
+	const [isLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
 
+	const [pendingMessage, setPendingMessage] = useState<IMessage | null>(null);
+	const [pendingError, setPendingError] = useState<unknown>(null);
 	const sendMessage: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
 			const newMessage = await axios.post<IMessage>(`${serverURL}/api/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
-			setMessages((prevMessages) => [...prevMessages, newMessage.data]);
+			setPendingMessage(newMessage.data);
+		} catch (error) {
+			setPendingError(error);
+		} finally {
+			setSubmitLoading(false);
+		}
+	};
+
+	const applyPending = () => {
+		if (pendingMessage) {
+			setMessages((prevMessages) => [...prevMessages, pendingMessage]);
+			setPendingMessage(null);
 			triggerScroll((prev) => !prev);
 			if (convosPage) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
 			setMessagesError("");
 			reset();
-		} catch (error) {
-			handleErrors(error, "send message", isMounted.current);
-		} finally {
-			setSubmitLoading(false);
+		}
+		if (pendingError) {
+			handleErrors(pendingError, "send message");
+			setPendingError(null);
 		}
 	};
 
 	return (
 		<FlexBox>
-			<Grid2 container component="form" onSubmit={handleSubmit(sendMessage)}>
-				<Grid2 size={2} />
-				<Grid2 container size={8}>
+			<Grid2 container component="form" onSubmit={handleSubmit(sendMessage)} display={"flex"} justifyContent={"center"}>
+				<Grid2 container size={8} paddingRight={2}>
 					<Grid2 size={12}>
 						<TextField {...register("text")} type="text" variant="standard" label="Send message" />
 					</Grid2>
 				</Grid2>
 				<Grid2 size={2} container justifyContent="center">
-					{isSubmitLoading ? (
-						<Box paddingTop={3}>
-							<CircularProgress size="2.1rem" thickness={6} />
-						</Box>
-					) : (
-						<IconButton type="submit">
+					<LoadingSpinner onFinished={applyPending} isLoading={isLoading}>
+						<IconButton type="submit" sx={{ pointerEvents: isLoading ? "none" : undefined }}>
 							<Send fontSize="large" />
 						</IconButton>
-					)}
+					</LoadingSpinner>
 				</Grid2>
 			</Grid2>
 		</FlexBox>

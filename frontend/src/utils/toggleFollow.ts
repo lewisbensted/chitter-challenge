@@ -1,8 +1,8 @@
-import type { UserEnhanced } from "../interfaces/interfaces";
+import type { IUserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 
-export const toggleFollow = async (userToFollow: UserEnhanced) => {
+export const toggleFollow = async (userToFollow: IUserEnhanced) => {
 	const { user, isFollowing } = userToFollow;
 	await (isFollowing
 		? axios.delete(`${serverURL}/api/follow/${user.uuid}`, { withCredentials: true })

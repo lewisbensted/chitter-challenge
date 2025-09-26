@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import type { ICheet, IConversation, UserEnhanced } from "../interfaces/interfaces";
+import type { ICheet, IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import SendCheet from "../components/SendCheet";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import { Box, Typography } from "@mui/material";
@@ -93,7 +93,7 @@ const UserPage: React.FC = () => {
 							sessionUserId={userId}
 							conversation={Array.from(conversations.values())[0]}
 							setSelectedConversation={setSelectedConversation}
-							onToggleFollow={(arg: UserEnhanced) => {
+							onToggleFollow={(arg: IUserEnhanced) => {
 								setUserEnhanced((prev) => (prev ? arg : prev));
 							}}
 						/>

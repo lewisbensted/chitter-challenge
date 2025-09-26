@@ -22,8 +22,7 @@ import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
 import FlexBox from "../styles/FlexBox";
 import { Search } from "@mui/icons-material";
-
-const DRAWER_WIDTH = 200;
+import { DRAWER_WIDTH } from "../config/layout";
 
 const Layout: React.FC = () => {
 	const [isDrawerOpen, setDrawerOpen] = useState(false);

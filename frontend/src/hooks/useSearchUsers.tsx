@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { IUser, UserEnhanced } from "../interfaces/interfaces";
+import type { IUser, IUserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { useIsMounted } from "../utils/isMounted";
 import { useError } from "../contexts/ErrorContext";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface UseSearchUsersReturn {
 	users: { user: IUser; isFollowing: boolean | null }[];
 	isSearchLoading: boolean;
 	searchUsers: (searchString: string) => Promise<void>;
-	setUsers: React.Dispatch<React.SetStateAction<UserEnhanced[]>>;
+	setUsers: React.Dispatch<React.SetStateAction<IUserEnhanced[]>>;
 	displayEmpty: boolean;
 }
 
 const useSearchUsers = (): UseSearchUsersReturn => {
 	const [isSearchLoading, setSearchLoading] = useState<boolean>(false);
-	const [users, setUsers] = useState<UserEnhanced[]>([]);
+	const [users, setUsers] = useState<IUserEnhanced[]>([]);
 	const [displayEmpty, setDisplayEmpty] = useState(false);
 
 	const { handleErrors } = useError();
@@ -29,12 +30,12 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 
 	const searchUsers = useCallback(
 		async (searchString: string) => {
-			if (isMounted.current) setSearchLoading(true);
+			setSearchLoading(true);
 			try {
-				const res = await axios.get<UserEnhanced[]>(`${serverURL}/api/users?search=${searchString}`, {
+				const res = await axios.get<IUserEnhanced[]>(`${serverURL}/api/users?search=${searchString}`, {
 					withCredentials: true,
 				});
-				const userMap = new Map<string, UserEnhanced>(
+				const userMap = new Map<string, IUserEnhanced>(
 					res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
 				);
 				if (isMounted.current) {
@@ -48,7 +49,7 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 					handleErrors(error, "search users", false);
 				}
 			} finally {
-				if (isMounted.current) setSearchLoading(false);
+				if (isMounted.current) setTimeout(() => { setSearchLoading(false); }, SPINNER_DURATION);
 			}
 		},
 		[handleErrors, isMounted]

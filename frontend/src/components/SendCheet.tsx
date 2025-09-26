@@ -5,12 +5,11 @@ import type { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
 import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
-import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Send from "@mui/icons-material/Send";
 import FlexBox from "../styles/FlexBox";
-import { Box, Grid2, TextField } from "@mui/material";
+import { Grid2, TextField } from "@mui/material";
 import { useError } from "../contexts/ErrorContext";
-import { useIsMounted } from "../utils/isMounted";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
@@ -22,12 +21,12 @@ interface Props {
 const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }) => {
 	const { id } = useParams();
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
-	const [isSubmitLoading, setSubmitLoading] = useState<boolean>(false);
+	const [isLoading, setSubmitLoading] = useState<boolean>(false);
 
 	const { handleErrors } = useError();
 
-	const isMounted = useIsMounted();
-
+	const [pendingCheet, setPendingCheet] = useState<ICheet | null>(null);
+	const [pendingError, setPendingError] = useState<unknown>(null);
 	const sendCheet: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
@@ -38,41 +37,59 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 					withCredentials: true,
 				}
 			);
-			setCheets((prevCheets) => [newCheet.data, ...prevCheets]);
-			triggerScroll((prev) => !prev);
-			setCheetsError("");
-			reset();
+			setPendingCheet(newCheet.data);
 		} catch (error) {
-			handleErrors(error, "send reply", isMounted.current);
+			setPendingError(error);
 		} finally {
 			setSubmitLoading(false);
 		}
 	};
 
+	const applyPending = () => {
+		if (pendingCheet) {
+			setCheets((prev) => [pendingCheet, ...prev]);
+			setPendingCheet(null);
+			triggerScroll((prev) => !prev);
+			setCheetsError("");
+			reset();
+		}
+		if (pendingError) {
+			handleErrors(pendingError, "send cheet");
+			setPendingError(null);
+		}
+	};
+
 	return (
-		
 		<FlexBox>
-			<Grid2 container component="form" onSubmit={handleSubmit(sendCheet)}>
-				<Grid2 size={2} />
-				<Grid2 container size={8}>
+			<Grid2
+				container
+				component="form"
+				onSubmit={handleSubmit(sendCheet)}
+				width={400}
+				display={"flex"}
+				justifyContent={"center"}
+			>
+				<Grid2 container size={8} paddingRight={2}>
 					<Grid2 size={12}>
-						<TextField {...register("text")} type="text" variant="standard" label='Send cheet'/>
+						<TextField
+							{...register("text")}
+							type="text"
+							variant="standard"
+							label="Send cheet"
+							
+						/>
 					</Grid2>
 				</Grid2>
+
 				<Grid2 size={2} container justifyContent="center">
-					{isSubmitLoading ? (
-						<Box paddingTop={3}>
-							<CircularProgress size="2.1rem" thickness={6} />
-						</Box>
-					) : (
-						<IconButton type="submit">
+					<LoadingSpinner isLoading={isLoading} onFinished={applyPending}>
+						<IconButton type="submit" sx={{ pointerEvents: isLoading ? "none" : undefined }}>
 							<Send fontSize="large" />
 						</IconButton>
-					)}
+					</LoadingSpinner>
 				</Grid2>
 			</Grid2>
 		</FlexBox>
-	
 	);
 };
 

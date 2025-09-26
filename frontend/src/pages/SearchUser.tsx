@@ -4,7 +4,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import FlexBox from "../styles/FlexBox";
 import { Search } from "@mui/icons-material";
 import ScrollGrid from "../styles/ScrollGrid";
-import type { IConversation, UserEnhanced } from "../interfaces/interfaces";
+import type { IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import User from "../components/User";
 import { useAuth } from "../contexts/AuthContext";
 import useFetchConversations from "../hooks/useFetchConversations";
@@ -84,23 +84,22 @@ const SearchUser: React.FC = () => {
 		<Box>
 			<Typography variant="h4">Search Users</Typography>
 			<FlexBox>
-				<Grid2 container component="form" onSubmit={handleSubmit(onSubmit)}>
-					<Grid2 size={2} />
+				<Grid2
+					container
+					component="form"
+					onSubmit={handleSubmit(onSubmit)}
+					display={"flex"}
+					justifyContent={"center"}
+				>
 					<Grid2 container size={8}>
-						<Grid2 size={12}>
+						<Grid2 size={12} paddingRight={2}>
 							<TextField {...register("searchString")} type="text" variant="standard" label="Username" />
 						</Grid2>
 					</Grid2>
 					<Grid2 size={2} container justifyContent="center">
-						{isSearchLoading ? (
-							<Box paddingTop={3}>
-								<CircularProgress size="2.1rem" thickness={6} />
-							</Box>
-						) : (
-							<IconButton type="submit">
-								<Search fontSize="large" />
-							</IconButton>
-						)}
+						<IconButton type="submit" sx={{ pointerEvents: isSearchLoading ? "none" : undefined }}>
+							<Search fontSize="large" />
+						</IconButton>
 					</Grid2>
 				</Grid2>
 			</FlexBox>
@@ -117,7 +116,7 @@ const SearchUser: React.FC = () => {
 							sessionUserId={userId}
 							userEnhanced={user}
 							setSelectedConversation={setSelectedConversation}
-							onToggleFollow={(arg: UserEnhanced) => {
+							onToggleFollow={(arg: IUserEnhanced) => {
 								setUsers((users) =>
 									users.map((user) => (user.user.uuid === arg.user.uuid ? arg : user))
 								);

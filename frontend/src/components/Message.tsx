@@ -9,7 +9,6 @@ import {
 	Card,
 	CardActions,
 	CardContent,
-	CircularProgress,
 	Grid2,
 	IconButton,
 	TextField,
@@ -20,6 +19,7 @@ import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useIsMounted } from "../utils/isMounted";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	message: IMessage;
@@ -48,6 +48,9 @@ const Message = forwardRef<HTMLDivElement, Props>(
 			}
 		}, [isEditing, message.text, setValue]);
 
+		const [pendingMessage, setPendingMessage] = useState<IMessage | null>(null);
+		const [pendingError, setPendingError] = useState<unknown>(null);
+
 		const editMessage: SubmitHandler<{ text: string }> = async (data) => {
 			try {
 				setEditLoading(true);
@@ -58,17 +61,25 @@ const Message = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
-
-				setMessages((prevMessages) =>
-					prevMessages.map((message) =>
-						message.uuid === updatedMessage.data.uuid ? updatedMessage.data : message
-					)
-				);
+				setPendingMessage(updatedMessage.data);
 			} catch (error) {
-				handleErrors(error, "edit message", isMounted.current);
+				setPendingError(error);
 			} finally {
 				setEditing(false);
 				setEditLoading(false);
+			}
+		};
+
+		const applyPendingEdit = () => {
+			if (pendingMessage) {
+				setMessages((prevMessages) =>
+					prevMessages.map((message) => (message.uuid === pendingMessage.uuid ? pendingMessage : message))
+				);
+				setPendingMessage(null);
+			}
+			if (pendingError) {
+				handleErrors(pendingError, "edit message");
+				setPendingError(null);
 			}
 		};
 
@@ -81,26 +92,36 @@ const Message = forwardRef<HTMLDivElement, Props>(
 						withCredentials: true,
 					}
 				);
+				setPendingMessage(deletedMessage.data);
+			} catch (error) {
+				setPendingError(error);
+			} finally {
+				setDeleteLoading(false);
+			}
+		};
+
+		const applyPendingDelete = () => {
+			if (pendingMessage) {
 				setMessages((prevMessages) =>
-					prevMessages.map((message) =>
-						message.uuid === deletedMessage.data.uuid ? deletedMessage.data : message
-					)
+					prevMessages.map((message) => (message.uuid === pendingMessage.uuid ? pendingMessage : message))
 				);
 				if (isEditing) setEditing(false);
 				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
 				if (isLastMessage && !userPageId) {
 					toggleReloadTrigger((prev) => !prev);
 				}
-			} catch (error) {
-				handleErrors(error, "delete message", isMounted.current);
-			} finally {
-				setDeleteLoading(false);
+				setPendingMessage(null);
+			}
+			if (pendingError) {
+				handleErrors(pendingError, "delete message");
+				setPendingError(null);
 			}
 		};
 
 		const createdAt = new Date(message.createdAt);
 		const updatedAt = new Date(message.updatedAt);
 		const isEdited = updatedAt > createdAt;
+		const isLoading= isEditLoading || isDeleteLoading;
 
 		return (
 			<Card ref={ref}>
@@ -170,46 +191,48 @@ const Message = forwardRef<HTMLDivElement, Props>(
 							<CardActions>
 								<Grid2 container size={12} columns={2}>
 									<Grid2 size={1}>
-										{isEditLoading ? (
-											<Box paddingTop={1.3} paddingLeft={1.4}>
-												<CircularProgress size="1.3rem" thickness={6} />
-											</Box>
-										) : (
-											!message.messageStatus.isRead &&
-											(isEditing ? (
-												<IconButton
-													type="submit"
-													form={`edit-message-${message.uuid}`}
-													key={`edit-message-${message.uuid}`}
-													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
-												>
-													<Done />
-												</IconButton>
-											) : (
-												<IconButton
-													onClick={() => {
-														setEditing(true);
-													}}
-													sx={{ pointerEvents: isDeleteLoading ? "none" : undefined }}
-												>
-													<Edit />
-												</IconButton>
-											))
-										)}
+										<LoadingSpinner
+											isLoading={isEditLoading}
+											isLarge={false}
+											onFinished={applyPendingEdit}
+										>
+											{!message.messageStatus.isRead &&
+												(isEditing ? (
+													<IconButton
+														type="submit"
+														form={`edit-message-${message.uuid}`}
+														key={`edit-message-${message.uuid}`}
+														sx={{ pointerEvents: isLoading ? "none" : undefined }}
+													>
+														<Done />
+													</IconButton>
+												) : (
+													<IconButton
+														onClick={() => {
+															setEditing(true);
+														}}
+														sx={{ pointerEvents: isLoading ? "none" : undefined }}
+													>
+														<Edit />
+													</IconButton>
+												))}
+										</LoadingSpinner>
 									</Grid2>
 									<Grid2 size={1}>
-										{isDeleteLoading ? (
-											<Box paddingTop={1.3} paddingLeft={1}>
-												<CircularProgress size="1.3rem" thickness={6} />
-											</Box>
-										) : message.messageStatus.isRead ? null : (
-											<IconButton
-												onClick={deleteMessage}
-												sx={{ pointerEvents: isEditLoading ? "none" : undefined }}
-											>
-												<Delete />
-											</IconButton>
-										)}
+										<LoadingSpinner
+											isLoading={isDeleteLoading}
+											isLarge={false}
+											onFinished={applyPendingDelete}
+										>
+											{message.messageStatus.isRead ? null : (
+												<IconButton
+													onClick={deleteMessage}
+													sx={{ pointerEvents: isLoading ? "none" : undefined }}
+												>
+													<Delete />
+												</IconButton>
+											)}
+										</LoadingSpinner>
 									</Grid2>
 								</Grid2>
 							</CardActions>

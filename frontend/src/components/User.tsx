@@ -1,16 +1,16 @@
 import React from "react";
 import { Typography } from "@mui/material";
-import type { IConversation, UserEnhanced } from "../interfaces/interfaces";
+import type { IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import ConversationIcon from "./ConversationIcon";
 import FollowIcon from "./FollowIcon";
 import { Fragment } from "react/jsx-runtime";
 
 interface Props {
-	userEnhanced: UserEnhanced;
+	userEnhanced: IUserEnhanced;
 	sessionUserId?: string | null;
 	conversation?: IConversation | null;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
-	onToggleFollow: (arg: UserEnhanced) => void;
+	onToggleFollow: (arg: IUserEnhanced) => void;
 }
 
 const User: React.FC<Props> = ({
