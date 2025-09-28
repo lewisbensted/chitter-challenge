@@ -121,6 +121,7 @@ const SearchUser: React.FC = () => {
 									users.map((user) => (user.user.uuid === arg.user.uuid ? arg : user))
 								);
 							}}
+							userPage={false}
 						/>
 					))
 				) : displayEmpty ? (

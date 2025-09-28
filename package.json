@@ -2,13 +2,14 @@
 	"name": "chitter",
 	"version": "1.0.0",
 	"description": "A mock Twitter app built with Express and React.",
+	"type": "module",
 	"scripts": {
 		"install-all": "npm install && npm --prefix server install && npm --prefix frontend install",
 		"lint": "npx eslint .",
 		"reset:dev": "npm --prefix server run reset:dev",
 		"migrate:dev": "npm --prefix server run migrate:dev",
-		"start:dev": "concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"npm --prefix frontend run dev\"",
-		"build:prod": "concurrently --names Frontend,Backend \"npm --prefix frontend run build\" \"npm --prefix server run build:prod\"",
+		"start:dev": "cross-env NODE_ENV=dev concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"node await-server.js\"",
+		"build:prod": "concurrently --names Backend,Frontend \"npm --prefix server run build:prod\" \"npm --prefix frontend run build\"",
 		"migrate:prod": "npm --prefix server run migrate:prod",
 		"start:prod": "npm --prefix server run start:prod"
 	},
@@ -25,11 +26,13 @@
 	},
 	"dependencies": {
 		"concurrently": "^9.2.0",
+		"cross-env": "^10.0.0",
 		"dotenv-cli": "^7.4.2",
 		"dotenv-expand": "^11.0.6"
 	},
 	"devDependencies": {
 		"@stylistic/eslint-plugin": "^2.13.0",
+		"@types/wait-on": "^5.3.4",
 		"@typescript-eslint/eslint-plugin": "^8.19.1",
 		"@typescript-eslint/parser": "^8.19.1",
 		"eslint": "^9.29.0",
@@ -38,6 +41,7 @@
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-react": "^7.37.4",
 		"eslint-plugin-react-hooks": "^5.1.0",
-		"typescript-eslint": "^8.20.0"
+		"typescript-eslint": "^8.20.0",
+		"wait-on": "^9.0.1"
 	}
 }

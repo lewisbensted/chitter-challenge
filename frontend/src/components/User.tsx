@@ -1,9 +1,10 @@
 import React from "react";
-import { Typography } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 import type { IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import ConversationIcon from "./ConversationIcon";
 import FollowIcon from "./FollowIcon";
 import { Fragment } from "react/jsx-runtime";
+import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
 	userEnhanced: IUserEnhanced;
@@ -11,6 +12,7 @@ interface Props {
 	conversation?: IConversation | null;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
 	onToggleFollow: (arg: IUserEnhanced) => void;
+	userPage?:boolean
 }
 
 const User: React.FC<Props> = ({
@@ -19,19 +21,19 @@ const User: React.FC<Props> = ({
 	setSelectedConversation,
 	onToggleFollow,
 	userEnhanced,
+	userPage = true
 }) => (
 	<Typography variant="h4">
-		{userEnhanced.user.username}
+		{userPage ? userEnhanced.user.username:<Link to={`/users/${userEnhanced.user.uuid}`} component={RouterLink}>
+			{userEnhanced.user.username}
+		</Link>}
 		{sessionUserId && sessionUserId !== userEnhanced.user.uuid && (
 			<Fragment>
 				{conversation && (
 					<ConversationIcon conversation={conversation} setSelectedConversation={setSelectedConversation} />
 				)}
 				{userEnhanced.isFollowing !== null && (
-					<FollowIcon
-						onSuccess={onToggleFollow}
-						userEnhanced={userEnhanced}
-					/>
+					<FollowIcon onSuccess={onToggleFollow} userEnhanced={userEnhanced} />
 				)}
 			</Fragment>
 		)}
