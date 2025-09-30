@@ -11,9 +11,7 @@ const router = express.Router({ mergeParams: true });
 const userClient = prisma.user as unknown as ExtendedUserClient;
 const cheetClient = prisma.cheet as unknown as ExtendedCheetClient;
 
-export const fetchCheets = async (sessionUserId?: string, pageUserId?: string, cursor?: string, take?: number) => {
-	take = typeof take === "number" && !isNaN(take) ? take : 10;
-
+export const fetchCheets = async (take: number, sessionUserId?: string, pageUserId?: string, cursor?: string) => {
 	const following: string[] = sessionUserId
 		? (await prisma.follow.findMany({ where: { followerId: sessionUserId } })).map((record) => record.followingId)
 		: [];
@@ -29,11 +27,13 @@ export const fetchCheets = async (sessionUserId?: string, pageUserId?: string, c
 			user: userFilter,
 		},
 		orderBy: { createdAt: "desc" },
-		take: take,
+		take: take + 1,
 		skip: cursor ? 1 : 0,
 		cursor: cursor ? { uuid: cursor } : undefined,
 	});
-	return cheets;
+	const hasNext = cheets.length > take;
+	if (hasNext) cheets.pop();
+	return { cheets, hasNext };
 };
 
 router.get("/", async (req: Request, res: Response) => {
@@ -42,14 +42,14 @@ router.get("/", async (req: Request, res: Response) => {
 		if (req.params.userId) {
 			user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 		}
-		req.query.take = req.query.take === "" ? undefined : req.query.take;
-		const cheets = await fetchCheets(
+		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
+		const { cheets, hasNext } = await fetchCheets(
+			take,
 			req.session.user?.uuid,
 			user?.uuid,
-			req.query.cursor as string,
-			Number(req.query.take)
+			req.query.cursor as string | undefined
 		);
-		res.status(200).json(cheets);
+		res.status(200).json({ cheets, hasNext });
 	} catch (error) {
 		console.error("Error retrieving cheets from the database:\n" + logError(error));
 		sendErrorResponse(error, res);

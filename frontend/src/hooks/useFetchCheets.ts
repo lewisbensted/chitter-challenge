@@ -34,22 +34,25 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 		try {
 			setCheetsLoading(true);
 
-			const cursorParam = cursorRef.current ? `cursor=${cursorRef.current}` : "";
-			const res = await axios.get<ICheet[]>(
-				`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${cursorParam}&take=${take}`,
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
+
+			const res = await axios.get<{cheets:ICheet[], hasNext:boolean}>(
+				`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${params}`,
 				{
 					withCredentials: true,
 				}
 			);
 
-			const newCheets = res.data;
+			const {cheets:newCheets,hasNext} = res.data;
 
 			if (isFirstLoad.current) {
 				isFirstLoad.current = false;
 			}
 
 			if (isMounted.current) {
-				setHasNextPage(newCheets.length >= take);
+				setHasNextPage(hasNext);
 
 				if (newCheets.length) {
 					setCheets((prevCheets) => [...prevCheets, ...newCheets]);
@@ -64,10 +67,9 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 				if (isMounted.current) setCheetsError("An unexpected error occured while loading cheets.");
 			} else {
 				handleErrors(error, "load cheets", false);
-				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
-			if (isMounted.current) setCheetsLoading(false);
+			//if (isMounted.current) setCheetsLoading(false);
 		}
 	}, []);
 

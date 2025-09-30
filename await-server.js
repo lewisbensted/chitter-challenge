@@ -13,7 +13,7 @@ if (!SERVER_PORT) {
 	process.exit(1);
 }
 
-console.log(`\nWaiting for server to start...\n`);
+console.log(`Waiting for server to start...\n`);
 
 waitOn({ resources: [`tcp:${SERVER_PORT}`] }, (err) => {
 	if (err) {

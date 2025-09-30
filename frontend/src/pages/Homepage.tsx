@@ -88,7 +88,6 @@ const Homepage: React.FC = () => {
 			{selectedCheet && (
 				<CheetModal
 					cheet={selectedCheet}
-					cheets={cheets}
 					isOpen={!!selectedCheet}
 					setCheets={setCheets}
 					numberOfCheets={cheets.length}

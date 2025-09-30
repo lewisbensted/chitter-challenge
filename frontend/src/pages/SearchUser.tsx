@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Box, CircularProgress, Grid2, IconButton, TextField, Typography } from "@mui/material";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Box, Button, CircularProgress, Grid2, IconButton, TextField, Typography } from "@mui/material";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import FlexBox from "../styles/FlexBox";
 import { Search } from "@mui/icons-material";
@@ -16,7 +16,7 @@ const SearchUser: React.FC = () => {
 
 	const { userId } = useAuth();
 
-	const { users, searchUsers, isSearchLoading, setUsers, displayEmpty } = useSearchUsers();
+	const { users, searchUsers, isSearchLoading, setUsers, searchError, hasNextPage, setPage, page } = useSearchUsers();
 
 	const {
 		reloadConversationsTrigger,
@@ -76,9 +76,20 @@ const SearchUser: React.FC = () => {
 		[users, conversations]
 	);
 
+	const [activeSearch, setActiveSearch] = useState("");
+
 	const onSubmit: SubmitHandler<{ searchString: string }> = async (data) => {
-		await searchUsers(data.searchString);
+		setPage(0);
+		setActiveSearch(data.searchString);
+		await searchUsers(data.searchString, 1);
 	};
+
+	useEffect(() => {
+		if (!activeSearch || page === 0) return;
+		void searchUsers(activeSearch, 1);
+	}, [activeSearch, page, searchUsers]);
+
+	const isLoading = isSearchLoading || isConversationsLoading;
 
 	return (
 		<Box>
@@ -103,38 +114,55 @@ const SearchUser: React.FC = () => {
 					</Grid2>
 				</Grid2>
 			</FlexBox>
-			<ScrollGrid ref={listRef}>
-				{isSearchLoading || isConversationsLoading ? (
-					<FlexBox>
-						<CircularProgress thickness={5} />
-					</FlexBox>
-				) : usersWithConvos.length ? (
-					usersWithConvos.map((user) => (
-						<User
-							key={user.user.uuid}
-							conversation={user.conversation}
-							sessionUserId={userId}
-							userEnhanced={user}
-							setSelectedConversation={setSelectedConversation}
-							onToggleFollow={(arg: IUserEnhanced) => {
-								setUsers((users) =>
-									users.map((user) => (user.user.uuid === arg.user.uuid ? arg : user))
-								);
+			{activeSearch && (
+				<Fragment>
+					<ScrollGrid ref={listRef}>
+						{!(isLoading && page === 0) &&
+							(usersWithConvos.length ? (
+								usersWithConvos.map((user) => (
+									<User
+										key={user.user.uuid}
+										conversation={user.conversation}
+										sessionUserId={userId}
+										userEnhanced={user}
+										setSelectedConversation={setSelectedConversation}
+										onToggleFollow={(arg: IUserEnhanced) => {
+											setUsers((users) =>
+												users.map((user) => (user.user.uuid === arg.user.uuid ? arg : user))
+											);
+										}}
+										userPage={false}
+									/>
+								))
+							) : searchError ? null : (
+								<Typography variant="subtitle1">No users found.</Typography>
+							))}
+						{isLoading ? (
+							<FlexBox>
+								<CircularProgress thickness={5} />
+							</FlexBox>
+						) : null}
+					</ScrollGrid>
+					{hasNextPage && (
+						<Button
+							onClick={() => {
+								if (hasNextPage) setPage((page) => page + 1);
 							}}
-							userPage={false}
+							variant="contained"
+							sx={{ pointerEvents: isLoading ? "none" : undefined }}
+						>
+							<Typography variant="button">Load more</Typography>
+						</Button>
+					)}
+					{selectedConversation && (
+						<MessageModal
+							conversation={selectedConversation}
+							isOpen={!!selectedConversation}
+							setSelectedConversation={setSelectedConversation}
+							toggleConversationsTrigger={toggleConversationsTrigger}
 						/>
-					))
-				) : displayEmpty ? (
-					<Typography variant="subtitle1">No users found.</Typography>
-				) : null}
-			</ScrollGrid>
-			{selectedConversation && (
-				<MessageModal
-					conversation={selectedConversation}
-					isOpen={!!selectedConversation}
-					setSelectedConversation={setSelectedConversation}
-					toggleConversationsTrigger={toggleConversationsTrigger}
-				/>
+					)}
+				</Fragment>
 			)}
 		</Box>
 	);

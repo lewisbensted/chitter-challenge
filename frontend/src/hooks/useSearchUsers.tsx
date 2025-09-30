@@ -9,53 +9,82 @@ import { SPINNER_DURATION } from "../config/layout";
 interface UseSearchUsersReturn {
 	users: { user: IUser; isFollowing: boolean | null }[];
 	isSearchLoading: boolean;
-	searchUsers: (searchString: string) => Promise<void>;
+	searchUsers: (searchString: string, take: number) => Promise<void>;
 	setUsers: React.Dispatch<React.SetStateAction<IUserEnhanced[]>>;
-	displayEmpty: boolean;
+	hasNextPage: boolean;
+	setPage: React.Dispatch<React.SetStateAction<number>>;
+	page: number;
+	searchError: boolean;
 }
 
 const useSearchUsers = (): UseSearchUsersReturn => {
 	const [isSearchLoading, setSearchLoading] = useState<boolean>(false);
 	const [users, setUsers] = useState<IUserEnhanced[]>([]);
-	const [displayEmpty, setDisplayEmpty] = useState(false);
+	const [hasNextPage, setHasNextPage] = useState(false);
+	const [page, setPage] = useState<number>(0);
+	const cursorRef = useRef<string>();
+
+	const [searchError, setSearchError] = useState(false);
 
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
-	const displayEmptyRef = useRef(displayEmpty);
-
-	useEffect(() => {
-		displayEmptyRef.current = displayEmpty;
-	}, [displayEmpty]);
 
 	const searchUsers = useCallback(
-		async (searchString: string) => {
-			setSearchLoading(true);
+		async (searchString: string, take: number) => {
 			try {
-				const res = await axios.get<IUserEnhanced[]>(`${serverURL}/api/users?search=${searchString}`, {
-					withCredentials: true,
-				});
-				const userMap = new Map<string, IUserEnhanced>(
-					res.data.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
+				setSearchLoading(true);
+
+				if (page === 0) {
+					cursorRef.current = undefined;
+					setUsers([]);
+				}
+
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
+				params.append("search", searchString);
+
+				const res = await axios.get<{ users: IUserEnhanced[]; hasNext: boolean }>(
+					`${serverURL}/api/users?${params}`,
+					{
+						withCredentials: true,
+					}
 				);
+				const { users, hasNext } = res.data;
+
 				if (isMounted.current) {
-					setUsers(Array.from(userMap.values()));
-					if (!displayEmptyRef.current) setDisplayEmpty(true);
+					setHasNextPage(hasNext);
+
+					if (users.length) {
+						const newUserMap = new Map<string, IUserEnhanced>(
+							users.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
+						);
+						const newUsers = Array.from(newUserMap.values());
+						setUsers((prevUsers) => (page === 0 ? newUsers : [...prevUsers, ...newUsers]));
+						cursorRef.current = newUsers[newUsers.length - 1].user.uuid;
+					}
+					setSearchError(false);
 				}
 			} catch (error) {
 				if (isMounted.current) {
-					setUsers([]);
-					if (displayEmptyRef.current) setDisplayEmpty(false);
 					handleErrors(error, "search users", false);
+					setSearchError(true);
 				}
 			} finally {
-				if (isMounted.current) setTimeout(() => { setSearchLoading(false); }, SPINNER_DURATION);
+				if (isMounted.current)
+					setTimeout(
+						() => {
+							setSearchLoading(false);
+						},
+						page === 0 ? SPINNER_DURATION : 0
+					);
 			}
 		},
-		[handleErrors, isMounted]
+		[handleErrors, isMounted, page]
 	);
 
-	return { users, isSearchLoading, searchUsers, setUsers, displayEmpty };
+	return { users, isSearchLoading, searchUsers, setUsers, hasNextPage, setPage, page, searchError };
 };
 
 export default useSearchUsers;

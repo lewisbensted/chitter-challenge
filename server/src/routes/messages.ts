@@ -16,9 +16,7 @@ const userClient = prisma.user as unknown as ExtendedUserClient;
 const messageClient = prisma.message as unknown as ExtendedMessageClient;
 const messageStatusClient = prisma.messageStatus as unknown as ExtendedMessageStatusClient;
 
-export const fetchMessages = async (userId: string, interlocutorId: string, cursor?: string, take?: number) => {
-	take = isNaN(take!) ? 20 : take;
-
+export const fetchMessages = async (take: number, userId: string, interlocutorId: string, cursor?: string) => {
 	const messages = await messageClient.findMany({
 		where: {
 			OR: [
@@ -27,11 +25,13 @@ export const fetchMessages = async (userId: string, interlocutorId: string, curs
 			],
 		},
 		orderBy: { createdAt: "desc" },
-		take: take,
+		take: take + 1,
 		skip: cursor ? 1 : 0,
 		cursor: cursor ? { uuid: cursor } : undefined,
 	});
-	return messages.reverse();
+	const hasNext = messages.length > take;
+	if (hasNext) messages.pop();
+	return { messages: messages.reverse(), hasNext };
 };
 
 export const readMessages = async (userId: string, interlocutorId: string) => {
@@ -60,17 +60,18 @@ router.get("/unread", authenticator, async (req: Request, res: Response) => {
 router.get("/:recipientId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const messages = await fetchMessages(
+		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50)
+		const { messages, hasNext } = await fetchMessages(
+			take,
 			req.session.user!.uuid,
 			recipient.uuid,
-			req.query.cursor as string,
-			Number(req.query.take)
+			req.query.cursor as string | undefined
 		);
 		const formattedMessages = messages.map((message) => ({
 			...message,
 			text: message.messageStatus.isDeleted ? null : message.text,
 		}));
-		res.status(200).json(formattedMessages);
+		res.status(200).json({ messages: formattedMessages, hasNext });
 	} catch (error) {
 		console.error("Error retrieving messages from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -132,7 +133,7 @@ router.put("/:recipientId/message/:messageId", authenticator, async (req: EditMe
 			},
 			data: { text: req.body.text },
 		});
-		
+
 		return res.status(200).json(updatedMessage);
 	} catch (error) {
 		console.error("Error updating cheet in the database:\n" + logError(error));

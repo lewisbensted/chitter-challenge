@@ -11,14 +11,13 @@ interface UseFetchRepliesReturn {
 	isRepliesLoading: boolean;
 	repliesLengthRef: React.MutableRefObject<number>;
 	repliesError: string;
-	page:number;
+	page: number;
 	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
 	fetchReplies: (take: number, userId?: string) => Promise<void>;
 	hasNextPage: boolean;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 }
-
 
 const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 	const [replies, setReplies] = useState<IReply[]>([]);
@@ -41,17 +40,20 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 			if (cursorRef.current) params.append("cursor", cursorRef.current);
 			params.append("take", take.toString());
 
-			const res = await axios.get<IReply[]>(`${serverURL}/api/cheets/${cheetId}/replies?${params}`, {
-				withCredentials: true,
-			});
+			const res = await axios.get<{ replies: IReply[]; hasNext: boolean }>(
+				`${serverURL}/api/cheets/${cheetId}/replies?${params}`,
+				{
+					withCredentials: true,
+				}
+			);
 
-			const newReplies = res.data;
+			const { replies: newReplies, hasNext } = res.data;
 
 			if (isFirstLoad.current) {
 				isFirstLoad.current = false;
 			}
 			if (isMounted.current) {
-				setHasNextPage(newReplies.length >= take);
+				setHasNextPage(hasNext);
 
 				if (newReplies.length) {
 					setReplies((replies) => {
@@ -69,13 +71,11 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 				if (isMounted.current) setRepliesError("An unexpected error occured while loading replies.");
 			} else {
 				handleErrors(error, "load replies", false);
-				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
 			if (isMounted.current) setRepliesLoading(false);
 		}
 	}, []);
-
 
 	return {
 		replies,

@@ -46,16 +46,16 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			if (cursorRef.current) params.append("cursor", cursorRef.current);
 			params.append("take", take.toString());
 
-			const res = await axios.get<IMessage[]>(`${serverURL}/api/messages/${interlocutorId}?${params}`, {
+			const res = await axios.get<{messages:IMessage[], hasNext:boolean}>(`${serverURL}/api/messages/${interlocutorId}?${params}`, {
 				withCredentials: true,
 			});
-			const newMessages = res.data;
+			const {messages:newMessages, hasNext} = res.data;
 			if (isFirstLoad.current) {
 				isFirstLoad.current = false;
 			}
 
 			if (isMounted.current) {
-				setHasNextPage(newMessages.length >= take);
+				setHasNextPage(hasNext);
 				if (newMessages.length) {
 					setMessages((prevMessages) => [...newMessages, ...prevMessages]);
 					cursorRef.current = newMessages[0].uuid;
@@ -68,7 +68,6 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				if (isMounted.current) setMessagesError("An unexpected error occurred while loading messages.");
 			} else {
 				handleErrors(error, "load messages", false);
-				if (isMounted.current) setHasNextPage(false);
 			}
 		} finally {
 			if (isMounted.current) setMessagesLoading(false);

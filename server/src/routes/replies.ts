@@ -11,27 +11,27 @@ const router = express.Router({ mergeParams: true });
 const cheetClient = prisma.cheet as unknown as ExtendedCheetClient;
 const replyClient = prisma.reply as unknown as ExtendedReplyClient;
 
-export const fetchReplies = async (cheetId: string, cursor?: string, take?: number) => {
-	take = isNaN(take!) ? 10 : take;
-
+export const fetchReplies = async (take: number, cheetId: string, cursor?: string) => {
 	const replies = await replyClient.findMany({
 		where: {
 			cheet: { uuid: cheetId },
 		},
-		take: take,
+		take: take + 1,
 		skip: cursor ? 1 : 0,
 		cursor: cursor ? { uuid: cursor } : undefined,
 		orderBy: { createdAt: "desc" },
 	});
-	return replies;
+	const hasNext = replies.length > take;
+	if (hasNext) replies.pop();
+	return { replies, hasNext };
 };
 
 router.get("/", async (req: Request, res: Response) => {
 	try {
 		const cheet = await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-		req.query.take = req.query.take === "" ? undefined : req.query.take;
-		const replies = await fetchReplies(cheet.uuid, req.query.cursor as string, Number(req.query.take));
-		res.status(200).json(replies);
+		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50)
+		const {replies, hasNext} = await fetchReplies(take, cheet.uuid, req.query.cursor as string | undefined);
+		res.status(200).json({replies, hasNext});
 	} catch (error) {
 		console.error("Error retrieving replies from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
