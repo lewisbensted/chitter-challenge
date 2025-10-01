@@ -77,13 +77,14 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const markMessagesFailed = useRef(false);
 	const markMessagesRead = useCallback(async () => {
 		try {
-			await axios.put(
+			const res = await axios.put(
 				`${serverURL}/api/messages/read/${interlocutorId}`,
 				{},
 				{
 					withCredentials: true,
 				}
 			);
+			console.log(res);
 		} catch (error) {
 			logErrors(error);
 			toast("Failed to mark messages read - may be displaying outdated information.");

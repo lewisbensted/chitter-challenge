@@ -45,6 +45,8 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 				}
 			);
 
+			console.log(res);
+
 			const {cheets:newCheets,hasNext} = res.data;
 
 			if (isFirstLoad.current) {
@@ -69,7 +71,7 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 				handleErrors(error, "load cheets", false);
 			}
 		} finally {
-			//if (isMounted.current) setCheetsLoading(false);
+			if (isMounted.current) setCheetsLoading(false);
 		}
 	}, []);
 

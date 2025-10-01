@@ -7,14 +7,14 @@
 		"module": "esnext",
 		"moduleResolution": "node",
 		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true, 
+		"forceConsistentCasingInFileNames": true,
 		"strict": true,
-		"strictNullChecks": true, 
+		"strictNullChecks": true,
 		"skipLibCheck": true,
 		"typeRoots": ["./types"],
 		"noEmit": true,
 		"allowImportingTsExtensions": true
 	},
 	"include": ["src/**/*.ts", "prisma/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+	"exclude": ["dist", "node_modules"]
 }

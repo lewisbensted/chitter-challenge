@@ -60,7 +60,7 @@ router.get("/unread", authenticator, async (req: Request, res: Response) => {
 router.get("/:recipientId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const recipient = await userClient.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
-		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50)
+		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
 		const { messages, hasNext } = await fetchMessages(
 			take,
 			req.session.user!.uuid,

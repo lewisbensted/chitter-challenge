@@ -12,7 +12,7 @@ interface UseFetchConversationsReturn {
 	isConversationsLoading: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	fetchConversations: (isRefresh?: boolean, userIds?: string[]) => Promise<IConversation[] | undefined>;
+	fetchConversations: (userIds?: string[], isRefresh?: boolean, replace?: boolean, sort?: boolean) => Promise<void>;
 	reloadConversationsTrigger: boolean;
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -25,30 +25,55 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchConversations = useCallback(async (isRefresh = false, userIds?: string[]) => {
-		if (!isRefresh && !isConversationsLoading) setConversationsLoading(true);
-		try {
-			const res = await axios.get<IConversation[]>(
-				`${serverURL}/api/conversations${userIds ? "?userIds=" + userIds.join(",") : ""}`,
-				{
+	const mergeAndSort = (
+		prevConvos: Map<string, IConversation>,
+		newConvos: Map<string, IConversation>,
+		sort = false
+	) => {
+		const merged = new Map([...prevConvos, ...newConvos]);
+		if (!sort) return merged;
+
+		const sorted = Array.from(merged.values()).sort((a, b) => {
+			const aTime = a.latestMessage?.createdAt ? new Date(a.latestMessage.createdAt).getTime() : 0;
+			const bTime = b.latestMessage?.createdAt ? new Date(b.latestMessage.createdAt).getTime() : 0;
+			return bTime - aTime;
+		});
+
+		return new Map(sorted.map((c) => [c.interlocutorId, c]));
+	};
+
+	const fetchConversations = useCallback(
+		async (userIds?: string[], isRefresh = false, merge = false, sort = false) => {
+			if (!isRefresh && !isConversationsLoading) setConversationsLoading(true);
+			try {
+				const params = new URLSearchParams();
+				if (userIds?.length) params.append("userIds", userIds.join(","));
+
+				const res = await axios.get<IConversation[]>(`${serverURL}/api/conversations?${params}`, {
 					withCredentials: true,
+				});
+				if (isMounted.current) {
+					if (merge) {
+						const newConvos = new Map(res.data.map((convo) => [convo.interlocutorId, convo]));
+						setConversations((prevConvos) => mergeAndSort(prevConvos, newConvos, sort));
+					} else {
+						setConversations(new Map(res.data.map((convo) => [convo.interlocutorId, convo])));
+					}
+
+					setConversationsError("");
 				}
-			);
-			if (isMounted.current) {
-				setConversations(new Map(res.data.map((convo) => [convo.interlocutorId, convo])));
-				setConversationsError("");
+			} catch (error) {
+				logErrors(error);
+				if (isMounted.current) {
+					if (isRefresh) toast("Failed to refresh conversations - may be displaying outdated information.");
+					else setConversationsError("An unexpected error occured while loading conversations.");
+				}
+			} finally {
+				if (isMounted.current) setConversationsLoading(false);
 			}
-			return res.data;
-		} catch (error) {
-			logErrors(error);
-			if (isMounted.current) {
-				if (isRefresh) toast("Failed to refresh conversations - may be displaying outdated information.");
-				else setConversationsError("An unexpected error occured while loading conversations.");
-			}
-		} finally {
-			if (isMounted.current) setConversationsLoading(false);
-		}
-	}, []);
+		},
+		[]
+	);
 
 	return {
 		conversations,

@@ -37,7 +37,7 @@ const UserPage: React.FC = () => {
 
 	useEffect(() => {
 		if (!id) return;
-		void fetchConversations(false, [id]);
+		void fetchConversations([id], false);
 	}, [id, fetchConversations]);
 
 	const isFirstLoad = useRef(true);
@@ -47,7 +47,7 @@ const UserPage: React.FC = () => {
 			isFirstLoad.current = false;
 			return;
 		}
-		void fetchConversations(true, [id]);
+		void fetchConversations([id], true);
 	}, [id, reloadConversationsTrigger, fetchConversations]);
 
 	const { userId } = useAuth();

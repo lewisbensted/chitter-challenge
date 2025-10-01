@@ -23,6 +23,13 @@ const Conversations: React.FC = () => {
 		toggleConversationsTrigger,
 	} = useFetchConversations();
 
+	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
+
+	const selectedConversationRef = useRef<IConversation | null>(selectedConversation);
+	useEffect(() => {
+		selectedConversationRef.current = selectedConversation;
+	}, [selectedConversation]);
+
 	useEffect(() => {
 		if (!userId && !isValidateLoading) {
 			void navigate("/");
@@ -39,10 +46,13 @@ const Conversations: React.FC = () => {
 			isFirstLoad.current = false;
 			return;
 		}
-		void fetchConversations(true);
+		void fetchConversations(
+			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
+			true,
+			!!selectedConversationRef.current,
+			true
+		);
 	}, [reloadConversationsTrigger, fetchConversations]);
-
-	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
 
 	return (
 		<Box>

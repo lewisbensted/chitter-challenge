@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { IUser, IUserEnhanced } from "../interfaces/interfaces";
+import { useCallback, useRef, useState } from "react";
+import type { IUserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { useIsMounted } from "../utils/isMounted";
@@ -7,7 +7,8 @@ import { useError } from "../contexts/ErrorContext";
 import { SPINNER_DURATION } from "../config/layout";
 
 interface UseSearchUsersReturn {
-	users: { user: IUser; isFollowing: boolean | null }[];
+	users: IUserEnhanced[];
+	newUsers: IUserEnhanced[];
 	isSearchLoading: boolean;
 	searchUsers: (searchString: string, take: number) => Promise<void>;
 	setUsers: React.Dispatch<React.SetStateAction<IUserEnhanced[]>>;
@@ -20,6 +21,7 @@ interface UseSearchUsersReturn {
 const useSearchUsers = (): UseSearchUsersReturn => {
 	const [isSearchLoading, setSearchLoading] = useState<boolean>(false);
 	const [users, setUsers] = useState<IUserEnhanced[]>([]);
+	const [newUsers, setNewUsers] = useState<IUserEnhanced[]>([]);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const [page, setPage] = useState<number>(0);
 	const cursorRef = useRef<string>();
@@ -38,6 +40,7 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 				if (page === 0) {
 					cursorRef.current = undefined;
 					setUsers([]);
+					setNewUsers([]);
 				}
 
 				const params = new URLSearchParams();
@@ -61,6 +64,7 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 							users.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
 						);
 						const newUsers = Array.from(newUserMap.values());
+						setNewUsers(newUsers);
 						setUsers((prevUsers) => (page === 0 ? newUsers : [...prevUsers, ...newUsers]));
 						cursorRef.current = newUsers[newUsers.length - 1].user.uuid;
 					}
@@ -84,7 +88,7 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 		[handleErrors, isMounted, page]
 	);
 
-	return { users, isSearchLoading, searchUsers, setUsers, hasNextPage, setPage, page, searchError };
+	return { users, isSearchLoading, searchUsers, setUsers, hasNextPage, setPage, page, searchError, newUsers };
 };
 
 export default useSearchUsers;

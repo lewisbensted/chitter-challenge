@@ -16,14 +16,14 @@ const SearchUser: React.FC = () => {
 
 	const { userId } = useAuth();
 
-	const { users, searchUsers, isSearchLoading, setUsers, searchError, hasNextPage, setPage, page } = useSearchUsers();
+	const { users, searchUsers, isSearchLoading, setUsers, searchError, hasNextPage, setPage, page, newUsers } =
+		useSearchUsers();
 
 	const {
 		reloadConversationsTrigger,
 		toggleConversationsTrigger,
 		fetchConversations,
 		conversations,
-		setConversations,
 		isConversationsLoading,
 		setConversationsLoading,
 	} = useFetchConversations();
@@ -36,35 +36,27 @@ const SearchUser: React.FC = () => {
 		setConversationsLoading(false);
 	}, [setConversationsLoading]);
 
-	useEffect(() => {
-		if (!users.length) return;
-		const fetchConvos = async () => {
-			await fetchConversations(
-				false,
-				users.map((user) => user.user.uuid)
-			);
-		};
-		void fetchConvos();
-	}, [users, fetchConversations]);
-
 	const selectedConversationRef = useRef<IConversation | null>(selectedConversation);
-	const conversationsRef = useRef<Map<string, IConversation>>(conversations);
 	useEffect(() => {
 		selectedConversationRef.current = selectedConversation;
-		conversationsRef.current = conversations;
-	}, [conversations, selectedConversation]);
+	}, [selectedConversation]);
 
 	useEffect(() => {
-		const selectedConvo = selectedConversationRef.current;
-		if (!selectedConvo) return;
-		const refreshConversations = async () => {
-			const newConvos = new Map(conversationsRef.current);
-			const refreshedConversation = await fetchConversations(true, [selectedConvo.interlocutorId]);
-			if (refreshedConversation) newConvos.set(selectedConvo.interlocutorId, refreshedConversation[0]);
-			setConversations(newConvos);
-		};
-		void refreshConversations();
-	}, [reloadConversationsTrigger, fetchConversations, setConversations]);
+		if (!newUsers.length) return;
+		void fetchConversations(
+			newUsers.map((user) => user.user.uuid),
+			false,
+			page === 0 ? false : true
+		);
+	}, [newUsers, fetchConversations]);
+
+	useEffect(() => {
+		void fetchConversations(
+			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
+			true,
+			true
+		);
+	}, [reloadConversationsTrigger, fetchConversations]);
 
 	const usersWithConvos = useMemo(
 		() =>
@@ -146,7 +138,7 @@ const SearchUser: React.FC = () => {
 					{hasNextPage && (
 						<Button
 							onClick={() => {
-								if (hasNextPage) setPage((page) => page + 1);
+								setPage((page) => page + 1);
 							}}
 							variant="contained"
 							sx={{ pointerEvents: isLoading ? "none" : undefined }}

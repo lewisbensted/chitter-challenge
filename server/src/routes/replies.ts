@@ -29,7 +29,7 @@ export const fetchReplies = async (take: number, cheetId: string, cursor?: strin
 router.get("/", async (req: Request, res: Response) => {
 	try {
 		const cheet = await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50)
+		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
 		const {replies, hasNext} = await fetchReplies(take, cheet.uuid, req.query.cursor as string | undefined);
 		res.status(200).json({replies, hasNext});
 	} catch (error) {
