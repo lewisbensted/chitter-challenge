@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
 import { Box, Card, CardActions, CardContent, Grid2, IconButton, Link, TextField, Typography } from "@mui/material";
@@ -85,7 +85,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			}
 		};
 
-		const applyPendingEdit = useCallback(() => {
+		const applyPendingEdit = () => {
 			if (pendingCheet) {
 				setCheets((prevCheets) =>
 					prevCheets.map((cheet) => (cheet.uuid === pendingCheet.uuid ? pendingCheet : cheet))
@@ -99,9 +99,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				handleErrors(pendingError, "edit cheet");
 				setPendingError(null);
 			}
-		}, []);
+		};
 
-		const applyPendingDelete = useCallback(() => {
+		const applyPendingDelete = () => {
 			if (pendingCheet) {
 				setCheets((prevCheets) => prevCheets.filter((cheet) => cheet.uuid !== pendingCheet.uuid));
 				setSelectedCheet(null);
@@ -111,7 +111,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				handleErrors(pendingError, "delete cheet");
 				setPendingError(null);
 			}
-		}, []);
+		};
 
 		const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 		const createdAt = new Date(cheet.createdAt);

@@ -37,12 +37,12 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 		} finally {
 			if (isMounted.current) setUserLoading(false);
 		}
-	}, [ navigate, userId, isMounted]);
+	}, [ navigate, userId ]);
 
 	useEffect(() => {
 		if (!userId) return;
 		void fetchUser();
-	}, [userId, navigate, fetchUser]);
+	}, [userId, fetchUser]);
 
 	return { userEnhanced, isUserLoading, fetchUser, setUserEnhanced };
 };

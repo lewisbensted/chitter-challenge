@@ -31,17 +31,19 @@ const Conversations: React.FC = () => {
 	}, [selectedConversation]);
 
 	useEffect(() => {
-		if (!userId && !isValidateLoading) {
+		if (!userId) {
 			void navigate("/");
 		}
-	}, [userId, isValidateLoading, navigate]);
+	}, [userId, navigate]);
 
 	useEffect(() => {
+		if (!userId ) return;
 		void fetchConversations();
-	}, [fetchConversations]);
+	}, [userId, fetchConversations]);
 
 	const isFirstLoad = useRef(true);
 	useEffect(() => {
+		if (!userId || isValidateLoading) return;
 		if (isFirstLoad.current) {
 			isFirstLoad.current = false;
 			return;
@@ -52,7 +54,7 @@ const Conversations: React.FC = () => {
 			!!selectedConversationRef.current,
 			true
 		);
-	}, [reloadConversationsTrigger, fetchConversations]);
+	}, [userId, isValidateLoading, reloadConversationsTrigger, fetchConversations]);
 
 	return (
 		<Box>

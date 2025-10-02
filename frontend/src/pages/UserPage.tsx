@@ -27,6 +27,8 @@ const UserPage: React.FC = () => {
 	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage } =
 		useFetchCheets(id);
 
+	const { userId, isValidateLoading } = useAuth();
+
 	const {
 		conversations,
 		isConversationsLoading,
@@ -36,21 +38,19 @@ const UserPage: React.FC = () => {
 	} = useFetchConversations();
 
 	useEffect(() => {
-		if (!id) return;
+		if (!id || !userId) return;
 		void fetchConversations([id], false);
 	}, [id, fetchConversations]);
 
 	const isFirstLoad = useRef(true);
 	useEffect(() => {
-		if (!id) return;
+		if (!id || !userId) return;
 		if (isFirstLoad.current) {
 			isFirstLoad.current = false;
 			return;
 		}
 		void fetchConversations([id], true);
-	}, [id, reloadConversationsTrigger, fetchConversations]);
-
-	const { userId } = useAuth();
+	}, [id, userId, reloadConversationsTrigger, fetchConversations]);
 
 	const { setErrors } = useError();
 

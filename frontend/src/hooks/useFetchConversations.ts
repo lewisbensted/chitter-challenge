@@ -5,6 +5,7 @@ import type { IConversation } from "../interfaces/interfaces";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import toast from "react-hot-toast";
+import { mergeAndSortConvos } from "../utils/mergeAndSortConvos";
 
 interface UseFetchConversationsReturn {
 	conversations: Map<string, IConversation>;
@@ -19,28 +20,11 @@ interface UseFetchConversationsReturn {
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [conversations, setConversations] = useState<Map<string, IConversation>>(new Map<string, IConversation>());
-	const [isConversationsLoading, setConversationsLoading] = useState<boolean>(true);
+	const [isConversationsLoading, setConversationsLoading] = useState<boolean>(false);
 	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 	const [conversationsError, setConversationsError] = useState<string>("");
 
 	const isMounted = useIsMounted();
-
-	const mergeAndSort = (
-		prevConvos: Map<string, IConversation>,
-		newConvos: Map<string, IConversation>,
-		sort = false
-	) => {
-		const merged = new Map([...prevConvos, ...newConvos]);
-		if (!sort) return merged;
-
-		const sorted = Array.from(merged.values()).sort((a, b) => {
-			const aTime = a.latestMessage?.createdAt ? new Date(a.latestMessage.createdAt).getTime() : 0;
-			const bTime = b.latestMessage?.createdAt ? new Date(b.latestMessage.createdAt).getTime() : 0;
-			return bTime - aTime;
-		});
-
-		return new Map(sorted.map((c) => [c.interlocutorId, c]));
-	};
 
 	const fetchConversations = useCallback(
 		async (userIds?: string[], isRefresh = false, merge = false, sort = false) => {
@@ -55,7 +39,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				if (isMounted.current) {
 					if (merge) {
 						const newConvos = new Map(res.data.map((convo) => [convo.interlocutorId, convo]));
-						setConversations((prevConvos) => mergeAndSort(prevConvos, newConvos, sort));
+						setConversations((prevConvos) => mergeAndSortConvos(prevConvos, newConvos, sort));
 					} else {
 						setConversations(new Map(res.data.map((convo) => [convo.interlocutorId, convo])));
 					}

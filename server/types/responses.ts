@@ -1,6 +1,7 @@
 export interface IUser {
 	uuid: string;
 	username: string;
+	followers?: string[]
 }
 
 export interface ICheet {

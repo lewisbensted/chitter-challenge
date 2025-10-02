@@ -11,16 +11,16 @@ interface UseFetchMessagesReturn {
 	messages: IMessage[];
 	isMessagesLoading: boolean;
 	messagesError: string;
-	page:number;
+	page: number;
 	refreshMessagesTrigger: boolean;
 	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	fetchMessages: (take: number) => Promise<void>;
+	fetchMessages: () => Promise<void>;
 	hasNextPage: boolean;
 	refreshMessages: () => void;
 	markMessagesRead: () => Promise<void>;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
-	toggleRefreshMessages: React.Dispatch<React.SetStateAction<boolean>>
+	toggleRefreshMessages: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
@@ -38,7 +38,8 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchMessages = useCallback(async (take: number) => {
+	const fetchMessages = useCallback(async () => {
+		const take = page === 0 ? 20 : 10;
 		try {
 			setMessagesLoading(true);
 
@@ -46,10 +47,13 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			if (cursorRef.current) params.append("cursor", cursorRef.current);
 			params.append("take", take.toString());
 
-			const res = await axios.get<{messages:IMessage[], hasNext:boolean}>(`${serverURL}/api/messages/${interlocutorId}?${params}`, {
-				withCredentials: true,
-			});
-			const {messages:newMessages, hasNext} = res.data;
+			const res = await axios.get<{ messages: IMessage[]; hasNext: boolean }>(
+				`${serverURL}/api/messages/${interlocutorId}?${params}`,
+				{
+					withCredentials: true,
+				}
+			);
+			const { messages: newMessages, hasNext } = res.data;
 			if (isFirstLoad.current) {
 				isFirstLoad.current = false;
 			}
@@ -72,19 +76,18 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 		} finally {
 			if (isMounted.current) setMessagesLoading(false);
 		}
-	}, []);
+	}, [page, interlocutorId]);
 
 	const markMessagesFailed = useRef(false);
 	const markMessagesRead = useCallback(async () => {
 		try {
-			const res = await axios.put(
+			await axios.put(
 				`${serverURL}/api/messages/read/${interlocutorId}`,
 				{},
 				{
 					withCredentials: true,
 				}
 			);
-			console.log(res);
 		} catch (error) {
 			logErrors(error);
 			toast("Failed to mark messages read - may be displaying outdated information.");
@@ -107,8 +110,6 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 		});
 	}, []);
 
-	
-
 	return {
 		messages,
 		messagesError,
@@ -122,7 +123,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 		fetchMessages,
 		refreshMessages,
 		markMessagesRead,
-		setPage
+		setPage,
 	};
 };
 

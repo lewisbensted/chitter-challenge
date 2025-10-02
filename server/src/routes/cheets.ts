@@ -5,6 +5,7 @@ import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
 import type { ExtendedCheetClient, ExtendedUserClient } from "../../types/extendedClients.js";
+import session from "express-session";
 
 const router = express.Router({ mergeParams: true });
 
@@ -12,14 +13,10 @@ const userClient = prisma.user as unknown as ExtendedUserClient;
 const cheetClient = prisma.cheet as unknown as ExtendedCheetClient;
 
 export const fetchCheets = async (take: number, sessionUserId?: string, pageUserId?: string, cursor?: string) => {
-	const following: string[] = sessionUserId
-		? (await prisma.follow.findMany({ where: { followerId: sessionUserId } })).map((record) => record.followingId)
-		: [];
-
 	const userFilter = pageUserId
 		? { uuid: pageUserId }
 		: sessionUserId
-			? { uuid: { in: [...following, sessionUserId] } }
+			? { OR: [{ uuid: sessionUserId }, { followers: { some: { followerId: sessionUserId } } }] }
 			: undefined;
 
 	const cheets = await cheetClient.findMany({

@@ -53,7 +53,7 @@ const MessageModal: React.FC<Props> = ({
 	useEffect(() => {
 		if (!isOpen) return;
 		const loadAndMarkRead = async () => {
-			await fetchMessages(page === 0 ? 20 : 10);
+			await fetchMessages();
 			if (page === 0) {
 				toggleScrollTrigger((prev) => !prev);
 			}

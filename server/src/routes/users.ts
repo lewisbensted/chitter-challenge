@@ -3,6 +3,7 @@ import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import prisma from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
+import { IUser } from "../../types/responses.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -24,6 +25,9 @@ router.get("/", async (req: Request, res: Response) => {
 					contains: userSearch,
 				},
 			},
+			include: req.session?.user?.uuid
+				? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }
+				: undefined,
 			take: take + 1,
 			skip: cursor ? 1 : 0,
 			cursor: cursor ? { uuid: cursor } : undefined,
@@ -33,21 +37,10 @@ router.get("/", async (req: Request, res: Response) => {
 		const hasNext = dbUsers.length > take;
 		if (hasNext) dbUsers.pop();
 
-		let follows: string[];
-		if (req.session.user) {
-			follows = (
-				await prisma.follow.findMany({
-					where: { followerId: req.session.user.uuid, followingId: { in: dbUsers.map((user) => user.uuid) } },
-					select: { followingId: true },
-				})
-			).map((el) => el.followingId);
-		}
-
-		const users = dbUsers.map((user) => {
-			const isFollowing =
-				req.session.user && req.session.user.uuid !== user.uuid ? follows.some((f) => f === user.uuid) : null;
-			return { user, isFollowing };
-		});
+		const users = dbUsers.map((user: IUser) => ({
+			user: { uuid: user.uuid, username: user.username },
+			isFollowing: !!user.followers?.length,
+		}));
 
 		res.status(200).json({ users, hasNext });
 	} catch (error) {
@@ -58,18 +51,13 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.get("/:userId", async (req: Request, res: Response) => {
 	try {
-		const user = await userClient.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-		let isFollowing: null | boolean = null;
-		if (req.session.user) {
-			const follow = await prisma.follow.findUnique({
-				where: {
-					followerId_followingId: { followerId: req.session.user.uuid, followingId: req.params.userId },
-				},
-				select: { followingId: true },
-			});
-			isFollowing = !!follow;
-		}
-		res.json({ user: user, isFollowing });
+		const user = await userClient.findUniqueOrThrow({
+			where: { uuid: req.params.userId },
+			include: req.session?.user?.uuid
+				? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }
+				: undefined,
+		});
+		res.json({ user: { uuid: user.uuid, username: user.username }, isFollowing: !!user.followers?.length });
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));
 		sendErrorResponse(error, res);

@@ -14,7 +14,7 @@ interface UseFetchRepliesReturn {
 	page: number;
 	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
-	fetchReplies: (take: number, userId?: string) => Promise<void>;
+	fetchReplies: (userId?: string) => Promise<void>;
 	hasNextPage: boolean;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -32,7 +32,8 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchReplies = useCallback(async (take: number) => {
+	const fetchReplies = useCallback(async () => {
+		const take = 5;
 		try {
 			setRepliesLoading(true);
 
@@ -75,7 +76,7 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 		} finally {
 			if (isMounted.current) setRepliesLoading(false);
 		}
-	}, []);
+	}, [cheetId]);
 
 	return {
 		replies,

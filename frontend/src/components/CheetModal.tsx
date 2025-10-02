@@ -43,7 +43,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 
 	useEffect(() => {
 		if (isOpen) {
-			void fetchReplies(page === 0 ? 10 : 5);
+			void fetchReplies();
 		}
 	}, [isOpen, page, fetchReplies]);
 

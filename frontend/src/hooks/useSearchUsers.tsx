@@ -10,7 +10,7 @@ interface UseSearchUsersReturn {
 	users: IUserEnhanced[];
 	newUsers: IUserEnhanced[];
 	isSearchLoading: boolean;
-	searchUsers: (searchString: string, take: number) => Promise<void>;
+	searchUsers: (searchString: string) => Promise<void>;
 	setUsers: React.Dispatch<React.SetStateAction<IUserEnhanced[]>>;
 	hasNextPage: boolean;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -33,7 +33,8 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 	const isMounted = useIsMounted();
 
 	const searchUsers = useCallback(
-		async (searchString: string, take: number) => {
+		async (searchString: string) => {
+			const take = page === 0 ? 10 : 5;
 			try {
 				setSearchLoading(true);
 

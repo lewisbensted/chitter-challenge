@@ -42,21 +42,27 @@ const SearchUser: React.FC = () => {
 	}, [selectedConversation]);
 
 	useEffect(() => {
-		if (!newUsers.length) return;
+		if (!newUsers.length || !userId) return;
 		void fetchConversations(
 			newUsers.map((user) => user.user.uuid),
 			false,
 			page === 0 ? false : true
 		);
-	}, [newUsers, fetchConversations]);
+	}, [newUsers, userId, fetchConversations]);
 
+	const isFirstLoad = useRef(true);
 	useEffect(() => {
+		if (!userId) return;
+		if (isFirstLoad.current) {
+			isFirstLoad.current = false;
+			return;
+		}
 		void fetchConversations(
 			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
 			true,
 			true
 		);
-	}, [reloadConversationsTrigger, fetchConversations]);
+	}, [reloadConversationsTrigger, userId, fetchConversations]);
 
 	const usersWithConvos = useMemo(
 		() =>
@@ -73,12 +79,12 @@ const SearchUser: React.FC = () => {
 	const onSubmit: SubmitHandler<{ searchString: string }> = async (data) => {
 		setPage(0);
 		setActiveSearch(data.searchString);
-		await searchUsers(data.searchString, 1);
+		await searchUsers(data.searchString);
 	};
 
 	useEffect(() => {
 		if (!activeSearch || page === 0) return;
-		void searchUsers(activeSearch, 1);
+		void searchUsers(activeSearch);
 	}, [activeSearch, page, searchUsers]);
 
 	const isLoading = isSearchLoading || isConversationsLoading;

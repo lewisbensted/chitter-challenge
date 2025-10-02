@@ -16,8 +16,7 @@ interface UseFetchCheetsReturn {
 	hasNextPage: boolean;
 }
 
-
-const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
+const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [cheets, setCheets] = useState<ICheet[]>([]);
 	const [cheetsError, setCheetsError] = useState<string>("");
@@ -30,7 +29,9 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 
 	const isMounted = useIsMounted();
 
-	const fetchCheets = useCallback(async (take: number) => {
+	const fetchCheets = useCallback(async () => {
+		const take = page === 0 ? 10 : 5;
+		
 		try {
 			setCheetsLoading(true);
 
@@ -38,16 +39,13 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 			if (cursorRef.current) params.append("cursor", cursorRef.current);
 			params.append("take", take.toString());
 
-			const res = await axios.get<{cheets:ICheet[], hasNext:boolean}>(
+			const res = await axios.get<{ cheets: ICheet[]; hasNext: boolean }>(
 				`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${params}`,
 				{
 					withCredentials: true,
 				}
 			);
-
-			console.log(res);
-
-			const {cheets:newCheets,hasNext} = res.data;
+			const { cheets: newCheets, hasNext } = res.data;
 
 			if (isFirstLoad.current) {
 				isFirstLoad.current = false;
@@ -73,11 +71,11 @@ const useFetchCheets = (pageUserId? : string): UseFetchCheetsReturn => {
 		} finally {
 			if (isMounted.current) setCheetsLoading(false);
 		}
-	}, []);
+	}, [page, pageUserId]);
 
 	useEffect(() => {
-		void fetchCheets(page === 0 ? 10 : 5);
-	}, [page, fetchCheets]);
+		void fetchCheets();
+	}, [fetchCheets]);
 
 	return {
 		cheets,
