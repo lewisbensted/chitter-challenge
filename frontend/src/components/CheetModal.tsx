@@ -73,7 +73,6 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 	);
 
 	return (
-
 		<Dialog open={isOpen} fullWidth maxWidth="md">
 			<Grid2 container marginInline={2} marginTop={1}>
 				<Grid2 size={11} />
@@ -103,6 +102,21 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 						<Typography variant="subtitle1">{repliesError}</Typography>
 					) : (
 						<ScrollGrid ref={listRef} height={350}>
+							{!isRepliesLoading && replies.length === 0 ? (
+								<Typography variant="subtitle1">No replies yet.</Typography>
+							) : (
+								replies.map((reply, index) => (
+									<Reply
+										ref={replies.length === index + 1 ? lastReplyRef : null}
+										key={reply.uuid}
+										cheetId={cheet.uuid}
+										reply={reply}
+										setReplies={setReplies}
+										setErrors={setErrors}
+										numberOfReplies={replies.length}
+									/>
+								))
+							)}
 							{replies.map((reply, index) => (
 								<Reply
 									ref={replies.length === index + 1 ? lastReplyRef : null}
@@ -138,7 +152,6 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 				</Grid2>
 			</Grid2>
 		</Dialog>
-	
 	);
 };
 

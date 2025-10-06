@@ -30,8 +30,8 @@ router.get("/", async (req: Request, res: Response) => {
 	try {
 		const cheet = await cheetClient.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
 		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
-		const {replies, hasNext} = await fetchReplies(take, cheet.uuid, req.query.cursor as string | undefined);
-		res.status(200).json({replies, hasNext});
+		const { replies, hasNext } = await fetchReplies(take, cheet.uuid, req.query.cursor as string | undefined);
+		res.status(200).json({ replies, hasNext });
 	} catch (error) {
 		console.error("Error retrieving replies from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
@@ -40,23 +40,26 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", authenticator, async (req: SendReplyRequest, res: Response) => {
 	try {
-		const newReply = await replyClient.create({
-			data: {
-				userId: req.session.user!.uuid,
-				text: req.body.text,
-				cheetId: req.params.cheetId,
-			},
+		const result = await prisma.$transaction(async (transaction) => {
+			const newReply = await transaction.reply.create({
+				data: {
+					userId: req.session.user!.uuid,
+					text: req.body.text,
+					cheetId: req.params.cheetId,
+				},
+			});
+			await transaction.cheetStatus.updateMany({
+				where: {
+					cheetId: req.params.cheetId,
+					hasReplies: false,
+				},
+				data: {
+					hasReplies: true,
+				},
+			});
+			return newReply;
 		});
-		await prisma.cheetStatus.updateMany({
-			where: {
-				cheetId: req.params.cheetId,
-				hasReplies: false,
-			},
-			data: {
-				hasReplies: true,
-			},
-		});
-		res.status(201).json(newReply);
+		res.status(201).json(result);
 	} catch (error) {
 		console.error("Error adding reply to the database:\n" + logError(error));
 		sendErrorResponse(error, res);

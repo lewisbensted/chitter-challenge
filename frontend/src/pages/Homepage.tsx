@@ -17,7 +17,6 @@ const Homepage: React.FC = () => {
 	const { setErrors } = useError();
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
-
 	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, setPage, hasNextPage } = useFetchCheets();
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -49,25 +48,28 @@ const Homepage: React.FC = () => {
 
 	return (
 		<Box>
-
 			<Typography variant="h4">Welcome to Chitter</Typography>
 			{cheetsError ? (
 				<Typography variant="subtitle1">{cheetsError}</Typography>
 			) : (
 				<ScrollGrid ref={listRef}>
-					{cheets.map((cheet, index) => (
-						<Cheet
-							ref={cheets.length === index + 1 ? lastCheetRef : null}
-							key={cheet.uuid}
-							cheet={cheet}
-							userId={userId}
-							setCheets={setCheets}
-							setErrors={setErrors}
-							isModalView={false}
-							numberOfCheets={cheets.length}
-							setSelectedCheet={setSelectedCheet}
-						/>
-					))}
+					{!isCheetsLoading && cheets.length === 0 ? (
+						<Typography variant="subtitle1">No cheets to display.</Typography>
+					) : (
+						cheets.map((cheet, index) => (
+							<Cheet
+								ref={cheets.length === index + 1 ? lastCheetRef : null}
+								key={cheet.uuid}
+								cheet={cheet}
+								userId={userId}
+								setCheets={setCheets}
+								setErrors={setErrors}
+								isModalView={false}
+								numberOfCheets={cheets.length}
+								setSelectedCheet={setSelectedCheet}
+							/>
+						))
+					)}
 					{isCheetsLoading && (
 						<FlexBox>
 							<CircularProgress thickness={5} />

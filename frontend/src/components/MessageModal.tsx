@@ -163,18 +163,22 @@ const MessageModal: React.FC<Props> = ({
 									<CircularProgress thickness={5} />
 								</FlexBox>
 							)}
-							{messages.map((message, index) => (
-								<Message
-									ref={index === 0 ? lastMessageRef : null}
-									key={message.uuid}
-									message={message}
-									messages={messages}
-									setMessages={setMessages}
-									setErrors={setErrors}
-									toggleReloadTrigger={toggleConversationsTrigger}
-									userPageId={userPageId}
-								/>
-							))}
+							{!isMessagesLoading && messages.length === 0 ? (
+								<Typography variant="subtitle1">No messages yet.</Typography>
+							) : (
+								messages.map((message, index) => (
+									<Message
+										ref={index === 0 ? lastMessageRef : null}
+										key={message.uuid}
+										message={message}
+										messages={messages}
+										setMessages={setMessages}
+										setErrors={setErrors}
+										toggleReloadTrigger={toggleConversationsTrigger}
+										userPageId={userPageId}
+									/>
+								))
+							)}
 						</ScrollGrid>
 					)}
 					{!messagesError && (

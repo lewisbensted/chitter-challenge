@@ -1,6 +1,6 @@
 import prisma from "../prisma/prismaClient.js";
 import { RegisterUserRequestBody } from "./requests.js";
-import type { IUser, ICheet, IReply, IMessage } from "./responses.js";
+import type { IUser, ICheet, IReply, IMessage, IConversation } from "./responses.js";
 
 export interface ExtendedUserClient {
 	findMany(args: Parameters<typeof prisma.user.findMany>[0]): Promise<IUser[]>;
@@ -36,3 +36,8 @@ export interface ExtendedMessageClient {
 export interface ExtendedMessageStatusClient {
 	softDelete(messageId: string): Promise<IMessage>;
 }
+
+export interface ExtendedConversationClient {
+	findMany(args: Parameters<typeof prisma.conversation.findMany>[0]): Promise<IConversation[]>;
+}
+

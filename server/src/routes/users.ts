@@ -25,7 +25,7 @@ router.get("/", async (req: Request, res: Response) => {
 					contains: userSearch,
 				},
 			},
-			include: req.session?.user?.uuid
+			include: req.session.user?.uuid
 				? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }
 				: undefined,
 			take: take + 1,
@@ -53,7 +53,7 @@ router.get("/:userId", async (req: Request, res: Response) => {
 	try {
 		const user = await userClient.findUniqueOrThrow({
 			where: { uuid: req.params.userId },
-			include: req.session?.user?.uuid
+			include: req.session.user?.uuid
 				? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }
 				: undefined,
 		});

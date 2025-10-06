@@ -27,7 +27,7 @@ const UserPage: React.FC = () => {
 	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage } =
 		useFetchCheets(id);
 
-	const { userId, isValidateLoading } = useAuth();
+	const { userId } = useAuth();
 
 	const {
 		conversations,
@@ -40,7 +40,7 @@ const UserPage: React.FC = () => {
 	useEffect(() => {
 		if (!id || !userId) return;
 		void fetchConversations([id], false);
-	}, [id, fetchConversations]);
+	}, [id, userId, fetchConversations]);
 
 	const isFirstLoad = useRef(true);
 	useEffect(() => {
@@ -109,19 +109,23 @@ const UserPage: React.FC = () => {
 						<Typography variant="subtitle1">{cheetsError}</Typography>
 					) : (
 						<ScrollGrid ref={listRef}>
-							{cheets.map((cheet, index) => (
-								<Cheet
-									ref={cheets.length === index + 1 ? lastCheetRef : undefined}
-									key={cheet.uuid}
-									cheet={cheet}
-									userId={userId}
-									setCheets={setCheets}
-									setErrors={setErrors}
-									isModalView={false}
-									numberOfCheets={cheets.length}
-									setSelectedCheet={setSelectedCheet}
-								/>
-							))}
+							{!isCheetsLoading && cheets.length === 0 ? (
+								<Typography variant="subtitle1">No cheets yet.</Typography>
+							) : (
+								cheets.map((cheet, index) => (
+									<Cheet
+										ref={cheets.length === index + 1 ? lastCheetRef : null}
+										key={cheet.uuid}
+										cheet={cheet}
+										userId={userId}
+										setCheets={setCheets}
+										setErrors={setErrors}
+										isModalView={false}
+										numberOfCheets={cheets.length}
+										setSelectedCheet={setSelectedCheet}
+									/>
+								))
+							)}
 							{isCheetsLoading && (
 								<FlexBox>
 									<CircularProgress thickness={5} />

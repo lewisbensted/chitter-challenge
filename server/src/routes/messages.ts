@@ -9,6 +9,8 @@ import type {
 	ExtendedUserClient,
 	ExtendedMessageStatusClient,
 } from "../../types/extendedClients.js";
+import { generateConversationKey } from "../utils/generateConversationKey.js";
+import { messageFilters } from "../../prisma/extensions/messageExtension.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -35,14 +37,23 @@ export const fetchMessages = async (take: number, userId: string, interlocutorId
 };
 
 export const readMessages = async (userId: string, interlocutorId: string) => {
-	const readMessages = await prisma.messageStatus.updateMany({
-		where: {
-			message: { recipientId: userId, senderId: interlocutorId },
-			isRead: false,
-		},
-		data: { isRead: true },
+	return await prisma.$transaction(async (transaction) => {
+		const readMessages = await transaction.messageStatus.updateMany({
+			where: {
+				message: { recipientId: userId, senderId: interlocutorId },
+				isRead: false,
+			},
+			data: { isRead: true },
+		});
+		const [firstUser, secondUser] = [userId, interlocutorId].sort();
+		const convoKey = generateConversationKey(firstUser, secondUser);
+		const isFirstUserSession = firstUser === userId;
+		await transaction.conversation.update({
+			where: { key: convoKey },
+			data: { ...(isFirstUserSession ? { user1Unread: false } : { user2Unread: false }) },
+		});
+		return readMessages.count;
 	});
-	return readMessages.count;
 };
 
 router.get("/unread", authenticator, async (req: Request, res: Response) => {
@@ -91,20 +102,45 @@ router.put("/read/:recipientId", authenticator, async (req: Request, res: Respon
 
 router.post("/:recipientId", authenticator, async (req: SendMessageRequest, res: Response) => {
 	try {
-		const newMessage = await messageClient.create({
-			data: {
-				senderId: req.session.user!.uuid,
-				recipientId: req.params.recipientId,
-				text: req.body.text,
-			},
+		const result = await prisma.$transaction(async (transaction) => {
+			const newMessage = await transaction.message.create({
+				data: {
+					senderId: req.session.user!.uuid,
+					recipientId: req.params.recipientId,
+					text: req.body.text,
+				},
+				...messageFilters,
+			});
+			const isSelfMessage = newMessage.recipient.uuid === newMessage.sender.uuid;
+
+			const status = await transaction.messageStatus.create({
+				data: {
+					messageId: newMessage.uuid,
+					isRead: isSelfMessage,
+				},
+			});
+
+			const [firstUser, secondUser] = [newMessage.sender.uuid, newMessage.recipient.uuid].sort();
+			const convoKey = generateConversationKey(firstUser, secondUser);
+			const isFirstUserSender = firstUser === newMessage.sender.uuid;
+			const updateUnread = isSelfMessage ? {} : isFirstUserSender ? { user2Unread: true } : { user1Unread: true };
+			await transaction.conversation.upsert({
+				where: { key: convoKey },
+				update: {
+					latestMessageId: newMessage.uuid,
+					...updateUnread,
+				},
+				create: {
+					user1Id: firstUser,
+					user2Id: secondUser,
+					key: convoKey,
+					latestMessageId: newMessage.uuid,
+					...updateUnread,
+				},
+			});
+			return { ...newMessage, messageStatus: status };
 		});
-		const status = await prisma.messageStatus.create({
-			data: {
-				messageId: newMessage.uuid,
-				isRead: newMessage.recipient.uuid === newMessage.sender.uuid ? true : false,
-			},
-		});
-		res.status(201).json({ ...newMessage, messageStatus: status });
+		res.status(201).json(result);
 	} catch (error) {
 		console.error("Error adding message to the database:\n" + logError(error));
 		sendErrorResponse(error, res);

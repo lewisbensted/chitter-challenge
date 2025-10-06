@@ -6,7 +6,7 @@ export interface IUser {
 export interface IUserEnhanced {
 	user: IUser;
 	isFollowing: boolean | null
-	conversation?: IConversation | null
+	conversation: IConversation | null
 }
 
 export interface ICheet {

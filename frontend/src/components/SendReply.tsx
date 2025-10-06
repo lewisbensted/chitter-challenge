@@ -87,20 +87,20 @@ const SendReply: React.FC<Props> = ({
 
 	return (
 		<FlexBox>
-			<Grid2 container component="form" onSubmit={handleSubmit(sendReply)} display={"flex"} justifyContent={"center"}>
-				<Grid2 container size={8} paddingRight={2}>
-					<Grid2 size={12}>
-						<TextField
-							{...register("text")}
-							type="text"
-							variant="standard"
-							label="Send reply"
-						/>
-					</Grid2>
+			<Grid2
+				container
+				component="form"
+				onSubmit={handleSubmit(sendReply)}
+				display={"flex"}
+				justifyContent={"center"}
+				width={350}
+			>
+				<Grid2 container size={11} paddingRight={2}>
+					<TextField {...register("text")} type="text" variant="standard" label="Send reply" />
 				</Grid2>
-				<Grid2 size={2} container justifyContent="center">
+				<Grid2 size={1} container justifyContent="center">
 					<LoadingSpinner isLoading={isLoading} onFinished={applyPending}>
-						<IconButton type="submit" sx={{ pointerEvents: isDisabled || isLoading? "none" : undefined }}>
+						<IconButton type="submit" sx={{ pointerEvents: isDisabled || isLoading ? "none" : undefined }}>
 							<Reply fontSize="large" />
 						</IconButton>
 					</LoadingSpinner>

@@ -14,96 +14,112 @@ datasource db {
 }
 
 model User {
-  id              Int         @id @default(autoincrement())
-  uuid            String      @default(uuid()) @db.VarChar(36) @unique
-  firstName       String      @map(name: "first_name")
-  lastName        String      @map(name: "last_name")
-  email           String      @unique
-  username        String      @unique @db.VarChar(30)
-  passwordHash    String      @db.Char(60) @map(name: "password_hash")
-  cheets          Cheet[]
-  replies         Reply[]
-  sender          Message[]   @relation("sender")
-  recipient       Message[]   @relation("recipient")
-  following       Follow[]    @relation("UserFollowing") 
-  followers       Follow[]    @relation("UserFollowers")
+  id            Int            @id @default(autoincrement())
+  uuid          String         @unique @default(uuid()) @db.VarChar(36)
+  firstName     String         @map(name: "first_name")
+  lastName      String         @map(name: "last_name")
+  email         String         @unique
+  username      String         @unique @db.VarChar(30)
+  passwordHash  String         @map(name: "password_hash") @db.Char(60)
+  cheets        Cheet[]
+  replies       Reply[]
+  sender        Message[]      @relation("Sender")
+  recipient     Message[]      @relation("Recipient")
+  following     Follow[]       @relation("Following")
+  followers     Follow[]       @relation("Followers")
+  conversation1 Conversation[] @relation(name: "User1")
+  conversation2 Conversation[] @relation(name: "User2")
 
   @@map("Users")
 }
 
 model Follow {
-  id              Int           @id @default(autoincrement())
-  followerId      String        @map(name: "follower_id")
-  follower        User          @relation("UserFollowing", fields: [followerId], references: [uuid], onDelete: Cascade)
-  followingId     String        @map(name: "following_id")
-  following       User          @relation("UserFollowers", fields: [followingId], references: [uuid], onDelete: Cascade)
-  @@unique([followerId, followingId])
+  id          Int    @id @default(autoincrement())
+  followerId  String @map(name: "follower_id")
+  follower    User   @relation("Following", fields: [followerId], references: [uuid], onDelete: Cascade)
+  followingId String @map(name: "following_id")
+  following   User   @relation("Followers", fields: [followingId], references: [uuid], onDelete: Cascade)
 
+  @@unique([followerId, followingId])
   @@map("Follows")
 }
 
 model Cheet {
-  id          Int           @id @default(autoincrement())
-  uuid        String        @default(uuid()) @db.VarChar(36) @unique
-  user        User          @relation(fields: [userId], references: [uuid], onDelete: Cascade)
-  userId      String        @map(name: "user_id")
-  text        String        @db.VarChar(50)
-  createdAt   DateTime      @default(now()) @map(name: "created_at")
-  updatedAt   DateTime      @updatedAt @map(name: "updated_at")
-  cheetStatus CheetStatus?  
+  id          Int          @id @default(autoincrement())
+  uuid        String       @unique @default(uuid()) @db.VarChar(36)
+  user        User         @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId      String       @map(name: "user_id")
+  text        String       @db.VarChar(50)
+  createdAt   DateTime     @default(now()) @map(name: "created_at")
+  updatedAt   DateTime     @updatedAt @map(name: "updated_at")
+  cheetStatus CheetStatus?
   replies     Reply[]
 
-  @@map("Cheets")
   @@index([createdAt])
+  @@map("Cheets")
 }
 
 model CheetStatus {
-  cheetId     String        @id
-  hasReplies  Boolean       @default(false) @map(name: "has_replies")
-  cheet       Cheet         @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
+  cheetId    String  @id
+  hasReplies Boolean @default(false) @map(name: "has_replies")
+  cheet      Cheet   @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
 
   @@map("Cheet_Status")
 }
 
 model Reply {
-  id          Int         @id @default(autoincrement())
-  uuid        String      @default(uuid()) @db.VarChar(36) @unique
-  user        User        @relation(fields: [userId], references: [uuid], onDelete: Cascade)
-  userId      String         @map(name: "user_id")
-  cheet       Cheet       @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
-  cheetId     String         @map(name: "cheet_id")
-  text        String      @db.VarChar(50)
-  createdAt   DateTime    @default(now()) @map(name: "created_at")
-  updatedAt   DateTime    @updatedAt @map(name: "updated_at")
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid()) @db.VarChar(36)
+  user      User     @relation(fields: [userId], references: [uuid], onDelete: Cascade)
+  userId    String   @map(name: "user_id")
+  cheet     Cheet    @relation(fields: [cheetId], references: [uuid], onDelete: Cascade)
+  cheetId   String   @map(name: "cheet_id")
+  text      String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  @@map("Replies")
   @@index([createdAt])
+  @@map("Replies")
 }
 
 model Message {
-  id                  Int             @id @default(autoincrement())
-  uuid                String          @default(uuid()) @db.VarChar(36) @unique
-  sender              User            @relation(name: "sender", fields: [senderId], references: [uuid], onDelete: Cascade)
-  senderId            String          @map(name: "sender_id")
-  recipient           User            @relation(name:"recipient", fields: [recipientId], references: [uuid], onDelete: Cascade)
-  recipientId         String          @map(name: "recipient_id")
-  text                String          @db.VarChar(200)
-  createdAt           DateTime        @default(now()) @map(name: "created_at")
-  updatedAt           DateTime        @updatedAt @map(name: "updated_at")
-  messageStatus       MessageStatus?  
+  id                 Int            @id @default(autoincrement())
+  uuid               String         @unique @default(uuid()) @db.VarChar(36)
+  sender             User           @relation(name: "Sender", fields: [senderId], references: [uuid], onDelete: Cascade)
+  senderId           String         @map(name: "sender_id")
+  recipient          User           @relation(name: "Recipient", fields: [recipientId], references: [uuid], onDelete: Cascade)
+  recipientId        String         @map(name: "recipient_id")
+  text               String         @db.VarChar(200)
+  createdAt          DateTime       @default(now()) @map(name: "created_at")
+  updatedAt          DateTime       @updatedAt @map(name: "updated_at")
+  messageStatus      MessageStatus?
+  conversationLatest Conversation?  @relation("LatestMessage")
 
-  @@map("Messages")   
-  @@index([createdAt])   
+  @@index([createdAt])
+  @@map("Messages")
 }
 
 model MessageStatus {
-  messageId     String        @id
-  isRead        Boolean       @default(false) @map(name: "is_read")
-  isDeleted     Boolean       @default(false) @map(name: "is_deleted")
-  message       Message       @relation(fields: [messageId], references: [uuid], onDelete: Cascade)
+  messageId String  @id
+  isRead    Boolean @default(false) @map(name: "is_read")
+  isDeleted Boolean @default(false) @map(name: "is_deleted")
+  message   Message @relation(fields: [messageId], references: [uuid], onDelete: Cascade)
 
   @@map("Message_Status")
 }
 
+model Conversation {
+  id              Int      @id @default(autoincrement())
+  latestMessage   Message  @relation(name: "LatestMessage", fields: [latestMessageId], references: [uuid])
+  latestMessageId String   @unique
+  user1           User     @relation(name: "User1", fields: [user1Id], references: [uuid], onDelete: Cascade)
+  user1Id         String   @map(name: "user1_id")
+  user1Unread     Boolean  @default(false)
+  user2           User     @relation(name: "User2", fields: [user2Id], references: [uuid], onDelete: Cascade)
+  user2Id         String   @map(name: "user2_id")
+  user2Unread     Boolean  @default(false)
+  key             String   @unique //enforce uniqueness by ordering participants
 
-
+  @@index([user1Id])
+  @@index([user2Id])
+}

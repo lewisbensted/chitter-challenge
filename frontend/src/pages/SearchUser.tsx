@@ -41,12 +41,17 @@ const SearchUser: React.FC = () => {
 		selectedConversationRef.current = selectedConversation;
 	}, [selectedConversation]);
 
+	const pageRef = useRef(page);
+	useEffect(() => {
+		pageRef.current = page;
+	}, [page]);
+
 	useEffect(() => {
 		if (!newUsers.length || !userId) return;
 		void fetchConversations(
 			newUsers.map((user) => user.user.uuid),
 			false,
-			page === 0 ? false : true
+			pageRef.current === 0 ? false : true
 		);
 	}, [newUsers, userId, fetchConversations]);
 
@@ -99,13 +104,12 @@ const SearchUser: React.FC = () => {
 					onSubmit={handleSubmit(onSubmit)}
 					display={"flex"}
 					justifyContent={"center"}
+					width={400}
 				>
-					<Grid2 container size={8}>
-						<Grid2 size={12} paddingRight={2}>
-							<TextField {...register("searchString")} type="text" variant="standard" label="Username" />
-						</Grid2>
+					<Grid2 container size={11} paddingRight={2}>
+						<TextField {...register("searchString")} type="text" variant="standard" label="Username" />
 					</Grid2>
-					<Grid2 size={2} container justifyContent="center">
+					<Grid2 size={1} container justifyContent="center">
 						<IconButton type="submit" sx={{ pointerEvents: isSearchLoading ? "none" : undefined }}>
 							<Search fontSize="large" />
 						</IconButton>
@@ -120,7 +124,6 @@ const SearchUser: React.FC = () => {
 								usersWithConvos.map((user) => (
 									<User
 										key={user.user.uuid}
-										conversation={user.conversation}
 										sessionUserId={userId}
 										userEnhanced={user}
 										setSelectedConversation={setSelectedConversation}
@@ -135,11 +138,11 @@ const SearchUser: React.FC = () => {
 							) : searchError ? null : (
 								<Typography variant="subtitle1">No users found.</Typography>
 							))}
-						{isLoading ? (
+						{isLoading && (
 							<FlexBox>
 								<CircularProgress thickness={5} />
 							</FlexBox>
-						) : null}
+						)}
 					</ScrollGrid>
 					{hasNextPage && (
 						<Button

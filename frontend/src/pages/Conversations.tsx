@@ -37,7 +37,7 @@ const Conversations: React.FC = () => {
 	}, [userId, navigate]);
 
 	useEffect(() => {
-		if (!userId ) return;
+		if (!userId) return;
 		void fetchConversations();
 	}, [userId, fetchConversations]);
 
@@ -56,6 +56,8 @@ const Conversations: React.FC = () => {
 		);
 	}, [userId, isValidateLoading, reloadConversationsTrigger, fetchConversations]);
 
+	const convosArray = Array.from(conversations.values());
+
 	return (
 		<Box>
 			{isConversationsLoading ? (
@@ -65,18 +67,22 @@ const Conversations: React.FC = () => {
 			) : (
 				userId && (
 					<Fragment>
-						<Typography variant="h4">Messages</Typography>
+						<Typography variant="h4">Conversations</Typography>
 						{conversationsError ? (
 							<Typography variant="subtitle1">{conversationsError}</Typography>
 						) : (
 							<ScrollGrid>
-								{Array.from(conversations.values()).map((conversation) => (
-									<Conversation
-										key={conversation.interlocutorId}
-										conversation={conversation}
-										setSelectedConversation={setSelectedConversation}
-									/>
-								))}
+								{convosArray.length > 0 ? (
+									convosArray.map((conversation) => (
+										<Conversation
+											key={conversation.interlocutorId}
+											conversation={conversation}
+											setSelectedConversation={setSelectedConversation}
+										/>
+									))
+								) : (
+									<Typography variant="subtitle1">No conversations yet.</Typography>
+								)}
 							</ScrollGrid>
 						)}
 					</Fragment>

@@ -36,6 +36,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				const res = await axios.get<IConversation[]>(`${serverURL}/api/conversations?${params}`, {
 					withCredentials: true,
 				});
+
 				if (isMounted.current) {
 					if (merge) {
 						const newConvos = new Map(res.data.map((convo) => [convo.interlocutorId, convo]));
@@ -43,7 +44,6 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 					} else {
 						setConversations(new Map(res.data.map((convo) => [convo.interlocutorId, convo])));
 					}
-
 					setConversationsError("");
 				}
 			} catch (error) {

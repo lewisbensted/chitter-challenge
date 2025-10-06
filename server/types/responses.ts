@@ -41,16 +41,11 @@ export interface IMessageStatus {
 	isDeleted: boolean;
 }
 
-export interface ILatestMessage {
-	text: string | null;
-	senderId: string;
-	createdAt: Date;
-	messageStatus: IMessageStatus;
-}
-
 export interface IConversation {
-	interlocutorId: string;
-	interlocutorUsername: string;
-	unread: boolean;
-	latestMessage: ILatestMessage | null
+	key: string;
+	user1: IUser;
+	user1Unread: boolean;
+	user2: IUser;
+	user2Unread: boolean;
+	latestMessage: IMessage
 }

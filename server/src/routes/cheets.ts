@@ -5,7 +5,6 @@ import prisma from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
 import type { ExtendedCheetClient, ExtendedUserClient } from "../../types/extendedClients.js";
-import session from "express-session";
 
 const router = express.Router({ mergeParams: true });
 
@@ -55,19 +54,22 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", authenticator, async (req: SendCheetRequest, res: Response) => {
 	try {
-		const newCheet = await cheetClient.create({
-			data: {
-				userId: req.session.user!.uuid,
-				text: req.body.text,
-			},
+		const result = await prisma.$transaction(async (transaction) => {
+			const newCheet = await transaction.cheet.create({
+				data: {
+					userId: req.session.user!.uuid,
+					text: req.body.text,
+				},
+			});
+			const status = await transaction.cheetStatus.create({
+				data: {
+					cheetId: newCheet.uuid,
+				},
+				omit: { cheetId: true },
+			});
+			return { ...newCheet, cheetStatus: status };
 		});
-		const status = await prisma.cheetStatus.create({
-			data: {
-				cheetId: newCheet.uuid,
-			},
-			omit: { cheetId: true },
-		});
-		res.status(201).json({ ...newCheet, cheetStatus: status });
+		res.status(201).json(result);
 	} catch (error) {
 		console.error("Error adding cheet to the database:\n" + logError(error));
 		sendErrorResponse(error, res);

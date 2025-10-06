@@ -17,10 +17,10 @@ CREATE TABLE `Users` (
 -- CreateTable
 CREATE TABLE `Follows` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `followerId` VARCHAR(191) NOT NULL,
-    `followingId` VARCHAR(191) NOT NULL,
+    `follower_id` VARCHAR(191) NOT NULL,
+    `following_id` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `Follows_followerId_followingId_key`(`followerId`, `followingId`),
+    UNIQUE INDEX `Follows_follower_id_following_id_key`(`follower_id`, `following_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -85,11 +85,28 @@ CREATE TABLE `Message_Status` (
     PRIMARY KEY (`messageId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- AddForeignKey
-ALTER TABLE `Follows` ADD CONSTRAINT `Follows_followerId_fkey` FOREIGN KEY (`followerId`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateTable
+CREATE TABLE `Conversation` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `latestMessageId` VARCHAR(191) NULL,
+    `user1_id` VARCHAR(191) NOT NULL,
+    `user1Unread` BOOLEAN NOT NULL DEFAULT false,
+    `user2_id` VARCHAR(191) NOT NULL,
+    `user2Unread` BOOLEAN NOT NULL DEFAULT false,
+    `key` VARCHAR(191) NOT NULL,
+
+    UNIQUE INDEX `Conversation_latestMessageId_key`(`latestMessageId`),
+    UNIQUE INDEX `Conversation_key_key`(`key`),
+    INDEX `Conversation_user1_id_idx`(`user1_id`),
+    INDEX `Conversation_user2_id_idx`(`user2_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Follows` ADD CONSTRAINT `Follows_followingId_fkey` FOREIGN KEY (`followingId`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Follows` ADD CONSTRAINT `Follows_follower_id_fkey` FOREIGN KEY (`follower_id`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Follows` ADD CONSTRAINT `Follows_following_id_fkey` FOREIGN KEY (`following_id`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Cheets` ADD CONSTRAINT `Cheets_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -111,3 +128,12 @@ ALTER TABLE `Messages` ADD CONSTRAINT `Messages_recipient_id_fkey` FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE `Message_Status` ADD CONSTRAINT `Message_Status_messageId_fkey` FOREIGN KEY (`messageId`) REFERENCES `Messages`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Conversation` ADD CONSTRAINT `Conversation_latestMessageId_fkey` FOREIGN KEY (`latestMessageId`) REFERENCES `Messages`(`uuid`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Conversation` ADD CONSTRAINT `Conversation_user1_id_fkey` FOREIGN KEY (`user1_id`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Conversation` ADD CONSTRAINT `Conversation_user2_id_fkey` FOREIGN KEY (`user2_id`) REFERENCES `Users`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
