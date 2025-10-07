@@ -1,16 +1,16 @@
 import type { IConversation } from "../interfaces/interfaces";
 
 export const mergeAndSortConvos = (
-	prevConvos: Map<string, IConversation>,
+	sort = false,
 	newConvos: Map<string, IConversation>,
-	sort = false
+	prevConvos?: Map<string, IConversation>
 ) => {
-	const merged = new Map([...prevConvos, ...newConvos]);
+	const merged = prevConvos ? new Map([...prevConvos, ...newConvos]) : newConvos;
 	if (!sort) return merged;
 
 	const sorted = Array.from(merged.values()).sort((a, b) => {
-		const aTime = a.latestMessage?.createdAt ? new Date(a.latestMessage.createdAt).getTime() : 0;
-		const bTime = b.latestMessage?.createdAt ? new Date(b.latestMessage.createdAt).getTime() : 0;
+		const aTime = new Date(a.latestMessage?.createdAt ?? 0).getTime();
+		const bTime = new Date(b.latestMessage?.createdAt ?? 0).getTime();
 		return bTime - aTime;
 	});
 

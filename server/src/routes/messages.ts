@@ -36,8 +36,8 @@ export const fetchMessages = async (take: number, userId: string, interlocutorId
 	return { messages: messages.reverse(), hasNext };
 };
 
-export const readMessages = async (userId: string, interlocutorId: string) => {
-	return await prisma.$transaction(async (transaction) => {
+export const readMessages = async (userId: string, interlocutorId: string) =>
+	await prisma.$transaction(async (transaction) => {
 		const readMessages = await transaction.messageStatus.updateMany({
 			where: {
 				message: { recipientId: userId, senderId: interlocutorId },
@@ -54,19 +54,7 @@ export const readMessages = async (userId: string, interlocutorId: string) => {
 		});
 		return readMessages.count;
 	});
-};
 
-router.get("/unread", authenticator, async (req: Request, res: Response) => {
-	try {
-		const unreadMessages = await messageClient.findFirst({
-			where: { recipientId: req.session.user!.uuid, messageStatus: { isRead: false, isDeleted: false } },
-		});
-		res.status(200).json(!!unreadMessages);
-	} catch (error) {
-		console.error("Error retrieving messages from the database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-});
 
 router.get("/:recipientId", authenticator, async (req: Request, res: Response) => {
 	try {

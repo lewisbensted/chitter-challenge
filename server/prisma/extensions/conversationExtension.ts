@@ -1,5 +1,4 @@
 import { Prisma } from "@prisma/client";
-import { CreateCheetSchema, UpdateCheetSchema } from "../../src/schemas/cheet.schema.js";
 import { userFilters } from "./userExtension.js";
 import type { IConversation } from "../../types/responses.js";
 import { messageFilters } from "./messageExtension.js";
@@ -22,6 +21,13 @@ export const conversationExtension = Prisma.defineExtension({
 					...conversationFilters,
 				});
 				return cheets as unknown as IConversation[];
+			},
+			async findFirst({ args, query }): Promise<IConversation> {
+				const cheets = await query({
+					...args,
+					...conversationFilters,
+				});
+				return cheets as unknown as IConversation;
 			},
 		},
 	},

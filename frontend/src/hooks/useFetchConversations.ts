@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
 import type { IConversation } from "../interfaces/interfaces";
@@ -16,6 +16,8 @@ interface UseFetchConversationsReturn {
 	fetchConversations: (userIds?: string[], isRefresh?: boolean, replace?: boolean, sort?: boolean) => Promise<void>;
 	reloadConversationsTrigger: boolean;
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	setPage: React.Dispatch<React.SetStateAction<number>>;
+	hasNextPage: boolean;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -24,26 +26,41 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
 	const [conversationsError, setConversationsError] = useState<string>("");
 
+	const cursorRef = useRef<string>();
+	const [page, setPage] = useState<number>(0);
+	const [hasNextPage, setHasNextPage] = useState(false);
+
 	const isMounted = useIsMounted();
 
 	const fetchConversations = useCallback(
-		async (userIds?: string[], isRefresh = false, merge = false, sort = false) => {
+		async (userIds?: string[], isRefresh = false, sort = false) => {
+			const take = page === 0 ? 2 : 1;
 			if (!isRefresh && !isConversationsLoading) setConversationsLoading(true);
 			try {
 				const params = new URLSearchParams();
 				if (userIds?.length) params.append("userIds", userIds.join(","));
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
 
-				const res = await axios.get<IConversation[]>(`${serverURL}/api/conversations?${params}`, {
-					withCredentials: true,
-				});
+				const res = await axios.get<{ conversations: IConversation[]; hasNext: boolean }>(
+					`${serverURL}/api/conversations?${params}`,
+					{
+						withCredentials: true,
+					}
+				);
+
+				const { conversations, hasNext } = res.data;
 
 				if (isMounted.current) {
-					if (merge) {
-						const newConvos = new Map(res.data.map((convo) => [convo.interlocutorId, convo]));
-						setConversations((prevConvos) => mergeAndSortConvos(prevConvos, newConvos, sort));
-					} else {
-						setConversations(new Map(res.data.map((convo) => [convo.interlocutorId, convo])));
-					}
+					setHasNextPage(hasNext);
+					const newConvos = new Map(conversations.map((convo) => [convo.interlocutorId, convo]));
+					const newConvosArray = Array.from(newConvos.values());
+					if (newConvosArray.length) cursorRef.current = newConvosArray[newConvosArray.length - 1].key;
+
+					setConversations((prevConvos) =>
+						mergeAndSortConvos(sort, newConvos, page === 0 ? undefined : prevConvos)
+					);
+
 					setConversationsError("");
 				}
 			} catch (error) {
@@ -56,7 +73,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 				if (isMounted.current) setConversationsLoading(false);
 			}
 		},
-		[]
+		[page]
 	);
 
 	return {
@@ -68,6 +85,8 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		toggleConversationsTrigger,
 		setConversations,
 		setConversationsLoading,
+		setPage,
+		hasNextPage,
 	};
 };
 

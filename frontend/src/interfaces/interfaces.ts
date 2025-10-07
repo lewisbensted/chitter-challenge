@@ -5,8 +5,8 @@ export interface IUser {
 
 export interface IUserEnhanced {
 	user: IUser;
-	isFollowing: boolean | null
-	conversation: IConversation | null
+	isFollowing: boolean | null;
+	conversation: IConversation | null;
 }
 
 export interface ICheet {
@@ -54,8 +54,9 @@ export interface ILatestMessage {
 }
 
 export interface IConversation {
+	key: string;
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: boolean;
-	latestMessage: ILatestMessage | null
+	latestMessage: ILatestMessage | null;
 }

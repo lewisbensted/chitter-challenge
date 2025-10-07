@@ -9,7 +9,6 @@ import { Link as RouterLink } from "react-router-dom";
 interface Props {
 	userEnhanced: IUserEnhanced;
 	sessionUserId?: string | null;
-	conversation: IConversation | null;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
 	onToggleFollow: (arg: IUserEnhanced) => void;
 	userPage?: boolean;
@@ -17,36 +16,35 @@ interface Props {
 
 const User: React.FC<Props> = ({
 	sessionUserId,
-	conversation,
 	setSelectedConversation,
 	onToggleFollow,
 	userEnhanced,
 	userPage = true,
-}) => (
-	<Typography variant="h4">
-		{userPage ? (
-			userEnhanced.user.username
-		) : (
-			<Link to={`/users/${userEnhanced.user.uuid}`} component={RouterLink}>
-				{userEnhanced.user.username}
-			</Link>
-		)}
-		{sessionUserId && sessionUserId !== userEnhanced.user.uuid && (
-			<Fragment>
-				<ConversationIcon
-					conversation={conversation}
-					setSelectedConversation={setSelectedConversation}
-					user={userEnhanced.user}
-				/>
+}) => {
+	const { user, conversation, isFollowing } = userEnhanced;
+	return (
+		<Typography variant="h4">
+			{userPage ? (
+				user.username
+			) : (
+				<Link to={`/users/${user.uuid}`} component={RouterLink}>
+					{user.username}
+				</Link>
+			)}
+			{sessionUserId && sessionUserId !== user.uuid && (
+				<Fragment>
+					<ConversationIcon
+						conversation={conversation}
+						setSelectedConversation={setSelectedConversation}
+						user={user}
+					/>
 
-				{userEnhanced.isFollowing !== null && (
-					<FollowIcon onSuccess={onToggleFollow} userEnhanced={userEnhanced} />
-				)}
-			</Fragment>
-		)}
-	</Typography>
-);
-
+					{isFollowing !== null && <FollowIcon onSuccess={onToggleFollow} userEnhanced={userEnhanced} />}
+				</Fragment>
+			)}
+		</Typography>
+	);
+};
 User.displayName = "User";
 
 export default User;

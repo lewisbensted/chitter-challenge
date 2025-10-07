@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { ICheet, IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import SendCheet from "../components/SendCheet";
@@ -79,6 +79,11 @@ const UserPage: React.FC = () => {
 		[isCheetsLoading, hasNextPage, setPage]
 	);
 
+	const userWithConvos = useMemo(() => {
+		if (!userEnhanced) return;
+		return { ...userEnhanced, conversation: Array.from(conversations.values())[0] ?? null };
+	}, [userEnhanced, conversations]);
+
 	return (
 		<Box>
 			{isUserLoading || isConversationsLoading ? (
@@ -87,11 +92,10 @@ const UserPage: React.FC = () => {
 				</FlexBox>
 			) : (
 				<Fragment>
-					{userEnhanced ? (
+					{userWithConvos ? (
 						<User
-							userEnhanced={userEnhanced}
+							userEnhanced={userWithConvos}
 							sessionUserId={userId}
-							conversation={Array.from(conversations.values())[0]}
 							setSelectedConversation={setSelectedConversation}
 							onToggleFollow={(arg: IUserEnhanced) => {
 								setUserEnhanced((prev) => (prev ? arg : prev));
@@ -112,6 +116,7 @@ const UserPage: React.FC = () => {
 							{!isCheetsLoading && cheets.length === 0 ? (
 								<Typography variant="subtitle1">No cheets yet.</Typography>
 							) : (
+
 								cheets.map((cheet, index) => (
 									<Cheet
 										ref={cheets.length === index + 1 ? lastCheetRef : null}

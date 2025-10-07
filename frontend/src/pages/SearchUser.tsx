@@ -41,17 +41,11 @@ const SearchUser: React.FC = () => {
 		selectedConversationRef.current = selectedConversation;
 	}, [selectedConversation]);
 
-	const pageRef = useRef(page);
-	useEffect(() => {
-		pageRef.current = page;
-	}, [page]);
-
 	useEffect(() => {
 		if (!newUsers.length || !userId) return;
 		void fetchConversations(
 			newUsers.map((user) => user.user.uuid),
-			false,
-			pageRef.current === 0 ? false : true
+			false
 		);
 	}, [newUsers, userId, fetchConversations]);
 
@@ -64,7 +58,6 @@ const SearchUser: React.FC = () => {
 		}
 		void fetchConversations(
 			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
-			true,
 			true
 		);
 	}, [reloadConversationsTrigger, userId, fetchConversations]);

@@ -56,7 +56,6 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 
 				if (newCheets.length) {
 					setCheets((prevCheets) => [...prevCheets, ...newCheets]);
-
 					cursorRef.current = newCheets[newCheets.length - 1].uuid;
 				}
 				setCheetsError("");

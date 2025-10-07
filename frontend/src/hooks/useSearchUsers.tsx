@@ -62,7 +62,10 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 
 					if (users.length) {
 						const newUserMap = new Map<string, IUserEnhanced>(
-							users.map((item) => [item.user.uuid, { user: item.user, isFollowing: item.isFollowing }])
+							users.map((item) => [
+								item.user.uuid,
+								{ user: item.user, isFollowing: item.isFollowing, conversation: null },
+							])
 						);
 						const newUsers = Array.from(newUserMap.values());
 						setNewUsers(newUsers);

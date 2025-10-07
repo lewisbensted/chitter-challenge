@@ -35,7 +35,7 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 		}
 		try {
 			setUnreadLoading(true);
-			const res = await axios.get<boolean>(`${serverURL}/api/messages/unread`, { withCredentials: true });
+			const res = await axios.get<boolean>(`${serverURL}/api/conversations/unread`, { withCredentials: true });
 			setUnreadMessages(res.data);
 		} catch (error) {
 			logErrors(error);

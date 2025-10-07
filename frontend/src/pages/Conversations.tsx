@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import Conversation from "../components/Conversation";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchConversations from "../hooks/useFetchConversations";
 import type { IConversation } from "../interfaces/interfaces";
@@ -21,6 +21,8 @@ const Conversations: React.FC = () => {
 		fetchConversations,
 		reloadConversationsTrigger,
 		toggleConversationsTrigger,
+		hasNextPage,
+		setPage,
 	} = useFetchConversations();
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
@@ -51,7 +53,6 @@ const Conversations: React.FC = () => {
 		void fetchConversations(
 			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
 			true,
-			!!selectedConversationRef.current,
 			true
 		);
 	}, [userId, isValidateLoading, reloadConversationsTrigger, fetchConversations]);
@@ -87,6 +88,17 @@ const Conversations: React.FC = () => {
 						)}
 					</Fragment>
 				)
+			)}
+			{hasNextPage && (
+				<Button
+					onClick={() => {
+						setPage((page) => page + 1);
+					}}
+					variant="contained"
+					sx={{ pointerEvents: isConversationsLoading ? "none" : undefined }}
+				>
+					<Typography variant="button">Load more</Typography>
+				</Button>
 			)}
 			{selectedConversation && (
 				<MessageModal
