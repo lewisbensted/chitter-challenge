@@ -6,6 +6,7 @@ import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { useError } from "../contexts/ErrorContext";
 import toast from "react-hot-toast";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchMessagesReturn {
 	messages: IMessage[];
@@ -32,8 +33,6 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
 	const cursorRef = useRef<string>();
 
-	const isFirstLoad = useRef<boolean>(true);
-
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
@@ -54,9 +53,6 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				}
 			);
 			const { messages: newMessages, hasNext } = res.data;
-			if (isFirstLoad.current) {
-				isFirstLoad.current = false;
-			}
 
 			if (isMounted.current) {
 				setHasNextPage(hasNext);
@@ -67,14 +63,19 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				setMessagesError("");
 			}
 		} catch (error) {
-			if (isFirstLoad.current) {
+			if (page === 0) {
 				logErrors(error);
 				if (isMounted.current) setMessagesError("An unexpected error occurred while loading messages.");
 			} else {
 				handleErrors(error, "load messages", false);
 			}
 		} finally {
-			if (isMounted.current) setMessagesLoading(false);
+			setTimeout(
+				() => {
+					setMessagesLoading(false);
+				},
+				page === 0 ? SPINNER_DURATION : 0
+			);
 		}
 	}, [page, interlocutorId]);
 

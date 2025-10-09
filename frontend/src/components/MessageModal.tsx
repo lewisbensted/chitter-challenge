@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { IConversation } from "../interfaces/interfaces";
 import Message from "./Message";
 import SendMessage from "./SendMessage";
@@ -95,10 +95,15 @@ const MessageModal: React.FC<Props> = ({
 	const listRef = useRef<HTMLDivElement>(null);
 	const hasReachedBottom = useRef<boolean>(false);
 
+	const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+	useEffect(() => {
+		if (!isMessagesLoading) setHasFetchedOnce(true);
+	}, [isMessagesLoading]);
+
 	const [isMessagesSet, setMessagesSet] = useState<boolean>(false);
 	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
-			if (!listRef.current || !isMessagesSet) return;
+			if (!listRef.current || !isMessagesSet || !hasFetchedOnce) return;
 			listRef.current.scrollTo({
 				top: listRef.current.scrollHeight,
 				behavior: hasReachedBottom.current ? "smooth" : "auto",
@@ -107,7 +112,7 @@ const MessageModal: React.FC<Props> = ({
 				hasReachedBottom.current = true;
 			}
 		});
-	}, [scrollTrigger, isMessagesSet]);
+	}, [scrollTrigger, isMessagesSet, hasFetchedOnce]);
 
 	const observer = useRef<IntersectionObserver>();
 	const lastMessageRef = useCallback(
@@ -154,33 +159,38 @@ const MessageModal: React.FC<Props> = ({
 							</Link>
 						)}
 					</Typography>
-					{messagesError ? (
-						<Typography variant="subtitle1">{messagesError}</Typography>
-					) : (
-						<ScrollGrid ref={listRef} height={350}>
-							{isMessagesLoading && (
-								<FlexBox>
-									<CircularProgress thickness={5} />
-								</FlexBox>
-							)}
-							{!isMessagesLoading && messages.length === 0 ? (
-								<Typography variant="subtitle1">No messages yet.</Typography>
-							) : (
-								messages.map((message, index) => (
-									<Message
-										ref={index === 0 ? lastMessageRef : null}
-										key={message.uuid}
-										message={message}
-										messages={messages}
-										setMessages={setMessages}
-										setErrors={setErrors}
-										toggleReloadTrigger={toggleConversationsTrigger}
-										userPageId={userPageId}
-									/>
-								))
-							)}
-						</ScrollGrid>
-					)}
+
+					<ScrollGrid ref={listRef} height={350}>
+						{isMessagesLoading && (
+							<FlexBox>
+								<CircularProgress thickness={5} />
+							</FlexBox>
+						)}
+						{hasFetchedOnce && (
+							<Fragment>
+								{((page === 0 && !isMessagesLoading) || page > 0) &&
+									messages.length > 0 &&
+									messages.map((message, index) => (
+										<Message
+											ref={index === 0 ? lastMessageRef : null}
+											key={message.uuid}
+											message={message}
+											messages={messages}
+											setMessages={setMessages}
+											setErrors={setErrors}
+											toggleReloadTrigger={toggleConversationsTrigger}
+											userPageId={userPageId}
+										/>
+									))}
+								{page === 0 && !isMessagesLoading && !messages.length && (
+									<Typography variant="subtitle1">
+										{messagesError || "No messages to display."}
+									</Typography>
+								)}
+							</Fragment>
+						)}
+					</ScrollGrid>
+
 					{!messagesError && (
 						<SendMessage
 							recipientId={conversation.interlocutorId}

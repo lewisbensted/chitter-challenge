@@ -66,8 +66,6 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 				component="form"
 				onSubmit={handleSubmit(sendCheet)}
 				width={400}
-				display={"flex"}
-				justifyContent={"center"}
 			>
 				<Grid2 container size={11} paddingRight={2}>
 					<TextField {...register("text")} type="text" variant="standard" label="Send cheet" />

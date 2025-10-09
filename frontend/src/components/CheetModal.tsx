@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
 import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
@@ -72,6 +72,11 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 		[isRepliesLoading, hasNextPage, setPage]
 	);
 
+	const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+	useEffect(() => {
+		if (!isRepliesLoading) setHasFetchedOnce(true);
+	}, [isRepliesLoading]);
+
 	return (
 		<Dialog open={isOpen} fullWidth maxWidth="md">
 			<Grid2 container marginInline={2} marginTop={1}>
@@ -98,43 +103,35 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 					/>
 					<Divider />
 
-					{repliesError ? (
-						<Typography variant="subtitle1">{repliesError}</Typography>
-					) : (
-						<ScrollGrid ref={listRef} height={350}>
-							{!isRepliesLoading && replies.length === 0 ? (
-								<Typography variant="subtitle1">No replies yet.</Typography>
-							) : (
-								replies.map((reply, index) => (
-									<Reply
-										ref={replies.length === index + 1 ? lastReplyRef : null}
-										key={reply.uuid}
-										cheetId={cheet.uuid}
-										reply={reply}
-										setReplies={setReplies}
-										setErrors={setErrors}
-										numberOfReplies={replies.length}
-									/>
-								))
-							)}
-							{replies.map((reply, index) => (
-								<Reply
-									ref={replies.length === index + 1 ? lastReplyRef : null}
-									key={reply.uuid}
-									cheetId={cheet.uuid}
-									reply={reply}
-									setReplies={setReplies}
-									setErrors={setErrors}
-									numberOfReplies={replies.length}
-								/>
-							))}
-							{isRepliesLoading && (
-								<FlexBox>
-									<CircularProgress thickness={5} />
-								</FlexBox>
-							)}
-						</ScrollGrid>
-					)}
+					<ScrollGrid ref={listRef} height={350}>
+						{hasFetchedOnce && (
+							<Fragment>
+								{((page === 0 && !isRepliesLoading) || page > 0) &&
+									replies.length > 0 &&
+									replies.map((reply, index) => (
+										<Reply
+											ref={replies.length === index + 1 ? lastReplyRef : null}
+											key={reply.uuid}
+											cheetId={cheet.uuid}
+											reply={reply}
+											setReplies={setReplies}
+											setErrors={setErrors}
+											numberOfReplies={replies.length}
+										/>
+									))}
+								{page === 0 && !isRepliesLoading && !replies.length && (
+									<Typography variant="subtitle1">
+										{repliesError || "No replies to display."}
+									</Typography>
+								)}
+							</Fragment>
+						)}
+						{isRepliesLoading && (
+							<FlexBox>
+								<CircularProgress thickness={5} />
+							</FlexBox>
+						)}
+					</ScrollGrid>
 
 					{userId && !repliesError && (
 						<SendReply

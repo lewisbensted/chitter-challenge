@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import type { IConversation } from "../interfaces/interfaces";
 import { Card, CardActionArea, CardContent, Grid2, Link, Typography } from "@mui/material";
 import Done from "@mui/icons-material/Done";
@@ -12,17 +12,14 @@ interface Props {
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
 }
 
-const Conversation: React.FC<Props> = ({ conversation,  setSelectedConversation }) => {
-
+const Conversation = forwardRef<HTMLDivElement, Props>(({ conversation, setSelectedConversation }, ref) => {
 	const { userId } = useAuth();
 
 	const createdAt = new Date(conversation.latestMessage!.createdAt);
 
 	return (
-
-		<Card>
+		<Card ref={ref}>
 			<CardActionArea
-					
 				onClick={() => {
 					setSelectedConversation(conversation);
 				}}
@@ -61,13 +58,12 @@ const Conversation: React.FC<Props> = ({ conversation,  setSelectedConversation 
 						</Grid2>
 
 						<Grid2 size={1} display="flex" justifyContent="flex-end">
-				
 							{conversation.unread ? (
 								<PriorityHigh fontSize="small" color="primary" />
 							) : (
 								conversation.latestMessage?.senderId === userId &&
-									conversation.latestMessage?.messageStatus.isRead &&
-									!conversation.latestMessage.messageStatus.isDeleted && (
+								conversation.latestMessage?.messageStatus.isRead &&
+								!conversation.latestMessage.messageStatus.isDeleted && (
 									<Done fontSize="small" color="primary" />
 								)
 							)}
@@ -76,8 +72,9 @@ const Conversation: React.FC<Props> = ({ conversation,  setSelectedConversation 
 				</CardContent>
 			</CardActionArea>
 		</Card>
-
 	);
-};
+});
+
+Conversation.displayName = "Conversation";
 
 export default Conversation;

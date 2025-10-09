@@ -13,11 +13,11 @@ const fetchConversations = async (userId: string, interlocutorIds?: string[], cu
 	const conversations = await conversationClient.findMany({
 		where: interlocutorIds?.length
 			? {
-					OR: [
-						{ user1Id: userId, user2Id: { in: interlocutorIds } },
-						{ user2Id: userId, user1Id: { in: interlocutorIds } },
-					],
-				}
+				OR: [
+					{ user1Id: userId, user2Id: { in: interlocutorIds } },
+					{ user2Id: userId, user1Id: { in: interlocutorIds } },
+				],
+			}
 			: { OR: [{ user1Id: userId }, { user2Id: userId }] },
 		orderBy: { latestMessage: { createdAt: "desc" } },
 		...(take ? { take: take + 1 } : {}),

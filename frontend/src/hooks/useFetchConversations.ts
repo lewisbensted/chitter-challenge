@@ -6,6 +6,7 @@ import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import toast from "react-hot-toast";
 import { mergeAndSortConvos } from "../utils/mergeAndSortConvos";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchConversationsReturn {
 	conversations: Map<string, IConversation>;
@@ -18,6 +19,7 @@ interface UseFetchConversationsReturn {
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 	hasNextPage: boolean;
+	page: number;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -34,7 +36,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 
 	const fetchConversations = useCallback(
 		async (userIds?: string[], isRefresh = false, sort = false) => {
-			const take = page === 0 ? 2 : 1;
+			const take = page === 0 ? 10 : 5;
 			if (!isRefresh && !isConversationsLoading) setConversationsLoading(true);
 			try {
 				const params = new URLSearchParams();
@@ -58,7 +60,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 					if (newConvosArray.length) cursorRef.current = newConvosArray[newConvosArray.length - 1].key;
 
 					setConversations((prevConvos) =>
-						mergeAndSortConvos(sort, newConvos, page === 0 ? undefined : prevConvos)
+						mergeAndSortConvos(sort, newConvos, page > 0 || isRefresh ? prevConvos : undefined)
 					);
 
 					setConversationsError("");
@@ -70,7 +72,12 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 					else setConversationsError("An unexpected error occured while loading conversations.");
 				}
 			} finally {
-				if (isMounted.current) setConversationsLoading(false);
+				setTimeout(
+					() => {
+						setConversationsLoading(false);
+					},
+					page === 0 ? SPINNER_DURATION : 0
+				);
 			}
 		},
 		[page]
@@ -87,6 +94,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setConversationsLoading,
 		setPage,
 		hasNextPage,
+		page,
 	};
 };
 

@@ -76,8 +76,6 @@ const SendMessage: React.FC<Props> = ({
 				container
 				component="form"
 				onSubmit={handleSubmit(sendMessage)}
-				display={"flex"}
-				justifyContent={"center"}
 				width={350}
 			>
 				<Grid2 container size={11} paddingRight={2}>

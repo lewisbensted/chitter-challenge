@@ -24,7 +24,7 @@ const UserPage: React.FC = () => {
 
 	const { isUserLoading, userEnhanced, setUserEnhanced } = useFetchUser(id);
 
-	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage } =
+	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage, page } =
 		useFetchCheets(id);
 
 	const { userId } = useAuth();
@@ -84,6 +84,11 @@ const UserPage: React.FC = () => {
 		return { ...userEnhanced, conversation: Array.from(conversations.values())[0] ?? null };
 	}, [userEnhanced, conversations]);
 
+	const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+	useEffect(() => {
+		if (!isCheetsLoading) setHasFetchedOnce(true);
+	}, [isCheetsLoading]);
+
 	return (
 		<Box>
 			{isUserLoading || isConversationsLoading ? (
@@ -109,35 +114,37 @@ const UserPage: React.FC = () => {
 						</Box>
 					)}
 
-					{cheetsError ? (
-						<Typography variant="subtitle1">{cheetsError}</Typography>
-					) : (
-						<ScrollGrid ref={listRef}>
-							{!isCheetsLoading && cheets.length === 0 ? (
-								<Typography variant="subtitle1">No cheets yet.</Typography>
-							) : (
-
-								cheets.map((cheet, index) => (
-									<Cheet
-										ref={cheets.length === index + 1 ? lastCheetRef : null}
-										key={cheet.uuid}
-										cheet={cheet}
-										userId={userId}
-										setCheets={setCheets}
-										setErrors={setErrors}
-										isModalView={false}
-										numberOfCheets={cheets.length}
-										setSelectedCheet={setSelectedCheet}
-									/>
-								))
-							)}
-							{isCheetsLoading && (
-								<FlexBox>
-									<CircularProgress thickness={5} />
-								</FlexBox>
-							)}
-						</ScrollGrid>
-					)}
+					<ScrollGrid ref={listRef}>
+						{hasFetchedOnce && (
+							<Fragment>
+								{((page === 0 && !isCheetsLoading) || page > 0) &&
+									cheets.length > 0 &&
+									cheets.map((cheet, index) => (
+										<Cheet
+											ref={cheets.length === index + 1 ? lastCheetRef : null}
+											key={cheet.uuid}
+											cheet={cheet}
+											userId={userId}
+											setCheets={setCheets}
+											setErrors={setErrors}
+											isModalView={false}
+											numberOfCheets={cheets.length}
+											setSelectedCheet={setSelectedCheet}
+										/>
+									))}
+								{page === 0 && !isCheetsLoading && !cheets.length && (
+									<Typography variant="subtitle1">
+										{cheetsError || "No cheets to display."}
+									</Typography>
+								)}
+							</Fragment>
+						)}
+						{isCheetsLoading && (
+							<FlexBox>
+								<CircularProgress thickness={5} />
+							</FlexBox>
+						)}
+					</ScrollGrid>
 					{userId === id && !cheetsError && (
 						<SendCheet
 							setCheetsError={setCheetsError}

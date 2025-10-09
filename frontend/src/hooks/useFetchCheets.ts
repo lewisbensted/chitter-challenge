@@ -5,6 +5,7 @@ import { serverURL } from "../config/config";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { useError } from "../contexts/ErrorContext";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
@@ -14,6 +15,7 @@ interface UseFetchCheetsReturn {
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 	hasNextPage: boolean;
+	page: number;
 }
 
 const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
@@ -22,7 +24,6 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 	const [cheetsError, setCheetsError] = useState<string>("");
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
-	const isFirstLoad = useRef<boolean>(true);
 	const [page, setPage] = useState<number>(0);
 
 	const { handleErrors } = useError();
@@ -31,7 +32,7 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 
 	const fetchCheets = useCallback(async () => {
 		const take = page === 0 ? 10 : 5;
-		
+
 		try {
 			setCheetsLoading(true);
 
@@ -47,10 +48,6 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 			);
 			const { cheets: newCheets, hasNext } = res.data;
 
-			if (isFirstLoad.current) {
-				isFirstLoad.current = false;
-			}
-
 			if (isMounted.current) {
 				setHasNextPage(hasNext);
 
@@ -61,14 +58,19 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 				setCheetsError("");
 			}
 		} catch (error) {
-			if (isFirstLoad.current) {
+			if (page===0) {
 				logErrors(error);
 				if (isMounted.current) setCheetsError("An unexpected error occured while loading cheets.");
 			} else {
 				handleErrors(error, "load cheets", false);
 			}
 		} finally {
-			if (isMounted.current) setCheetsLoading(false);
+			setTimeout(
+				() => {
+					setCheetsLoading(false);
+				},
+				page === 0 ? SPINNER_DURATION : 0
+			);
 		}
 	}, [page, pageUserId]);
 
@@ -84,6 +86,7 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 		setPage,
 		setCheetsError,
 		hasNextPage,
+		page,
 	};
 };
 

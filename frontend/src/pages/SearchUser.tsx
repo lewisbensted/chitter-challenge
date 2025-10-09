@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Box, Button, CircularProgress, Grid2, IconButton, TextField, Typography } from "@mui/material";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import FlexBox from "../styles/FlexBox";
@@ -72,12 +72,20 @@ const SearchUser: React.FC = () => {
 		[users, conversations]
 	);
 
+	const isLoading = isSearchLoading || isConversationsLoading;
+
+	const [displayedUsers, setDisplayedUsers] = useState<IUserEnhanced[]>([]);
+	useEffect(() => {
+		if (isLoading) return;
+		setDisplayedUsers(usersWithConvos);
+	}, [isLoading, usersWithConvos]);
+
 	const [activeSearch, setActiveSearch] = useState("");
 
 	const onSubmit: SubmitHandler<{ searchString: string }> = async (data) => {
-		setPage(0);
 		setActiveSearch(data.searchString);
-		await searchUsers(data.searchString);
+		setPage(0);
+		await searchUsers(data.searchString, true);
 	};
 
 	useEffect(() => {
@@ -85,7 +93,16 @@ const SearchUser: React.FC = () => {
 		void searchUsers(activeSearch);
 	}, [activeSearch, page, searchUsers]);
 
-	const isLoading = isSearchLoading || isConversationsLoading;
+	useLayoutEffect(() => {
+		requestAnimationFrame(() => {
+			if (listRef.current) {
+				listRef.current.scrollTo({
+					top: listRef.current.scrollHeight,
+					behavior: "smooth",
+				});
+			}
+		});
+	}, [displayedUsers.length]);
 
 	return (
 		<Box>
@@ -111,10 +128,11 @@ const SearchUser: React.FC = () => {
 			</FlexBox>
 			{activeSearch && (
 				<Fragment>
-					<ScrollGrid ref={listRef}>
-						{!(isLoading && page === 0) &&
-							(usersWithConvos.length ? (
-								usersWithConvos.map((user) => (
+					<ScrollGrid ref={listRef} height={430}>
+						<Fragment>
+							{((page === 0 && !isLoading) || page > 0) &&
+								displayedUsers.length > 0 &&
+								displayedUsers.map((user) => (
 									<User
 										key={user.user.uuid}
 										sessionUserId={userId}
@@ -127,10 +145,11 @@ const SearchUser: React.FC = () => {
 										}}
 										userPage={false}
 									/>
-								))
-							) : searchError ? null : (
+								))}
+							{page === 0 && !isLoading && !displayedUsers.length && !searchError && (
 								<Typography variant="subtitle1">No users found.</Typography>
-							))}
+							)}
+						</Fragment>
 						{isLoading && (
 							<FlexBox>
 								<CircularProgress thickness={5} />
@@ -138,15 +157,17 @@ const SearchUser: React.FC = () => {
 						)}
 					</ScrollGrid>
 					{hasNextPage && (
-						<Button
-							onClick={() => {
-								setPage((page) => page + 1);
-							}}
-							variant="contained"
-							sx={{ pointerEvents: isLoading ? "none" : undefined }}
-						>
-							<Typography variant="button">Load more</Typography>
-						</Button>
+						<FlexBox>
+							<Button
+								onClick={() => {
+									setPage((page) => page + 1);
+								}}
+								variant="contained"
+								sx={{ pointerEvents: isLoading ? "none" : undefined }}
+							>
+								<Typography variant="button">Load more</Typography>
+							</Button>
+						</FlexBox>
 					)}
 					{selectedConversation && (
 						<MessageModal

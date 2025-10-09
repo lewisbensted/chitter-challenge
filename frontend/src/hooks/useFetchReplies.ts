@@ -5,6 +5,7 @@ import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { useError } from "../contexts/ErrorContext";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchRepliesReturn {
 	replies: IReply[];
@@ -27,7 +28,6 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 	const [page, setPage] = useState<number>(0);
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
-	const isFirstLoad = useRef<boolean>(true);
 	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
@@ -50,9 +50,6 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 
 			const { replies: newReplies, hasNext } = res.data;
 
-			if (isFirstLoad.current) {
-				isFirstLoad.current = false;
-			}
 			if (isMounted.current) {
 				setHasNextPage(hasNext);
 
@@ -67,14 +64,19 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 				setRepliesError("");
 			}
 		} catch (error) {
-			if (isFirstLoad.current) {
+			if (page === 0) {
 				logErrors(error);
 				if (isMounted.current) setRepliesError("An unexpected error occured while loading replies.");
 			} else {
 				handleErrors(error, "load replies", false);
 			}
 		} finally {
-			if (isMounted.current) setRepliesLoading(false);
+			setTimeout(
+				() => {
+					setRepliesLoading(false);
+				},
+				page === 0 ? SPINNER_DURATION : 0
+			);
 		}
 	}, [cheetId]);
 

@@ -10,7 +10,7 @@ interface UseSearchUsersReturn {
 	users: IUserEnhanced[];
 	newUsers: IUserEnhanced[];
 	isSearchLoading: boolean;
-	searchUsers: (searchString: string) => Promise<void>;
+	searchUsers: (searchString: string, reset?: boolean) => Promise<void>;
 	setUsers: React.Dispatch<React.SetStateAction<IUserEnhanced[]>>;
 	hasNextPage: boolean;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -33,12 +33,12 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 	const isMounted = useIsMounted();
 
 	const searchUsers = useCallback(
-		async (searchString: string) => {
-			const take = page === 0 ? 10 : 5;
+		async (searchString: string, reset = false) => {
+			const take = page === 0 ? 5 : 5;
 			try {
 				setSearchLoading(true);
 
-				if (page === 0) {
+				if (reset) {
 					cursorRef.current = undefined;
 					setUsers([]);
 					setNewUsers([]);
@@ -69,7 +69,7 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 						);
 						const newUsers = Array.from(newUserMap.values());
 						setNewUsers(newUsers);
-						setUsers((prevUsers) => (page === 0 ? newUsers : [...prevUsers, ...newUsers]));
+						setUsers((prevUsers) => (reset ? newUsers : [...prevUsers, ...newUsers]));
 						cursorRef.current = newUsers[newUsers.length - 1].user.uuid;
 					}
 					setSearchError(false);
@@ -85,7 +85,7 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 						() => {
 							setSearchLoading(false);
 						},
-						page === 0 ? SPINNER_DURATION : 0
+						reset ? SPINNER_DURATION : 0
 					);
 			}
 		},
