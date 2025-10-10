@@ -5,6 +5,7 @@ import { serverURL } from "../config/config";
 import { useNavigate } from "react-router";
 import { useIsMounted } from "../utils/isMounted";
 import { logErrors } from "../utils/processErrors";
+import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchUserReturn {
 	userEnhanced: IUserEnhanced | undefined;
@@ -35,7 +36,9 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 				logErrors(error);
 			}
 		} finally {
-			if (isMounted.current) setUserLoading(false);
+			setTimeout(() => {
+				setUserLoading(false);
+			}, SPINNER_DURATION);
 		}
 	}, [userId, navigate]);
 

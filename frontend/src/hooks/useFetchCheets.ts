@@ -69,7 +69,7 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 				() => {
 					setCheetsLoading(false);
 				},
-				page === 0 ? SPINNER_DURATION : 0
+				page === 0 ? SPINNER_DURATION  : 0
 			);
 		}
 	}, [page, pageUserId]);

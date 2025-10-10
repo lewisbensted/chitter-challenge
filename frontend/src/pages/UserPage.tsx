@@ -41,6 +41,7 @@ const UserPage: React.FC = () => {
 		if (!id || !userId) return;
 		void fetchConversations([id], false);
 	}, [id, userId, fetchConversations]);
+	
 
 	const isFirstLoad = useRef(true);
 	useEffect(() => {
@@ -91,7 +92,7 @@ const UserPage: React.FC = () => {
 
 	return (
 		<Box>
-			{isUserLoading || isConversationsLoading ? (
+			{isUserLoading || isConversationsLoading || (isCheetsLoading && !hasFetchedOnce) ? (
 				<FlexBox>
 					<CircularProgress thickness={5} />
 				</FlexBox>

@@ -76,7 +76,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 					() => {
 						setConversationsLoading(false);
 					},
-					page === 0 ? SPINNER_DURATION : 0
+					page === 0 && !userIds?.length ? SPINNER_DURATION : 0
 				);
 			}
 		},
