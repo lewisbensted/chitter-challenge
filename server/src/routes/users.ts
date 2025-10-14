@@ -16,7 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
 		const cursor = req.query.cursor as string | undefined;
 
 		if (!userSearch) {
-			return res.status(200).json([]);
+			return res.status(200).json({ users: [], hasNext: false });
 		}
 
 		const dbUsers = await userClient.findMany({

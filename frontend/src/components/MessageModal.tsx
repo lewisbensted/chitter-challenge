@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
-import { Grid2, Link, Typography } from "@mui/material";
+import { Button, Grid2, Link, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
 import { Link as RouterLink } from "react-router-dom";
@@ -119,7 +119,7 @@ const MessageModal: React.FC<Props> = ({
 		(message: HTMLElement | null) => {
 			if (observer.current) observer.current.disconnect();
 			observer.current = new IntersectionObserver((messages) => {
-				if (isMessagesLoading || !isMessagesSet) return;
+				if (isMessagesLoading || !isMessagesSet || messagesError) return;
 				if (messages[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
@@ -128,6 +128,14 @@ const MessageModal: React.FC<Props> = ({
 		},
 		[isMessagesLoading, hasNextPage, isMessagesSet, setPage]
 	);
+
+	const message = () => {
+		if (messagesError) {
+			return page === 0 ? "An unexpected error occured while loading messages." : "Failed to load more messages.";
+		} else if (!messages.length) {
+			return "No messages to display.";
+		}
+	};
 
 	return (
 		<Dialog
@@ -166,6 +174,18 @@ const MessageModal: React.FC<Props> = ({
 								<CircularProgress thickness={5} />
 							</FlexBox>
 						)}
+						{!isMessagesLoading && (
+							<Fragment>
+								<Typography variant="subtitle1">{message()}</Typography>
+								{(messagesError) && (
+									<FlexBox>
+										<Button onClick={() => fetchMessages(true)} variant="contained">
+											<Typography variant="button">Retry</Typography>
+										</Button>
+									</FlexBox>
+								)}
+							</Fragment>
+						)}
 						{hasFetchedOnce && (
 							<Fragment>
 								{((page === 0 && !isMessagesLoading) || page > 0) &&
@@ -182,11 +202,6 @@ const MessageModal: React.FC<Props> = ({
 											userPageId={userPageId}
 										/>
 									))}
-								{page === 0 && !isMessagesLoading && !messages.length && (
-									<Typography variant="subtitle1">
-										{messagesError || "No messages to display."}
-									</Typography>
-								)}
 							</Fragment>
 						)}
 					</ScrollGrid>

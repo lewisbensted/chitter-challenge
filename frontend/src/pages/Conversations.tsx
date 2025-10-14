@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Conversation from "../components/Conversation";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchConversations from "../hooks/useFetchConversations";
 import type { IConversation } from "../interfaces/interfaces";
@@ -55,8 +55,7 @@ const Conversations: React.FC = () => {
 		}
 		void fetchConversations(
 			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
-			true,
-			true
+			{ isRefresh: true, sort: true }
 		);
 	}, [userId, isValidateLoading, reloadConversationsTrigger, fetchConversations]);
 
@@ -66,9 +65,9 @@ const Conversations: React.FC = () => {
 	const lastConversationRef = useCallback(
 		(cheet: HTMLElement | null) => {
 			if (observer.current) observer.current.disconnect();
-			observer.current = new IntersectionObserver((cheets) => {
-				if (isConversationsLoading) return;
-				if (cheets[0].isIntersecting && hasNextPage) {
+			observer.current = new IntersectionObserver((conversations) => {
+				if (isConversationsLoading || conversationsError) return;
+				if (conversations[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
 			});
@@ -81,6 +80,16 @@ const Conversations: React.FC = () => {
 	useEffect(() => {
 		if (!isConversationsLoading) setHasFetchedOnce(true);
 	}, [isConversationsLoading]);
+
+	const message = () => {
+		if (conversationsError) {
+			return page === 0
+				? "An unexpected error occured while loading conversations."
+				: "Failed to load more conversations.";
+		} else if (!conversations.size) {
+			return "No conversations to display.";
+		}
+	};
 
 	return (
 		<Box>
@@ -100,10 +109,20 @@ const Conversations: React.FC = () => {
 											setSelectedConversation={setSelectedConversation}
 										/>
 									))}
-								{page === 0 && !isConversationsLoading && !convosArray.length && (
-									<Typography variant="subtitle1">
-										{conversationsError ?? "No conversations to display."}
-									</Typography>
+								{!isConversationsLoading && (
+									<Fragment>
+										<Typography variant="subtitle1">{message()}</Typography>
+										{conversationsError && (
+											<FlexBox>
+												<Button
+													onClick={() => fetchConversations(undefined, { isRetry: true })}
+													variant="contained"
+												>
+													<Typography variant="button">Retry</Typography>
+												</Button>
+											</FlexBox>
+										)}
+									</Fragment>
 								)}
 							</Fragment>
 						)}

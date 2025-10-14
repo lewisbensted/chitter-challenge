@@ -4,19 +4,18 @@ import { serverURL } from "../config/config";
 import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
-import { useError } from "../contexts/ErrorContext";
 import toast from "react-hot-toast";
 import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchMessagesReturn {
 	messages: IMessage[];
 	isMessagesLoading: boolean;
-	messagesError: string;
+	messagesError: boolean;
 	page: number;
 	refreshMessagesTrigger: boolean;
-	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
+	setMessagesError: React.Dispatch<React.SetStateAction<boolean>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	fetchMessages: () => Promise<void>;
+	fetchMessages: (isRetry?: boolean) => Promise<void>;
 	hasNextPage: boolean;
 	refreshMessages: () => void;
 	markMessagesRead: () => Promise<void>;
@@ -27,57 +26,54 @@ interface UseFetchMessagesReturn {
 const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
-	const [messagesError, setMessagesError] = useState<string>("");
+	const [messagesError, setMessagesError] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const [refreshMessagesTrigger, toggleRefreshMessages] = useState<boolean>(false);
 	const cursorRef = useRef<string>();
 
-	const { handleErrors } = useError();
-
 	const isMounted = useIsMounted();
 
-	const fetchMessages = useCallback(async () => {
-		const take = page === 0 ? 20 : 10;
-		try {
-			setMessagesLoading(true);
+	const fetchMessages = useCallback(
+		async (isRetry = false) => {
+			const take = page === 0 ? 20 : 10;
+			try {
+				setMessagesLoading(true);
 
-			const params = new URLSearchParams();
-			if (cursorRef.current) params.append("cursor", cursorRef.current);
-			params.append("take", take.toString());
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
 
-			const res = await axios.get<{ messages: IMessage[]; hasNext: boolean }>(
-				`${serverURL}/api/messages/${interlocutorId}?${params}`,
-				{
-					withCredentials: true,
+				const res = await axios.get<{ messages: IMessage[]; hasNext: boolean }>(
+					`${serverURL}/api/messages/${interlocutorId}?${params}`,
+					{
+						withCredentials: true,
+					}
+				);
+				const { messages: newMessages, hasNext } = res.data;
+
+				if (isMounted.current) {
+					setHasNextPage(hasNext);
+					if (newMessages.length) {
+						setMessages((prevMessages) => [...newMessages, ...prevMessages]);
+						cursorRef.current = newMessages[0].uuid;
+					}
+					setMessagesError(false);
 				}
-			);
-			const { messages: newMessages, hasNext } = res.data;
-
-			if (isMounted.current) {
-				setHasNextPage(hasNext);
-				if (newMessages.length) {
-					setMessages((prevMessages) => [...newMessages, ...prevMessages]);
-					cursorRef.current = newMessages[0].uuid;
-				}
-				setMessagesError("");
-			}
-		} catch (error) {
-			if (page === 0) {
+			} catch (error) {
 				logErrors(error);
-				if (isMounted.current) setMessagesError("An unexpected error occurred while loading messages.");
-			} else {
-				handleErrors(error, "load messages", false);
+				setMessagesError(true);
+			} finally {
+				setTimeout(
+					() => {
+						setMessagesLoading(false);
+					},
+					page === 0 || isRetry ? SPINNER_DURATION : 0
+				);
 			}
-		} finally {
-			setTimeout(
-				() => {
-					setMessagesLoading(false);
-				},
-				page === 0 ? SPINNER_DURATION : 0
-			);
-		}
-	}, [page, interlocutorId]);
+		},
+		[page, interlocutorId]
+	);
 
 	const markMessagesFailed = useRef(false);
 	const markMessagesRead = useCallback(async () => {

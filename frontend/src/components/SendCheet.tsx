@@ -13,7 +13,7 @@ import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
+	setCheetsError: React.Dispatch<React.SetStateAction<boolean>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -50,7 +50,7 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 			setCheets((prev) => [pendingCheet, ...prev]);
 			setPendingCheet(null);
 			triggerScroll((prev) => !prev);
-			setCheetsError("");
+			setCheetsError(false);
 			reset();
 		}
 		if (pendingError) {

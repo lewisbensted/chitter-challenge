@@ -4,81 +4,78 @@ import { serverURL } from "../config/config";
 import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
-import { useError } from "../contexts/ErrorContext";
 import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchRepliesReturn {
 	replies: IReply[];
 	isRepliesLoading: boolean;
 	repliesLengthRef: React.MutableRefObject<number>;
-	repliesError: string;
+	repliesError: boolean;
 	page: number;
-	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
+	setRepliesError: React.Dispatch<React.SetStateAction<boolean>>;
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
-	fetchReplies: (userId?: string) => Promise<void>;
+	fetchReplies: (isRetry?: boolean) => Promise<void>;
 	hasNextPage: boolean;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 	const [replies, setReplies] = useState<IReply[]>([]);
-	const [repliesError, setRepliesError] = useState<string>("");
+	const [repliesError, setRepliesError] = useState<boolean>(false);
 	const [isRepliesLoading, setRepliesLoading] = useState<boolean>(true);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const [page, setPage] = useState<number>(0);
 	const cursorRef = useRef<string>();
 	const repliesLengthRef = useRef<number>(0);
-	const { handleErrors } = useError();
 
 	const isMounted = useIsMounted();
 
-	const fetchReplies = useCallback(async () => {
-		const take = 5;
-		try {
-			setRepliesLoading(true);
+	const fetchReplies = useCallback(
+		async (isRetry = false) => {
+			const take = 5;
+			try {
+				setRepliesLoading(true);
 
-			const params = new URLSearchParams();
-			if (cursorRef.current) params.append("cursor", cursorRef.current);
-			params.append("take", take.toString());
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
 
-			const res = await axios.get<{ replies: IReply[]; hasNext: boolean }>(
-				`${serverURL}/api/cheets/${cheetId}/replies?${params}`,
-				{
-					withCredentials: true,
+				const res = await axios.get<{ replies: IReply[]; hasNext: boolean }>(
+					`${serverURL}/api/cheets/${cheetId}/replies?${params}`,
+					{
+						withCredentials: true,
+					}
+				);
+
+				const { replies: newReplies, hasNext } = res.data;
+
+				if (isMounted.current) {
+					setHasNextPage(hasNext);
+
+					if (newReplies.length) {
+						setReplies((replies) => {
+							const updated = [...replies, ...newReplies];
+							repliesLengthRef.current = updated.length;
+							return updated;
+						});
+						cursorRef.current = newReplies[newReplies.length - 1].uuid;
+					}
+					setRepliesError(false);
 				}
-			);
-
-			const { replies: newReplies, hasNext } = res.data;
-
-			if (isMounted.current) {
-				setHasNextPage(hasNext);
-
-				if (newReplies.length) {
-					setReplies((replies) => {
-						const updated = [...replies, ...newReplies];
-						repliesLengthRef.current = updated.length;
-						return updated;
-					});
-					cursorRef.current = newReplies[newReplies.length - 1].uuid;
-				}
-				setRepliesError("");
-			}
-		} catch (error) {
-			if (page === 0) {
+			} catch (error) {
 				logErrors(error);
-				if (isMounted.current) setRepliesError("An unexpected error occured while loading replies.");
-			} else {
-				handleErrors(error, "load replies", false);
+				setRepliesError(true);
+			} finally {
+				setTimeout(
+					() => {
+						setRepliesLoading(false);
+					},
+					page === 0 || isRetry ? SPINNER_DURATION : 0
+				);
 			}
-		} finally {
-			setTimeout(
-				() => {
-					setRepliesLoading(false);
-				},
-				page === 0 ? SPINNER_DURATION : 0
-			);
-		}
-	}, [cheetId]);
+		},
+		[cheetId, page]
+	);
 
 	return {
 		replies,

@@ -4,17 +4,16 @@ import axios from "axios";
 import type { IConversation } from "../interfaces/interfaces";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
-import toast from "react-hot-toast";
 import { mergeAndSortConvos } from "../utils/mergeAndSortConvos";
 import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchConversationsReturn {
 	conversations: Map<string, IConversation>;
-	conversationsError: string | undefined;
+	conversationsError: boolean;
 	isConversationsLoading: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
 	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	fetchConversations: (userIds?: string[], isRefresh?: boolean, replace?: boolean, sort?: boolean) => Promise<void>;
+	fetchConversations: (userIds?: string[], additionalParams?: AdditionalParams) => Promise<void>;
 	reloadConversationsTrigger: boolean;
 	setConversationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -22,11 +21,17 @@ interface UseFetchConversationsReturn {
 	page: number;
 }
 
+interface AdditionalParams {
+	isRefresh?: boolean;
+	isRetry?: boolean;
+	sort?: boolean;
+}
+
 const useFetchConversations = (): UseFetchConversationsReturn => {
 	const [conversations, setConversations] = useState<Map<string, IConversation>>(new Map<string, IConversation>());
 	const [isConversationsLoading, setConversationsLoading] = useState<boolean>(false);
 	const [reloadConversationsTrigger, toggleConversationsTrigger] = useState<boolean>(false);
-	const [conversationsError, setConversationsError] = useState<string>("");
+	const [conversationsError, setConversationsError] = useState<boolean>(false);
 
 	const cursorRef = useRef<string>();
 	const [page, setPage] = useState<number>(0);
@@ -35,7 +40,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 	const isMounted = useIsMounted();
 
 	const fetchConversations = useCallback(
-		async (userIds?: string[], isRefresh = false, sort = false) => {
+		async (userIds?: string[], { isRefresh = false, sort = false, isRetry = false }: AdditionalParams = {}) => {
 			const take = page === 0 ? 10 : 5;
 			if (!isRefresh && !isConversationsLoading) setConversationsLoading(true);
 			try {
@@ -63,20 +68,17 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 						mergeAndSortConvos(sort, newConvos, page > 0 || isRefresh ? prevConvos : undefined)
 					);
 
-					setConversationsError("");
+					setConversationsError(false);
 				}
 			} catch (error) {
 				logErrors(error);
-				if (isMounted.current) {
-					if (isRefresh) toast("Failed to refresh conversations - may be displaying outdated information.");
-					else setConversationsError("An unexpected error occured while loading conversations.");
-				}
+				if (!isRefresh) setConversationsError(true);
 			} finally {
 				setTimeout(
 					() => {
 						setConversationsLoading(false);
 					},
-					page === 0 && !userIds?.length ? SPINNER_DURATION : 0
+					(page === 0 && !userIds?.length) || isRetry ? SPINNER_DURATION : 0
 				);
 			}
 		},

@@ -18,7 +18,7 @@ interface Props {
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
 	repliesLengthRef: React.MutableRefObject<number>;
-	setRepliesError: React.Dispatch<React.SetStateAction<string>>;
+	setRepliesError: React.Dispatch<React.SetStateAction<boolean>>;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 }
@@ -76,11 +76,11 @@ const SendReply: React.FC<Props> = ({
 				});
 			}
 			repliesLengthRef.current++;
-			setRepliesError("");
+			setRepliesError(false);
 			reset();
 		}
 		if (pendingError) {
-			handleErrors(pendingError, "send message");
+			handleErrors(pendingError, "send reply");
 			setPendingError(null);
 		}
 	};

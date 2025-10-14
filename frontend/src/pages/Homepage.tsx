@@ -3,7 +3,7 @@ import SendCheet from "../components/SendCheet";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Box from "@mui/material/Box/Box";
 import Cheet from "../components/Cheet";
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchCheets from "../hooks/useFetchCheets";
 import CheetModal from "../components/CheetModal";
@@ -17,8 +17,17 @@ const Homepage: React.FC = () => {
 	const { setErrors } = useError();
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
-	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, setPage, hasNextPage, page } =
-		useFetchCheets();
+	const {
+		cheets,
+		isCheetsLoading,
+		cheetsError,
+		setCheetsError,
+		setCheets,
+		setPage,
+		hasNextPage,
+		page,
+		fetchCheets,
+	} = useFetchCheets();
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
@@ -37,7 +46,7 @@ const Homepage: React.FC = () => {
 		(cheet: HTMLElement | null) => {
 			if (observer.current) observer.current.disconnect();
 			observer.current = new IntersectionObserver((cheets) => {
-				if (isCheetsLoading) return;
+				if (isCheetsLoading || cheetsError) return;
 				if (cheets[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
@@ -51,6 +60,18 @@ const Homepage: React.FC = () => {
 	useEffect(() => {
 		if (!isCheetsLoading) setHasFetchedOnce(true);
 	}, [isCheetsLoading]);
+
+	useEffect(() => {
+		void fetchCheets();
+	}, [fetchCheets]);
+
+	const message = () => {
+		if (cheetsError) {
+			return page === 0 ? "An unexpected error occured while loading cheets." : "Failed to load more cheets.";
+		} else if (!cheets.length) {
+			return "No cheets to display.";
+		}
+	};
 
 	return (
 		<Box>
@@ -74,8 +95,17 @@ const Homepage: React.FC = () => {
 									setSelectedCheet={setSelectedCheet}
 								/>
 							))}
-						{page === 0 && !isCheetsLoading && !cheets.length && (
-							<Typography variant="subtitle1">{cheetsError || "No cheets to display."}</Typography>
+						{!isCheetsLoading && (
+							<Fragment>
+								<Typography variant="subtitle1">{message()}</Typography>
+								{cheetsError && (
+									<FlexBox>
+										<Button onClick={() => { void fetchCheets(true); }} variant="contained">
+											<Typography variant="button">Retry</Typography>
+										</Button>
+									</FlexBox>
+								)}
+							</Fragment>
 						)}
 					</Fragment>
 				)}
@@ -87,7 +117,7 @@ const Homepage: React.FC = () => {
 				)}
 			</ScrollGrid>
 
-			{userId && !cheetsError && (
+			{hasFetchedOnce && userId && !cheetsError && (
 				<SendCheet
 					setCheets={setCheets}
 					setCheetsError={setCheetsError}

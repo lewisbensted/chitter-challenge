@@ -43,10 +43,7 @@ const SearchUser: React.FC = () => {
 
 	useEffect(() => {
 		if (!newUsers.length || !userId) return;
-		void fetchConversations(
-			newUsers.map((user) => user.user.uuid),
-			false
-		);
+		void fetchConversations(newUsers.map((user) => user.user.uuid));
 	}, [newUsers, userId, fetchConversations]);
 
 	const isFirstLoad = useRef(true);
@@ -58,7 +55,7 @@ const SearchUser: React.FC = () => {
 		}
 		void fetchConversations(
 			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
-			true
+			{ isRefresh: true }
 		);
 	}, [reloadConversationsTrigger, userId, fetchConversations]);
 
@@ -80,7 +77,7 @@ const SearchUser: React.FC = () => {
 		setDisplayedUsers(usersWithConvos);
 	}, [isLoading, usersWithConvos]);
 
-	const [activeSearch, setActiveSearch] = useState("");
+	const [activeSearch, setActiveSearch] = useState<string | null>(null);
 
 	const onSubmit: SubmitHandler<{ searchString: string }> = async (data) => {
 		setActiveSearch(data.searchString);
@@ -126,7 +123,7 @@ const SearchUser: React.FC = () => {
 					</Grid2>
 				</Grid2>
 			</FlexBox>
-			{activeSearch && (
+			{activeSearch !== null && (
 				<Fragment>
 					<ScrollGrid ref={listRef} height={430}>
 						<Fragment>

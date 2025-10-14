@@ -1,82 +1,75 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
-import { useError } from "../contexts/ErrorContext";
 import { SPINNER_DURATION } from "../config/layout";
 
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
 	isCheetsLoading: boolean;
-	cheetsError: string;
-	setCheetsError: React.Dispatch<React.SetStateAction<string>>;
+	cheetsError: boolean;
+	setCheetsError: React.Dispatch<React.SetStateAction<boolean>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 	hasNextPage: boolean;
 	page: number;
+	fetchCheets: (isRetry?: boolean) => Promise<void>;
 }
 
 const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 	const [isCheetsLoading, setCheetsLoading] = useState<boolean>(true);
 	const [cheets, setCheets] = useState<ICheet[]>([]);
-	const [cheetsError, setCheetsError] = useState<string>("");
+	const [cheetsError, setCheetsError] = useState<boolean>(false);
 	const [hasNextPage, setHasNextPage] = useState(false);
 	const cursorRef = useRef<string>();
 	const [page, setPage] = useState<number>(0);
 
-	const { handleErrors } = useError();
-
 	const isMounted = useIsMounted();
 
-	const fetchCheets = useCallback(async () => {
-		const take = page === 0 ? 10 : 5;
+	const fetchCheets = useCallback(
+		async (isRetry = false) => {
+			const take = page === 0 ? 10 : 5;
 
-		try {
-			setCheetsLoading(true);
+			try {
+				setCheetsLoading(true);
 
-			const params = new URLSearchParams();
-			if (cursorRef.current) params.append("cursor", cursorRef.current);
-			params.append("take", take.toString());
+				const params = new URLSearchParams();
+				if (cursorRef.current) params.append("cursor", cursorRef.current);
+				params.append("take", take.toString());
 
-			const res = await axios.get<{ cheets: ICheet[]; hasNext: boolean }>(
-				`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${params}`,
-				{
-					withCredentials: true,
+				const res = await axios.get<{ cheets: ICheet[]; hasNext: boolean }>(
+					`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${params}`,
+					{
+						withCredentials: true,
+					}
+				);
+				const { cheets: newCheets, hasNext } = res.data;
+
+				if (isMounted.current) {
+					setHasNextPage(hasNext);
+
+					if (newCheets.length) {
+						setCheets((prevCheets) => [...prevCheets, ...newCheets]);
+						cursorRef.current = newCheets[newCheets.length - 1].uuid;
+					}
+					setCheetsError(false);
 				}
-			);
-			const { cheets: newCheets, hasNext } = res.data;
-
-			if (isMounted.current) {
-				setHasNextPage(hasNext);
-
-				if (newCheets.length) {
-					setCheets((prevCheets) => [...prevCheets, ...newCheets]);
-					cursorRef.current = newCheets[newCheets.length - 1].uuid;
-				}
-				setCheetsError("");
-			}
-		} catch (error) {
-			if (page===0) {
+			} catch (error) {
 				logErrors(error);
-				if (isMounted.current) setCheetsError("An unexpected error occured while loading cheets.");
-			} else {
-				handleErrors(error, "load cheets", false);
+				setCheetsError(true);
+			} finally {
+				setTimeout(
+					() => {
+						setCheetsLoading(false);
+					},
+					page === 0 || isRetry ? SPINNER_DURATION : 0
+				);
 			}
-		} finally {
-			setTimeout(
-				() => {
-					setCheetsLoading(false);
-				},
-				page === 0 ? SPINNER_DURATION  : 0
-			);
-		}
-	}, [page, pageUserId]);
-
-	useEffect(() => {
-		void fetchCheets();
-	}, [fetchCheets]);
+		},
+		[page, pageUserId]
+	);
 
 	return {
 		cheets,
@@ -87,6 +80,7 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 		setCheetsError,
 		hasNextPage,
 		page,
+		fetchCheets,
 	};
 };
 

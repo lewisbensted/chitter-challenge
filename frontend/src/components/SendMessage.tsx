@@ -17,7 +17,7 @@ interface Props {
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	triggerScroll: React.Dispatch<React.SetStateAction<boolean>>;
-	setMessagesError: React.Dispatch<React.SetStateAction<string>>;
+	setMessagesError: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 	convosPage?: boolean;
 }
@@ -61,7 +61,7 @@ const SendMessage: React.FC<Props> = ({
 			if (convosPage) {
 				toggleReloadTrigger((reloadTrigger) => !reloadTrigger);
 			}
-			setMessagesError("");
+			setMessagesError(false);
 			reset();
 		}
 		if (pendingError) {

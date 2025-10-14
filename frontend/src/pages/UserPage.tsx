@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import type { ICheet, IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import SendCheet from "../components/SendCheet";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import Cheet from "../components/Cheet";
 import FlexBox from "../styles/FlexBox";
 import useFetchCheets from "../hooks/useFetchCheets";
@@ -24,7 +24,7 @@ const UserPage: React.FC = () => {
 
 	const { isUserLoading, userEnhanced, setUserEnhanced } = useFetchUser(id);
 
-	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage, page } =
+	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage, page, fetchCheets } =
 		useFetchCheets(id);
 
 	const { userId } = useAuth();
@@ -38,10 +38,13 @@ const UserPage: React.FC = () => {
 	} = useFetchConversations();
 
 	useEffect(() => {
+		void fetchCheets();
+	}, [fetchCheets]);
+
+	useEffect(() => {
 		if (!id || !userId) return;
-		void fetchConversations([id], false);
+		void fetchConversations([id]);
 	}, [id, userId, fetchConversations]);
-	
 
 	const isFirstLoad = useRef(true);
 	useEffect(() => {
@@ -50,7 +53,7 @@ const UserPage: React.FC = () => {
 			isFirstLoad.current = false;
 			return;
 		}
-		void fetchConversations([id], true);
+		void fetchConversations([id], { isRefresh: true });
 	}, [id, userId, reloadConversationsTrigger, fetchConversations]);
 
 	const { setErrors } = useError();
@@ -70,7 +73,7 @@ const UserPage: React.FC = () => {
 		(cheet: HTMLElement | null) => {
 			if (observer.current) observer.current.disconnect();
 			observer.current = new IntersectionObserver((cheets) => {
-				if (isCheetsLoading) return;
+				if (isCheetsLoading || cheetsError) return;
 				if (cheets[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
@@ -89,6 +92,14 @@ const UserPage: React.FC = () => {
 	useEffect(() => {
 		if (!isCheetsLoading) setHasFetchedOnce(true);
 	}, [isCheetsLoading]);
+
+	const message = () => {
+		if (cheetsError) {
+			return page === 0 ? "An unexpected error occured while loading cheets." : "Failed to load more cheets.";
+		} else if (!cheets.length) {
+			return "No cheets to display.";
+		}
+	};
 
 	return (
 		<Box>
@@ -133,19 +144,28 @@ const UserPage: React.FC = () => {
 											setSelectedCheet={setSelectedCheet}
 										/>
 									))}
-								{page === 0 && !isCheetsLoading && !cheets.length && (
-									<Typography variant="subtitle1">
-										{cheetsError || "No cheets to display."}
-									</Typography>
+								{!isCheetsLoading && (
+									<Fragment>
+										<Typography variant="subtitle1">{message()}</Typography>
+										{cheetsError && (
+											<FlexBox>
+												<Button onClick={() => { void fetchCheets(true); }} variant="contained">
+													<Typography variant="button">Retry</Typography>
+												</Button>
+											</FlexBox>
+										)}
+									</Fragment>
 								)}
 							</Fragment>
 						)}
+
 						{isCheetsLoading && (
 							<FlexBox>
 								<CircularProgress thickness={5} />
 							</FlexBox>
 						)}
 					</ScrollGrid>
+
 					{userId === id && !cheetsError && (
 						<SendCheet
 							setCheetsError={setCheetsError}

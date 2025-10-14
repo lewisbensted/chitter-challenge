@@ -4,7 +4,7 @@ import IconButton from "@mui/material/IconButton/IconButton";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 import Close from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog/Dialog";
-import { Divider, Grid2, Typography } from "@mui/material";
+import { Button, Divider, Grid2, Typography } from "@mui/material";
 import Reply from "./Reply";
 import Cheet from "./Cheet";
 import SendReply from "./SendReply";
@@ -45,7 +45,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 		if (isOpen) {
 			void fetchReplies();
 		}
-	}, [isOpen, page, fetchReplies]);
+	}, [isOpen, fetchReplies]);
 
 	const listRef = useRef<HTMLDivElement>(null);
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
@@ -59,15 +59,15 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 
 	const observer = useRef<IntersectionObserver>();
 	const lastReplyRef = useCallback(
-		(cheet: HTMLElement | null) => {
+		(reply: HTMLElement | null) => {
 			if (observer.current) observer.current.disconnect();
-			observer.current = new IntersectionObserver((cheets) => {
-				if (isRepliesLoading) return;
-				if (cheets[0].isIntersecting && hasNextPage) {
+			observer.current = new IntersectionObserver((replies) => {
+				if (isRepliesLoading || repliesError) return;
+				if (replies[0].isIntersecting && hasNextPage) {
 					setPage((page) => page + 1);
 				}
 			});
-			if (cheet) observer.current.observe(cheet);
+			if (reply) observer.current.observe(reply);
 		},
 		[isRepliesLoading, hasNextPage, setPage]
 	);
@@ -76,6 +76,14 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 	useEffect(() => {
 		if (!isRepliesLoading) setHasFetchedOnce(true);
 	}, [isRepliesLoading]);
+
+	const message = () => {
+		if (repliesError) {
+			return page === 0 ? "An unexpected error occured while loading replies." : "Failed to load more replies.";
+		} else if (!replies.length) {
+			return "No replies to display.";
+		}
+	};
 
 	return (
 		<Dialog open={isOpen} fullWidth maxWidth="md">
@@ -119,10 +127,17 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 											numberOfReplies={replies.length}
 										/>
 									))}
-								{page === 0 && !isRepliesLoading && !replies.length && (
-									<Typography variant="subtitle1">
-										{repliesError || "No replies to display."}
-									</Typography>
+								{!isRepliesLoading && (
+									<Fragment>
+										<Typography variant="subtitle1">{message()}</Typography>
+										{repliesError && (
+											<FlexBox>
+												<Button onClick={() => fetchReplies(true)} variant="contained">
+													<Typography variant="button">Retry</Typography>
+												</Button>
+											</FlexBox>
+										)}
+									</Fragment>
 								)}
 							</Fragment>
 						)}

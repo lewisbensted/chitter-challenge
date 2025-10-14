@@ -3,7 +3,6 @@ import { Box, Card, CardActions, CardContent, Grid2, Link, Typography } from "@m
 import type { IConversation, IUserEnhanced } from "../interfaces/interfaces";
 import ConversationIcon from "./ConversationIcon";
 import FollowIcon from "./FollowIcon";
-import { Fragment } from "react/jsx-runtime";
 import { Link as RouterLink } from "react-router-dom";
 
 interface Props {
@@ -24,11 +23,11 @@ const User: React.FC<Props> = ({
 	const { user, conversation, isFollowing } = userEnhanced;
 	
 	return userPage ? (
-		<Grid2 container justifyContent={"center"} alignItems={'center'} gap={0.5}>
+		<Grid2 container justifyContent={"center"} alignItems={"center"} gap={0.5}>
 			<Typography variant="h4" component="span">{user.username}</Typography>
 
 			{sessionUserId && sessionUserId !== user.uuid && (
-				<Box paddingTop={1.3} display={'flex'}>
+				<Box paddingTop={1.3} display={"flex"}>
 					<ConversationIcon
 						conversation={conversation}
 						setSelectedConversation={setSelectedConversation}
