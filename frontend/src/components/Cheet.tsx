@@ -13,6 +13,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	userId?: string | null;
@@ -52,18 +53,21 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			try {
 				setEditLoading(true);
 				if (setCheetLoading) setCheetLoading(true);
-				const updatedCheet = await axios.put<ICheet>(
+				const res = await axios.put<ICheet>(
 					`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`,
 					data,
 					{
 						withCredentials: true,
 					}
 				);
-				setPendingCheet(updatedCheet.data);
+				const updatedCheet = res.data;
+				if (typeof updatedCheet !== "object") throwApiError("object", updatedCheet);
+				setPendingCheet(updatedCheet);
 			} catch (error) {
 				setPendingError(error);
 			} finally {
 				setEditing(false);
+				setEditLoading(false);
 				if (setCheetLoading) setCheetLoading(false);
 			}
 		};

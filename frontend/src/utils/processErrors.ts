@@ -1,5 +1,6 @@
 import axios from "axios";
 import { extractData } from "./extractErrorData";
+import type {ApiResponseError} from './apiResponseError'
 
 export const logErrors = (error: unknown) => {
 	if (axios.isAxiosError(error)) {
@@ -11,6 +12,15 @@ export const logErrors = (error: unknown) => {
 			code: error.code,
 			errors: errors,
 			customCode: code,
+		});
+	} else if ((error as unknown as ApiResponseError)?.type == 'ApiResponseError') {
+		const apiError = error as ApiResponseError
+		console.error("Axios error:", {
+			message: apiError.message,
+			status: apiError.status,
+			type: apiError.type,
+			expected: apiError.expected,
+			actual: apiError.actual
 		});
 	} else {
 		console.error("Unknown error occurred:", {

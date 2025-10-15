@@ -10,6 +10,7 @@ import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	selectedCheet: ICheet;
@@ -45,10 +46,12 @@ const SendReply: React.FC<Props> = ({
 	const sendReply: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
-			const newReply = await axios.post<IReply>(`${serverURL}/api/cheets/${selectedCheet.uuid}/replies`, data, {
+			const res = await axios.post<IReply>(`${serverURL}/api/cheets/${selectedCheet.uuid}/replies`, data, {
 				withCredentials: true,
 			});
-			setPendingReply(newReply.data);
+			const newReply = res.data;
+			if (typeof newReply !== "object") throwApiError("object", newReply);
+			setPendingReply(newReply);
 		} catch (error) {
 			setPendingError(error);
 			handleErrors(error, "send reply", isMounted.current);
@@ -87,12 +90,7 @@ const SendReply: React.FC<Props> = ({
 
 	return (
 		<FlexBox>
-			<Grid2
-				container
-				component="form"
-				onSubmit={handleSubmit(sendReply)}
-				width={350}
-			>
+			<Grid2 container component="form" onSubmit={handleSubmit(sendReply)} width={350}>
 				<Grid2 container size={11} paddingRight={2}>
 					<TextField {...register("text")} type="text" variant="standard" label="Send reply" />
 				</Grid2>

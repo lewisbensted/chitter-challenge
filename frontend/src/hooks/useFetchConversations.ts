@@ -6,6 +6,7 @@ import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { mergeAndSortConvos } from "../utils/mergeAndSortConvos";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface UseFetchConversationsReturn {
 	conversations: Map<string, IConversation>;
@@ -56,16 +57,18 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 					}
 				);
 
-				const { conversations, hasNext } = res.data;
+				const { conversations: newConvos, hasNext } = res.data;	
+				if (!Array.isArray(newConvos) || typeof hasNext !== "boolean")
+					throwApiError({ conversations: "array", hasNext: "boolean" }, res.data);
 
 				if (isMounted.current) {
 					setHasNextPage(hasNext);
-					const newConvos = new Map(conversations.map((convo) => [convo.interlocutorId, convo]));
-					const newConvosArray = Array.from(newConvos.values());
-					if (newConvosArray.length) cursorRef.current = newConvosArray[newConvosArray.length - 1].key;
+					const newConvosMap = new Map(newConvos.map((convo) => [convo.interlocutorId, convo]));
+					// using a map for conversations for faster lookup when searching for users
+					if (newConvos.length) cursorRef.current = newConvos[newConvos.length - 1].key;
 
 					setConversations((prevConvos) =>
-						mergeAndSortConvos(sort, newConvos, page > 0 || isRefresh ? prevConvos : undefined)
+						mergeAndSortConvos(sort, newConvosMap, page > 0 || isRefresh ? prevConvos : undefined)
 					);
 
 					setConversationsError(false);

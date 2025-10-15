@@ -6,6 +6,7 @@ import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import toast from "react-hot-toast";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface UseFetchMessagesReturn {
 	messages: IMessage[];
@@ -51,6 +52,8 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 					}
 				);
 				const { messages: newMessages, hasNext } = res.data;
+				if (!Array.isArray(newMessages) || typeof hasNext !== "boolean")
+					throwApiError({ messages: "array", hasNext: "boolean" }, res.data);
 
 				if (isMounted.current) {
 					setHasNextPage(hasNext);
@@ -98,9 +101,9 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			const updatedMessages = messages.map((message) =>
 				message.sender.uuid === interlocutorId && !message.messageStatus.isRead
 					? {
-						...message,
-						messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
-					}
+							...message,
+							messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
+						}
 					: message
 			);
 			return updatedMessages;

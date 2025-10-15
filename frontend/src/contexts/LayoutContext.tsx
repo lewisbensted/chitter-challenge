@@ -5,6 +5,7 @@ import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useAuth } from "./AuthContext";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface LayoutContextType {
 	isUnreadMessages: boolean;
@@ -36,7 +37,9 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			setUnreadLoading(true);
 			const res = await axios.get<boolean>(`${serverURL}/api/conversations/unread`, { withCredentials: true });
-			setUnreadMessages(res.data);
+			const unread = res.data;
+			if (typeof unread !== "boolean") throwApiError("boolean", unread);
+			setUnreadMessages(unread);
 		} catch (error) {
 			logErrors(error);
 		} finally {

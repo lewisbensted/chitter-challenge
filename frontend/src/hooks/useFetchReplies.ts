@@ -5,6 +5,7 @@ import axios from "axios";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface UseFetchRepliesReturn {
 	replies: IReply[];
@@ -48,6 +49,8 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 				);
 
 				const { replies: newReplies, hasNext } = res.data;
+				if (!Array.isArray(newReplies) || typeof hasNext !== "boolean")
+					throwApiError({ replies: "array", hasNext: "boolean" }, res.data);
 
 				if (isMounted.current) {
 					setHasNextPage(hasNext);

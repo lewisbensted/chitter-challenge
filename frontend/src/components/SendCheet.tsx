@@ -10,6 +10,7 @@ import FlexBox from "../styles/FlexBox";
 import { Grid2, TextField } from "@mui/material";
 import { useError } from "../contexts/ErrorContext";
 import LoadingSpinner from "./LoadingSpinner";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
@@ -30,14 +31,12 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 	const sendCheet: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
-			const newCheet = await axios.post<ICheet>(
-				`${serverURL + "/api" + (id ? `/users/${id}` : "")}/cheets`,
-				data,
-				{
-					withCredentials: true,
-				}
-			);
-			setPendingCheet(newCheet.data);
+			const res = await axios.post<ICheet>(`${serverURL + "/api" + (id ? `/users/${id}` : "")}/cheets`, data, {
+				withCredentials: true,
+			});
+			const newCheet = res.data;
+			if (typeof newCheet !== "object") throwApiError("object", newCheet);
+			setPendingCheet(newCheet);
 		} catch (error) {
 			setPendingError(error);
 		} finally {
@@ -61,12 +60,7 @@ const SendCheet: React.FC<Props> = ({ setCheets, setCheetsError, triggerScroll }
 
 	return (
 		<FlexBox>
-			<Grid2
-				container
-				component="form"
-				onSubmit={handleSubmit(sendCheet)}
-				width={400}
-			>
+			<Grid2 container component="form" onSubmit={handleSubmit(sendCheet)} width={400}>
 				<Grid2 container size={11} paddingRight={2}>
 					<TextField {...register("text")} type="text" variant="standard" label="Send cheet" />
 				</Grid2>

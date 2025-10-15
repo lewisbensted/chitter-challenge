@@ -10,6 +10,7 @@ import FlexBox from "../styles/FlexBox";
 import { useError } from "../contexts/ErrorContext";
 import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	recipientId: string;
@@ -42,10 +43,12 @@ const SendMessage: React.FC<Props> = ({
 	const sendMessage: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setSubmitLoading(true);
-			const newMessage = await axios.post<IMessage>(`${serverURL}/api/messages/${recipientId}`, data, {
+			const res = await axios.post<IMessage>(`${serverURL}/api/messages/${recipientId}`, data, {
 				withCredentials: true,
 			});
-			setPendingMessage(newMessage.data);
+			const newMessage = res.data;
+			if (typeof newMessage !== "object") throwApiError("object", newMessage);
+			setPendingMessage(newMessage);
 		} catch (error) {
 			setPendingError(error);
 		} finally {
@@ -72,12 +75,7 @@ const SendMessage: React.FC<Props> = ({
 
 	return (
 		<FlexBox>
-			<Grid2
-				container
-				component="form"
-				onSubmit={handleSubmit(sendMessage)}
-				width={350}
-			>
+			<Grid2 container component="form" onSubmit={handleSubmit(sendMessage)} width={350}>
 				<Grid2 container size={11} paddingRight={2}>
 					<TextField {...register("text")} type="text" variant="standard" label="Send message" />
 				</Grid2>

@@ -4,22 +4,14 @@ import type { IMessage } from "../interfaces/interfaces";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
-import {
-	Box,
-	Card,
-	CardActions,
-	CardContent,
-	Grid2,
-	IconButton,
-	TextField,
-	Typography,
-} from "@mui/material";
+import { Box, Card, CardActions, CardContent, Grid2, IconButton, TextField, Typography } from "@mui/material";
 import { Delete, Done, Edit } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	message: IMessage;
@@ -54,14 +46,16 @@ const Message = forwardRef<HTMLDivElement, Props>(
 		const editMessage: SubmitHandler<{ text: string }> = async (data) => {
 			try {
 				setEditLoading(true);
-				const updatedMessage = await axios.put<IMessage>(
+				const res = await axios.put<IMessage>(
 					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					data,
 					{
 						withCredentials: true,
 					}
 				);
-				setPendingMessage(updatedMessage.data);
+				const updatedMessage = res.data;
+				if (typeof updatedMessage !== "object") throwApiError("object", updatedMessage);
+				setPendingMessage(updatedMessage);
 			} catch (error) {
 				setPendingError(error);
 			} finally {
@@ -121,7 +115,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 		const createdAt = new Date(message.createdAt);
 		const updatedAt = new Date(message.updatedAt);
 		const isEdited = updatedAt > createdAt;
-		const isLoading= isEditLoading || isDeleteLoading;
+		const isLoading = isEditLoading || isDeleteLoading;
 
 		return (
 			<Card ref={ref}>

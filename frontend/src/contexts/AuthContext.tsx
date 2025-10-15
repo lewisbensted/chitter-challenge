@@ -3,6 +3,7 @@ import { createContext, type ReactNode, useCallback, useContext, useState } from
 import { serverURL } from "../config/config";
 import axios from "axios";
 import { useError } from "./ErrorContext";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface AuthContextType {
 	userId: string | null | undefined;
@@ -27,7 +28,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			setValidateLoading(true);
 			const res = await axios.get<string>(`${serverURL}/api/validate`, { withCredentials: true });
-			setUserId(res.data);
+			const userId = res.data;
+			if (typeof userId !== "string") throwApiError("string", userId);
+			setUserId(userId);
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 401) {
 				setUserId(null);
@@ -43,7 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		void validateUser();
 	}, [validateUser]);
 
-
 	return (
 		<AuthContext.Provider
 			value={{
@@ -53,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				setUserId,
 				setValidateLoading,
 				isLoggingOut,
-				setLoggingOut
+				setLoggingOut,
 			}}
 		>
 			{children}

@@ -5,6 +5,7 @@ import { serverURL } from "../config/config";
 import { useIsMounted } from "../utils/isMounted";
 import { useError } from "../contexts/ErrorContext";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface UseSearchUsersReturn {
 	users: IUserEnhanced[];
@@ -56,6 +57,8 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 					}
 				);
 				const { users, hasNext } = res.data;
+				if (!Array.isArray(users) || typeof hasNext !== "boolean")
+					throwApiError({ users: "array", hasNext: "boolean" }, res.data);
 
 				if (isMounted.current) {
 					setHasNextPage(hasNext);

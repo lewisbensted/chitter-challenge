@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { useIsMounted } from "../utils/isMounted";
 import { logErrors } from "../utils/processErrors";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface UseFetchUserReturn {
 	userEnhanced: IUserEnhanced | undefined;
@@ -28,7 +29,10 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 			const res = await axios.get<IUserEnhanced>(`${serverURL}/api/users/${userId}`, {
 				withCredentials: true,
 			});
-			if (isMounted.current) setUserEnhanced({ ...res.data });
+			const { user, isFollowing } = res.data;
+			if (typeof user !== "object" || typeof isFollowing !== "boolean")
+				throwApiError({ user: "object", isFollowing: "boolean" }, res.data);
+			if (isMounted.current) setUserEnhanced({ user, isFollowing, conversation: null });
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 404) {
 				void navigate("/");

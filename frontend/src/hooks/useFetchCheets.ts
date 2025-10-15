@@ -5,6 +5,7 @@ import { serverURL } from "../config/config";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { SPINNER_DURATION } from "../config/layout";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface UseFetchCheetsReturn {
 	cheets: ICheet[];
@@ -45,7 +46,10 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 						withCredentials: true,
 					}
 				);
+
 				const { cheets: newCheets, hasNext } = res.data;
+				if (!Array.isArray(newCheets) || typeof hasNext !== "boolean")
+					throwApiError({ cheets: "array", hasNext: "boolean" }, res.data);
 
 				if (isMounted.current) {
 					setHasNextPage(hasNext);

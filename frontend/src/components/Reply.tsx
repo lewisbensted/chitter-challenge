@@ -15,6 +15,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLayout } from "../contexts/LayoutContext";
 import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
+import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
@@ -49,14 +50,12 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 	const editReply: SubmitHandler<{ text: string }> = async (data) => {
 		try {
 			setEditLoading(true);
-			const updatedReply = await axios.put<IReply>(
-				`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`,
-				data,
-				{
-					withCredentials: true,
-				}
-			);
-			setPendingReply(updatedReply.data);
+			const res = await axios.put<IReply>(`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`, data, {
+				withCredentials: true,
+			});
+			const updatedReply = res.data;
+			if (typeof updatedReply !== "object") throwApiError("object", updatedReply);
+			setPendingReply(updatedReply);
 		} catch (error) {
 			setPendingError(error);
 		} finally {
