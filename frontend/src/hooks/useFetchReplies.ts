@@ -33,14 +33,14 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 
 	const fetchReplies = useCallback(
 		async (isRetry = false) => {
+			setRepliesLoading(true);
+
 			const take = 5;
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
+
 			try {
-				setRepliesLoading(true);
-
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
-
 				const res = await axios.get<{ replies: IReply[]; hasNext: boolean }>(
 					`${serverURL}/api/cheets/${cheetId}/replies?${params}`,
 					{
@@ -67,11 +67,11 @@ const useFetchReplies = (cheetId: string): UseFetchRepliesReturn => {
 				}
 			} catch (error) {
 				logErrors(error);
-				setRepliesError(true);
+				if (isMounted.current) setRepliesError(true);
 			} finally {
 				setTimeout(
 					() => {
-						setRepliesLoading(false);
+						if (isMounted.current) setRepliesLoading(false);
 					},
 					page === 0 || isRetry ? SPINNER_DURATION : 0
 				);

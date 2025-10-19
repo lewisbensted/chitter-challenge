@@ -10,28 +10,27 @@ import { Button, Grid2, Link, Typography } from "@mui/material";
 import FlexBox from "../styles/FlexBox";
 import useFetchMessages from "../hooks/useFetchMessages";
 import { Link as RouterLink } from "react-router-dom";
-import { useError } from "../contexts/ErrorContext";
 import { useLayout } from "../contexts/LayoutContext";
 import ScrollGrid from "../styles/ScrollGrid";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	conversation: IConversation;
 	isOpen: boolean;
 	setSelectedConversation: React.Dispatch<React.SetStateAction<IConversation | null>>;
-	toggleConversationsTrigger: React.Dispatch<React.SetStateAction<boolean>>;
 	userPageId?: string;
 	convosPage?: boolean;
+	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
 }
 
 const MessageModal: React.FC<Props> = ({
 	conversation,
 	isOpen,
 	setSelectedConversation,
-	toggleConversationsTrigger,
 	userPageId,
 	convosPage,
+	setConversations,
 }) => {
-	const { setErrors } = useError();
 	const { toggleUnreadTrigger } = useLayout();
 
 	const {
@@ -52,28 +51,26 @@ const MessageModal: React.FC<Props> = ({
 
 	useEffect(() => {
 		if (!isOpen) return;
+		const { unread, interlocutorId } = conversation;
 		const loadAndMarkRead = async () => {
 			await fetchMessages();
 			if (page === 0) {
 				toggleScrollTrigger((prev) => !prev);
 			}
-			if (conversation.unread) {
+			if (unread) {
 				await markMessagesRead();
 				toggleUnreadTrigger((prev) => !prev);
-				toggleConversationsTrigger((prev) => !prev);
+				setConversations((prevConvos) => {
+					const newConvos = new Map(prevConvos);
+					const convoToUpdate = prevConvos.get(interlocutorId);
+					if (convoToUpdate) newConvos.set(interlocutorId, { ...convoToUpdate, unread: false });
+					return newConvos;
+				});
 			}
 			setMessagesSet(true);
 		};
 		void loadAndMarkRead();
-	}, [
-		isOpen,
-		conversation.unread,
-		page,
-		fetchMessages,
-		markMessagesRead,
-		toggleConversationsTrigger,
-		toggleUnreadTrigger,
-	]);
+	}, [isOpen, conversation, page, setConversations, fetchMessages, markMessagesRead, toggleUnreadTrigger]);
 
 	const hasRefreshedMessages = useRef(false);
 	const prevUnreadRef = useRef<boolean>();
@@ -126,8 +123,10 @@ const MessageModal: React.FC<Props> = ({
 			});
 			if (message) observer.current.observe(message);
 		},
-		[isMessagesLoading, hasNextPage, isMessagesSet, setPage]
+		[isMessagesLoading, hasNextPage, isMessagesSet, messagesError, setPage]
 	);
+
+	const isMounted = useIsMounted();
 
 	const message = () => {
 		if (messagesError) {
@@ -177,7 +176,7 @@ const MessageModal: React.FC<Props> = ({
 						{!isMessagesLoading && (
 							<Fragment>
 								<Typography variant="subtitle1">{message()}</Typography>
-								{(messagesError) && (
+								{messagesError && (
 									<FlexBox>
 										<Button onClick={() => fetchMessages(true)} variant="contained">
 											<Typography variant="button">Retry</Typography>
@@ -197,9 +196,10 @@ const MessageModal: React.FC<Props> = ({
 											message={message}
 											messages={messages}
 											setMessages={setMessages}
-											setErrors={setErrors}
-											toggleReloadTrigger={toggleConversationsTrigger}
-											userPageId={userPageId}
+											convosPage={convosPage}
+											isModalMounted={isMounted}
+											setConversations={setConversations}
+											interlocutorId={conversation.interlocutorId}
 										/>
 									))}
 							</Fragment>
@@ -209,13 +209,12 @@ const MessageModal: React.FC<Props> = ({
 					{!messagesError && (
 						<SendMessage
 							recipientId={conversation.interlocutorId}
-							toggleReloadTrigger={toggleConversationsTrigger}
 							setMessages={setMessages}
-							setErrors={setErrors}
 							triggerScroll={toggleScrollTrigger}
 							setMessagesError={setMessagesError}
-							userPageId={userPageId}
 							convosPage={convosPage}
+							isModalMounted={isMounted}
+							setConversations={setConversations}
 						/>
 					)}
 				</Grid2>

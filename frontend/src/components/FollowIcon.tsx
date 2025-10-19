@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Box, IconButton } from "@mui/material";
 import { PersonAddAlt1, PersonRemove } from "@mui/icons-material";
 import type { IUserEnhanced } from "../interfaces/interfaces";
@@ -31,7 +31,7 @@ const FollowIcon: React.FC<Props> = ({ userEnhanced, onSuccess }) => {
 		}
 	};
 
-	const applyPending = () => {
+	const applyPending = useCallback(() => {
 		if (pendingUser) {
 			onSuccess(pendingUser);
 			setPendingUser(null);
@@ -40,7 +40,7 @@ const FollowIcon: React.FC<Props> = ({ userEnhanced, onSuccess }) => {
 			handleErrors(pendingError, `${userEnhanced.isFollowing ? "unfollow" : "follow"} user`, false);
 			setPendingError(null);
 		}
-	};
+	}, [pendingUser, pendingError, handleErrors, setPendingError, userEnhanced, onSuccess]);
 
 	return (
 		<Box>

@@ -10,20 +10,18 @@ import Cheet from "./Cheet";
 import SendReply from "./SendReply";
 import FlexBox from "../styles/FlexBox";
 import useFetchReplies from "../hooks/useFetchReplies";
-import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
 import ScrollGrid from "../styles/ScrollGrid";
+import { useIsMounted } from "../utils/isMounted";
 
 interface Props {
 	cheet: ICheet;
 	isOpen: boolean;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
-	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 }
 
-const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets, setSelectedCheet }) => {
-	const { setErrors } = useError();
+const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, setSelectedCheet }) => {
 	const { userId } = useAuth();
 
 	const {
@@ -69,13 +67,15 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 			});
 			if (reply) observer.current.observe(reply);
 		},
-		[isRepliesLoading, hasNextPage, setPage]
+		[isRepliesLoading, hasNextPage, repliesError, setPage]
 	);
 
 	const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
 	useEffect(() => {
 		if (!isRepliesLoading) setHasFetchedOnce(true);
 	}, [isRepliesLoading]);
+
+	const isMounted = useIsMounted();
 
 	const message = () => {
 		if (repliesError) {
@@ -100,14 +100,12 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 				</Grid2>
 				<Grid2 marginInline={3} size={12}>
 					<Cheet
-						cheet={cheet}
-						userId={userId}
+						cheet={cheet}				
 						setCheets={setCheets}
-						setErrors={setErrors}
 						isModalView={true}
-						numberOfCheets={numberOfCheets}
 						setSelectedCheet={setSelectedCheet}
 						setCheetLoading={setCheetLoading}
+						isPageMounted={isMounted}
 					/>
 					<Divider />
 
@@ -123,8 +121,7 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 											cheetId={cheet.uuid}
 											reply={reply}
 											setReplies={setReplies}
-											setErrors={setErrors}
-											numberOfReplies={replies.length}
+											isModalMounted={isMounted}
 										/>
 									))}
 								{!isRepliesLoading && (
@@ -153,12 +150,12 @@ const CheetModal: React.FC<Props> = ({ cheet, isOpen, setCheets, numberOfCheets,
 							selectedCheet={cheet}
 							isDisabled={isCheetLoading}
 							setReplies={setReplies}
-							setErrors={setErrors}
 							triggerScroll={toggleScrollTrigger}
 							repliesLengthRef={repliesLengthRef}
 							setRepliesError={setRepliesError}
 							setSelectedCheet={setSelectedCheet}
 							setCheets={setCheets}
+							isModalMounted = { isMounted}
 						/>
 					)}
 				</Grid2>

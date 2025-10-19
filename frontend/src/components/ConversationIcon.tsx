@@ -11,11 +11,13 @@ interface Props {
 }
 
 const ConversationIcon: React.FC<Props> = ({ conversation, user,setSelectedConversation }) => (
+	
 	<IconButton
 		onClick={() => {
 			if (conversation) setSelectedConversation(conversation);
 			else
 				setSelectedConversation({
+					key:"placeholder",
 					interlocutorId: user.uuid,
 					interlocutorUsername: user.username,
 					unread: false,

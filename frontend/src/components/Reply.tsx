@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import type { IReply } from "../interfaces/interfaces";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -12,20 +12,17 @@ import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
-import { useLayout } from "../contexts/LayoutContext";
-import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
 import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
 	setReplies: React.Dispatch<React.SetStateAction<IReply[]>>;
-	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	reply: IReply;
 	cheetId: string;
-	numberOfReplies: number;
+	isModalMounted: React.MutableRefObject<boolean>;
 }
 
-const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies }, ref) => {
+const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies, isModalMounted }, ref) => {
 	const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 	const [isEditing, setEditing] = useState<boolean>(false);
 	const [isEditLoading, setEditLoading] = useState<boolean>(false);
@@ -33,10 +30,6 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 
 	const { handleErrors } = useError();
 	const { userId } = useAuth();
-
-	useLayout();
-
-	const isMounted = useIsMounted();
 
 	useEffect(() => {
 		if (isEditing) {
@@ -48,59 +41,65 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies },
 	const [pendingError, setPendingError] = useState<unknown>(null);
 
 	const editReply: SubmitHandler<{ text: string }> = async (data) => {
+		setEditLoading(true);
 		try {
-			setEditLoading(true);
 			const res = await axios.put<IReply>(`${serverURL}/api/cheets/${cheetId}/replies/${reply.uuid}`, data, {
 				withCredentials: true,
 			});
 			const updatedReply = res.data;
 			if (typeof updatedReply !== "object") throwApiError("object", updatedReply);
-			setPendingReply(updatedReply);
+			if (isModalMounted.current) setPendingReply(updatedReply);
 		} catch (error) {
-			setPendingError(error);
+			if (isModalMounted.current) setPendingError(error);
+			else handleErrors(error, "edit reply", false);
 		} finally {
-			setEditLoading(false);
-			setEditing(false);
+			if (isModalMounted.current) {
+				setEditLoading(false);
+				setEditing(false);
+			}
 		}
 	};
 
 	const deleteReply = async () => {
+		setDeleteLoading(true);
 		try {
-			setDeleteLoading(true);
 			await axios.delete(`${serverURL}/api/cheets/${reply.cheetId}/replies/${reply.uuid}`, {
 				withCredentials: true,
 			});
-			setPendingReply(reply);
+			if (isModalMounted.current) setPendingReply(reply);
 		} catch (error) {
-			setPendingError(error);
+			if (isModalMounted.current) setPendingError(error);
+			else handleErrors(error, "delete reply", false);
 		} finally {
-			setDeleteLoading(false);
+			if (isModalMounted.current) setDeleteLoading(false);
 		}
 	};
 
-	const applyPendingEdit = () => {
+	const applyPendingEdit = useCallback(() => {
 		if (pendingReply) {
+			if (!isModalMounted.current) return;
 			setReplies((prevReplies) =>
 				prevReplies.map((reply) => (reply.uuid === pendingReply.uuid ? pendingReply : reply))
 			);
 			setPendingReply(null);
 		}
 		if (pendingError) {
-			handleErrors(pendingError, "edit cheet");
-			setPendingError(null);
+			handleErrors(pendingError, "edit reply", isModalMounted.current);
+			if (isModalMounted.current) setPendingError(null);
 		}
-	};
+	}, [handleErrors, isModalMounted, pendingError, pendingReply, setReplies]);
 
-	const applyPendingDelete = () => {
+	const applyPendingDelete = useCallback(() => {
 		if (pendingReply) {
+			if (!isModalMounted.current) return;
 			setReplies((prevReplies) => prevReplies.filter((reply) => reply.uuid !== pendingReply.uuid));
 			setPendingReply(null);
 		}
 		if (pendingError) {
-			handleErrors(pendingError, "delete cheet");
-			setPendingError(null);
+			handleErrors(pendingError, "delete reply", isModalMounted.current);
+			if (isModalMounted.current) setPendingError(null);
 		}
-	};
+	}, [handleErrors, isModalMounted, pendingError, pendingReply, setReplies]);
 
 	const createdAt = new Date(reply.createdAt);
 	const updatedAt = new Date(reply.updatedAt);

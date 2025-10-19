@@ -31,15 +31,14 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 
 	const fetchCheets = useCallback(
 		async (isRetry = false) => {
+			setCheetsLoading(true);
+			
 			const take = page === 0 ? 10 : 5;
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
 
 			try {
-				setCheetsLoading(true);
-
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
-
 				const res = await axios.get<{ cheets: ICheet[]; hasNext: boolean }>(
 					`${serverURL}/api${pageUserId ? `/users/${pageUserId}` : ""}/cheets?${params}`,
 					{
@@ -62,11 +61,11 @@ const useFetchCheets = (pageUserId?: string): UseFetchCheetsReturn => {
 				}
 			} catch (error) {
 				logErrors(error);
-				setCheetsError(true);
+				if (isMounted.current) setCheetsError(true);
 			} finally {
 				setTimeout(
 					() => {
-						setCheetsLoading(false);
+						if (isMounted.current) setCheetsLoading(false);
 					},
 					page === 0 || isRetry ? SPINNER_DURATION : 0
 				);

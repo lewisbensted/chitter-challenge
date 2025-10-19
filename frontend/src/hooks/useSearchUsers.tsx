@@ -35,21 +35,21 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 
 	const searchUsers = useCallback(
 		async (searchString: string, reset = false) => {
+			setSearchLoading(true);
+
 			const take = page === 0 ? 5 : 5;
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
+			params.append("search", searchString);
+
+			if (reset) {
+				cursorRef.current = undefined;
+				setUsers([]);
+				setNewUsers([]);
+			}
+
 			try {
-				setSearchLoading(true);
-
-				if (reset) {
-					cursorRef.current = undefined;
-					setUsers([]);
-					setNewUsers([]);
-				}
-
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
-				params.append("search", searchString);
-
 				const res = await axios.get<{ users: IUserEnhanced[]; hasNext: boolean }>(
 					`${serverURL}/api/users?${params}`,
 					{
@@ -78,18 +78,22 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 					setSearchError(false);
 				}
 			} catch (error) {
-				if (isMounted.current) {
-					handleErrors(error, "search users", false);
-					setSearchError(true);
-				}
+				setTimeout(
+					() => {
+						if (isMounted.current) {
+							handleErrors(error, "search users", false);
+							setSearchError(true);
+						}
+					},
+					reset ? SPINNER_DURATION : 0
+				);
 			} finally {
-				if (isMounted.current)
-					setTimeout(
-						() => {
-							setSearchLoading(false);
-						},
-						reset ? SPINNER_DURATION : 0
-					);
+				setTimeout(
+					() => {
+						if (isMounted.current) setSearchLoading(false);
+					},
+					reset ? SPINNER_DURATION : 0
+				);
 			}
 		},
 		[handleErrors, isMounted, page]

@@ -12,7 +12,7 @@ import ScrollGrid from "../styles/ScrollGrid";
 const Conversations: React.FC = () => {
 	const navigate = useNavigate();
 
-	const { userId, isValidateLoading } = useAuth();
+	const { userId } = useAuth();
 
 	const listRef = useRef<HTMLDivElement>(null);
 
@@ -21,11 +21,10 @@ const Conversations: React.FC = () => {
 		isConversationsLoading,
 		conversationsError,
 		fetchConversations,
-		reloadConversationsTrigger,
-		toggleConversationsTrigger,
 		hasNextPage,
 		setPage,
 		page,
+		setConversations,
 	} = useFetchConversations();
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
@@ -46,19 +45,6 @@ const Conversations: React.FC = () => {
 		void fetchConversations();
 	}, [userId, fetchConversations]);
 
-	const isFirstLoad = useRef(true);
-	useEffect(() => {
-		if (!userId || isValidateLoading) return;
-		if (isFirstLoad.current) {
-			isFirstLoad.current = false;
-			return;
-		}
-		void fetchConversations(
-			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
-			{ isRefresh: true, sort: true }
-		);
-	}, [userId, isValidateLoading, reloadConversationsTrigger, fetchConversations]);
-
 	const convosArray = Array.from(conversations.values());
 
 	const observer = useRef<IntersectionObserver>();
@@ -73,7 +59,7 @@ const Conversations: React.FC = () => {
 			});
 			if (cheet) observer.current.observe(cheet);
 		},
-		[isConversationsLoading, hasNextPage, setPage]
+		[isConversationsLoading, conversationsError, hasNextPage, setPage]
 	);
 
 	const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
@@ -115,7 +101,7 @@ const Conversations: React.FC = () => {
 										{conversationsError && (
 											<FlexBox>
 												<Button
-													onClick={() => fetchConversations(undefined, { isRetry: true })}
+													onClick={() => fetchConversations(undefined, true)}
 													variant="contained"
 												>
 													<Typography variant="button">Retry</Typography>
@@ -140,8 +126,8 @@ const Conversations: React.FC = () => {
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
 					setSelectedConversation={setSelectedConversation}
-					toggleConversationsTrigger={toggleConversationsTrigger}
 					convosPage={true}
+					setConversations={setConversations}
 				/>
 			)}
 		</Box>

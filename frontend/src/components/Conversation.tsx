@@ -50,7 +50,7 @@ const Conversation = forwardRef<HTMLDivElement, Props>(({ conversation, setSelec
 								variant="body2"
 							>
 								{conversation.latestMessage?.messageStatus.isDeleted
-									? conversation.latestMessage.senderId === userId
+									? conversation.latestMessage.sender.uuid === userId
 										? "You deleted this message."
 										: `${conversation.interlocutorUsername} deleted this message`
 									: conversation.latestMessage?.text}
@@ -61,7 +61,7 @@ const Conversation = forwardRef<HTMLDivElement, Props>(({ conversation, setSelec
 							{conversation.unread ? (
 								<PriorityHigh fontSize="small" color="primary" />
 							) : (
-								conversation.latestMessage?.senderId === userId &&
+								conversation.latestMessage?.sender.uuid === userId &&
 								conversation.latestMessage?.messageStatus.isRead &&
 								!conversation.latestMessage.messageStatus.isDeleted && (
 									<Done fontSize="small" color="primary" />

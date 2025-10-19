@@ -1,6 +1,6 @@
 import axios from "axios";
 import { extractData } from "./extractErrorData";
-import type {ApiResponseError} from './apiResponseError'
+import type { ApiResponseError } from "./apiResponseError";
 
 export const logErrors = (error: unknown) => {
 	if (axios.isAxiosError(error)) {
@@ -13,19 +13,18 @@ export const logErrors = (error: unknown) => {
 			errors: errors,
 			customCode: code,
 		});
-	} else if ((error as unknown as ApiResponseError)?.type == 'ApiResponseError') {
-		const apiError = error as ApiResponseError
-		console.error("Axios error:", {
+	} else if (typeof error === "object" && error !== null && "type" in error && error.type === "ApiResponseError") {
+		const apiError = error as ApiResponseError;
+		console.error("ApiResponseError error:", {
 			message: apiError.message,
 			status: apiError.status,
 			type: apiError.type,
 			expected: apiError.expected,
-			actual: apiError.actual
+			actual: apiError.actual,
 		});
 	} else {
-		console.error("Unknown error occurred:", {
-			message: (error as Error).message,
-		});
+		const err = error instanceof Error ? error : new Error(String(error));
+		console.error("Unknown error occurred:", { message: err.message });
 	}
 };
 

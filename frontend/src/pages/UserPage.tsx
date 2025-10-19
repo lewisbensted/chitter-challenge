@@ -10,11 +10,11 @@ import useFetchCheets from "../hooks/useFetchCheets";
 import useFetchConversations from "../hooks/useFetchConversations";
 import CheetModal from "../components/CheetModal";
 import { useAuth } from "../contexts/AuthContext";
-import { useError } from "../contexts/ErrorContext";
 import ScrollGrid from "../styles/ScrollGrid";
 import User from "../components/User";
 import useFetchUser from "../hooks/useFetchUser";
 import MessageModal from "../components/MessageModal";
+import { useIsMounted } from "../utils/isMounted";
 
 const UserPage: React.FC = () => {
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
@@ -22,7 +22,7 @@ const UserPage: React.FC = () => {
 
 	const { id } = useParams();
 
-	const { isUserLoading, userEnhanced, setUserEnhanced } = useFetchUser(id);
+	const { isUserLoading, userEnhanced, setUserEnhanced, fetchUser } = useFetchUser(id);
 
 	const { cheets, isCheetsLoading, cheetsError, hasNextPage, setCheetsError, setCheets, setPage, page, fetchCheets } =
 		useFetchCheets(id);
@@ -33,9 +33,14 @@ const UserPage: React.FC = () => {
 		conversations,
 		isConversationsLoading,
 		fetchConversations,
-		reloadConversationsTrigger,
-		toggleConversationsTrigger,
+		setConversations,
 	} = useFetchConversations();
+
+	const isMounted = useIsMounted();
+
+	useEffect(() => {
+		void fetchUser();
+	}, [fetchUser]);
 
 	useEffect(() => {
 		void fetchCheets();
@@ -45,18 +50,6 @@ const UserPage: React.FC = () => {
 		if (!id || !userId) return;
 		void fetchConversations([id]);
 	}, [id, userId, fetchConversations]);
-
-	const isFirstLoad = useRef(true);
-	useEffect(() => {
-		if (!id || !userId) return;
-		if (isFirstLoad.current) {
-			isFirstLoad.current = false;
-			return;
-		}
-		void fetchConversations([id], { isRefresh: true });
-	}, [id, userId, reloadConversationsTrigger, fetchConversations]);
-
-	const { setErrors } = useError();
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 	const listRef = useRef<HTMLDivElement>(null);
@@ -80,7 +73,7 @@ const UserPage: React.FC = () => {
 			});
 			if (cheet) observer.current.observe(cheet);
 		},
-		[isCheetsLoading, hasNextPage, setPage]
+		[isCheetsLoading, hasNextPage, cheetsError, setPage]
 	);
 
 	const userWithConvos = useMemo(() => {
@@ -136,12 +129,10 @@ const UserPage: React.FC = () => {
 											ref={cheets.length === index + 1 ? lastCheetRef : null}
 											key={cheet.uuid}
 											cheet={cheet}
-											userId={userId}
 											setCheets={setCheets}
-											setErrors={setErrors}
 											isModalView={false}
-											numberOfCheets={cheets.length}
 											setSelectedCheet={setSelectedCheet}
+											isPageMounted={isMounted}
 										/>
 									))}
 								{!isCheetsLoading && (
@@ -149,7 +140,12 @@ const UserPage: React.FC = () => {
 										<Typography variant="subtitle1">{message()}</Typography>
 										{cheetsError && (
 											<FlexBox>
-												<Button onClick={() => { void fetchCheets(true); }} variant="contained">
+												<Button
+													onClick={() => {
+														void fetchCheets(true);
+													}}
+													variant="contained"
+												>
 													<Typography variant="button">Retry</Typography>
 												</Button>
 											</FlexBox>
@@ -170,8 +166,8 @@ const UserPage: React.FC = () => {
 						<SendCheet
 							setCheetsError={setCheetsError}
 							setCheets={setCheets}
-							setErrors={setErrors}
 							triggerScroll={toggleScrollTrigger}
+							isPageMounted={isMounted}
 						/>
 					)}
 				</Fragment>
@@ -181,7 +177,6 @@ const UserPage: React.FC = () => {
 					cheet={selectedCheet}
 					isOpen={!!selectedCheet}
 					setCheets={setCheets}
-					numberOfCheets={cheets.length}
 					setSelectedCheet={setSelectedCheet}
 				/>
 			)}
@@ -190,7 +185,7 @@ const UserPage: React.FC = () => {
 					conversation={selectedConversation}
 					isOpen={!!selectedConversation}
 					setSelectedConversation={setSelectedConversation}
-					toggleConversationsTrigger={toggleConversationsTrigger}
+					setConversations={setConversations}
 				/>
 			)}
 		</Box>

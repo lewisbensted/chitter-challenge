@@ -20,8 +20,7 @@ const SearchUser: React.FC = () => {
 		useSearchUsers();
 
 	const {
-		reloadConversationsTrigger,
-		toggleConversationsTrigger,
+		setConversations,
 		fetchConversations,
 		conversations,
 		isConversationsLoading,
@@ -45,19 +44,6 @@ const SearchUser: React.FC = () => {
 		if (!newUsers.length || !userId) return;
 		void fetchConversations(newUsers.map((user) => user.user.uuid));
 	}, [newUsers, userId, fetchConversations]);
-
-	const isFirstLoad = useRef(true);
-	useEffect(() => {
-		if (!userId) return;
-		if (isFirstLoad.current) {
-			isFirstLoad.current = false;
-			return;
-		}
-		void fetchConversations(
-			selectedConversationRef.current ? [selectedConversationRef.current.interlocutorId] : undefined,
-			{ isRefresh: true }
-		);
-	}, [reloadConversationsTrigger, userId, fetchConversations]);
 
 	const usersWithConvos = useMemo(
 		() =>
@@ -171,7 +157,7 @@ const SearchUser: React.FC = () => {
 							conversation={selectedConversation}
 							isOpen={!!selectedConversation}
 							setSelectedConversation={setSelectedConversation}
-							toggleConversationsTrigger={toggleConversationsTrigger}
+							setConversations={setConversations}
 						/>
 					)}
 				</Fragment>

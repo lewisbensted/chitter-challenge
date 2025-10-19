@@ -37,14 +37,14 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 
 	const fetchMessages = useCallback(
 		async (isRetry = false) => {
+			setMessagesLoading(true);
+
 			const take = page === 0 ? 20 : 10;
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
+
 			try {
-				setMessagesLoading(true);
-
-				const params = new URLSearchParams();
-				if (cursorRef.current) params.append("cursor", cursorRef.current);
-				params.append("take", take.toString());
-
 				const res = await axios.get<{ messages: IMessage[]; hasNext: boolean }>(
 					`${serverURL}/api/messages/${interlocutorId}?${params}`,
 					{
@@ -65,11 +65,11 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 				}
 			} catch (error) {
 				logErrors(error);
-				setMessagesError(true);
+				if (isMounted.current) setMessagesError(true);
 			} finally {
 				setTimeout(
 					() => {
-						setMessagesLoading(false);
+						if (isMounted.current) setMessagesLoading(false);
 					},
 					page === 0 || isRetry ? SPINNER_DURATION : 0
 				);
@@ -101,9 +101,9 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			const updatedMessages = messages.map((message) =>
 				message.sender.uuid === interlocutorId && !message.messageStatus.isRead
 					? {
-							...message,
-							messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
-						}
+						...message,
+						messageStatus: { isRead: true, isDeleted: message.messageStatus.isDeleted },
+					}
 					: message
 			);
 			return updatedMessages;

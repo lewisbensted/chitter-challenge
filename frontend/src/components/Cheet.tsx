@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
 import { useParams } from "react-router-dom";
 import { Box, Card, CardActions, CardContent, Grid2, IconButton, Link, TextField, Typography } from "@mui/material";
@@ -10,24 +10,20 @@ import { formatDate } from "../utils/formatDate";
 import { Link as RouterLink } from "react-router-dom";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
-import { useLayout } from "../contexts/LayoutContext";
-import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
 import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
-	userId?: string | null;
 	cheet: ICheet;
-	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setCheets: React.Dispatch<React.SetStateAction<ICheet[]>>;
 	isModalView: boolean;
-	numberOfCheets: number;
 	setSelectedCheet: React.Dispatch<React.SetStateAction<ICheet | null | undefined>>;
 	setCheetLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+	isPageMounted: React.MutableRefObject<boolean>;
 }
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
-	({ cheet, setCheets, isModalView, setSelectedCheet, setCheetLoading }, ref) => {
+	({ cheet, setCheets, isModalView, setSelectedCheet, setCheetLoading, isPageMounted }, ref) => {
 		const { id } = useParams();
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
@@ -35,10 +31,6 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
 		const { handleErrors } = useError();
 		const { userId } = useAuth();
-
-		useLayout();
-
-		const isMounted = useIsMounted();
 
 		useEffect(() => {
 			if (isEditing) {
@@ -50,9 +42,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		const [pendingError, setPendingError] = useState<unknown>(null);
 
 		const editCheet: SubmitHandler<{ text: string }> = async (data) => {
+			setEditLoading(true);
+			if (setCheetLoading) setCheetLoading(true);
 			try {
-				setEditLoading(true);
-				if (setCheetLoading) setCheetLoading(true);
 				const res = await axios.put<ICheet>(
 					`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`,
 					data,
@@ -62,35 +54,41 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				);
 				const updatedCheet = res.data;
 				if (typeof updatedCheet !== "object") throwApiError("object", updatedCheet);
-				setPendingCheet(updatedCheet);
+				if (isPageMounted.current) setPendingCheet(updatedCheet);
 			} catch (error) {
-				setPendingError(error);
+				if (isPageMounted.current) setPendingError(error);
+				else handleErrors(error, "edit cheet", false);
 			} finally {
-				setEditing(false);
-				setEditLoading(false);
-				if (setCheetLoading) setCheetLoading(false);
+				if (isPageMounted.current) {
+					setEditing(false);
+					setEditLoading(false);
+					if (setCheetLoading) setCheetLoading(false);
+				}
 			}
 		};
 
 		const deleteCheet = async () => {
+			setDeleteLoading(true);
+			if (setCheetLoading) setCheetLoading(true);
 			try {
-				setDeleteLoading(true);
-				if (setCheetLoading) setCheetLoading(true);
 				await axios.delete(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`, {
 					withCredentials: true,
 				});
-				setPendingCheet(cheet);
+				if (isPageMounted.current) setPendingCheet(cheet);
 			} catch (error) {
-				setPendingError(error);
-				handleErrors(error, "delete cheet", isMounted.current);
+				if (isPageMounted.current) setPendingError(error);
+				else handleErrors(error, "delete cheet", false);
 			} finally {
-				setDeleteLoading(false);
-				if (setCheetLoading) setCheetLoading(false);
+				if (isPageMounted.current) {
+					setDeleteLoading(false);
+					if (setCheetLoading) setCheetLoading(false);
+				}
 			}
 		};
 
-		const applyPendingEdit = () => {
+		const applyPendingEdit = useCallback(() => {
 			if (pendingCheet) {
+				if (!isPageMounted.current) return;
 				setCheets((prevCheets) =>
 					prevCheets.map((cheet) => (cheet.uuid === pendingCheet.uuid ? pendingCheet : cheet))
 				);
@@ -100,22 +98,23 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				setPendingCheet(null);
 			}
 			if (pendingError) {
-				handleErrors(pendingError, "edit cheet");
-				setPendingError(null);
+				handleErrors(pendingError, "edit cheet", isPageMounted.current);
+				if (!isPageMounted.current) setPendingError(null);
 			}
-		};
+		}, [pendingCheet, pendingError, isPageMounted, isModalView, handleErrors, setCheets, setSelectedCheet]);
 
-		const applyPendingDelete = () => {
+		const applyPendingDelete = useCallback(() => {
 			if (pendingCheet) {
+				if (!isPageMounted.current) return;
 				setCheets((prevCheets) => prevCheets.filter((cheet) => cheet.uuid !== pendingCheet.uuid));
 				setSelectedCheet(null);
 				setPendingCheet(null);
 			}
 			if (pendingError) {
-				handleErrors(pendingError, "delete cheet");
-				setPendingError(null);
+				handleErrors(pendingError, "delete cheet", isPageMounted.current);
+				if (isPageMounted.current) setPendingError(null);
 			}
-		};
+		}, [pendingCheet, pendingError, isPageMounted, handleErrors, setCheets, setSelectedCheet]);
 
 		const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 		const createdAt = new Date(cheet.createdAt);

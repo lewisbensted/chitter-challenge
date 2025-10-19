@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { IUserEnhanced } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
@@ -20,7 +20,6 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 	const [isUserLoading, setUserLoading] = useState(true);
 
 	const navigate = useNavigate();
-
 	const isMounted = useIsMounted();
 
 	const fetchUser = useCallback(async () => {
@@ -34,21 +33,14 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 				throwApiError({ user: "object", isFollowing: "boolean" }, res.data);
 			if (isMounted.current) setUserEnhanced({ user, isFollowing, conversation: null });
 		} catch (error) {
-			if (axios.isAxiosError(error) && error.response?.status === 404) {
-				void navigate("/");
-			} else {
-				logErrors(error);
-			}
+			if (axios.isAxiosError(error) && error.response?.status === 404) void navigate("/");
+			else logErrors(error);
 		} finally {
 			setTimeout(() => {
-				setUserLoading(false);
+				if (isMounted.current) setUserLoading(false);
 			}, SPINNER_DURATION);
 		}
-	}, [userId, navigate]);
-
-	useEffect(() => {
-		void fetchUser();
-	}, [fetchUser]);
+	}, [userId, navigate, isMounted]);
 
 	return { userEnhanced, isUserLoading, fetchUser, setUserEnhanced };
 };

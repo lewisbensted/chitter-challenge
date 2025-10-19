@@ -11,6 +11,7 @@ interface Props {
 
 const LoadingSpinner: React.FC<Props> = ({ isLoading, children, onFinished, isLarge = true }) => {
 	const [showSpinner, setShowSpinner] = useState(false);
+
 	useEffect(() => {
 		let showTimer: ReturnType<typeof setTimeout> | undefined;
 		let hideTimer: ReturnType<typeof setTimeout> | undefined;
@@ -31,7 +32,7 @@ const LoadingSpinner: React.FC<Props> = ({ isLoading, children, onFinished, isLa
 			clearTimeout(showTimer);
 			clearTimeout(hideTimer);
 		};
-	}, [isLoading]);
+	}, [isLoading, showSpinner, onFinished]);
 
 	return showSpinner ? (
 		<Box paddingTop={isLarge ? 3 : 1.3} paddingLeft={isLarge ? 0 : 1}>
@@ -41,4 +42,4 @@ const LoadingSpinner: React.FC<Props> = ({ isLoading, children, onFinished, isLa
 		<>{children}</>
 	);
 };
-export default LoadingSpinner;
+export default React.memo(LoadingSpinner);

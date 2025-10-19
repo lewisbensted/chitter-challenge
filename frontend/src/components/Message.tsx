@@ -1,6 +1,6 @@
-import React, { forwardRef, useEffect } from "react";
+import React, { forwardRef, useCallback, useEffect } from "react";
 import { useState } from "react";
-import type { IMessage } from "../interfaces/interfaces";
+import type { IConversation, IMessage } from "../interfaces/interfaces";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
@@ -9,21 +9,21 @@ import { Delete, Done, Edit } from "@mui/icons-material";
 import { formatDate } from "../utils/formatDate";
 import { useError } from "../contexts/ErrorContext";
 import { useAuth } from "../contexts/AuthContext";
-import { useIsMounted } from "../utils/isMounted";
 import LoadingSpinner from "./LoadingSpinner";
 import { throwApiError } from "../utils/apiResponseError";
 
 interface Props {
+	interlocutorId: string;
 	message: IMessage;
 	messages: IMessage[];
-	setErrors: React.Dispatch<React.SetStateAction<string[]>>;
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
-	toggleReloadTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-	userPageId?: string;
+	convosPage?: boolean;
+	isModalMounted: React.MutableRefObject<boolean>;
+	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
 }
 
 const Message = forwardRef<HTMLDivElement, Props>(
-	({ message, messages, setMessages, toggleReloadTrigger, userPageId }, ref) => {
+	({ message, messages, setMessages, convosPage, isModalMounted, setConversations, interlocutorId }, ref) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
@@ -31,8 +31,6 @@ const Message = forwardRef<HTMLDivElement, Props>(
 
 		const { handleErrors } = useError();
 		const { userId } = useAuth();
-
-		const isMounted = useIsMounted();
 
 		useEffect(() => {
 			if (isEditing && message.text) {
@@ -44,8 +42,8 @@ const Message = forwardRef<HTMLDivElement, Props>(
 		const [pendingError, setPendingError] = useState<unknown>(null);
 
 		const editMessage: SubmitHandler<{ text: string }> = async (data) => {
+			setEditLoading(true);
 			try {
-				setEditLoading(true);
 				const res = await axios.put<IMessage>(
 					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					data,
@@ -55,62 +53,109 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				);
 				const updatedMessage = res.data;
 				if (typeof updatedMessage !== "object") throwApiError("object", updatedMessage);
-				setPendingMessage(updatedMessage);
+				if (isModalMounted.current) setPendingMessage(updatedMessage);
 			} catch (error) {
-				setPendingError(error);
+				if (isModalMounted.current) setPendingError(error);
+				else handleErrors(error, "edit message", false);
 			} finally {
-				setEditing(false);
-				setEditLoading(false);
+				if (isModalMounted.current) {
+					setEditing(false);
+					setEditLoading(false);
+				}
 			}
 		};
 
-		const applyPendingEdit = () => {
+		const applyPendingEdit = useCallback(() => {
 			if (pendingMessage) {
-				setMessages((prevMessages) =>
-					prevMessages.map((message) => (message.uuid === pendingMessage.uuid ? pendingMessage : message))
-				);
-				setPendingMessage(null);
+				if (isModalMounted.current) {
+					setMessages((prevMessages) =>
+						prevMessages.map((message) => (message.uuid === pendingMessage.uuid ? pendingMessage : message))
+					);
+					setPendingMessage(null);
+				}
+				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
+				if (isLastMessage && convosPage) {
+					setConversations((prevConvos) => {
+						const newConvos = new Map(prevConvos);
+						const convoToUpdate = prevConvos.get(interlocutorId);
+						if (convoToUpdate)
+							newConvos.set(interlocutorId, { ...convoToUpdate, latestMessage: pendingMessage });
+						return newConvos;
+					});
+				}
 			}
 			if (pendingError) {
-				handleErrors(pendingError, "edit message");
-				setPendingError(null);
+				handleErrors(pendingError, "edit message", isModalMounted.current);
+				if (isModalMounted.current) setPendingError(null);
 			}
-		};
+		}, [
+			convosPage,
+			handleErrors,
+			interlocutorId,
+			isModalMounted,
+			message.uuid,
+			messages,
+			pendingError,
+			pendingMessage,
+			setConversations,
+			setMessages,
+		]);
 
 		const deleteMessage = async () => {
+			setDeleteLoading(true);
 			try {
-				setDeleteLoading(true);
 				const deletedMessage = await axios.delete<IMessage>(
 					`${serverURL}/api/messages/${message.recipient.uuid}/message/${message.uuid}`,
 					{
 						withCredentials: true,
 					}
 				);
-				setPendingMessage(deletedMessage.data);
+				if (isModalMounted.current) setPendingMessage(deletedMessage.data);
 			} catch (error) {
-				setPendingError(error);
+				if (isModalMounted.current) setPendingError(error);
+				else handleErrors(error, "delete message", false);
 			} finally {
-				setDeleteLoading(false);
+				if (isModalMounted.current) setDeleteLoading(false);
 			}
 		};
 
-		const applyPendingDelete = () => {
+		const applyPendingDelete = useCallback(() => {
 			if (pendingMessage) {
-				setMessages((prevMessages) =>
-					prevMessages.map((message) => (message.uuid === pendingMessage.uuid ? pendingMessage : message))
-				);
-				if (isEditing) setEditing(false);
-				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
-				if (isLastMessage && !userPageId) {
-					toggleReloadTrigger((prev) => !prev);
+				if (isModalMounted.current) {
+					setMessages((prevMessages) =>
+						prevMessages.map((message) => (message.uuid === pendingMessage.uuid ? pendingMessage : message))
+					);
+					if (isEditing) setEditing(false);
+					setPendingMessage(null);
 				}
-				setPendingMessage(null);
+				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
+				if (isLastMessage && convosPage) {
+					setConversations((prevConvos) => {
+						const newConvos = new Map(prevConvos);
+						const convoToUpdate = prevConvos.get(interlocutorId);
+						if (convoToUpdate)
+							newConvos.set(interlocutorId, { ...convoToUpdate, latestMessage: pendingMessage });
+						return newConvos;
+					});
+				}
 			}
 			if (pendingError) {
-				handleErrors(pendingError, "delete message");
-				setPendingError(null);
+				handleErrors(pendingError, "delete message", isModalMounted.current);
+				if (isModalMounted.current) setPendingError(null);
 			}
-		};
+		}, [
+			convosPage,
+			handleErrors,
+			interlocutorId,
+			isModalMounted,
+			message.uuid,
+			messages,
+			isEditing,
+			pendingError,
+			pendingMessage,
+			setConversations,
+			setMessages,
+		]);
 
 		const createdAt = new Date(message.createdAt);
 		const updatedAt = new Date(message.updatedAt);
@@ -130,13 +175,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 											onSubmit={handleSubmit(editMessage)}
 											id={`edit-message-${message.uuid}`}
 										>
-											<TextField
-												component="form"
-												id="edit-message"
-												{...register("text")}
-												type="text"
-												variant="standard"
-											/>
+											<TextField {...register("text")} type="text" variant="standard" />
 										</Box>
 									) : (
 										<Typography

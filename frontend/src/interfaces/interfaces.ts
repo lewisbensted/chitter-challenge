@@ -46,17 +46,10 @@ export interface IMessageStatus {
 	isDeleted: boolean;
 }
 
-export interface ILatestMessage {
-	text: string | null;
-	senderId: string;
-	createdAt: string;
-	messageStatus: IMessageStatus;
-}
-
 export interface IConversation {
 	key: string;
 	interlocutorId: string;
 	interlocutorUsername: string;
 	unread: boolean;
-	latestMessage: ILatestMessage | null;
+	latestMessage: IMessage | null;
 }

@@ -9,29 +9,21 @@ import useFetchCheets from "../hooks/useFetchCheets";
 import CheetModal from "../components/CheetModal";
 import type { ICheet } from "../interfaces/interfaces";
 import { useAuth } from "../contexts/AuthContext";
-import { useError } from "../contexts/ErrorContext";
 import ScrollGrid from "../styles/ScrollGrid";
+import { useIsMounted } from "../utils/isMounted";
 
 const Homepage: React.FC = () => {
 	const { userId } = useAuth();
-	const { setErrors } = useError();
 	const [selectedCheet, setSelectedCheet] = useState<ICheet | null>();
 
-	const {
-		cheets,
-		isCheetsLoading,
-		cheetsError,
-		setCheetsError,
-		setCheets,
-		setPage,
-		hasNextPage,
-		page,
-		fetchCheets,
-	} = useFetchCheets();
+	const { cheets, isCheetsLoading, cheetsError, setCheetsError, setCheets, setPage, hasNextPage, page, fetchCheets } =
+		useFetchCheets();
 
 	const [scrollTrigger, toggleScrollTrigger] = useState<boolean>(false);
 
 	const listRef = useRef<HTMLDivElement>(null);
+
+	const isMounted = useIsMounted();
 
 	useLayoutEffect(() => {
 		requestAnimationFrame(() => {
@@ -53,7 +45,7 @@ const Homepage: React.FC = () => {
 			});
 			if (cheet) observer.current.observe(cheet);
 		},
-		[isCheetsLoading, hasNextPage, setPage]
+		[isCheetsLoading, hasNextPage, cheetsError, setPage]
 	);
 
 	const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
@@ -87,12 +79,10 @@ const Homepage: React.FC = () => {
 									ref={cheets.length === index + 1 ? lastCheetRef : null}
 									key={cheet.uuid}
 									cheet={cheet}
-									userId={userId}
 									setCheets={setCheets}
-									setErrors={setErrors}
 									isModalView={false}
-									numberOfCheets={cheets.length}
 									setSelectedCheet={setSelectedCheet}
+									isPageMounted={isMounted}
 								/>
 							))}
 						{!isCheetsLoading && (
@@ -100,7 +90,12 @@ const Homepage: React.FC = () => {
 								<Typography variant="subtitle1">{message()}</Typography>
 								{cheetsError && (
 									<FlexBox>
-										<Button onClick={() => { void fetchCheets(true); }} variant="contained">
+										<Button
+											onClick={() => {
+												void fetchCheets(true);
+											}}
+											variant="contained"
+										>
 											<Typography variant="button">Retry</Typography>
 										</Button>
 									</FlexBox>
@@ -121,8 +116,8 @@ const Homepage: React.FC = () => {
 				<SendCheet
 					setCheets={setCheets}
 					setCheetsError={setCheetsError}
-					setErrors={setErrors}
 					triggerScroll={toggleScrollTrigger}
+					isPageMounted={isMounted}
 				/>
 			)}
 
@@ -131,7 +126,6 @@ const Homepage: React.FC = () => {
 					cheet={selectedCheet}
 					isOpen={!!selectedCheet}
 					setCheets={setCheets}
-					numberOfCheets={cheets.length}
 					setSelectedCheet={setSelectedCheet}
 				/>
 			)}
