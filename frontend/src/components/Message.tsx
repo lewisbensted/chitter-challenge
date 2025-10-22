@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useEffect } from "react";
 import { useState } from "react";
-import type { IConversation, IMessage } from "../interfaces/interfaces";
+import type { IMessage } from "../interfaces/interfaces";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";
 import { serverURL } from "../config/config";
@@ -19,11 +19,29 @@ interface Props {
 	setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 	convosPage?: boolean;
 	isModalMounted: React.MutableRefObject<boolean>;
-	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
+	refreshConversations: (
+		interlocutorId: string,
+		additionalParams?: {
+			sort?: boolean | undefined;
+			unread?: boolean | undefined;
+			latestMessage?: IMessage | undefined;
+		}
+	) => void;
 }
 
 const Message = forwardRef<HTMLDivElement, Props>(
-	({ message, messages, setMessages, convosPage, isModalMounted, setConversations, interlocutorId }, ref) => {
+	(
+		{
+			message,
+			messages,
+			setMessages,
+			convosPage,
+			isModalMounted,
+			interlocutorId,
+			refreshConversations,
+		},
+		ref
+	) => {
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
 		const [isDeleteLoading, setDeleteLoading] = useState<boolean>(false);
@@ -75,13 +93,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				}
 				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
 				if (isLastMessage && convosPage) {
-					setConversations((prevConvos) => {
-						const newConvos = new Map(prevConvos);
-						const convoToUpdate = prevConvos.get(interlocutorId);
-						if (convoToUpdate)
-							newConvos.set(interlocutorId, { ...convoToUpdate, latestMessage: pendingMessage });
-						return newConvos;
-					});
+					refreshConversations(interlocutorId, { latestMessage: pendingMessage });
 				}
 			}
 			if (pendingError) {
@@ -97,8 +109,8 @@ const Message = forwardRef<HTMLDivElement, Props>(
 			messages,
 			pendingError,
 			pendingMessage,
-			setConversations,
 			setMessages,
+			refreshConversations,
 		]);
 
 		const deleteMessage = async () => {
@@ -130,13 +142,7 @@ const Message = forwardRef<HTMLDivElement, Props>(
 				}
 				const isLastMessage = messages[messages.length - 1].uuid === message.uuid;
 				if (isLastMessage && convosPage) {
-					setConversations((prevConvos) => {
-						const newConvos = new Map(prevConvos);
-						const convoToUpdate = prevConvos.get(interlocutorId);
-						if (convoToUpdate)
-							newConvos.set(interlocutorId, { ...convoToUpdate, latestMessage: pendingMessage });
-						return newConvos;
-					});
+					refreshConversations(interlocutorId, { latestMessage: pendingMessage });
 				}
 			}
 			if (pendingError) {
@@ -153,8 +159,8 @@ const Message = forwardRef<HTMLDivElement, Props>(
 			isEditing,
 			pendingError,
 			pendingMessage,
-			setConversations,
 			setMessages,
+			refreshConversations,
 		]);
 
 		const createdAt = new Date(message.createdAt);

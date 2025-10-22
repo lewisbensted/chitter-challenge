@@ -9,12 +9,9 @@ import stylistic from "@stylistic/eslint-plugin";
 /** @type {import('eslint').Linter.Config[]} */
 export default tseslint.config(
 	eslint.configs.recommended,
-	tseslint.configs.strictTypeChecked,
-	tseslint.configs.stylisticTypeChecked,
 	{
 		languageOptions: {
 			globals: { ...globals.node, ...globals.browser },
-			parserOptions: { project: ["./frontend/tsconfig.json", "./server/tsconfig.json"] },
 		},
 		settings: {
 			react: {
@@ -24,7 +21,12 @@ export default tseslint.config(
 	},
 	{ ignores: ["eslint.config.mjs", "server/ts-register.mjs", "**/*/dist/", "**/*.config.ts"] },
 	{
-		files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+		files: ["**/*.{ts,tsx}"],
+		extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
+		languageOptions: {
+			parserOptions: { project: ["./frontend/tsconfig.json", "./server/tsconfig.json"] },
+		},
+
 		plugins: {
 			"@stylistic": stylistic,
 			"only-warn": onlyWarn,
@@ -42,6 +44,21 @@ export default tseslint.config(
 		},
 	},
 	{
+		files: ["**/*.{js,mjs,cjs,jsx}"],
+		plugins: {
+			"@stylistic": stylistic,
+			"only-warn": onlyWarn,
+		},
+		rules: {
+			"@stylistic/indent": ["warn", "tab"],
+			"@stylistic/linebreak-style": ["warn", "windows"],
+			"@stylistic/quotes": ["warn", "double"],
+			"@stylistic/semi": "warn",
+			eqeqeq: ["warn", "smart"],
+			"arrow-body-style": ["warn", "as-needed"],
+		},
+	},
+	{
 		files: ["**/*.{jsx,tsx}"],
 		plugins: {
 			react: reactPlugin,
@@ -50,7 +67,7 @@ export default tseslint.config(
 		rules: {
 			...reactPlugin.configs.flat.recommended.rules,
 			...reactHooksPlugin.configs.recommended.rules,
-			"react/no-unused-prop-types": "warn"
+			"react/no-unused-prop-types": "warn",
 		},
 	}
 );

@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { IConversation } from "../interfaces/interfaces";
+import type { IConversation, IMessage } from "../interfaces/interfaces";
 import Message from "./Message";
 import SendMessage from "./SendMessage";
 import IconButton from "@mui/material/IconButton/IconButton";
@@ -21,6 +21,14 @@ interface Props {
 	userPageId?: string;
 	convosPage?: boolean;
 	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
+	refreshConversations: (
+		interlocutorId: string,
+		additionalParams?: {
+			sort?: boolean | undefined;
+			unread?: boolean | undefined;
+			latestMessage?: IMessage | undefined;
+		}
+	) => void;
 }
 
 const MessageModal: React.FC<Props> = ({
@@ -30,6 +38,7 @@ const MessageModal: React.FC<Props> = ({
 	userPageId,
 	convosPage,
 	setConversations,
+	refreshConversations,
 }) => {
 	const { toggleUnreadTrigger } = useLayout();
 
@@ -60,17 +69,21 @@ const MessageModal: React.FC<Props> = ({
 			if (unread) {
 				await markMessagesRead();
 				toggleUnreadTrigger((prev) => !prev);
-				setConversations((prevConvos) => {
-					const newConvos = new Map(prevConvos);
-					const convoToUpdate = prevConvos.get(interlocutorId);
-					if (convoToUpdate) newConvos.set(interlocutorId, { ...convoToUpdate, unread: false });
-					return newConvos;
-				});
+				refreshConversations(interlocutorId, { unread: false });
 			}
 			setMessagesSet(true);
 		};
 		void loadAndMarkRead();
-	}, [isOpen, conversation, page, setConversations, fetchMessages, markMessagesRead, toggleUnreadTrigger]);
+	}, [
+		isOpen,
+		conversation,
+		page,
+		setConversations,
+		fetchMessages,
+		markMessagesRead,
+		toggleUnreadTrigger,
+		refreshConversations,
+	]);
 
 	const hasRefreshedMessages = useRef(false);
 	const prevUnreadRef = useRef<boolean>();
@@ -198,8 +211,8 @@ const MessageModal: React.FC<Props> = ({
 											setMessages={setMessages}
 											convosPage={convosPage}
 											isModalMounted={isMounted}
-											setConversations={setConversations}
 											interlocutorId={conversation.interlocutorId}
+											refreshConversations={refreshConversations}
 										/>
 									))}
 							</Fragment>
@@ -214,7 +227,7 @@ const MessageModal: React.FC<Props> = ({
 							setMessagesError={setMessagesError}
 							convosPage={convosPage}
 							isModalMounted={isMounted}
-							setConversations={setConversations}
+							refreshConversations={refreshConversations}
 						/>
 					)}
 				</Grid2>

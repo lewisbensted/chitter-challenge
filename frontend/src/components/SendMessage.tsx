@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import type { IConversation, IMessage } from "../interfaces/interfaces";
+import type { IMessage } from "../interfaces/interfaces";
 import axios from "axios";
 import { serverURL } from "../config/config";
 import IconButton from "@mui/material/IconButton/IconButton";
@@ -18,7 +18,14 @@ interface Props {
 	setMessagesError: React.Dispatch<React.SetStateAction<boolean>>;
 	convosPage?: boolean;
 	isModalMounted: React.MutableRefObject<boolean>;
-	setConversations: React.Dispatch<React.SetStateAction<Map<string, IConversation>>>;
+	refreshConversations: (
+		interlocutorId: string,
+		additionalParams?: {
+			sort?: boolean | undefined;
+			unread?: boolean | undefined;
+			latestMessage?: IMessage | undefined;
+		}
+	) => void;
 }
 
 const SendMessage: React.FC<Props> = ({
@@ -28,7 +35,7 @@ const SendMessage: React.FC<Props> = ({
 	setMessagesError,
 	convosPage,
 	isModalMounted,
-	setConversations,
+	refreshConversations,
 }) => {
 	const { register, handleSubmit, reset } = useForm<{ text: string }>();
 	const [isLoading, setSubmitLoading] = useState<boolean>(false);
@@ -64,24 +71,9 @@ const SendMessage: React.FC<Props> = ({
 				setMessagesError(false);
 				reset();
 			}
+
 			if (convosPage) {
-				setConversations((prevConvos) => {
-					const newConvos = new Map(
-						Array.from(prevConvos.values())
-							.map((convo) =>
-								convo.interlocutorId === recipientId
-									? { ...convo, latestMessage: pendingMessage }
-									: convo
-							)
-							.sort((a, b) => {
-								const aTime = new Date(a.latestMessage?.createdAt ?? 0).getTime();
-								const bTime = new Date(b.latestMessage?.createdAt ?? 0).getTime();
-								return bTime - aTime;
-							})
-							.map((convo) => [convo.interlocutorId, convo])
-					);
-					return newConvos;
-				});
+				refreshConversations(recipientId, { sort: true, latestMessage: pendingMessage });
 			}
 		}
 		if (pendingError) {
@@ -96,10 +88,10 @@ const SendMessage: React.FC<Props> = ({
 		pendingMessage,
 		recipientId,
 		reset,
-		setConversations,
 		setMessages,
 		setMessagesError,
 		triggerScroll,
+		refreshConversations
 	]);
 
 	return (

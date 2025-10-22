@@ -13,7 +13,7 @@ if (!SERVER_PORT) {
 	process.exit(1);
 }
 
-console.log(`Waiting for server to start...\n`);
+console.log("Waiting for server to start...\n");
 
 waitOn({ resources: [`tcp:${SERVER_PORT}`] }, (err) => {
 	if (err) {
@@ -21,7 +21,7 @@ waitOn({ resources: [`tcp:${SERVER_PORT}`] }, (err) => {
 		process.exit(1);
 	}
 
-	console.log(`Starting frontend...`);
+	console.log("Starting frontend...");
 
 	const frontend = spawn("npm", ["--prefix", "frontend", "run", "dev"], { stdio: "inherit", shell: true });
 

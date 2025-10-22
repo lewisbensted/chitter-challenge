@@ -25,6 +25,7 @@ const Conversations: React.FC = () => {
 		setPage,
 		page,
 		setConversations,
+		refreshConversations,
 	} = useFetchConversations();
 
 	const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
@@ -128,6 +129,7 @@ const Conversations: React.FC = () => {
 					setSelectedConversation={setSelectedConversation}
 					convosPage={true}
 					setConversations={setConversations}
+					refreshConversations = {refreshConversations}
 				/>
 			)}
 		</Box>

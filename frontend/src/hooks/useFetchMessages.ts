@@ -93,7 +93,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			toast("Failed to mark messages read - may be displaying outdated information.");
 			markMessagesFailed.current = true;
 		}
-	}, []);
+	}, [interlocutorId, serverURL]);
 
 	const refreshMessages = useCallback(() => {
 		if (markMessagesFailed.current) return;
@@ -108,7 +108,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 			);
 			return updatedMessages;
 		});
-	}, []);
+	}, [interlocutorId]);
 
 	return {
 		messages,

@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { serverURL } from "../config/config";
 import axios from "axios";
-import type { IConversation } from "../interfaces/interfaces";
+import type { IConversation, IMessage } from "../interfaces/interfaces";
 import { logErrors } from "../utils/processErrors";
 import { useIsMounted } from "../utils/isMounted";
 import { SPINNER_DURATION } from "../config/layout";
@@ -17,6 +17,14 @@ interface UseFetchConversationsReturn {
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 	hasNextPage: boolean;
 	page: number;
+	refreshConversations: (
+		interlocutorId: string,
+		additionalParams?: {
+			sort?: boolean | undefined;
+			unread?: boolean | undefined;
+			latestMessage?: IMessage | undefined;
+		}
+	) => void;
 }
 
 const useFetchConversations = (): UseFetchConversationsReturn => {
@@ -82,6 +90,39 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		[page]
 	);
 
+	const refreshConversations = useCallback(
+		(
+			interlocutorId: string,
+			additionalParams: { sort?: boolean; unread?: boolean; latestMessage?: IMessage } = {}
+		) => {
+			setConversations((prevConvos) => {
+				const { sort, unread, latestMessage } = additionalParams;
+				const newConvos = new Map(prevConvos);
+				const convoToUpdate = prevConvos.get(interlocutorId);
+				if (convoToUpdate)
+					newConvos.set(interlocutorId, {
+						...convoToUpdate,
+						latestMessage: latestMessage ?? convoToUpdate.latestMessage,
+						unread: unread ?? convoToUpdate.unread,
+					});
+				if (sort) {
+					return new Map(
+						Array.from(newConvos.values())
+							.sort((a, b) => {
+								const aTime = new Date(a.latestMessage?.createdAt ?? 0).getTime();
+								const bTime = new Date(b.latestMessage?.createdAt ?? 0).getTime();
+								return bTime - aTime;
+							})
+							.map((convo) => [convo.interlocutorId, convo])
+					);
+				}
+
+				return newConvos;
+			});
+		},
+		[setConversations]
+	);
+
 	return {
 		conversations,
 		fetchConversations,
@@ -92,6 +133,7 @@ const useFetchConversations = (): UseFetchConversationsReturn => {
 		setPage,
 		hasNextPage,
 		page,
+		refreshConversations,
 	};
 };
 
