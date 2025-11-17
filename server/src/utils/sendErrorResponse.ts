@@ -34,18 +34,25 @@ export const sendErrorResponse = (error: unknown, res: Response) => {
 						? error.meta.constraint[0]
 						: undefined;
 				const model = constraint ? constraintModelMap[constraint] : undefined;
-				return res.status(404).json({ errors: [`Related resource not found${model ? `: ${model}` : ""}.`] });
+
+				return res.status(404).json({
+					errors: [`The ${model ?? "item"} you are trying to reference could not be found.`],
+				});
 			}
 			case "P2025": {
 				const modelName = typeof error.meta?.modelName === "string" ? error.meta.modelName : undefined;
-				return res.status(404).json({ errors: [`Resource not found${modelName ? `: ${modelName}` : ""}.`] });
+				return res.status(404).json({
+					errors: [`The ${modelName ?? "item"} you are trying to access could not be found.`],
+				});
 			}
 			default:
 				break;
 		}
 	} else if (error instanceof ZodError) {
 		const errors = error.errors.map((err) => err.message);
-		return res.status(400).json({ errors: errors });
+		return res.status(400).json({ errors: errors, _internalErrors: error.issues });
 	}
-	return res.status(500).json({ errors: ["Internal server error."] });
+	return res.status(500).json({
+		errors: ["Internal server error."],
+	});
 };

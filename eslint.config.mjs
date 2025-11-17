@@ -32,19 +32,13 @@ export default tseslint.config(
 			"only-warn": onlyWarn,
 		},
 		rules: {
-			"@stylistic/indent": ["warn", "tab"],
-			"@stylistic/linebreak-style": ["warn", "windows"],
-			"@stylistic/quotes": ["warn", "double"],
-			"@stylistic/semi": "warn",
-			eqeqeq: ["warn", "smart"],
-			"arrow-body-style": ["warn", "as-needed"],
 			"@typescript-eslint/no-misused-promises": ["warn", { checksVoidReturn: false }],
 			"@typescript-eslint/restrict-template-expressions": ["warn", { allowNumber: true }],
 			"@typescript-eslint/no-non-null-assertion": ["off"],
 		},
 	},
 	{
-		files: ["**/*.{js,mjs,cjs,jsx}"],
+		files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
 		plugins: {
 			"@stylistic": stylistic,
 			"only-warn": onlyWarn,

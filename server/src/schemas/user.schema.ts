@@ -12,42 +12,85 @@ export const UserSchema = z
 		firstName: z
 			.string({ required_error: "First name not provided." })
 			.trim()
-			.min(2, "First name too short. Must be at least 2 characters.")
-			.max(20, "First name too long. Must be less than 20 characters.")
-			.regex(nameExp1, "First name cannot contain numbers or special characters.")
-			.refine(isValidName, "Invalid first name format."),
+			.superRefine((val, ctx) => {
+				if (val.length < 2) {
+					ctx.addIssue({ code: "custom", message: "First name too short. Must be at least 2 characters." });
+					return;
+				}
+				if (val.length > 20) {
+					ctx.addIssue({ code: "custom", message: "First name too long. Must be fewer than 20 characters." });
+					return;
+				}
+				if (!nameExp1.test(val)) {
+					ctx.addIssue({
+						code: "custom",
+						message: "First name cannot contain numbers or special characters.",
+					});
+					return;
+				}
+				if (!isValidName(val)) {
+					ctx.addIssue({ code: "custom", message: "Invalid first name format." });
+				}
+			}),
+
 		lastName: z
 			.string({ required_error: "Last name not provided." })
 			.trim()
-			.min(2, "Last name too short. Must be at least 2 characters.")
-			.max(30, "Last name too long. Must be less than 20 characters.")
-			.regex(nameExp1, "Last name cannot contain numbers or special characters.")
-			.refine(isValidName, "Invalid last name format."),
+			.superRefine((val, ctx) => {
+				if (val.length < 2) {
+					ctx.addIssue({ code: "custom", message: "Last name too short. Must be at least 2 characters." });
+					return;
+				}
+				if (val.length > 30) {
+					ctx.addIssue({ code: "custom", message: "Last name too long. Must be fewer than 30 characters." });
+					return;
+				}
+				if (!nameExp1.test(val)) {
+					ctx.addIssue({
+						code: "custom",
+						message: "Last name cannot contain numbers or special characters.",
+					});
+					return;
+				}
+				if (!isValidName(val)) {
+					ctx.addIssue({ code: "custom", message: "Invalid last name format." });
+				}
+			}),
 		email: z
 			.string({ required_error: "Email address not provided." })
 			.trim()
 			.email("Invalid email address.")
-			.refine(async (email) => {
-				const userClient = prisma.user as unknown as ExtendedUserClient;
-				const user = await userClient.findUnique({ where: { email: email } });
-				return !user;
-			}, "Email address already taken."),
+			.superRefine(async (val, ctx) => {
+				const simpleEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+				if (!simpleEmailRegex.test(val)) return;
+
+				const user = await prisma.user.findUnique({ where: { email: val } });
+				if (user) {
+					ctx.addIssue({ code: "custom", message: "Email address already taken." });
+				}
+			}),
 		username: z
 			.string({ required_error: "Username not provided." })
 			.trim()
-			.min(5, "Username too short. Must be at least 5 characters.")
-			.max(30, "Username too long. Must be less than 30 characters.")
-			.refine(async (username) => {
+			.superRefine(async (val, ctx) => {
+				if (val.length < 5) {
+					ctx.addIssue({ code: "custom", message: "Username too short. Must be at least 5 characters." });
+					return;
+				}
+				if (val.length > 30) {
+					ctx.addIssue({ code: "custom", message: "Username too long. Must be fewer than 30 characters." });
+					return;
+				}
 				const userClient = prisma.user as unknown as ExtendedUserClient;
-				const user = await userClient.findUnique({
-					where: { username: username },
-				});
-				return !user;
-			}, "Username already taken."),
+				const user = await userClient.findUnique({ where: { username: val } });
+				if (user) {
+					ctx.addIssue({ code: "custom", message: "Username already taken." });
+				}
+			}),
 		password: z
 			.string({ required_error: "Password not provided." })
 			.min(8, "Password too short. Must be at least 8 characters.")
-			.max(30, "Password too long. Must be less than 30 characters.")
+			.max(30, "Password too long. Must be fewer than 30 characters.")
 			.regex(passwordExp1, "Password must contain at least one number, one letter and one special character.")
 			.regex(passwordExp2, "Password cannot contain spaces."),
 	})

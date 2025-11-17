@@ -1,5 +1,5 @@
 import express from "express";
-import session, * as expressSession from "express-session";
+import session from "express-session";
 import cookieParser from "cookie-parser";
 import register from "./routes/register.js";
 import login from "./routes/login.js";
@@ -12,7 +12,7 @@ import prisma from "../prisma/prismaClient.js";
 import messages from "./routes/messages.js";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
-import MySQLStore from "express-mysql-session";
+
 import path from "path";
 import cors from "cors";
 import conversations from "./routes/conversations.js";
@@ -20,12 +20,15 @@ import users from "./routes/users.js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 import { rateLimiter } from "./middleware/rateLimit.js";
 import follow from "./routes/follow.js";
+import MySQLStoreImport from "express-mysql-session";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
-const SessionStore = MySQLStore(expressSession);
+
 const __dirname = import.meta.dirname;
 
-const sessionStoreOptions: MySQLStore.Options = {
+const MySQLStore = MySQLStoreImport(session);
+
+const storeOptions = {
 	user: process.env.DB_USER,
 	password: process.env.DB_PASSWORD,
 	database: process.env.DB_NAME,
@@ -34,6 +37,8 @@ const sessionStoreOptions: MySQLStore.Options = {
 	expiration: 86400,
 	schema: { tableName: "session_store" },
 };
+
+const sessionStore = new MySQLStore(storeOptions);
 
 const checkValidPort = (port: number, side: string) => {
 	if (Number.isNaN(port)) {
@@ -59,7 +64,7 @@ try {
 			name: "session",
 			saveUninitialized: false,
 			resave: false,
-			store: new SessionStore(sessionStoreOptions),
+			store: sessionStore,
 		})
 	);
 

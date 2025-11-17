@@ -20,7 +20,7 @@ A mock Twitter app where users are able to post "cheets" (messages up to 50 char
 2. Install dependencies for the root, frontend and server from the project [root directory](/):
 
 ```sh
-  npm install-all
+  npm run install-all
 ```
 
 3. Create a _.env_ file to run in the relevant environment (`dev`, `test` or `prod`):
