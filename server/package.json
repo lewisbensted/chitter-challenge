@@ -11,8 +11,9 @@
 		"build:prod": "tsc --project tsconfig.prod.json && npx prisma generate",
 		"migrate:prod": "dotenv -e ../.env.prod -r dotenv-expand/config -- npx prisma migrate deploy",
 		"start:prod": "cross-env NODE_ENV=prod node dist/src/app.js",
-		"test": "vitest run",
-		"test:watch": "vitest --watch"
+		"reset:test": "dotenv -e ../.env.test -r dotenv-expand/config -- npx prisma migrate reset --force",
+		"test": "dotenv -e ../.env.test -r dotenv-expand/config vitest run",
+		"test:watch": "dotenv -e ../.env.test -r dotenv-expand/config vitest --watch"
 	},
 	"license": "ISC",
 	"devDependencies": {
@@ -26,7 +27,6 @@
 		"@types/supertest": "^6.0.2",
 		"nodemon": "^3.1.0",
 		"prisma": "^6.11.1",
-		"supertest": "^7.1.1",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.4.2",
 		"vitest": "^3.2.4",

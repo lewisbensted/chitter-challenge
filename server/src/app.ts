@@ -54,7 +54,7 @@ try {
 	const app = express();
 	const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 5173;
 	const SERVER_PORT = Number(process.env.SERVER_PORT);
-	checkValidPort(Number(SERVER_PORT), "server");
+	checkValidPort(SERVER_PORT, "server");
 	const PROJECT_ROOT = path.resolve(__dirname, "../../..");
 
 	app.use(cookieParser());
@@ -69,7 +69,7 @@ try {
 	);
 
 	if (process.env.NODE_ENV !== "prod") {
-		checkValidPort(Number(FRONTEND_PORT), "frontend");
+		checkValidPort(FRONTEND_PORT, "frontend");
 		app.use(
 			cors({
 				origin: `http://localhost:${FRONTEND_PORT}`,

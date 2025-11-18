@@ -50,7 +50,7 @@ export const sendErrorResponse = (error: unknown, res: Response) => {
 		}
 	} else if (error instanceof ZodError) {
 		const errors = error.errors.map((err) => err.message);
-		return res.status(400).json({ errors: errors, _internalErrors: error.issues });
+		return res.status(400).json({ errors: errors });
 	}
 	return res.status(500).json({
 		errors: ["Internal server error."],

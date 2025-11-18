@@ -1,15 +1,10 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 import { sendErrorResponse } from "./../../src/utils/sendErrorResponse";
 import { ZodError } from "zod";
+import { createMockRes } from "../test-utils";
 
 describe("sendErrorResponse()", () => {
-	const createMockRes = () => {
-		const res: any = {};
-		res.status = vi.fn().mockReturnValue(res);
-		res.json = vi.fn().mockReturnValue(res);
-		return res;
-	};
 	describe("Unique constraint", () => {
 		test("No constraint key", () => {
 			const mockRes = createMockRes();
@@ -138,7 +133,6 @@ describe("sendErrorResponse()", () => {
 	describe("Fallback", () => {
 		test("Non-error object", () => {
 			const mockRes = createMockRes();
-
 			sendErrorResponse("Non-error object", mockRes);
 			expect(mockRes.status).toHaveBeenCalledWith(500);
 			expect(mockRes.json).toHaveBeenCalledWith({
