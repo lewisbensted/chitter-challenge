@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const isTestEnv = process.env.NODE_ENV === "test";
+
 export const CreateMessageSchema = z
 	.object({
 		senderId: z.string({ required_error: "Sender ID not provided." }),
@@ -24,8 +26,7 @@ export const UpdateMessageSchema = z
 
 export const FullMessageSchema = z
 	.object({
-		id: z.number(),
-		uuid: z.string(),
+		uuid: z.string().optional(),
 		senderId: z.string({ required_error: "Sender ID not provided." }),
 		recipientId: z.string({ required_error: "Recipient ID not provided." }),
 		text: z
@@ -36,4 +37,5 @@ export const FullMessageSchema = z
 		createdAt: z.date().optional(),
 		updatedAt: z.date().optional(),
 	})
+	.omit(isTestEnv ? {} : { uuid: true })
 	.strip();

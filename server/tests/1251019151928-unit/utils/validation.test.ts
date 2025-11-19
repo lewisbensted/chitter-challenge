@@ -1,6 +1,6 @@
 import { test, describe, expect } from "vitest";
 
-import { isValidName, nameExp1, passwordExp1, passwordExp2 } from "./../../src/utils/validation";
+import { isValidName, nameExp1, passwordExp1, passwordExp2 } from "../../../src/utils/validation";
 
 describe("Validation", () => {
 	describe("Name validation", () => {

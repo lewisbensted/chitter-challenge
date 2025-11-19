@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const isTestEnv = process.env.NODE_ENV === "test";
+
 export const CreateReplySchema = z
 	.object({
 		userId: z.string({ required_error: "User ID not provided." }),
@@ -25,7 +27,6 @@ export const UpdateReplySchema = z
 
 export const FullReplySchema = z
 	.object({
-		id: z.number(),
 		uuid: z.string(),
 		userId: z.string({ required_error: "User ID not provided." }),
 		cheetId: z.string({ required_error: "Cheet ID not provided" }),
@@ -37,5 +38,5 @@ export const FullReplySchema = z
 		createdAt: z.date().optional(),
 		updatedAt: z.date().optional(),
 	})
-
+	.omit(isTestEnv ? {} : { uuid: true })
 	.strip();

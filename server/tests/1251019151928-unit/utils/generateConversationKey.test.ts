@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { generateConversationKey } from "./../../src/utils/generateConversationKey";
+import { generateConversationKey } from "../../../src/utils/generateConversationKey";
 
 describe("generateConversationKey()", () => {
 	test("generateConversationKey()", () => {

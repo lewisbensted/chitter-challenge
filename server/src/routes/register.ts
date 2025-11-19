@@ -4,14 +4,14 @@ import prisma from "../../prisma/prismaClient.js";
 import { RegisterUserRequest } from "../../types/requests.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
+import { PrismaClient } from "@prisma/client";
 
 const router = express.Router();
 
-const userClient = prisma.user as unknown as ExtendedUserClient;
 
-router.post("/", async (req: RegisterUserRequest, res: Response) => {
+export const registerHandler = (prismaClient: PrismaClient) => async (req: RegisterUserRequest, res: Response) => {
 	try {
-		const newUser = await userClient.create({
+		const newUser = await prismaClient.user.create({
 			data: req.body,
 		});
 		res.status(201).json(newUser);
@@ -19,6 +19,8 @@ router.post("/", async (req: RegisterUserRequest, res: Response) => {
 		console.error("Error saving user to the database:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
-});
+};
+
+router.post("/", registerHandler(prisma));
 
 export default router;

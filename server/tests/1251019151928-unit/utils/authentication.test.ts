@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
-import { authenticate } from "./../../src/utils/authenticate";
-import * as authUtils from "./../../src/utils/authenticate";
-import { authenticator } from "../../src/middleware/authMiddleware";
+import { authenticate } from "./../../../src/utils/authenticate";
+import * as authUtils from "./../../../src/utils/authenticate";
+import { authenticator } from "../../../src/middleware/authMiddleware";
 import { Request, NextFunction } from "express";
-import { createMockRes } from "../test-utils";
+import { createMockRes } from "../../test-utils/createMockRes";
 
 describe("Authentication", () => {
 	describe("authenticate()", () => {
@@ -116,7 +116,7 @@ describe("Authentication", () => {
 			const mockReq = {} as Request;
 			const mockRes = createMockRes();
 			const mockNext: NextFunction = vi.fn();
-			const spy = vi.spyOn(authUtils, "authenticate").mockReturnValue(false);
+			vi.spyOn(authUtils, "authenticate").mockReturnValue(false);
 			authenticator(mockReq, mockRes, mockNext);
 			expect(mockNext).toHaveBeenCalledTimes(0);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Invalid credentials."] });

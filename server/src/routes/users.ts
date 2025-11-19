@@ -4,19 +4,18 @@ import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import prisma from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
 import { IUser } from "../../types/responses.js";
+import { PrismaClient } from "@prisma/client";
 
 const router = express.Router({ mergeParams: true });
 
-const userClient = prisma.user as unknown as ExtendedUserClient;
-
-export const searchUsersHandler = async (req: Request, res: Response) => {
+export const searchUsersHandler = (prismaClient: PrismaClient) => async (req: Request, res: Response) => {
 	try {
-		const userSearch = (req.query.search as string | undefined) ?? "";
+		const userSearch = typeof req.query.search === "string" ? req.query.search.trim() : "";
 		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
-		
+
 		let cursor = typeof req.query.cursor === "string" ? req.query.cursor.trim() : undefined;
 		if (cursor) {
-			const userExists = await userClient.findUnique({ where: { uuid: cursor } });
+			const userExists = await prismaClient.user.findUnique({ where: { uuid: cursor } });
 			if (!userExists) cursor = undefined;
 		}
 
@@ -24,13 +23,13 @@ export const searchUsersHandler = async (req: Request, res: Response) => {
 			return res.status(200).json({ users: [], hasNext: false });
 		}
 
-		const dbUsers = await userClient.findMany({
+		const dbUsers = await prismaClient.user.findMany({
 			where: {
 				username: {
 					contains: userSearch,
 				},
 			},
-			include: req.session.user?.uuid
+			include: req.session?.user?.uuid
 				? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }
 				: undefined,
 			take: take + 1,
@@ -54,22 +53,25 @@ export const searchUsersHandler = async (req: Request, res: Response) => {
 	}
 };
 
-export const getUserHandler = async (req: Request, res: Response) => {
+export const getUserHandler = (prismaClient: PrismaClient) => async (req: Request, res: Response) => {
 	try {
-		const user = await userClient.findUniqueOrThrow({
+		const user = await prismaClient.user.findUniqueOrThrow({
 			where: { uuid: req.params.userId },
 			include: req.session.user?.uuid
 				? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }
 				: undefined,
 		});
-		res.json({ user: { uuid: user.uuid, username: user.username }, isFollowing: !!user.followers?.length });
+		res.status(200).json({
+			user: { uuid: user.uuid, username: user.username },
+			isFollowing: req.session.user?.uuid ? !!user.followers?.length : null,
+		});
 	} catch (error) {
 		console.error("Error retrieving user from the database:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
 };
 
-router.get("/", searchUsersHandler);
-router.get("/:userId", getUserHandler);
+router.get("/", searchUsersHandler(prisma));
+router.get("/:userId", getUserHandler(prisma));
 
 export default router;

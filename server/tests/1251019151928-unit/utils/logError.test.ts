@@ -1,6 +1,6 @@
 import { PrismaClientInitializationError, PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { describe, expect, test } from "vitest";
-import { logError } from "./../../src/utils/logError";
+import { logError } from "./../../../src/utils/logError";
 import { ZodError } from "zod";
 
 describe("logError()", () => {

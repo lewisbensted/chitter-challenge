@@ -7,8 +7,7 @@ const isTestEnv = process.env.NODE_ENV === "test";
 
 export const UserSchema = z
 	.object({
-		id: z.number(),
-		uuid: z.string(),
+		uuid: z.string().optional(),
 		firstName: z
 			.string({ required_error: "First name not provided." })
 			.trim()
@@ -94,5 +93,5 @@ export const UserSchema = z
 			.regex(passwordExp1, "Password must contain at least one number, one letter and one special character.")
 			.regex(passwordExp2, "Password cannot contain spaces."),
 	})
-	.omit(isTestEnv ? {} : { id: true, uuid: true })
+	.omit(isTestEnv ? {} : { uuid: true })
 	.strip();
