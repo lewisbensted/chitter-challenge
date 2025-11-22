@@ -1,16 +1,15 @@
 import express, { Request, Response } from "express";
 import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
-import prisma from "../../prisma/prismaClient.js";
+import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
-import type { ExtendedCheetClient, ExtendedUserClient } from "../../types/extendedClients.js";
-import { PrismaClient } from "@prisma/client";
+import { ExtendedCheetClient } from "../../types/extendedClients.js";
 
 const router = express.Router({ mergeParams: true });
 
 export const fetchCheets = async (
-	prismaClient: PrismaClient,
+	prismaClient: ExtendedPrismaClient,
 	take: number,
 	sessionUserId?: string,
 	pageUserId?: string,
@@ -31,59 +30,64 @@ export const fetchCheets = async (
 		skip: cursor ? 1 : 0,
 		cursor: cursor ? { uuid: cursor } : undefined,
 	});
-	const hasNext = cheets.length > take;
-	if (hasNext) cheets.pop();
+	const hasNext = take > 0 && cheets.length > take;
+	if (hasNext || take === 0) cheets.pop();
 	return { cheets, hasNext };
 };
 
-const getHandler = (prisma: PrismaClient) => async (req: Request, res: Response) => {
-	try {
-		let user;
-		if (req.params.userId) {
-			user = await prisma.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
+export type FetchCheetsType = typeof fetchCheets;
+
+export const getCheetHandler =
+	(prismaClient: ExtendedPrismaClient, fetchFn: FetchCheetsType) => async (req: Request, res: Response) => {
+		try {
+			let user;
+			if (req.params.userId) {
+				user = await prismaClient.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
+			}
+			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
+
+			let cursor = (req.query.cursor as string | undefined)?.trim()
+			if (cursor) {
+				const cheetExists = await prismaClient.cheet.findUnique({ where: { uuid: cursor } });
+				if (!cheetExists) cursor = undefined;
+			}
+
+			const { cheets, hasNext } = await fetchFn(prismaClient, take, req.session.user?.uuid, user?.uuid, cursor);
+			res.status(200).json({ cheets, hasNext });
+		} catch (error) {
+			console.error("Error retrieving cheets from the database:\n" + logError(error));
+			sendErrorResponse(error, res);
 		}
-		const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
-		const { cheets, hasNext } = await fetchCheets(
-			prisma.cheet,
-			take,
-			req.session.user?.uuid,
-			user?.uuid,
-			req.query.cursor as string | undefined
-		);
-		res.status(200).json({ cheets, hasNext });
-	} catch (error) {
-		console.error("Error retrieving cheets from the database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-};
+	};
 
-const postHandler = (prisma: PrismaClient) => async (req: SendCheetRequest, res: Response) => {
-	try {
-		const result = await prisma.$transaction(async (transaction: PrismaClient) => {
-			const newCheet = await transaction.cheet.create({
-				data: {
-					userId: req.session.user!.uuid,
-					text: req.body.text,
-				},
+export const postCheetHandler =
+	(prismaClient: ExtendedPrismaClient) => async (req: SendCheetRequest, res: Response) => {
+		try {
+			const result = await prismaClient.$transaction(async (transaction) => {
+				const newCheet = await transaction.cheet.create({
+					data: {
+						userId: req.session.user!.uuid,
+						text: req.body.text,
+					},
+				});
+				const status = await transaction.cheetStatus.create({
+					data: {
+						cheetId: newCheet.uuid,
+					},
+					omit: { cheetId: true },
+				});
+				return { ...newCheet, cheetStatus: status };
 			});
-			const status = await transaction.cheetStatus.create({
-				data: {
-					cheetId: newCheet.uuid,
-				},
-				omit: { cheetId: true },
-			});
-			return { ...newCheet, cheetStatus: status };
-		});
-		res.status(201).json(result);
-	} catch (error) {
-		console.error("Error adding cheet to the database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-};
+			res.status(201).json(result);
+		} catch (error) {
+			console.error("Error adding cheet to the database:\n" + logError(error));
+			sendErrorResponse(error, res);
+		}
+	};
 
-const putHandler = (prisma: PrismaClient) => async (req: EditCheetRequest, res: Response) => {
+export const putCheetHandler = (prismaClient: ExtendedPrismaClient) => async (req: EditCheetRequest, res: Response) => {
 	try {
-		const targetCheet = await prisma.cheet.findUniqueOrThrow({
+		const targetCheet = await (prismaClient.cheet as unknown as ExtendedCheetClient).findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});
 
@@ -99,7 +103,7 @@ const putHandler = (prisma: PrismaClient) => async (req: EditCheetRequest, res: 
 		}
 		if (req.body.text === targetCheet.text) return res.status(200).json(targetCheet);
 
-		const updatedCheet = await prisma.cheet.update({
+		const updatedCheet = await prismaClient.cheet.update({
 			where: {
 				uuid: targetCheet.uuid,
 			},
@@ -114,14 +118,14 @@ const putHandler = (prisma: PrismaClient) => async (req: EditCheetRequest, res: 
 	}
 };
 
-const deleteHandler = (prisma: PrismaClient) => async (req: Request, res: Response) => {
+export const deleteCheetHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
 	try {
-		const targetCheet = await prisma.cheet.findUniqueOrThrow({
+		const targetCheet = await (prismaClient.cheet as unknown as ExtendedCheetClient).findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});
 		if (targetCheet.user.uuid !== req.session.user!.uuid)
 			return res.status(403).json({ errors: ["Cannot delete someone else's cheet."] });
-		await prisma.cheet.delete({
+		await prismaClient.cheet.delete({
 			where: {
 				uuid: targetCheet.uuid,
 			},
@@ -133,9 +137,9 @@ const deleteHandler = (prisma: PrismaClient) => async (req: Request, res: Respon
 	}
 };
 
-router.get("/", getHandler(prisma));
-router.post("/", authenticator, postHandler(prisma));
-router.put("/", authenticator, putHandler(prisma));
-router.delete("/", authenticator, deleteHandler(prisma));
+router.get("/", getCheetHandler(prisma, fetchCheets));
+router.post("/", authenticator, postCheetHandler(prisma));
+router.put("/", authenticator, putCheetHandler(prisma));
+router.delete("/", authenticator, deleteCheetHandler(prisma));
 
 export default router;

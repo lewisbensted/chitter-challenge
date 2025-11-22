@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
-import { sendErrorResponse } from "./../../../src/utils/sendErrorResponse";
+import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
 import { ZodError } from "zod";
 import { createMockRes } from "../../test-utils/createMockRes";
 

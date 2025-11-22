@@ -1,10 +1,11 @@
-import prisma from "./prismaClient.js";
+import { PrismaClient } from "@prisma/client";
+import prisma, { ExtendedPrismaClient } from "./prismaClient.js";
 
-export const resetDB = async () => {
-	await prisma.$transaction([
-		prisma.reply.deleteMany(),
-		prisma.cheet.deleteMany(),
-		prisma.message.deleteMany(),
-		prisma.user.deleteMany(),
+export const resetDB = async (prismaClient: ExtendedPrismaClient) => {
+	await prismaClient.$transaction([
+		prismaClient.reply.deleteMany(),
+		prismaClient.cheet.deleteMany(),
+		prismaClient.message.deleteMany(),
+		prismaClient.user.deleteMany(),
 	]);
 };

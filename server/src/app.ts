@@ -91,6 +91,7 @@ try {
 	app.use("/api/conversations", generalLimiter, express.json(), conversations);
 	app.use("/api/users/:userId/cheets", generalLimiter, express.json(), cheets);
 	app.use("/api/cheets/:cheetId/replies", generalLimiter, express.json(), replies);
+	app.use("/api/replies", generalLimiter, express.json(), replies);
 	app.use("/api/messages", generalLimiter, express.json(), messages);
 	app.all("/api/*", (_req, res) => {
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });

@@ -77,7 +77,7 @@ router.get("/:recipientId", authenticator, async (req: Request, res: Response) =
 	}
 });
 
-router.put("/read/:recipientId", authenticator, async (req: Request, res: Response) => {
+router.put("/:recipientId/read", authenticator, async (req: Request, res: Response) => {
 	try {
 		const updatedCount = await readMessages(req.session.user!.uuid, req.params.recipientId);
 		if (updatedCount === 0) console.warn("No messages marked as read");
@@ -135,13 +135,11 @@ router.post("/:recipientId", authenticator, async (req: SendMessageRequest, res:
 	}
 });
 
-router.put("/:recipientId/message/:messageId", authenticator, async (req: EditMessageRequest, res: Response) => {
+router.put("/:messageId", authenticator, async (req: EditMessageRequest, res: Response) => {
 	try {
 		const targetMessage = await messageClient.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
 		});
-		if (targetMessage.recipient.uuid !== req.params.recipientId)
-			return res.status(403).json({ code: "OWNERSHIP_VIOLATION", errors: ["Message does not match recipient"] });
 		if (targetMessage.sender.uuid !== req.session.user!.uuid)
 			return res.status(403).json({ errors: ["Cannot update someone else's message."] });
 		if (targetMessage.messageStatus.isRead)
@@ -165,13 +163,11 @@ router.put("/:recipientId/message/:messageId", authenticator, async (req: EditMe
 	}
 });
 
-router.delete("/:recipientId/message/:messageId", authenticator, async (req: Request, res: Response) => {
+router.delete("/:messageId", authenticator, async (req: Request, res: Response) => {
 	try {
 		const targetMessage = await messageClient.findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
 		});
-		if (targetMessage.recipient.uuid !== req.params.recipientId)
-			return res.status(403).json({ code: "OWNERSHIP_VIOLATION", errors: ["Message does not match recipient"] });
 		if (targetMessage.sender.uuid !== req.session.user!.uuid)
 			return res.status(403).json({ errors: ["Cannot delete someone else's message."] });
 		const deletedMessage = await messageStatusClient.softDelete(targetMessage.uuid);
