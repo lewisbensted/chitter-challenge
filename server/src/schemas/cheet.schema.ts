@@ -34,5 +34,5 @@ export const FullCheetSchema = z.object({
 	createdAt: z.date().optional(),
 	updatedAt: z.date().optional(),
 })
-.omit(isTestEnv ? {} : { uuid: true })
-.strip();
+	.omit(isTestEnv ? {} : { uuid: true })
+	.strip();

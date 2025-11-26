@@ -1,5 +1,4 @@
 import { vi } from "vitest";
-import { ExtendedPrismaClient } from "../../prisma/prismaClient";
 
 export const prismaMock = {
 	$transaction: vi.fn(),
@@ -20,4 +19,27 @@ export const prismaMock = {
 	cheetStatus: {
 		create: vi.fn(),
 	},
+	reply: {
+		update: vi.fn(),
+		delete: vi.fn(),
+		findMany: vi.fn(),
+		findUnique: vi.fn(),
+		findUniqueOrThrow: vi.fn(),
+	},
+	message: {
+		create: vi.fn(),
+		update: vi.fn(),
+		delete: vi.fn(),
+		findMany: vi.fn(),
+		findUnique: vi.fn(),
+		findUniqueOrThrow: vi.fn(),
+	},
+	messageStatus: {
+		softDelete: vi.fn(),
+		create: vi.fn()
+	},
+	conversation: {
+		upsert:vi.fn(),
+		findMany:vi.fn()
+	}
 } as any;

@@ -6,7 +6,7 @@ import { Request, NextFunction } from "express";
 import { createMockRes } from "../../test-utils/createMockRes";
 
 describe("Authentication", () => {
-	describe("authenticate()", () => {
+	describe("authenticate() function", () => {
 		test("sessionIDs and userIDs match.", () => {
 			const testReq = {
 				sessionID: "testsessionid",

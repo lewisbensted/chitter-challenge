@@ -4,31 +4,10 @@ import { logError } from "../utils/logError.js";
 import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { EditReplyRequest, SendReplyRequest } from "../../types/requests.js";
-import type { ExtendedCheetClient, ExtendedReplyClient } from "../../types/extendedClients.js";
+import type { ExtendedReplyClient } from "../../types/extendedClients.js";
+import { fetchReplies, FetchRepliesType } from "../utils/fetchReplies.js";
 
 const router = express.Router({ mergeParams: true });
-
-export const fetchReplies = async (
-	prismaClient: ExtendedPrismaClient,
-	take: number,
-	cheetId: string,
-	cursor?: string
-) => {
-	const replies = await prismaClient.reply.findMany({
-		where: {
-			cheet: { uuid: cheetId },
-		},
-		take: take + 1,
-		skip: cursor ? 1 : 0,
-		cursor: cursor ? { uuid: cursor } : undefined,
-		orderBy: { createdAt: "desc" },
-	});
-	const hasNext = replies.length > take;
-	if (hasNext) replies.pop();
-	return { replies, hasNext };
-};
-
-export type FetchRepliesType = typeof fetchReplies;
 
 export const getReplyHandler =
 	(prismaClient: ExtendedPrismaClient, fetchReplies: FetchRepliesType) => async (req: Request, res: Response) => {
@@ -37,8 +16,8 @@ export const getReplyHandler =
 			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
 			let cursor = (req.query.cursor as string | undefined)?.trim();
 			if (cursor) {
-				const cheetExists = await prismaClient.cheet.findUnique({ where: { uuid: cursor } });
-				if (!cheetExists) cursor = undefined;
+				const replyExists = await prismaClient.reply.findUnique({ where: { uuid: cursor } });
+				if (!replyExists) cursor = undefined;
 			}
 			const { replies, hasNext } = await fetchReplies(prismaClient, take, cheet.uuid, cursor);
 			res.status(200).json({ replies, hasNext });

@@ -4,7 +4,7 @@ import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
 import { ZodError } from "zod";
 import { createMockRes } from "../../test-utils/createMockRes";
 
-describe("sendErrorResponse()", () => {
+describe("sendErrorResponse() function", () => {
 	describe("Unique constraint", () => {
 		test("No constraint key", () => {
 			const mockRes = createMockRes();

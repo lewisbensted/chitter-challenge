@@ -8,14 +8,14 @@ export const testCheets = [
 		updatedAt: new Date(baseTime.getTime() + i * 1000),
 	})),
 	{
-		uuid: `testcheetuuidrecent`,
-		text: `Test Cheet Recent`,
-		userId: `testuseruuid1`,
+		uuid: "testcheetuuidrecent",
+		text: "Test Cheet Recent",
+		userId: "testuseruuid1",
 	},
 	{
-		uuid: `testcheetuuidhasreplies`,
-		text: `Test Cheet Has Replies`,
-		userId: `testuseruuid1`,
+		uuid: "testcheetuuidhasreplies",
+		text: "Test Cheet Has Replies",
+		userId: "testuseruuid1",
 	},
 ];
 
@@ -25,11 +25,11 @@ export const testCheetStatuses = [
 		hasReplies: i % 2 == 0,
 	})),
 	{
-		cheetId: `testcheetuuidrecent`,
+		cheetId: "testcheetuuidrecent",
 		hasReplies: false,
 	},
 	{
-		cheetId: `testcheetuuidhasreplies`,
+		cheetId: "testcheetuuidhasreplies",
 		hasReplies: true,
 	},
 ];

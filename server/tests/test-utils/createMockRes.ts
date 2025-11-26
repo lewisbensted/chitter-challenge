@@ -1,14 +1,10 @@
-import { Mock, vi } from "vitest";
+import { vi } from "vitest";
 import { Response } from "express";
 
-export const createMockRes = () => {
-	const res: any = {};
-	res.status = vi.fn().mockImplementation(() => res);
-	res.sendStatus = vi.fn().mockImplementation(() => res);
-	res.json = vi.fn().mockImplementation(() => Promise.resolve(res));
-	return res as Response & {
-		status: Mock;
-		json: Mock;
-		sendStatus: Mock;
-	};
-};
+export interface MockResponse extends Response {}
+
+export const createMockRes = () => ({
+	status: vi.fn().mockReturnThis(),
+	sendStatus: vi.fn().mockReturnThis(),
+	json: vi.fn().mockReturnThis(),
+} as unknown as MockResponse);

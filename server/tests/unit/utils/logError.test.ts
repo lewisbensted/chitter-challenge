@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { logError } from "../../../src/utils/logError";
 import { ZodError } from "zod";
 
-describe("logError()", () => {
+describe("logError() function", () => {
 	test("Zod error", () => {
 		const zodError = Object.create(ZodError.prototype);
 		zodError.issues = [

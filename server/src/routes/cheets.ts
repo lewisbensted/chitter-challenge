@@ -5,37 +5,9 @@ import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
 import { ExtendedCheetClient } from "../../types/extendedClients.js";
+import { fetchCheets, FetchCheetsType } from "../utils/fetchCheets.js";
 
 const router = express.Router({ mergeParams: true });
-
-export const fetchCheets = async (
-	prismaClient: ExtendedPrismaClient,
-	take: number,
-	sessionUserId?: string,
-	pageUserId?: string,
-	cursor?: string
-) => {
-	const userFilter = pageUserId
-		? { uuid: pageUserId }
-		: sessionUserId
-			? { OR: [{ uuid: sessionUserId }, { followers: { some: { followerId: sessionUserId } } }] }
-			: undefined;
-
-	const cheets = await prismaClient.cheet.findMany({
-		where: {
-			user: userFilter,
-		},
-		orderBy: { createdAt: "desc" },
-		take: take + 1,
-		skip: cursor ? 1 : 0,
-		cursor: cursor ? { uuid: cursor } : undefined,
-	});
-	const hasNext = take > 0 && cheets.length > take;
-	if (hasNext || take === 0) cheets.pop();
-	return { cheets, hasNext };
-};
-
-export type FetchCheetsType = typeof fetchCheets;
 
 export const getCheetHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchCheetsType) => async (req: Request, res: Response) => {
@@ -46,7 +18,7 @@ export const getCheetHandler =
 			}
 			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
 
-			let cursor = (req.query.cursor as string | undefined)?.trim()
+			let cursor = (req.query.cursor as string | undefined)?.trim();
 			if (cursor) {
 				const cheetExists = await prismaClient.cheet.findUnique({ where: { uuid: cursor } });
 				if (!cheetExists) cursor = undefined;
