@@ -1,5 +1,5 @@
-import { ExtendedPrismaClient } from "../../prisma/prismaClient";
-import { ExtendedConversationClient } from "../../types/extendedClients";
+import type { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import type { ExtendedConversationClient } from "../../types/extendedClients.js";
 
 export const fetchConversations = async (
 	prismaClient: ExtendedPrismaClient,
@@ -11,11 +11,11 @@ export const fetchConversations = async (
 	const conversations = await (prismaClient.conversation as unknown as ExtendedConversationClient).findMany({
 		where: interlocutorIds
 			? {
-					OR: [
-						{ user1Id: userId, user2Id: { in: interlocutorIds } },
-						{ user2Id: userId, user1Id: { in: interlocutorIds } },
-					],
-				}
+				OR: [
+					{ user1Id: userId, user2Id: { in: interlocutorIds } },
+					{ user2Id: userId, user1Id: { in: interlocutorIds } },
+				],
+			}
 			: { OR: [{ user1Id: userId }, { user2Id: userId }] },
 		orderBy: { latestMessage: { createdAt: "desc" } },
 		...(interlocutorIds ? {} : { take: take + 1 }),

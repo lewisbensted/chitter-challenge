@@ -3,7 +3,11 @@ import { authenticator } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-export const validateHandler = (req: Request, res: Response) => res.status(200).json(req.session.user!.uuid);
+export const validateHandler = (req: Request, res: Response) => {
+	const user = req.session.user;
+	if (!user) return res.status(401).json({ errors: ["Unauthorised."] });
+	return res.status(200).json(user.uuid);
+};
 
 router.get("/", authenticator, validateHandler);
 

@@ -1,5 +1,5 @@
-import { ExtendedPrismaClient } from "../../prisma/prismaClient";
-import { ExtendedMessageClient } from "../../types/extendedClients";
+import type { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import type { ExtendedMessageClient } from "../../types/extendedClients.js";
 
 export const fetchMessages = async (
 	prismaClient: ExtendedPrismaClient,

@@ -9,9 +9,8 @@ interface Props {
 }
 
 const ErrorModal: React.FC<Props> = ({ errors, closeModal }) => (
-
 	<Dialog open={errors.length ? true : false}>
-		{errors.length && (
+		{errors.length > 0 ? (
 			<Fragment>
 				<Typography variant="h4">Something went wrong!</Typography>
 				{errors.map((error, key) => (
@@ -25,9 +24,8 @@ const ErrorModal: React.FC<Props> = ({ errors, closeModal }) => (
 					</Button>
 				</FlexBox>
 			</Fragment>
-		)}
+		) : null}
 	</Dialog>
-
 );
 
 export default ErrorModal;

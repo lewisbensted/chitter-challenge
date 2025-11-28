@@ -25,6 +25,7 @@ const SearchUser: React.FC = () => {
 		conversations,
 		isConversationsLoading,
 		setConversationsLoading,
+		refreshConversations,
 	} = useFetchConversations();
 
 	const { register, handleSubmit } = useForm<{ searchString: string }>();
@@ -158,6 +159,7 @@ const SearchUser: React.FC = () => {
 							isOpen={!!selectedConversation}
 							setSelectedConversation={setSelectedConversation}
 							setConversations={setConversations}
+							refreshConversations={refreshConversations}
 						/>
 					)}
 				</Fragment>

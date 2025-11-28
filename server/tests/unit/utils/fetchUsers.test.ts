@@ -74,7 +74,7 @@ describe("fetchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Cursor provided", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", undefined, 'mockcursor');
+		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", undefined, "mockcursor");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -87,8 +87,8 @@ describe("fetchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Empty return", async () => {
-		prismaMock.user.findMany.mockResolvedValue([])
-		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", undefined, 'mockcursor');
+		prismaMock.user.findMany.mockResolvedValue([]);
+		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", undefined, "mockcursor");
 		expect(users).toHaveLength(0);
 		expect(hasNext).toBe(false);
 	});

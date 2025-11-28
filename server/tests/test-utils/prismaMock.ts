@@ -1,4 +1,8 @@
 import { vi } from "vitest";
+import { ExtendedPrismaClient } from "../../prisma/prismaClient";
+import { mockDeep, DeepMockProxy } from "vitest-mock-extended";
+
+// export const prismaMock = mockDeep<ExtendedPrismaClient>() as DeepMockProxy<ExtendedPrismaClient>;
 
 export const prismaMock = {
 	$transaction: vi.fn(),
@@ -36,10 +40,18 @@ export const prismaMock = {
 	},
 	messageStatus: {
 		softDelete: vi.fn(),
-		create: vi.fn()
+		create: vi.fn(),
+		updateMany: vi.fn(),
 	},
 	conversation: {
-		upsert:vi.fn(),
-		findMany:vi.fn()
+		upsert: vi.fn(),
+		update: vi.fn(),
+		findFirst: vi.fn(),
+		findMany: vi.fn(),
+		findUnique: vi.fn(),
+	},
+	follow: {
+		create: vi.fn(),
+		delete: vi.fn(),
 	}
 } as any;

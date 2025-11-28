@@ -37,17 +37,17 @@ const useSearchUsers = (): UseSearchUsersReturn => {
 		async (searchString: string, reset = false) => {
 			setSearchLoading(true);
 
-			const take = page === 0 ? 5 : 5;
-			const params = new URLSearchParams();
-			if (cursorRef.current) params.append("cursor", cursorRef.current);
-			params.append("take", take.toString());
-			params.append("search", searchString);
-
 			if (reset) {
 				cursorRef.current = undefined;
 				setUsers([]);
 				setNewUsers([]);
 			}
+
+			const take = page === 0 ? 5 : 5;
+			const params = new URLSearchParams();
+			if (cursorRef.current) params.append("cursor", cursorRef.current);
+			params.append("take", take.toString());
+			params.append("search", searchString);
 
 			try {
 				const res = await axios.get<{ users: IUserEnhanced[]; hasNext: boolean }>(

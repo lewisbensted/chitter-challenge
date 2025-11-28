@@ -1,7 +1,7 @@
 export interface IUser {
 	uuid: string;
 	username: string;
-	followers?: string[]
+	followers?: { uuid: string }[];
 }
 
 export interface ICheet {
@@ -47,5 +47,5 @@ export interface IConversation {
 	user1Unread: boolean;
 	user2: IUser;
 	user2Unread: boolean;
-	latestMessage: IMessage
+	latestMessage: IMessage;
 }

@@ -5,9 +5,11 @@ import reactHooksPlugin from "eslint-plugin-react-hooks";
 import eslint from "@eslint/js";
 import onlyWarn from "eslint-plugin-only-warn";
 import stylistic from "@stylistic/eslint-plugin";
+import { defineConfig } from 'eslint/config';
+
 
 /** @type {import('eslint').Linter.Config[]} */
-export default tseslint.config(
+export default defineConfig(
 	eslint.configs.recommended,
 	{
 		languageOptions: {
@@ -24,12 +26,10 @@ export default tseslint.config(
 		files: ["**/*.{ts,tsx}"],
 		extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
 		languageOptions: {
-			parserOptions: { project: ["./frontend/tsconfig.json", "./server/tsconfig.json"] },
-		},
-
-		plugins: {
-			"@stylistic": stylistic,
-			"only-warn": onlyWarn,
+			parser: tseslint.parser,
+			parserOptions: {
+				project: ["./frontend/tsconfig.json", "./server/tsconfig.json"],
+			},
 		},
 		rules: {
 			"@typescript-eslint/no-misused-promises": ["warn", { checksVoidReturn: false }],

@@ -56,6 +56,7 @@ const MessageModal: React.FC<Props> = ({
 		markMessagesRead,
 		refreshMessages,
 		setPage,
+		
 	} = useFetchMessages(conversation.interlocutorId);
 
 	useEffect(() => {

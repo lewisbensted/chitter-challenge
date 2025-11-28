@@ -1,12 +1,11 @@
 import { PrismaClientInitializationError, PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { describe, expect, test } from "vitest";
 import { logError } from "../../../src/utils/logError";
-import { ZodError } from "zod";
+import { ZodError, ZodIssue } from "zod";
 
 describe("logError() function", () => {
 	test("Zod error", () => {
-		const zodError = Object.create(ZodError.prototype);
-		zodError.issues = [
+		const issues: ZodIssue[] = [
 			{
 				code: "too_small",
 				minimum: 2,
@@ -23,6 +22,7 @@ describe("logError() function", () => {
 				path: ["email"],
 			},
 		];
+		const zodError = new ZodError(issues);
 		expect(logError(zodError)).toBe(`\nValidation Error(s):\n${zodError.message}\n`);
 	});
 	test("Error object", () => {
@@ -32,17 +32,16 @@ describe("logError() function", () => {
 		expect(logError("Non-error message")).toBe("\nNon-error message\n");
 	});
 	test("Prisma initialisation error P1003", () => {
-		const prismaError = Object.create(PrismaClientInitializationError.prototype);
-		prismaError.errorCode = "P1003";
-		prismaError.message = "Cannot connect to database";
+		const prismaError = new PrismaClientInitializationError("Cannot connect to database", "", "P1003");
 		expect(logError(prismaError)).toBe(
 			"\nCannot connect to database\n\nHave all migrations been executed successfully?\n"
 		);
 	});
 	test("Prisma table error P2021", () => {
-		const prismaError = Object.create(PrismaClientKnownRequestError.prototype);
-		prismaError.code = "P2021";
-		prismaError.message = "Table does not exist";
+		const prismaError = new PrismaClientKnownRequestError("Table does not exist", {
+			code: "P2021",
+			clientVersion: "",
+		});
 		expect(logError(prismaError)).toBe(
 			"\nTable does not exist\n\nHave all migrations been executed successfully?\n"
 		);

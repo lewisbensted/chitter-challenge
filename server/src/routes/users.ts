@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import prisma, {  type  ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
 import { IUser } from "../../types/responses.js";
-import { SearchUsersRequest } from "../../types/requests.js";
-import { fetchUsers, FetchUsersType } from "../utils/fetchUsers.js";
+import type  { SearchUsersRequest } from "../../types/requests.js";
+import { fetchUsers, type FetchUsersType } from "../utils/fetchUsers.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -25,7 +25,7 @@ export const searchUsersHandler =
 				return res.status(200).json({ users: [], hasNext: false });
 			}
 
-			const { users, hasNext } = await fetchFn(prismaClient, searchString, take, req.session?.user?.uuid, cursor);
+			const { users, hasNext } = await fetchFn(prismaClient, take, searchString, req.session?.user?.uuid, cursor);
 
 			res.status(200).json({ users, hasNext });
 		} catch (error) {

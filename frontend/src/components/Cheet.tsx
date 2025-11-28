@@ -45,13 +45,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			setEditLoading(true);
 			if (setCheetLoading) setCheetLoading(true);
 			try {
-				const res = await axios.put<ICheet>(
-					`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`,
-					data,
-					{
-						withCredentials: true,
-					}
-				);
+				const res = await axios.put<ICheet>(`${serverURL}/api/cheets/${cheet.uuid}`, data, {
+					withCredentials: true,
+				});
 				const updatedCheet = res.data;
 				if (typeof updatedCheet !== "object") throwApiError("object", updatedCheet);
 				if (isPageMounted.current) setPendingCheet(updatedCheet);
@@ -71,7 +67,7 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			setDeleteLoading(true);
 			if (setCheetLoading) setCheetLoading(true);
 			try {
-				await axios.delete(`${serverURL + (id ? `/users/${id}` : "")}/api/cheets/${cheet.uuid}`, {
+				await axios.delete(`${serverURL}/api/cheets/${cheet.uuid}`, {
 					withCredentials: true,
 				});
 				if (isPageMounted.current) setPendingCheet(cheet);

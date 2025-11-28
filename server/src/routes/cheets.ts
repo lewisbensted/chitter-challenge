@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
-import { ExtendedCheetClient } from "../../types/extendedClients.js";
-import { fetchCheets, FetchCheetsType } from "../utils/fetchCheets.js";
+import type { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
+import type { ExtendedCheetClient } from "../../types/extendedClients.js";
+import { fetchCheets, type FetchCheetsType } from "../utils/fetchCheets.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -35,10 +35,12 @@ export const getCheetHandler =
 export const postCheetHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendCheetRequest, res: Response) => {
 		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 			const result = await prismaClient.$transaction(async (transaction) => {
 				const newCheet = await transaction.cheet.create({
 					data: {
-						userId: req.session.user!.uuid,
+						userId: sessionUser.uuid,
 						text: req.body.text,
 					},
 				});
@@ -57,45 +59,51 @@ export const postCheetHandler =
 		}
 	};
 
-export const putCheetHandler = (prismaClient: ExtendedPrismaClient) => async (req: EditCheetRequest, res: Response) => {
-	try {
-		const targetCheet = await (prismaClient.cheet as unknown as ExtendedCheetClient).findUniqueOrThrow({
-			where: { uuid: req.params.cheetId },
-		});
+export const editCheetHandler =
+	(prismaClient: ExtendedPrismaClient) => async (req: EditCheetRequest, res: Response) => {
+		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 
-		if (targetCheet.user.uuid !== req.session.user!.uuid)
-			return res.status(403).json({ errors: ["Cannot update someone else's cheet."] });
+			const targetCheet = await (prismaClient.cheet as unknown as ExtendedCheetClient).findUniqueOrThrow({
+				where: { uuid: req.params.cheetId },
+			});
 
-		const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
-		if (targetCheet.createdAt < oneHourAgo) {
-			return res.status(400).json({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
+			if (targetCheet.user.uuid !== sessionUser.uuid)
+				return res.status(403).json({ errors: ["Cannot update someone else's cheet."] });
+
+			const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
+			if (targetCheet.createdAt < oneHourAgo) {
+				return res.status(400).json({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
+			}
+			if (targetCheet.cheetStatus.hasReplies) {
+				return res.status(400).json({ errors: ["Cannot update a cheet with replies."] });
+			}
+			if (req.body.text === targetCheet.text) return res.status(200).json(targetCheet);
+
+			const updatedCheet = await prismaClient.cheet.update({
+				where: {
+					uuid: targetCheet.uuid,
+				},
+				data: {
+					text: req.body.text,
+				},
+			});
+			return res.status(200).json(updatedCheet);
+		} catch (error) {
+			console.error("Error updating cheet in the database:\n" + logError(error));
+			sendErrorResponse(error, res);
 		}
-		if (targetCheet.cheetStatus.hasReplies) {
-			return res.status(400).json({ errors: ["Cannot update a cheet with replies."] });
-		}
-		if (req.body.text === targetCheet.text) return res.status(200).json(targetCheet);
-
-		const updatedCheet = await prismaClient.cheet.update({
-			where: {
-				uuid: targetCheet.uuid,
-			},
-			data: {
-				text: req.body.text,
-			},
-		});
-		return res.status(200).json(updatedCheet);
-	} catch (error) {
-		console.error("Error updating cheet in the database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-};
+	};
 
 export const deleteCheetHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
 	try {
+		const sessionUser = req.session.user;
+		if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 		const targetCheet = await (prismaClient.cheet as unknown as ExtendedCheetClient).findUniqueOrThrow({
 			where: { uuid: req.params.cheetId },
 		});
-		if (targetCheet.user.uuid !== req.session.user!.uuid)
+		if (targetCheet.user.uuid !== sessionUser.uuid)
 			return res.status(403).json({ errors: ["Cannot delete someone else's cheet."] });
 		await prismaClient.cheet.delete({
 			where: {
@@ -111,7 +119,7 @@ export const deleteCheetHandler = (prismaClient: ExtendedPrismaClient) => async 
 
 router.get("/", getCheetHandler(prisma, fetchCheets));
 router.post("/", authenticator, postCheetHandler(prisma));
-router.put("/", authenticator, putCheetHandler(prisma));
-router.delete("/", authenticator, deleteCheetHandler(prisma));
+router.put("/:cheetId", authenticator, editCheetHandler(prisma));
+router.delete("/:cheetId", authenticator, deleteCheetHandler(prisma));
 
 export default router;

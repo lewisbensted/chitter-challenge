@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import prisma, { ExtendedPrismaClient } from "./prismaClient.js";
+import { ExtendedPrismaClient } from "./prismaClient.js";
 
 export const resetDB = async (prismaClient: ExtendedPrismaClient) => {
 	await prismaClient.$transaction([

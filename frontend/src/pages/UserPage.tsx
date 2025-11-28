@@ -29,12 +29,8 @@ const UserPage: React.FC = () => {
 
 	const { userId } = useAuth();
 
-	const {
-		conversations,
-		isConversationsLoading,
-		fetchConversations,
-		setConversations,
-	} = useFetchConversations();
+	const { conversations, isConversationsLoading, fetchConversations, setConversations, refreshConversations } =
+		useFetchConversations();
 
 	const isMounted = useIsMounted();
 
@@ -186,6 +182,7 @@ const UserPage: React.FC = () => {
 					isOpen={!!selectedConversation}
 					setSelectedConversation={setSelectedConversation}
 					setConversations={setConversations}
+					refreshConversations={refreshConversations}
 				/>
 			)}
 		</Box>

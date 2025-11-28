@@ -34,7 +34,7 @@ export const processErrors = (error: unknown, action: string) => {
 		if (
 			error.response?.status &&
 			[400, 401, 403, 409, 429].includes(error.response.status) &&
-			!(code && ["ROUTE_NOT_FOUND", "OWNERSHIP_VIOLATION"].includes(code))
+			code !== "ROUTE_NOT_FOUND"
 		) {
 			return errors.length > 0 ? errors : [`An unexpected error has occured - failed to ${action}.`];
 		} else if (axios.isAxiosError(error) && error.code === "ERR_NETWORK") {

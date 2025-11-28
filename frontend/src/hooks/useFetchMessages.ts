@@ -82,7 +82,7 @@ const useFetchMessages = (interlocutorId: string): UseFetchMessagesReturn => {
 	const markMessagesRead = useCallback(async () => {
 		try {
 			await axios.put(
-				`${serverURL}/api/messages/read/${interlocutorId}`,
+				`${serverURL}/api/messages/${interlocutorId}/read`,
 				{},
 				{
 					withCredentials: true,

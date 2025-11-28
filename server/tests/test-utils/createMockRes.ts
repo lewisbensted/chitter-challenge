@@ -1,10 +1,17 @@
-import { vi } from "vitest";
-import { Response } from "express";
+import { Mock, vi } from "vitest";
 
-export interface MockResponse extends Response {}
+export interface MockResponse {
+	status: ReturnType<typeof vi.fn>;
+	sendStatus: ReturnType<typeof vi.fn>;
+	json: ReturnType<typeof vi.fn>;
+	clearCookie: ReturnType<typeof vi.fn>;
+	cookie: ReturnType<typeof vi.fn>;
+}
 
-export const createMockRes = () => ({
+export const createMockRes = (): MockResponse => ({
 	status: vi.fn().mockReturnThis(),
 	sendStatus: vi.fn().mockReturnThis(),
 	json: vi.fn().mockReturnThis(),
-} as unknown as MockResponse);
+	clearCookie: vi.fn().mockReturnThis(),
+	cookie: vi.fn().mockReturnThis(),
+});

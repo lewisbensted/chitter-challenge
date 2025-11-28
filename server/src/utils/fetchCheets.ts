@@ -1,4 +1,4 @@
-import { ExtendedPrismaClient } from "../../prisma/prismaClient";
+import type { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 
 export const fetchCheets = async (
 	prismaClient: ExtendedPrismaClient,

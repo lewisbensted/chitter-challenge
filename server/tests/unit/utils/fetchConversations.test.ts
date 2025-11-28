@@ -8,15 +8,15 @@ describe("fetchConversations() function", () => {
 			Array.from({ length: 5 }, (_, i) => ({
 				key: `testkey${i + 1}`,
 				user1:
-					i % 2 == 0
+					i % 2 === 0
 						? { uuid: "mockuserid", username: "mockusername" }
 						: { uuid: `mockuserid${i + 1}`, username: `mockusername${i + 1}` },
 				user2:
-					i % 2 != 0
+					i % 2 !== 0
 						? { uuid: "mockuserid", username: "mockusername" }
 						: { uuid: `mockuserid${i + 1}`, username: `mockusername${i + 1}` },
-				user1Unread: i % 2 == 0,
-				user2Unread: i % 2 == 0,
+				user1Unread: i % 2 === 0,
+				user2Unread: i % 2 === 0,
 				latestMessage: { text: `Message ${i + 1}` },
 			}))
 		);
@@ -39,7 +39,7 @@ describe("fetchConversations() function", () => {
 				interlocutorId: `mockuserid${i + 1}`,
 				interlocutorUsername: `mockusername${i + 1}`,
 				latestMessage: { text: `Message ${i + 1}` },
-				unread: i % 2 == 0,
+				unread: i % 2 === 0,
 			});
 		});
 		expect(hasNext).toBe(false);

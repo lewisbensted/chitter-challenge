@@ -29,8 +29,8 @@ const useFetchUser = (userId?: string): UseFetchUserReturn => {
 				withCredentials: true,
 			});
 			const { user, isFollowing } = res.data;
-			if (typeof user !== "object" || typeof isFollowing !== "boolean")
-				throwApiError({ user: "object", isFollowing: "boolean" }, res.data);
+			if (!(typeof user === "object" && (isFollowing == null || typeof isFollowing == "boolean")))
+				throwApiError({ user: "object", isFollowing: ["boolean", "null"] }, res.data);
 			if (isMounted.current) setUserEnhanced({ user, isFollowing, conversation: null });
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 404) void navigate("/");

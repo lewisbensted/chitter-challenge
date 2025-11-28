@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 
 const router = express.Router();
 
-router.delete("/", (req: Request, res: Response) => {
+export const logoutHandler = (req: Request, res: Response) => {
 	if (req.session.user) {
 		req.session.destroy((error: unknown) => {
 			if (error) {
@@ -20,6 +21,8 @@ router.delete("/", (req: Request, res: Response) => {
 	} else {
 		res.status(403).json({ errors: ["Not logged in."] });
 	}
-});
+};
+
+router.delete("/", logoutHandler);
 
 export default router;

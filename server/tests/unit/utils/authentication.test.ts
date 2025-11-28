@@ -1,9 +1,10 @@
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { authenticate } from "../../../src/utils/authenticate";
 import * as authUtils from "../../../src/utils/authenticate";
 import { authenticator } from "../../../src/middleware/authMiddleware";
-import { Request, NextFunction } from "express";
-import { createMockRes } from "../../test-utils/createMockRes";
+import { Request, Response, NextFunction } from "express";
+import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
+import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 
 describe("Authentication", () => {
 	describe("authenticate() function", () => {
@@ -47,15 +48,9 @@ describe("Authentication", () => {
 			} as unknown as Request;
 			expect(authenticate(testReq)).toEqual(false);
 		});
-		test("sessionID missing.", () => {
+		test("session_id cookie missing.", () => {
 			const testReq = {
-				session: { user: { uuid: "testuseruuid" } },
-				cookies: { session_id: "testsessionid", user_id: "testuseruuid" },
-			} as unknown as Request;
-			expect(authenticate(testReq)).toEqual(false);
-		});
-		test("sessionID and session_id cookie both missing.", () => {
-			const testReq = {
+				sessionID: "testsessionid",
 				session: { user: { uuid: "testuseruuid" } },
 				cookies: { user_id: "testuseruuid" },
 			} as unknown as Request;
@@ -103,23 +98,25 @@ describe("Authentication", () => {
 		});
 	});
 	describe("authMiddleware()", () => {
+		let mockReq: MockRequest;
+		let mockRes: MockResponse;
+		let mockNext: NextFunction;
+		beforeEach(() => {
+			mockReq = createMockReq();
+			mockRes = createMockRes();
+			mockNext = vi.fn();
+		});
 		test("pass", () => {
-			const mockReq = {} as Request;
-			const mockRes = createMockRes();
-			const mockNext: NextFunction = vi.fn();
 			vi.spyOn(authUtils, "authenticate").mockReturnValue(true);
-			authenticator(mockReq, mockRes, mockNext);
+			authenticator(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(mockNext).toHaveBeenCalledTimes(1);
 			expect(mockRes.status).toHaveBeenCalledTimes(0);
 		});
 		test("fail", () => {
-			const mockReq = {} as Request;
-			const mockRes = createMockRes();
-			const mockNext: NextFunction = vi.fn();
 			vi.spyOn(authUtils, "authenticate").mockReturnValue(false);
-			authenticator(mockReq, mockRes, mockNext);
+			authenticator(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(mockNext).toHaveBeenCalledTimes(0);
-			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Invalid credentials."] });
+			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
 		});
 	});
 });

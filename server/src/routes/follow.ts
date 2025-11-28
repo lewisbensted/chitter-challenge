@@ -1,44 +1,56 @@
 import express, { Request, Response } from "express";
 import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
-import prisma from "../../prisma/prismaClient.js";
+import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 
 const router = express.Router({ mergeParams: true });
 
-router.post("/", authenticator, async (req: Request, res: Response) => {
+export const followHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
 	try {
-		const followerId = req.session.user!.uuid;
+		const sessionUser = req.session.user;
+		if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
+
+		const followerId = sessionUser.uuid;
 		const followingId = req.params.followingId;
 
 		if (followerId === followingId) {
-			return res.status(400).json({ error: ["You cannot follow yourself."] });
+			return res.status(400).json({ errors: ["You cannot follow yourself."] });
 		}
-		await prisma.follow.create({
+		await prismaClient.follow.create({
 			data: {
 				followerId: followerId,
 				followingId: followingId,
 			},
 		});
-		res.status(201).json({ message: "success" });
+		res.sendStatus(201);
 	} catch (error) {
 		console.error("Error following user:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
-});
+};
 
-router.delete("/", authenticator, async (req: Request, res: Response) => {
-	const followerId = req.session.user!.uuid;
+export const unfollowHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
+	const sessionUser = req.session.user;
+	if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
+
+	const followerId = sessionUser.uuid;
 	const followingId = req.params.followingId;
 	try {
-		await prisma.follow.delete({
+		await prismaClient.follow.delete({
 			where: { followerId_followingId: { followerId: followerId, followingId: followingId } },
 		});
-		res.status(200).json({ message: "success" });
+		res.sendStatus(204);
 	} catch (error) {
+		if (typeof error == "object" && error && "code" in error && error?.code === "P2025") {
+			return res.sendStatus(204);
+		}
 		console.error("Error unfollowing user:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
-});
+};
+
+router.post("/", authenticator, followHandler(prisma));
+router.delete("/", authenticator, unfollowHandler(prisma));
 
 export default router;

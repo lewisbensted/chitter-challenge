@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { authenticator } from "../middleware/authMiddleware.js";
 import { logError } from "../utils/logError.js";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { EditReplyRequest, SendReplyRequest } from "../../types/requests.js";
+import type { EditReplyRequest, SendReplyRequest } from "../../types/requests.js";
 import type { ExtendedReplyClient } from "../../types/extendedClients.js";
-import { fetchReplies, FetchRepliesType } from "../utils/fetchReplies.js";
+import { fetchReplies, type FetchRepliesType } from "../utils/fetchReplies.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -30,10 +30,13 @@ export const getReplyHandler =
 export const postReplyHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendReplyRequest, res: Response) => {
 		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
+
 			const result = await prismaClient.$transaction(async (transaction) => {
 				const newReply = await transaction.reply.create({
 					data: {
-						userId: req.session.user!.uuid,
+						userId: sessionUser.uuid,
 						text: req.body.text,
 						cheetId: req.params.cheetId,
 					},
@@ -56,35 +59,40 @@ export const postReplyHandler =
 		}
 	};
 
-export const putReplyHandler = (prismaClient: ExtendedPrismaClient) => async (req: EditReplyRequest, res: Response) => {
-	try {
-		const targetReply = await (prismaClient.reply as unknown as ExtendedReplyClient).findUniqueOrThrow({
-			where: { uuid: req.params.replyId },
-		});
-		if (targetReply.user.uuid !== req.session.user!.uuid)
-			return res.status(403).json({ errors: ["Cannot update someone else's reply."] });
-		if (req.body.text === targetReply.text) return res.status(200).json(targetReply);
-		const updatedReply = await prismaClient.reply.update({
-			where: {
-				uuid: targetReply.uuid,
-			},
-			data: {
-				text: req.body.text,
-			},
-		});
-		return res.status(200).json(updatedReply);
-	} catch (error) {
-		console.error("Error updating reply in the database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-};
+export const editReplyHandler =
+	(prismaClient: ExtendedPrismaClient) => async (req: EditReplyRequest, res: Response) => {
+		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
+			const targetReply = await (prismaClient.reply as unknown as ExtendedReplyClient).findUniqueOrThrow({
+				where: { uuid: req.params.replyId },
+			});
+			if (targetReply.user.uuid !== sessionUser.uuid)
+				return res.status(403).json({ errors: ["Cannot update someone else's reply."] });
+			if (req.body.text === targetReply.text) return res.status(200).json(targetReply);
+			const updatedReply = await prismaClient.reply.update({
+				where: {
+					uuid: targetReply.uuid,
+				},
+				data: {
+					text: req.body.text,
+				},
+			});
+			return res.status(200).json(updatedReply);
+		} catch (error) {
+			console.error("Error updating reply in the database:\n" + logError(error));
+			sendErrorResponse(error, res);
+		}
+	};
 
 export const deleteReplyHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
 	try {
+		const sessionUser = req.session.user;
+		if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 		const targetReply = await (prismaClient.reply as unknown as ExtendedReplyClient).findUniqueOrThrow({
 			where: { uuid: req.params.replyId },
 		});
-		if (targetReply.user.uuid !== req.session.user!.uuid)
+		if (targetReply.user.uuid !== sessionUser.uuid)
 			return res.status(403).json({ errors: ["Cannot delete someone else's reply."] });
 		await prismaClient.reply.delete({
 			where: {
@@ -99,8 +107,8 @@ export const deleteReplyHandler = (prismaClient: ExtendedPrismaClient) => async 
 };
 
 router.get("/", getReplyHandler(prisma, fetchReplies));
-router.get("/", authenticator, postReplyHandler(prisma));
-router.put("/:replyId", authenticator, putReplyHandler(prisma));
+router.post("/", authenticator, postReplyHandler(prisma));
+router.put("/:replyId", authenticator, editReplyHandler(prisma));
 router.delete("/:replyId", authenticator, deleteReplyHandler(prisma));
 
 export default router;

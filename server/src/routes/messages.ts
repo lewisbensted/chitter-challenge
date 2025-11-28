@@ -1,38 +1,22 @@
 import express, { Request, Response } from "express";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import { logError } from "../utils/logError.js";
 import { authenticator } from "../middleware/authMiddleware.js";
-import { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
+import type { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
 import type { ExtendedMessageClient } from "../../types/extendedClients.js";
 import { generateConversationKey } from "../utils/generateConversationKey.js";
 import { messageFilters } from "../../prisma/extensions/messageExtension.js";
-import { fetchMessages, FetchMessagesType } from "../utils/fetchMessages.js";
+import { fetchMessages, type FetchMessagesType } from "../utils/fetchMessages.js";
+import { readMessages } from "../utils/readMessages.js";
 
 const router = express.Router({ mergeParams: true });
-
-export const readMessages = async (userId: string, interlocutorId: string) =>
-	await prisma.$transaction(async (transaction) => {
-		const readMessages = await transaction.messageStatus.updateMany({
-			where: {
-				message: { recipientId: userId, senderId: interlocutorId },
-				isRead: false,
-			},
-			data: { isRead: true },
-		});
-		const [firstUser, secondUser] = [userId, interlocutorId].sort();
-		const convoKey = generateConversationKey(firstUser, secondUser);
-		const isFirstUserSession = firstUser === userId;
-		await transaction.conversation.update({
-			where: { key: convoKey },
-			data: { ...(isFirstUserSession ? { user1Unread: false } : { user2Unread: false }) },
-		});
-		return readMessages.count;
-	});
 
 export const getMessageHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchMessagesType) => async (req: Request, res: Response) => {
 		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 			const recipient = await prismaClient.user.findUniqueOrThrow({ where: { uuid: req.params.recipientId } });
 			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
 
@@ -42,13 +26,7 @@ export const getMessageHandler =
 				if (!messageExists) cursor = undefined;
 			}
 
-			const { messages, hasNext } = await fetchFn(
-				prismaClient,
-				take,
-				req.session.user!.uuid,
-				recipient.uuid,
-				cursor
-			);
+			const { messages, hasNext } = await fetchFn(prismaClient, take, sessionUser.uuid, recipient.uuid, cursor);
 			res.status(200).json({ messages, hasNext });
 		} catch (error) {
 			console.error("Error retrieving messages from the database:\n" + logError(error));
@@ -56,24 +34,28 @@ export const getMessageHandler =
 		}
 	};
 
-router.put("/:recipientId/read", authenticator, async (req: Request, res: Response) => {
+export const readMessagesHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
 	try {
-		const updatedCount = await readMessages(req.session.user!.uuid, req.params.recipientId);
+		const sessionUser = req.session.user;
+		if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
+		const updatedCount = await readMessages(prismaClient, sessionUser.uuid, req.params.recipientId);
 		if (updatedCount === 0) console.warn("No messages marked as read");
 		res.sendStatus(200);
 	} catch (error) {
 		console.error("Error marking messages as read:\n" + logError(error));
 		sendErrorResponse(error, res);
 	}
-});
+};
 
 export const postMessageHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendMessageRequest, res: Response) => {
 		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 			const result = await prismaClient.$transaction(async (transaction) => {
 				const newMessage = await transaction.message.create({
 					data: {
-						senderId: req.session.user!.uuid,
+						senderId: sessionUser.uuid,
 						recipientId: req.params.recipientId,
 						text: req.body.text,
 					},
@@ -123,10 +105,12 @@ export const postMessageHandler =
 export const editMessageHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: EditMessageRequest, res: Response) => {
 		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 			const targetMessage = await (prismaClient.message as unknown as ExtendedMessageClient).findUniqueOrThrow({
 				where: { uuid: req.params.messageId },
 			});
-			if (targetMessage.sender.uuid !== req.session.user!.uuid)
+			if (targetMessage.sender.uuid !== sessionUser.uuid)
 				return res.status(403).json({ errors: ["Cannot update someone else's message."] });
 			if (targetMessage.messageStatus.isRead)
 				return res.status(400).json({ errors: ["Cannot update a message after it has been read."] });
@@ -151,10 +135,12 @@ export const editMessageHandler =
 
 export const deleteMessageHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
 	try {
+		const sessionUser = req.session.user;
+		if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 		const targetMessage = await (prismaClient.message as unknown as ExtendedMessageClient).findUniqueOrThrow({
 			where: { uuid: req.params.messageId },
 		});
-		if (targetMessage.sender.uuid !== req.session.user!.uuid)
+		if (targetMessage.sender.uuid !== sessionUser.uuid)
 			return res.status(403).json({ errors: ["Cannot delete someone else's message."] });
 		const deletedMessage = await prismaClient.messageStatus.softDelete(targetMessage.uuid);
 		res.status(200).json({ ...deletedMessage, text: null });
@@ -168,5 +154,6 @@ router.get("/:recipientId", authenticator, getMessageHandler(prisma, fetchMessag
 router.post("/:recipientId", authenticator, postMessageHandler(prisma));
 router.put("/:messageId", authenticator, editMessageHandler(prisma));
 router.delete("/:messageId", authenticator, deleteMessageHandler(prisma));
+router.put("/:recipientId/read", authenticator, readMessagesHandler(prisma));
 
 export default router;

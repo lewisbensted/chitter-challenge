@@ -1,10 +1,9 @@
 import express, { Response } from "express";
 import { logError } from "../utils/logError.js";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
-import { RegisterUserRequest } from "../../types/requests.js";
+import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type RegisterUserRequest } from "../../types/requests.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
-import { PrismaClient } from "@prisma/client";
 
 const router = express.Router();
 
