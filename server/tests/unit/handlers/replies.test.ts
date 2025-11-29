@@ -7,7 +7,12 @@ vi.mock("../../../src/utils/logError", () => ({
 	logError: vi.fn(),
 }));
 
-import { getReplyHandler, postReplyHandler, editReplyHandler, deleteReplyHandler } from "../../../src/routes/replies";
+import {
+	getRepliesHandler,
+	createReplyHandler,
+	updateReplyHandler,
+	deleteReplyHandler,
+} from "../../../src/routes/replies";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
@@ -29,7 +34,7 @@ describe("Reply handlers", () => {
 	afterAll(() => {
 		vi.restoreAllMocks();
 	});
-	describe("Fetch replies at route: [GET] /replies", () => {
+	describe("getRepliesHandler() function", () => {
 		let fetchRepliesMock: ReturnType<typeof vi.fn>;
 		beforeEach(() => {
 			fetchRepliesMock = vi.fn().mockResolvedValue({ replies: [], hasNext: false });
@@ -43,7 +48,7 @@ describe("Reply handlers", () => {
 			mockReq.query.cursor = "valid";
 			prismaMock.reply.findUnique.mockResolvedValueOnce("valid");
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockcheet" });
-			await getReplyHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
+			await getRepliesHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchRepliesMock).toHaveBeenCalledWith(prismaMock, 20, "mockcheet", "valid");
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({ replies: [], hasNext: false });
@@ -51,7 +56,7 @@ describe("Reply handlers", () => {
 		test("Failure - invalid cheet ID", async () => {
 			mockReq.params.cheetId = "mockcheetid";
 			prismaMock.cheet.findUniqueOrThrow.mockRejectedValueOnce(new Error("Invalid cheet"));
-			await getReplyHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
+			await getRepliesHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
@@ -60,7 +65,7 @@ describe("Reply handlers", () => {
 			mockReq.query.take = "invalidtake";
 
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockcheet" });
-			await getReplyHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
+			await getRepliesHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchRepliesMock).toHaveBeenCalledWith(prismaMock, 10, "mockcheet", undefined);
 		});
 		test("Success - take clamped at max value", async () => {
@@ -68,7 +73,7 @@ describe("Reply handlers", () => {
 			mockReq.query.take = String(100);
 
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockcheet" });
-			await getReplyHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
+			await getRepliesHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchRepliesMock).toHaveBeenCalledWith(prismaMock, 50, "mockcheet", undefined);
 		});
 		test("Success - invalid cursor provided", async () => {
@@ -77,13 +82,13 @@ describe("Reply handlers", () => {
 
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockcheet" });
 			prismaMock.reply.findUnique.mockResolvedValueOnce(null);
-			await getReplyHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
+			await getRepliesHandler(prismaMock, fetchRepliesMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchRepliesMock).toHaveBeenCalledWith(prismaMock, 10, "mockcheet", undefined);
 		});
 	});
-	describe("Post replies at route: [POST] /replies", () => {
+	describe("createReplyHandler() function", () => {
 		test("Unauthorised", async () => {
-			await postReplyHandler(prismaMock)(mockReq as SendReplyRequest, mockRes as unknown as Response);
+			await createReplyHandler(prismaMock)(mockReq as SendReplyRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
 		});
@@ -95,7 +100,7 @@ describe("Reply handlers", () => {
 				uuid: "mockreply",
 			});
 
-			await postReplyHandler(prismaMock)(mockReq as SendReplyRequest, mockRes as unknown as Response);
+			await createReplyHandler(prismaMock)(mockReq as SendReplyRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(201);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				uuid: "mockreply",
@@ -106,15 +111,15 @@ describe("Reply handlers", () => {
 			mockReq.params.cheetId = "mockcheetid";
 
 			prismaMock.$transaction = vi.fn().mockRejectedValue(new Error("DB exploded"));
-			await postReplyHandler(prismaMock)(mockReq as SendReplyRequest, mockRes as unknown as Response);
+			await createReplyHandler(prismaMock)(mockReq as SendReplyRequest, mockRes as unknown as Response);
 
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("Edit replies at route [PUT] /replies/:replyId", () => {
+	describe("updateReplyHandler() function", () => {
 		test("Unauthorised", async () => {
-			await editReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
+			await updateReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
 		});
@@ -131,7 +136,7 @@ describe("Reply handlers", () => {
 			prismaMock.reply.update.mockResolvedValueOnce({
 				uuid: "mockreplyuuid",
 			});
-			await editReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
+			await updateReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({ uuid: "mockreplyuuid" });
 		});
@@ -145,7 +150,7 @@ describe("Reply handlers", () => {
 				text: "Mock Reply",
 				user: { uuid: "mockuserid" },
 			});
-			await editReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
+			await updateReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				uuid: "mockreplyuuid",
@@ -156,7 +161,7 @@ describe("Reply handlers", () => {
 		test("Failure - invalid target reply ID", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			prismaMock.reply.findUniqueOrThrow.mockRejectedValueOnce(new Error("Reply not found"));
-			await editReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
+			await updateReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
@@ -166,12 +171,12 @@ describe("Reply handlers", () => {
 				uuid: "mockreplyuuid",
 				user: { uuid: "mockuseridother" },
 			});
-			await editReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
+			await updateReplyHandler(prismaMock)(mockReq as EditReplyRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot update someone else's reply."] });
 		});
 	});
-	describe("Delete replies at route [DELETE] /replies/:replyId", () => {
+	describe("deleteReplyHandler() function", () => {
 		test("Unauthorised", async () => {
 			await deleteReplyHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);

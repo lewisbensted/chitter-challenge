@@ -97,7 +97,7 @@ describe("Authentication", () => {
 			expect(authenticate(testReq)).toEqual(false);
 		});
 	});
-	describe("authMiddleware()", () => {
+	describe("authMiddleware() function", () => {
 		let mockReq: MockRequest;
 		let mockRes: MockResponse;
 		let mockNext: NextFunction;

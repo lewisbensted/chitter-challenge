@@ -28,7 +28,7 @@ describe("Follow handlers", () => {
 	afterAll(() => {
 		vi.restoreAllMocks();
 	});
-	describe("Follow user at route: [POST] /follow", () => {
+	describe("followHandler() function", () => {
 		test("Unauthorised", async () => {
 			await followHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -57,7 +57,7 @@ describe("Follow handlers", () => {
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("Unfollow user at route: [DELETE] /follow", () => {
+	describe("unfollowHandler() function", () => {
 		test("Unauthorised", async () => {
 			await unfollowHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);

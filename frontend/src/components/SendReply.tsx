@@ -59,16 +59,17 @@ const SendReply: React.FC<Props> = ({
 	};
 
 	const applyPending = useCallback(() => {
+		console.log(repliesLengthRef)
 		if (pendingReply) {
 			if (isModalMounted.current) {
 				setReplies((replies) => [pendingReply, ...replies]);
 				setPendingReply(null);
 				triggerScroll((prev) => !prev);
-				repliesLengthRef.current++;
 				setRepliesError(false);
 				reset();
 			}
 			if (repliesLengthRef.current === 0) {
+				console.log('here')
 				if (isModalMounted.current)
 					setSelectedCheet((cheet) => {
 						if (!cheet) return cheet;
@@ -82,6 +83,7 @@ const SendReply: React.FC<Props> = ({
 					return updatedCheets;
 				});
 			}
+			repliesLengthRef.current++;
 		}
 		if (pendingError) {
 			handleErrors(pendingError, "send reply", isModalMounted.current);

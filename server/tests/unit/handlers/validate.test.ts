@@ -11,7 +11,7 @@ describe("Validate handlers", () => {
 		mockReq = createMockReq();
 		mockRes = createMockRes();
 	});
-	describe("Validate user at route: [GET] /validate", () => {
+	describe("validateHandler() function", () => {
 		test("Success", () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			validateHandler(mockReq as Request, mockRes as unknown as Response);

@@ -9,7 +9,7 @@ import { fetchCheets, type FetchCheetsType } from "../utils/fetchCheets.js";
 
 const router = express.Router({ mergeParams: true });
 
-export const getCheetHandler =
+export const getCheetsHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchCheetsType) => async (req: Request, res: Response) => {
 		try {
 			let user;
@@ -32,7 +32,7 @@ export const getCheetHandler =
 		}
 	};
 
-export const postCheetHandler =
+export const createCheetHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendCheetRequest, res: Response) => {
 		try {
 			const sessionUser = req.session.user;
@@ -59,7 +59,7 @@ export const postCheetHandler =
 		}
 	};
 
-export const editCheetHandler =
+export const updateCheetHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: EditCheetRequest, res: Response) => {
 		try {
 			const sessionUser = req.session.user;
@@ -117,9 +117,9 @@ export const deleteCheetHandler = (prismaClient: ExtendedPrismaClient) => async 
 	}
 };
 
-router.get("/", getCheetHandler(prisma, fetchCheets));
-router.post("/", authenticator, postCheetHandler(prisma));
-router.put("/:cheetId", authenticator, editCheetHandler(prisma));
+router.get("/", getCheetsHandler(prisma, fetchCheets));
+router.post("/", authenticator, createCheetHandler(prisma));
+router.put("/:cheetId", authenticator, updateCheetHandler(prisma));
 router.delete("/:cheetId", authenticator, deleteCheetHandler(prisma));
 
 export default router;

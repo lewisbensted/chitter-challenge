@@ -1,7 +1,7 @@
 import type { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
-export const fetchUsers = async (
+export const searchUsers = async (
 	prismaClient: ExtendedPrismaClient,
 	take: number,
 	searchString: string,
@@ -33,4 +33,4 @@ export const fetchUsers = async (
 
 	return { users, hasNext };
 };
-export type FetchUsersType = typeof fetchUsers;
+export type FetchUsersType = typeof searchUsers;

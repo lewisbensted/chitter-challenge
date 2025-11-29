@@ -24,7 +24,7 @@ describe("Validation", () => {
 			expect("- -' -'").toMatch(nameExp1);
 			expect("ji b- 'b '-er --' ish").toMatch(nameExp1);
 		});
-		test("isValidName()", () => {
+		test("isValidName() function", () => {
 			expect(isValidName("L")).toBe(false);
 			expect(isValidName("Le")).toBe(true);
 			expect(isValidName("test name")).toBe(true);

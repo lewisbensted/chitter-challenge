@@ -28,7 +28,7 @@ describe("Login handler", () => {
 	afterAll(() => {
 		vi.restoreAllMocks();
 	});
-	describe("loginHandler()", () => {
+	describe("loginHandler() function", () => {
 		test("Already logged in", async () => {
 			mockReq.session.user = { uuid: "mockuserir" };
 			await loginHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);

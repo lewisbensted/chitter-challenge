@@ -37,8 +37,11 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies, i
 		}
 	}, [isEditing, reply.text, setValue]);
 
-	const [pendingReply, setPendingReply] = useState<IReply | null>(null);
-	const [pendingError, setPendingError] = useState<unknown>(null);
+	const [pendingReplyEdited, setPendingReplyEdited] = useState<IReply | null>(null);
+	const [pendingErrorEdited, setPendingErrorEdited] = useState<unknown>(null);
+
+	const [pendingReplyDeleted, setPendingReplyDeleted] = useState<IReply | null>(null);
+	const [pendingErrorDeleted, setPendingErrorDeleted] = useState<unknown>(null);
 
 	const editReply: SubmitHandler<{ text: string }> = async (data) => {
 		setEditLoading(true);
@@ -48,9 +51,9 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies, i
 			});
 			const updatedReply = res.data;
 			if (typeof updatedReply !== "object") throwApiError("object", updatedReply);
-			if (isModalMounted.current) setPendingReply(updatedReply);
+			if (isModalMounted.current) setPendingReplyEdited(updatedReply);
 		} catch (error) {
-			if (isModalMounted.current) setPendingError(error);
+			if (isModalMounted.current) setPendingErrorEdited(error);
 			else handleErrors(error, "edit reply", false);
 		} finally {
 			if (isModalMounted.current) {
@@ -66,9 +69,9 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies, i
 			await axios.delete(`${serverURL}/api/cheets/${reply.cheetId}/replies/${reply.uuid}`, {
 				withCredentials: true,
 			});
-			if (isModalMounted.current) setPendingReply(reply);
+			if (isModalMounted.current) setPendingReplyDeleted(reply);
 		} catch (error) {
-			if (isModalMounted.current) setPendingError(error);
+			if (isModalMounted.current) setPendingErrorDeleted(error);
 			else handleErrors(error, "delete reply", false);
 		} finally {
 			if (isModalMounted.current) setDeleteLoading(false);
@@ -76,30 +79,30 @@ const Reply = forwardRef<HTMLDivElement, Props>(({ reply, cheetId, setReplies, i
 	};
 
 	const applyPendingEdit = useCallback(() => {
-		if (pendingReply) {
+		if (pendingReplyEdited) {
 			if (!isModalMounted.current) return;
 			setReplies((prevReplies) =>
-				prevReplies.map((reply) => (reply.uuid === pendingReply.uuid ? pendingReply : reply))
+				prevReplies.map((reply) => (reply.uuid === pendingReplyEdited.uuid ? pendingReplyEdited : reply))
 			);
-			setPendingReply(null);
+			setPendingReplyEdited(null);
 		}
-		if (pendingError) {
-			handleErrors(pendingError, "edit reply", isModalMounted.current);
-			if (isModalMounted.current) setPendingError(null);
+		if (pendingErrorEdited) {
+			handleErrors(pendingErrorEdited, "edit reply", isModalMounted.current);
+			if (isModalMounted.current) setPendingErrorEdited(null);
 		}
-	}, [handleErrors, isModalMounted, pendingError, pendingReply, setReplies]);
+	}, [handleErrors, isModalMounted, pendingErrorEdited, pendingReplyEdited, setReplies]);
 
 	const applyPendingDelete = useCallback(() => {
-		if (pendingReply) {
+		if (pendingReplyDeleted) {
 			if (!isModalMounted.current) return;
-			setReplies((prevReplies) => prevReplies.filter((reply) => reply.uuid !== pendingReply.uuid));
-			setPendingReply(null);
+			setReplies((prevReplies) => prevReplies.filter((reply) => reply.uuid !== pendingReplyDeleted.uuid));
+			setPendingReplyDeleted(null);
 		}
-		if (pendingError) {
-			handleErrors(pendingError, "delete reply", isModalMounted.current);
-			if (isModalMounted.current) setPendingError(null);
+		if (pendingErrorDeleted) {
+			handleErrors(pendingErrorDeleted, "delete reply", isModalMounted.current);
+			if (isModalMounted.current) setPendingErrorDeleted(null);
 		}
-	}, [handleErrors, isModalMounted, pendingError, pendingReply, setReplies]);
+	}, [handleErrors, isModalMounted, pendingErrorDeleted, pendingReplyDeleted, setReplies]);
 
 	const createdAt = new Date(reply.createdAt);
 	const updatedAt = new Date(reply.updatedAt);

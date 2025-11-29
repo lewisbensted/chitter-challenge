@@ -29,7 +29,7 @@ describe("User handlers", () => {
 	afterAll(() => {
 		vi.restoreAllMocks();
 	});
-	describe("Search for single user at route [GET] /users/:userId", () => {
+	describe("getUserHandler() function", () => {
 		test("Invalid userId param provided", async () => {
 			mockReq.session.user = { uuid: "mocksessionuserid" };
 			await getUserHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
@@ -74,7 +74,7 @@ describe("User handlers", () => {
 			});
 		});
 	});
-	describe("Search for multiple users at route [GET] /users", () => {
+	describe("searchUsersHandler() function", () => {
 		let fetchUsersMock: ReturnType<typeof vi.fn>;
 		beforeEach(() => {
 			fetchUsersMock = vi.fn().mockResolvedValue({ users: [], hasNext: false });

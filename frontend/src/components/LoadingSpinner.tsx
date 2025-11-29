@@ -1,4 +1,4 @@
-import React, { type ReactNode, useEffect, useState } from "react";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { SPINNER_DELAY, SPINNER_DURATION } from "../config/layout";
 
@@ -11,6 +11,8 @@ interface Props {
 
 const LoadingSpinner: React.FC<Props> = ({ isLoading, children, onFinished, isLarge = true }) => {
 	const [showSpinner, setShowSpinner] = useState(false);
+
+	const isMounted = useRef(false);
 
 	useEffect(() => {
 		let showTimer: ReturnType<typeof setTimeout> | undefined;
@@ -25,9 +27,10 @@ const LoadingSpinner: React.FC<Props> = ({ isLoading, children, onFinished, isLa
 				setShowSpinner(false);
 				onFinished();
 			}, SPINNER_DURATION);
-		} else {
+		} else if (isMounted.current) {
 			onFinished();
 		}
+		isMounted.current=true
 		return () => {
 			clearTimeout(showTimer);
 			clearTimeout(hideTimer);

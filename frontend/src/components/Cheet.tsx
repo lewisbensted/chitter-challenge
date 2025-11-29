@@ -24,7 +24,6 @@ interface Props {
 
 const Cheet = forwardRef<HTMLDivElement, Props>(
 	({ cheet, setCheets, isModalView, setSelectedCheet, setCheetLoading, isPageMounted }, ref) => {
-		const { id } = useParams();
 		const { register, handleSubmit, setValue } = useForm<{ text: string }>();
 		const [isEditing, setEditing] = useState<boolean>(false);
 		const [isEditLoading, setEditLoading] = useState<boolean>(false);
@@ -38,8 +37,11 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 			}
 		}, [isEditing, cheet.text, setValue]);
 
-		const [pendingCheet, setPendingCheet] = useState<ICheet | null>(null);
-		const [pendingError, setPendingError] = useState<unknown>(null);
+		const [pendingCheetEdited, setPendingCheetEdited] = useState<ICheet | null>(null);
+		const [pendingErrorEdited, setPendingErrorEdited] = useState<unknown>(null);
+
+		const [pendingCheetDeleted, setPendingCheetDeleted] = useState<ICheet | null>(null);
+		const [pendingErrorDeleted, setPendingErrorDeleted] = useState<unknown>(null);
 
 		const editCheet: SubmitHandler<{ text: string }> = async (data) => {
 			setEditLoading(true);
@@ -50,9 +52,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				});
 				const updatedCheet = res.data;
 				if (typeof updatedCheet !== "object") throwApiError("object", updatedCheet);
-				if (isPageMounted.current) setPendingCheet(updatedCheet);
+				if (isPageMounted.current) setPendingCheetEdited(updatedCheet);
 			} catch (error) {
-				if (isPageMounted.current) setPendingError(error);
+				if (isPageMounted.current) setPendingErrorEdited(error);
 				else handleErrors(error, "edit cheet", false);
 			} finally {
 				if (isPageMounted.current) {
@@ -70,9 +72,9 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 				await axios.delete(`${serverURL}/api/cheets/${cheet.uuid}`, {
 					withCredentials: true,
 				});
-				if (isPageMounted.current) setPendingCheet(cheet);
+				if (isPageMounted.current) setPendingCheetDeleted(cheet);
 			} catch (error) {
-				if (isPageMounted.current) setPendingError(error);
+				if (isPageMounted.current) setPendingErrorDeleted(error);
 				else handleErrors(error, "delete cheet", false);
 			} finally {
 				if (isPageMounted.current) {
@@ -83,34 +85,34 @@ const Cheet = forwardRef<HTMLDivElement, Props>(
 		};
 
 		const applyPendingEdit = useCallback(() => {
-			if (pendingCheet) {
+			if (pendingCheetEdited) {
 				if (!isPageMounted.current) return;
 				setCheets((prevCheets) =>
-					prevCheets.map((cheet) => (cheet.uuid === pendingCheet.uuid ? pendingCheet : cheet))
+					prevCheets.map((cheet) => (cheet.uuid === pendingCheetEdited.uuid ? pendingCheetEdited : cheet))
 				);
 				if (isModalView) {
-					setSelectedCheet(pendingCheet);
+					setSelectedCheet(pendingCheetEdited);
 				}
-				setPendingCheet(null);
+				setPendingCheetEdited(null);
 			}
-			if (pendingError) {
-				handleErrors(pendingError, "edit cheet", isPageMounted.current);
-				if (!isPageMounted.current) setPendingError(null);
+			if (pendingErrorEdited) {
+				handleErrors(pendingErrorEdited, "edit cheet", isPageMounted.current);
+				if (!isPageMounted.current) setPendingErrorEdited(null);
 			}
-		}, [pendingCheet, pendingError, isPageMounted, isModalView, handleErrors, setCheets, setSelectedCheet]);
+		}, [pendingCheetEdited, pendingErrorEdited, isPageMounted, isModalView, handleErrors, setCheets, setSelectedCheet]);
 
 		const applyPendingDelete = useCallback(() => {
-			if (pendingCheet) {
+			if (pendingCheetDeleted) {
 				if (!isPageMounted.current) return;
-				setCheets((prevCheets) => prevCheets.filter((cheet) => cheet.uuid !== pendingCheet.uuid));
+				setCheets((prevCheets) => prevCheets.filter((cheet) => cheet.uuid !== pendingCheetDeleted.uuid));
 				setSelectedCheet(null);
-				setPendingCheet(null);
+				setPendingCheetDeleted(null);
 			}
-			if (pendingError) {
-				handleErrors(pendingError, "delete cheet", isPageMounted.current);
-				if (isPageMounted.current) setPendingError(null);
+			if (pendingErrorDeleted) {
+				handleErrors(pendingErrorDeleted, "delete cheet", isPageMounted.current);
+				if (isPageMounted.current) setPendingErrorDeleted(null);
 			}
-		}, [pendingCheet, pendingError, isPageMounted, handleErrors, setCheets, setSelectedCheet]);
+		}, [pendingCheetDeleted, pendingErrorDeleted, isPageMounted, handleErrors, setCheets, setSelectedCheet]);
 
 		const oneHourAgo = new Date(new Date().getTime() - 1000 * 60 * 60);
 		const createdAt = new Date(cheet.createdAt);

@@ -27,7 +27,7 @@ describe("Conversation handlers", () => {
 	afterAll(() => {
 		vi.restoreAllMocks();
 	});
-	describe("Get unread messages at route: [GET] /unread", () => {
+	describe("getUnreadHandler() function", () => {
 		test("Unauthorised", async () => {
 			await getUnreadHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -55,7 +55,7 @@ describe("Conversation handlers", () => {
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("Fetch conversations at route: [GET] /conversations", () => {
+	describe("getConversationsHandler() function", () => {
 		let fetchConversationsMock: ReturnType<typeof vi.fn>;
 		beforeEach(() => {
 			fetchConversationsMock = vi.fn().mockResolvedValue({ conversations: [], hasNext: false });

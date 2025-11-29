@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
-import { fetchUsers } from "../../../src/utils/fetchUsers";
+import { searchUsers } from "../../../src/utils/searchUsers";
 
-describe("fetchUsers() function", () => {
+describe("searchUsers() function", () => {
 	beforeEach(() => {
 		prismaMock.user.findMany.mockResolvedValue(
 			Array.from({ length: 5 }, (_, i) => ({
@@ -15,11 +15,11 @@ describe("fetchUsers() function", () => {
 		prismaMock.user.findMany.mockReset();
 	});
 	test("Session user", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", "mocksessionuuid");
+		const { users, hasNext } = await searchUsers(prismaMock, 5, "search", "mocksessionuuid");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
-				take: 6
+				take: 6,
 			})
 		);
 		expect(users).toHaveLength(5);
@@ -29,7 +29,7 @@ describe("fetchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("No session user", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search");
+		const { users, hasNext } = await searchUsers(prismaMock, 5, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -41,40 +41,40 @@ describe("fetchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take > users.length", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 6, "search");
+		const { users, hasNext } = await searchUsers(prismaMock, 6, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
-				take: 7
+				take: 7,
 			})
 		);
 		expect(users).toHaveLength(5);
 		expect(hasNext).toBe(false);
 	});
 	test("take < users.length", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 3, "search");
+		const { users, hasNext } = await searchUsers(prismaMock, 3, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
-				take: 4
+				take: 4,
 			})
 		);
 		expect(users).toHaveLength(4);
 		expect(hasNext).toBe(true);
 	});
 	test("take = 0", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 0, "search");
+		const { users, hasNext } = await searchUsers(prismaMock, 0, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
-				take: 1
+				take: 1,
 			})
 		);
 		expect(users).toHaveLength(4);
 		expect(hasNext).toBe(false);
 	});
 	test("Cursor provided", async () => {
-		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", undefined, "mockcursor");
+		const { users, hasNext } = await searchUsers(prismaMock, 5, "search", undefined, "mockcursor");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -88,7 +88,7 @@ describe("fetchUsers() function", () => {
 	});
 	test("Empty return", async () => {
 		prismaMock.user.findMany.mockResolvedValue([]);
-		const { users, hasNext } = await fetchUsers(prismaMock, 5, "search", undefined, "mockcursor");
+		const { users, hasNext } = await searchUsers(prismaMock, 5, "search", undefined, "mockcursor");
 		expect(users).toHaveLength(0);
 		expect(hasNext).toBe(false);
 	});

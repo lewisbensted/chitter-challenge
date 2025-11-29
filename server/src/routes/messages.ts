@@ -12,7 +12,7 @@ import { readMessages } from "../utils/readMessages.js";
 
 const router = express.Router({ mergeParams: true });
 
-export const getMessageHandler =
+export const getMessagesHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchMessagesType) => async (req: Request, res: Response) => {
 		try {
 			const sessionUser = req.session.user;
@@ -102,7 +102,7 @@ export const postMessageHandler =
 		}
 	};
 
-export const editMessageHandler =
+export const updateMessageHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: EditMessageRequest, res: Response) => {
 		try {
 			const sessionUser = req.session.user;
@@ -150,9 +150,9 @@ export const deleteMessageHandler = (prismaClient: ExtendedPrismaClient) => asyn
 	}
 };
 
-router.get("/:recipientId", authenticator, getMessageHandler(prisma, fetchMessages));
+router.get("/:recipientId", authenticator, getMessagesHandler(prisma, fetchMessages));
 router.post("/:recipientId", authenticator, postMessageHandler(prisma));
-router.put("/:messageId", authenticator, editMessageHandler(prisma));
+router.put("/:messageId", authenticator, updateMessageHandler(prisma));
 router.delete("/:messageId", authenticator, deleteMessageHandler(prisma));
 router.put("/:recipientId/read", authenticator, readMessagesHandler(prisma));
 

@@ -1,16 +1,16 @@
 import express, { Request, Response } from "express";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import prisma, {  type  ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
 import { IUser } from "../../types/responses.js";
-import type  { SearchUsersRequest } from "../../types/requests.js";
-import { fetchUsers, type FetchUsersType } from "../utils/fetchUsers.js";
+import type { SearchUsersRequest } from "../../types/requests.js";
+import { searchUsers, type FetchUsersType } from "../utils/searchUsers.js";
 
 const router = express.Router({ mergeParams: true });
 
 export const searchUsersHandler =
-	(prismaClient: ExtendedPrismaClient, fetchFn: FetchUsersType) => async (req: SearchUsersRequest, res: Response) => {
+	(prismaClient: ExtendedPrismaClient, searchFn: FetchUsersType) => async (req: SearchUsersRequest, res: Response) => {
 		try {
 			const searchString = typeof req.query.search === "string" ? req.query.search.trim() : "";
 			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
@@ -25,7 +25,7 @@ export const searchUsersHandler =
 				return res.status(200).json({ users: [], hasNext: false });
 			}
 
-			const { users, hasNext } = await fetchFn(prismaClient, take, searchString, req.session?.user?.uuid, cursor);
+			const { users, hasNext } = await searchFn(prismaClient, take, searchString, req.session?.user?.uuid, cursor);
 
 			res.status(200).json({ users, hasNext });
 		} catch (error) {
@@ -52,7 +52,7 @@ export const getUserHandler = (prismaClient: ExtendedPrismaClient) => async (req
 	}
 };
 
-router.get("/", searchUsersHandler(prisma, fetchUsers));
+router.get("/", searchUsersHandler(prisma, searchUsers));
 router.get("/:userId", getUserHandler(prisma));
 
 export default router;

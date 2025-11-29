@@ -7,7 +7,7 @@ vi.mock("../../../src/utils/logError", () => ({
 	logError: vi.fn(),
 }));
 
-import { getCheetHandler, postCheetHandler, editCheetHandler, deleteCheetHandler } from "../../../src/routes/cheets";
+import { getCheetsHandler, createCheetHandler, updateCheetHandler, deleteCheetHandler } from "../../../src/routes/cheets";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { Response, Request } from "express";
 import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
@@ -29,7 +29,7 @@ describe("Cheet handlers", () => {
 	afterAll(() => {
 		vi.restoreAllMocks();
 	});
-	describe("Fetch cheets at route: [GET] /cheets", () => {
+	describe("getCheetsHandler() function", () => {
 		let fetchCheetsMock: ReturnType<typeof vi.fn>;
 		beforeEach(() => {
 			fetchCheetsMock = vi.fn().mockResolvedValue({ cheets: [], hasNext: false });
@@ -41,62 +41,62 @@ describe("Cheet handlers", () => {
 			mockReq.query.take = String(20);
 			mockReq.query.cursor = "valid";
 			prismaMock.cheet.findUnique.mockResolvedValueOnce({ uuid: "valid" });
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
 
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({ cheets: [], hasNext: false });
 			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 20, undefined, undefined, "valid");
 		});
 		test("userId provided", async () => {
-			mockReq.params.userId = "mockuseruuid";
-			prismaMock.user.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockuseruuid" });
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
-			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 10, undefined, "mockuseruuid", undefined);
+			mockReq.params.userId = "mockuserid";
+			prismaMock.user.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockuserid" });
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 10, undefined, "mockuserid", undefined);
 		});
 		test("sessionId provided", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
-			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 10, "mockuseruuid", undefined, undefined);
+			mockReq.session.user = { uuid: "mockuserid" };
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 10, "mockuserid", undefined, undefined);
 		});
 		test("Invalid take provide", async () => {
 			mockReq.query.take = "invalid";
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 10, undefined, undefined, undefined);
 		});
 		test("Take clamped at max value", async () => {
 			mockReq.query.take = String(100);
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 50, undefined, undefined, undefined);
 		});
 		test("Invalid cursor provided", async () => {
 			mockReq.query.cursor = "invalid";
 			prismaMock.cheet.findUnique.mockResolvedValueOnce(null);
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(fetchCheetsMock).toHaveBeenCalledWith(prismaMock, 10, undefined, undefined, undefined);
 		});
 		test("Invalid userId provided", async () => {
-			mockReq.params.userId = "mockuseruuid";
+			mockReq.params.userId = "mockuserid";
 			prismaMock.user.findUniqueOrThrow.mockRejectedValueOnce(new Error("User not found"));
-			await getCheetHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
+			await getCheetsHandler(prismaMock, fetchCheetsMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("Send cheet at route: [POST] /cheets", () => {
+	describe("createCheetHandler() function", () => {
 		test('Unauthorised', async ()=>{
-			await postCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await createCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({errors: ["Unauthorised."]});
 		})
 		test("Success", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 
 			prismaMock.$transaction.mockResolvedValue({
 				uuid: "mockcheetuuid",
 				cheetStatus: { hasReplies: false },
 			});
 
-			await postCheetHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
+			await createCheetHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(201);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				uuid: "mockcheetuuid",
@@ -104,21 +104,21 @@ describe("Cheet handlers", () => {
 			});
 		});
 		test("Failure", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			prismaMock.$transaction = vi.fn().mockRejectedValue(new Error("DB exploded"));
-			await postCheetHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
+			await createCheetHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("Edit cheet at route [PUT] /cheets/:cheetId", () => {
+	describe("updateCheetHandler() functon", () => {
 		test('Unauthorised', async ()=>{
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({errors: ["Unauthorised."]});
 		})
 		test("Success", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.body = { text: "Edited mock cheet" };
 			mockReq.params.cheetId = "mockcheetuuid";
 
@@ -126,18 +126,18 @@ describe("Cheet handlers", () => {
 				uuid: "mockcheetuuid",
 				text: "Mock cheet",
 				cheetStatus: { hasReplies: false },
-				user: { uuid: "mockuseruuid" },
+				user: { uuid: "mockuserid" },
 				createdAt: new Date(Date.now() - 60 * 1000),
 			});
 			prismaMock.cheet.update.mockResolvedValueOnce({
 				uuid: "mockcheetuuid",
 			});
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({ uuid: "mockcheetuuid" });
 		});
 		test("Success - cheet text unchanged", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.body = { text: "Mock cheet" };
 			mockReq.params.cheetId = "mockcheetuuid";
 
@@ -146,84 +146,84 @@ describe("Cheet handlers", () => {
 				uuid: "mockcheet",
 				text: "Mock cheet",
 				cheetStatus: { hasReplies: false },
-				user: { uuid: "mockuseruuid" },
+				user: { uuid: "mockuserid" },
 				createdAt: new Date(date - 60 * 1000),
 			});
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				uuid: "mockcheet",
 				text: "Mock cheet",
 				cheetStatus: { hasReplies: false },
-				user: { uuid: "mockuseruuid" },
+				user: { uuid: "mockuserid" },
 				createdAt: new Date(date - 60 * 1000),
 			});
 		});
 		test("Failure - invalid target cheet ID", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockRejectedValueOnce(new Error("Cheet not found"));
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 		test("Failure - cheet doesn't belong to user", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({
 				uuid: "mockcheetuuid",
-				user: { uuid: "mockuseruuidother" },
+				user: { uuid: "mockuseridother" },
 			});
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot update someone else's cheet."] });
 		});
 		test("Failure - cheet not recent enough to edit", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({
 				uuid: "mockcheet",
 				cheetStatus: { hasReplies: false },
-				user: { uuid: "mockuseruuid" },
+				user: { uuid: "mockuserid" },
 				createdAt: new Date(Date.now() - 60 * 61 * 1000),
 			});
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cheet cannot be updated (time limit exceeded)."] });
 		});
 		test("Failure - cheet has replies", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({
 				uuid: "mockcheet",
-				user: { uuid: "mockuseruuid" },
+				user: { uuid: "mockuserid" },
 				cheetStatus: { hasReplies: true },
 				createdAt: new Date(Date.now() - 60 * 1000),
 			});
-			await editCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
+			await updateCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot update a cheet with replies."] });
 		});
 	});
-	describe("Delete cheet at route [DELETE] /cheets/:cheetId", () => {
+	describe("deleteCheetHandler() function", () => {
 		test('Unauthorised', async ()=>{
 			await deleteCheetHandler(prismaMock)(mockReq as EditCheetRequest, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({errors: ["Unauthorised."]});
 		})
 		test("Success", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({
 				uuid: "mockcheet",
-				user: { uuid: "mockuseruuid" },
+				user: { uuid: "mockuserid" },
 			});
 			prismaMock.cheet.delete.mockResolvedValueOnce(undefined);
 			await deleteCheetHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
 		});
 		test("Failure - invalid target cheet ID", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockRejectedValueOnce(new Error("Cheet not found"));
 			await deleteCheetHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
@@ -231,7 +231,7 @@ describe("Cheet handlers", () => {
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
 		test("Failure - cheet doesn't belong to user", async () => {
-			mockReq.session.user = { uuid: "mockuseruuid" };
+			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.cheetId = "mockcheetuuid";
 			prismaMock.cheet.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockcheet", user: { uuid: "mockuser" } });
 

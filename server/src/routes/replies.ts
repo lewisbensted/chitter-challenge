@@ -9,7 +9,7 @@ import { fetchReplies, type FetchRepliesType } from "../utils/fetchReplies.js";
 
 const router = express.Router({ mergeParams: true });
 
-export const getReplyHandler =
+export const getRepliesHandler =
 	(prismaClient: ExtendedPrismaClient, fetchReplies: FetchRepliesType) => async (req: Request, res: Response) => {
 		try {
 			const cheet = await prismaClient.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
@@ -27,7 +27,7 @@ export const getReplyHandler =
 		}
 	};
 
-export const postReplyHandler =
+export const createReplyHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendReplyRequest, res: Response) => {
 		try {
 			const sessionUser = req.session.user;
@@ -59,7 +59,7 @@ export const postReplyHandler =
 		}
 	};
 
-export const editReplyHandler =
+export const updateReplyHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: EditReplyRequest, res: Response) => {
 		try {
 			const sessionUser = req.session.user;
@@ -106,9 +106,9 @@ export const deleteReplyHandler = (prismaClient: ExtendedPrismaClient) => async 
 	}
 };
 
-router.get("/", getReplyHandler(prisma, fetchReplies));
-router.post("/", authenticator, postReplyHandler(prisma));
-router.put("/:replyId", authenticator, editReplyHandler(prisma));
+router.get("/", getRepliesHandler(prisma, fetchReplies));
+router.post("/", authenticator, createReplyHandler(prisma));
+router.put("/:replyId", authenticator, updateReplyHandler(prisma));
 router.delete("/:replyId", authenticator, deleteReplyHandler(prisma));
 
 export default router;

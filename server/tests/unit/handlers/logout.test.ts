@@ -24,7 +24,7 @@ describe("Logout handler", () => {
 		mockReq = createMockReq();
 		mockRes = createMockRes();
 	});
-	describe("Logout at route: [DELETE] /logout", () => {
+	describe("logoutHandler() function", () => {
 		test("success", () => {
 			const destroyMock = vi.fn((callback) => callback(null));
 			mockReq.session = { user: { id: "mockuserid" }, destroy: destroyMock };
