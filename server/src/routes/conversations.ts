@@ -39,9 +39,9 @@ export const getConversationsHandler =
 				req.query.userIds === undefined
 					? undefined
 					: (req.query.userIds as string)
-							.split(",")
-							.map((id) => id.trim())
-							.filter(Boolean);
+						.split(",")
+						.map((id) => id.trim())
+						.filter(Boolean);
 
 			if (cursor) {
 				const convoExists = await prismaClient.conversation.findUnique({ where: { key: cursor } });

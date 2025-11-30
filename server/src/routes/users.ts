@@ -3,7 +3,6 @@ import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
-import { IUser } from "../../types/responses.js";
 import type { SearchUsersRequest } from "../../types/requests.js";
 import { searchUsers, type FetchUsersType } from "../utils/searchUsers.js";
 
@@ -25,7 +24,7 @@ export const searchUsersHandler =
 				return res.status(200).json({ users: [], hasNext: false });
 			}
 
-			const { users, hasNext } = await searchFn(prismaClient, take, searchString, req.session?.user?.uuid, cursor);
+			const { users, hasNext } = await searchFn(prismaClient, take, searchString, req.session.user?.uuid, cursor);
 
 			res.status(200).json({ users, hasNext });
 		} catch (error) {

@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import { logError } from "../utils/logError.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 
 const router = express.Router();
 

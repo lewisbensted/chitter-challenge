@@ -1,6 +1,5 @@
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
 import type { ICheet } from "../interfaces/interfaces";
-import { useParams } from "react-router-dom";
 import { Box, Card, CardActions, CardContent, Grid2, IconButton, Link, TextField, Typography } from "@mui/material";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import axios from "axios";

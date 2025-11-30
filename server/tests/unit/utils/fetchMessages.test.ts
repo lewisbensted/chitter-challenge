@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchMessages } from "../../../src/utils/fetchMessages";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("fetchMessages() function", () => {
 	beforeEach(() => {
@@ -17,7 +18,12 @@ describe("fetchMessages() function", () => {
 		prismaMock.message.findMany.mockReset();
 	});
 	test("Fetch all messages between specific users", async () => {
-		const { messages, hasNext } = await fetchMessages(prismaMock, 5, "mockuserid", "mockinterlocutorid");
+		const { messages, hasNext } = await fetchMessages(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockuserid",
+			"mockinterlocutorid"
+		);
 		expect(prismaMock.message.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: {
@@ -39,7 +45,12 @@ describe("fetchMessages() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take > messages.length", async () => {
-		const { messages, hasNext } = await fetchMessages(prismaMock, 6, "mockuserid", "mockinterlocutorid");
+		const { messages, hasNext } = await fetchMessages(
+			prismaMock as unknown as ExtendedPrismaClient,
+			6,
+			"mockuserid",
+			"mockinterlocutorid"
+		);
 		expect(prismaMock.message.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: {
@@ -55,7 +66,12 @@ describe("fetchMessages() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take < messages.length", async () => {
-		const { messages, hasNext } = await fetchMessages(prismaMock, 4, "mockuserid", "mockinterlocutorid");
+		const { messages, hasNext } = await fetchMessages(
+			prismaMock as unknown as ExtendedPrismaClient,
+			4,
+			"mockuserid",
+			"mockinterlocutorid"
+		);
 		expect(prismaMock.message.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: {
@@ -71,7 +87,12 @@ describe("fetchMessages() function", () => {
 		expect(hasNext).toBe(true);
 	});
 	test("take = 0", async () => {
-		const { messages, hasNext } = await fetchMessages(prismaMock, 0, "mockuserid", "mockinterlocutorid");
+		const { messages, hasNext } = await fetchMessages(
+			prismaMock as unknown as ExtendedPrismaClient,
+			0,
+			"mockuserid",
+			"mockinterlocutorid"
+		);
 		expect(prismaMock.message.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: {
@@ -88,7 +109,7 @@ describe("fetchMessages() function", () => {
 	});
 	test("Cursor provided", async () => {
 		const { messages, hasNext } = await fetchMessages(
-			prismaMock,
+			prismaMock as unknown as ExtendedPrismaClient,
 			0,
 			"mockuserid",
 			"mockinterlocutorid",
@@ -112,7 +133,12 @@ describe("fetchMessages() function", () => {
 	});
 	test("Empty return", async () => {
 		prismaMock.message.findMany.mockResolvedValueOnce([]);
-		const { messages, hasNext } = await fetchMessages(prismaMock, 5, "mockuserid", "mockinterlocutorid");
+		const { messages, hasNext } = await fetchMessages(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockuserid",
+			"mockinterlocutorid"
+		);
 		expect(messages).toHaveLength(0);
 		expect(hasNext).toBe(false);
 	});

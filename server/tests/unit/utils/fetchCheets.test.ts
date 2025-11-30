@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchCheets } from "../../../src/utils/fetchCheets";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("fetchCheets() function", () => {
 	beforeEach(() => {
@@ -14,7 +15,7 @@ describe("fetchCheets() function", () => {
 		prismaMock.cheet.findMany.mockReset();
 	});
 	test("Fetch all cheets", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 5);
+		const { cheets, hasNext } = await fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 5);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: undefined },
@@ -25,7 +26,12 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Fetch cheets from a specific user - userId provided", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 5, undefined, "mockuserid");
+		const { cheets, hasNext } = await fetchCheets(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			undefined,
+			"mockuserid"
+		);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: { uuid: "mockuserid" } },
@@ -36,7 +42,12 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Fetch cheets from specific user - userId and sessionId provided", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 5, "mocksessionid", "mockuserid");
+		const { cheets, hasNext } = await fetchCheets(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mocksessionid",
+			"mockuserid"
+		);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: { uuid: "mockuserid" } },
@@ -47,7 +58,11 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Fetch cheets from followed users - sessionId provided", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 5, "mocksessionid");
+		const { cheets, hasNext } = await fetchCheets(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mocksessionid"
+		);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: {
@@ -62,7 +77,7 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take > cheets.length", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 6);
+		const { cheets, hasNext } = await fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 6);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: undefined },
@@ -73,7 +88,7 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take < cheets.length", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 3);
+		const { cheets, hasNext } = await fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 3);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: undefined },
@@ -84,7 +99,7 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(true);
 	});
 	test("take = 0", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 0);
+		const { cheets, hasNext } = await fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 0);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: undefined },
@@ -95,7 +110,13 @@ describe("fetchCheets() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Pagination", async () => {
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 3, undefined, undefined, "mockcursor");
+		const { cheets, hasNext } = await fetchCheets(
+			prismaMock as unknown as ExtendedPrismaClient,
+			3,
+			undefined,
+			undefined,
+			"mockcursor"
+		);
 		expect(prismaMock.cheet.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { user: undefined },
@@ -109,7 +130,7 @@ describe("fetchCheets() function", () => {
 	});
 	test("Empty return", async () => {
 		prismaMock.cheet.findMany.mockResolvedValueOnce([]);
-		const { cheets, hasNext } = await fetchCheets(prismaMock, 5);
+		const { cheets, hasNext } = await fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 5);
 		expect(cheets).toHaveLength(0);
 		expect(hasNext).toBe(false);
 	});

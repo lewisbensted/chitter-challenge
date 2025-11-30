@@ -2,9 +2,7 @@ import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { logError } from "../utils/logError.js";
 import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
-import { authenticate } from "../utils/authenticate.js";
 import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
 
 const router = express.Router();

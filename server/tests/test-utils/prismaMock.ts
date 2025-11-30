@@ -1,57 +1,58 @@
 import { vi } from "vitest";
-import { ExtendedPrismaClient } from "../../prisma/prismaClient";
-import { mockDeep, DeepMockProxy } from "vitest-mock-extended";
 
-// export const prismaMock = mockDeep<ExtendedPrismaClient>() as DeepMockProxy<ExtendedPrismaClient>;
+interface MockModel {
+	findUnique: ReturnType<typeof vi.fn>;
+	findUniqueOrThrow: ReturnType<typeof vi.fn>;
+	findMany: ReturnType<typeof vi.fn>;
+	create: ReturnType<typeof vi.fn>;
+	update: ReturnType<typeof vi.fn>;
+	delete: ReturnType<typeof vi.fn>;
+	upsert: ReturnType<typeof vi.fn>;
+	updateMany: ReturnType<typeof vi.fn>;
+	findFirst: ReturnType<typeof vi.fn>;
+}
 
-export const prismaMock = {
+type MessageStatusMock = MockModel & {
+	softDelete: ReturnType<typeof vi.fn>;
+};
+
+export interface MockPrisma {
+	$transaction: ReturnType<typeof vi.fn>;
+	user: MockModel;
+	cheet: MockModel;
+	cheetStatus: MockModel;
+	reply: MockModel;
+	message: MockModel;
+	messageStatus: MockModel;
+	conversation: MockModel;
+	follow: MockModel;
+}
+
+const createMockModel = (): MockModel => ({
+	findUnique: vi.fn(),
+	findUniqueOrThrow: vi.fn(),
+	findMany: vi.fn(),
+	create: vi.fn(),
+	update: vi.fn(),
+	delete: vi.fn(),
+	upsert: vi.fn(),
+	updateMany: vi.fn(),
+	findFirst: vi.fn(),
+});
+
+const createMessageStatusMock = (): MessageStatusMock => ({
+	...createMockModel(),
+	softDelete: vi.fn(),
+});
+
+export const prismaMock: MockPrisma = {
 	$transaction: vi.fn(),
-	user: {
-		findMany: vi.fn(),
-		findUnique: vi.fn(),
-		findUniqueOrThrow: vi.fn(),
-		create: vi.fn(),
-	},
-	cheet: {
-		create: vi.fn(),
-		update: vi.fn(),
-		delete: vi.fn(),
-		findMany: vi.fn(),
-		findUnique: vi.fn(),
-		findUniqueOrThrow: vi.fn(),
-	},
-	cheetStatus: {
-		create: vi.fn(),
-	},
-	reply: {
-		update: vi.fn(),
-		delete: vi.fn(),
-		findMany: vi.fn(),
-		findUnique: vi.fn(),
-		findUniqueOrThrow: vi.fn(),
-	},
-	message: {
-		create: vi.fn(),
-		update: vi.fn(),
-		delete: vi.fn(),
-		findMany: vi.fn(),
-		findUnique: vi.fn(),
-		findUniqueOrThrow: vi.fn(),
-	},
-	messageStatus: {
-		softDelete: vi.fn(),
-		create: vi.fn(),
-		updateMany: vi.fn(),
-	},
-	conversation: {
-		upsert: vi.fn(),
-		update: vi.fn(),
-		findFirst: vi.fn(),
-		findMany: vi.fn(),
-		findUnique: vi.fn(),
-	},
-	follow: {
-		create: vi.fn(),
-		delete: vi.fn(),
-	}
-} as any;
+	user: createMockModel(),
+	cheet: createMockModel(),
+	cheetStatus: createMockModel(),
+	reply: createMockModel(),
+	message: createMockModel(),
+	messageStatus: createMessageStatusMock(),
+	conversation: createMockModel(),
+	follow: createMockModel(),
+};

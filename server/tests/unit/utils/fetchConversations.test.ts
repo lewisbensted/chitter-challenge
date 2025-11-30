@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchConversations } from "../../../src/utils/fetchConversations";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("fetchConversations() function", () => {
 	beforeEach(() => {
@@ -25,7 +26,11 @@ describe("fetchConversations() function", () => {
 		prismaMock.conversation.findMany.mockReset();
 	});
 	test("Fetch all conversations - no interlocutors ID array provided", async () => {
-		const { conversations, hasNext } = await fetchConversations(prismaMock, 5, "mockuserid");
+		const { conversations, hasNext } = await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockuserid"
+		);
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { OR: [{ user1Id: "mockuserid" }, { user2Id: "mockuserid" }] },
@@ -46,7 +51,13 @@ describe("fetchConversations() function", () => {
 	});
 	test("Fetch no conversations - empty interlocutor ID array", async () => {
 		prismaMock.conversation.findMany.mockResolvedValueOnce([]);
-		const { conversations, hasNext } = await fetchConversations(prismaMock, 5, "mockuserid", [], "mockcursor");
+		const { conversations, hasNext } = await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockuserid",
+			[],
+			"mockcursor"
+		);
 		const calledArgs = prismaMock.conversation.findMany.mock.calls[0][0];
 		expect(calledArgs).not.toHaveProperty("mockcursor");
 		expect(calledArgs).not.toHaveProperty("take");
@@ -64,7 +75,13 @@ describe("fetchConversations() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Fetch specific conversations - populated interlocutor array", async () => {
-		await fetchConversations(prismaMock, 5, "mockuserid", ["mockuser1", "mockuser2", "mockuser3"], "mockcursor");
+		await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockuserid",
+			["mockuser1", "mockuser2", "mockuser3"],
+			"mockcursor"
+		);
 		const calledArgs = prismaMock.conversation.findMany.mock.calls[0][0];
 		expect(calledArgs).not.toHaveProperty("mockcursor");
 		expect(calledArgs).not.toHaveProperty("take");
@@ -80,7 +97,13 @@ describe("fetchConversations() function", () => {
 		);
 	});
 	test("Pagination", async () => {
-		await fetchConversations(prismaMock, 5, "mockuserid", undefined, "mockcursor");
+		await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockuserid",
+			undefined,
+			"mockcursor"
+		);
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { OR: [{ user1Id: "mockuserid" }, { user2Id: "mockuserid" }] },
@@ -91,7 +114,11 @@ describe("fetchConversations() function", () => {
 		);
 	});
 	test("take > conversations.length", async () => {
-		const { conversations, hasNext } = await fetchConversations(prismaMock, 6, "mockuserid");
+		const { conversations, hasNext } = await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			6,
+			"mockuserid"
+		);
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { OR: [{ user1Id: "mockuserid" }, { user2Id: "mockuserid" }] },
@@ -102,7 +129,11 @@ describe("fetchConversations() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take < conversations.length", async () => {
-		const { conversations, hasNext } = await fetchConversations(prismaMock, 3, "mockuserid");
+		const { conversations, hasNext } = await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			3,
+			"mockuserid"
+		);
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { OR: [{ user1Id: "mockuserid" }, { user2Id: "mockuserid" }] },
@@ -113,7 +144,11 @@ describe("fetchConversations() function", () => {
 		expect(hasNext).toBe(true);
 	});
 	test("take = 0", async () => {
-		const { conversations, hasNext } = await fetchConversations(prismaMock, 0, "mockuserid");
+		const { conversations, hasNext } = await fetchConversations(
+			prismaMock as unknown as ExtendedPrismaClient,
+			0,
+			"mockuserid"
+		);
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { OR: [{ user1Id: "mockuserid" }, { user2Id: "mockuserid" }] },

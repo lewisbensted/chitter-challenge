@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("../../../src/utils/sendErrorResponse", () => ({
 	sendErrorResponse: vi.fn(),
@@ -15,24 +15,26 @@ import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
 import { logError } from "../../../src/utils/logError";
 import { Response, Request } from "express";
 import { SearchUsersRequest } from "../../../types/requests";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("User handlers", () => {
-	beforeAll(() => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
-	});
 	let mockReq: MockRequest;
 	let mockRes: MockResponse;
 	beforeEach(() => {
+		vi.spyOn(console, "error").mockImplementation(vi.fn());
 		mockReq = createMockReq();
 		mockRes = createMockRes();
 	});
-	afterAll(() => {
+	afterEach(() => {
 		vi.restoreAllMocks();
 	});
 	describe("getUserHandler() function", () => {
 		test("Invalid userId param provided", async () => {
 			mockReq.session.user = { uuid: "mocksessionuserid" };
-			await getUserHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
+			await getUserHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as Request,
+				mockRes as unknown as Response
+			);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
 			expect(logError).toHaveBeenCalledWith(expect.any(Error));
 		});
@@ -42,7 +44,10 @@ describe("User handlers", () => {
 				uuid: "mockuserid",
 				followers: [{ followerId: "mocksessionuserid" }],
 			});
-			await getUserHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
+			await getUserHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as Request,
+				mockRes as unknown as Response
+			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				user: { uuid: "mockuserid" },
@@ -55,7 +60,10 @@ describe("User handlers", () => {
 				uuid: "mockuserid",
 				followers: [],
 			});
-			await getUserHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
+			await getUserHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as Request,
+				mockRes as unknown as Response
+			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				user: { uuid: "mockuserid" },
@@ -66,7 +74,10 @@ describe("User handlers", () => {
 			prismaMock.user.findUniqueOrThrow.mockResolvedValueOnce({
 				uuid: "mockuserid",
 			});
-			await getUserHandler(prismaMock)(mockReq as Request, mockRes as unknown as Response);
+			await getUserHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as Request,
+				mockRes as unknown as Response
+			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				user: { uuid: "mockuserid" },
@@ -87,17 +98,23 @@ describe("User handlers", () => {
 			mockReq.query.take = String(20);
 			mockReq.query.cursor = "valid";
 			prismaMock.user.findUnique.mockResolvedValueOnce("valid");
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
-			expect(fetchUsersMock).toHaveBeenCalledWith(prismaMock, 20, "search", undefined, "valid");
+			expect(fetchUsersMock).toHaveBeenCalledWith(
+				prismaMock as unknown as ExtendedPrismaClient,
+				20,
+				"search",
+				undefined,
+				"valid"
+			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith({ users: [], hasNext: false });
 		});
 		test("No search param", async () => {
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -105,8 +122,8 @@ describe("User handlers", () => {
 		});
 		test("Empty search string", async () => {
 			mockReq.query.search = "";
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -115,36 +132,54 @@ describe("User handlers", () => {
 		test("Invalid take", async () => {
 			mockReq.query.search = "search";
 			mockReq.query.take = "invalid";
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
-			expect(fetchUsersMock).toHaveBeenCalledWith(prismaMock, 10, "search", undefined, undefined);
+			expect(fetchUsersMock).toHaveBeenCalledWith(
+				prismaMock as unknown as ExtendedPrismaClient,
+				10,
+				"search",
+				undefined,
+				undefined
+			);
 		});
 		test("Take clamped at max value", async () => {
 			mockReq.query.search = "search";
 			mockReq.query.take = String(100);
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
-			expect(fetchUsersMock).toHaveBeenCalledWith(prismaMock, 50, "search", undefined, undefined);
+			expect(fetchUsersMock).toHaveBeenCalledWith(
+				prismaMock as unknown as ExtendedPrismaClient,
+				50,
+				"search",
+				undefined,
+				undefined
+			);
 		});
 		test("Invalid cursor", async () => {
 			mockReq.query.search = "search";
 			mockReq.query.cursor = "invalid";
 			prismaMock.user.findUnique.mockResolvedValueOnce(null);
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
-			expect(fetchUsersMock).toHaveBeenCalledWith(prismaMock, 10, "search", undefined, undefined);
+			expect(fetchUsersMock).toHaveBeenCalledWith(
+				prismaMock as unknown as ExtendedPrismaClient,
+				10,
+				"search",
+				undefined,
+				undefined
+			);
 		});
 		test("Error", async () => {
 			mockReq.query.search = "search";
 			fetchUsersMock.mockRejectedValueOnce(new Error("DB exploded"));
-			await searchUsersHandler(prismaMock, fetchUsersMock)(
-				mockReq as SearchUsersRequest,
+			await searchUsersHandler(prismaMock as unknown as ExtendedPrismaClient, fetchUsersMock)(
+				mockReq as unknown as SearchUsersRequest,
 				mockRes as unknown as Response
 			);
 			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);

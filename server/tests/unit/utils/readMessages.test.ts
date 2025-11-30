@@ -5,10 +5,11 @@ vi.mock("../../../src/utils/generateConversationKey", () => ({
 import { prismaMock } from "../../test-utils/prismaMock";
 import { readMessages } from "../../../src/utils/readMessages";
 import { generateConversationKey } from "../../../src/utils/generateConversationKey";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("readMessages() function", () => {
 	beforeEach(() => {
-		prismaMock.$transaction.mockImplementation(async (cb: (transaction: typeof prismaMock) => Promise<any>) =>
+		prismaMock.$transaction.mockImplementation(async (cb: (transaction: typeof prismaMock) => Promise<unknown>) =>
 			cb(prismaMock)
 		);
 		prismaMock.messageStatus.updateMany.mockResolvedValue({
@@ -20,7 +21,7 @@ describe("readMessages() function", () => {
 		vi.clearAllMocks();
 	});
 	test("userId (session user) is firstUser", async () => {
-		const count = await readMessages(prismaMock, "mockuserA", "mockuserB");
+		const count = await readMessages(prismaMock as unknown as ExtendedPrismaClient, "mockuserA", "mockuserB");
 		expect(generateConversationKey).toHaveBeenCalledWith("mockuserA", "mockuserB");
 		expect(prismaMock.conversation.update).toHaveBeenCalledWith({
 			data: { user1Unread: false },
@@ -29,7 +30,7 @@ describe("readMessages() function", () => {
 		expect(count).toBe(1);
 	});
 	test("userId (session user) is secondUser", async () => {
-		const count = await readMessages(prismaMock, "mockuserB", "mockuserA");
+		const count = await readMessages(prismaMock as unknown as ExtendedPrismaClient, "mockuserB", "mockuserA");
 		expect(generateConversationKey).toHaveBeenCalledWith("mockuserA", "mockuserB");
 		expect(prismaMock.conversation.update).toHaveBeenCalledWith({
 			data: { user2Unread: false },

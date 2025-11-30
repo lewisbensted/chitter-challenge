@@ -30,7 +30,7 @@ const LoadingSpinner: React.FC<Props> = ({ isLoading, children, onFinished, isLa
 		} else if (isMounted.current) {
 			onFinished();
 		}
-		isMounted.current=true
+		isMounted.current=true;
 		return () => {
 			clearTimeout(showTimer);
 			clearTimeout(hideTimer);

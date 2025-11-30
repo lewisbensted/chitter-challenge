@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchReplies } from "../../../src/utils/fetchReplies";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("fetchReplies() function", () => {
 	beforeEach(() => {
@@ -14,31 +15,41 @@ describe("fetchReplies() function", () => {
 		prismaMock.cheet.findMany.mockReset();
 	});
 	test("Fetch replies of a specified cheet", async () => {
-		const { replies, hasNext } = await fetchReplies(prismaMock, 5, "mockcheetid");
+		const { replies, hasNext } = await fetchReplies(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockcheetid"
+		);
 		expect(prismaMock.reply.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { cheet: { uuid: "mockcheetid" } },
 				take: 6,
-
 			})
 		);
 		expect(replies).toHaveLength(5);
 		expect(hasNext).toBe(false);
 	});
 	test("take > replies.length", async () => {
-		const { replies, hasNext } = await fetchReplies(prismaMock, 6, "mockcheetid");
+		const { replies, hasNext } = await fetchReplies(
+			prismaMock as unknown as ExtendedPrismaClient,
+			6,
+			"mockcheetid"
+		);
 		expect(prismaMock.reply.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { cheet: { uuid: "mockcheetid" } },
 				take: 7,
-
 			})
 		);
 		expect(replies).toHaveLength(5);
 		expect(hasNext).toBe(false);
 	});
 	test("take < replies.length", async () => {
-		const { replies, hasNext } = await fetchReplies(prismaMock, 3, "mockcheetid");
+		const { replies, hasNext } = await fetchReplies(
+			prismaMock as unknown as ExtendedPrismaClient,
+			3,
+			"mockcheetid"
+		);
 		expect(prismaMock.reply.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { cheet: { uuid: "mockcheetid" } },
@@ -49,7 +60,11 @@ describe("fetchReplies() function", () => {
 		expect(hasNext).toBe(true);
 	});
 	test("take = 0", async () => {
-		const { replies, hasNext } = await fetchReplies(prismaMock, 0, "mockcheetid");
+		const { replies, hasNext } = await fetchReplies(
+			prismaMock as unknown as ExtendedPrismaClient,
+			0,
+			"mockcheetid"
+		);
 		expect(prismaMock.reply.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { cheet: { uuid: "mockcheetid" } },
@@ -60,7 +75,12 @@ describe("fetchReplies() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("cursor provided", async () => {
-		const { replies, hasNext } = await fetchReplies(prismaMock, 3, "mockcheetid", "mockcursor");
+		const { replies, hasNext } = await fetchReplies(
+			prismaMock as unknown as ExtendedPrismaClient,
+			3,
+			"mockcheetid",
+			"mockcursor"
+		);
 		expect(prismaMock.reply.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { cheet: { uuid: "mockcheetid" } },
@@ -74,7 +94,11 @@ describe("fetchReplies() function", () => {
 	});
 	test("Empty return", async () => {
 		prismaMock.reply.findMany.mockResolvedValueOnce([]);
-		const { replies, hasNext } = await fetchReplies(prismaMock, 5, "mockcheetid");
+		const { replies, hasNext } = await fetchReplies(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"mockcheetid"
+		);
 		expect(replies).toHaveLength(0);
 		expect(hasNext).toBe(false);
 	});

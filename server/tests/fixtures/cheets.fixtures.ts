@@ -22,7 +22,7 @@ export const testCheets = [
 export const testCheetStatuses = [
 	...Array.from({ length: 10 }, (_, i) => ({
 		cheetId: `testcheetuuid${i + 1}`,
-		hasReplies: i % 2 == 0,
+		hasReplies: i % 2 === 0,
 	})),
 	{
 		cheetId: "testcheetuuidrecent",

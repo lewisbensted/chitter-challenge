@@ -14,14 +14,14 @@ describe("Validate handlers", () => {
 	describe("validateHandler() function", () => {
 		test("Success", () => {
 			mockReq.session.user = { uuid: "mockuserid" };
-			validateHandler(mockReq as Request, mockRes as unknown as Response);
+			validateHandler(mockReq as unknown as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith("mockuserid");
 		});
 		test("Unauthorised", () => {
-			validateHandler(mockReq as Request, mockRes as unknown as Response);
+			validateHandler(mockReq as unknown as Request, mockRes as unknown as Response);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
-			expect(mockRes.json).toHaveBeenCalledWith({errors: ["Unauthorised."]});
+			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
 		});
 	});
 });

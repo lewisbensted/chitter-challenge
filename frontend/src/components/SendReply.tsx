@@ -59,7 +59,6 @@ const SendReply: React.FC<Props> = ({
 	};
 
 	const applyPending = useCallback(() => {
-		console.log(repliesLengthRef)
 		if (pendingReply) {
 			if (isModalMounted.current) {
 				setReplies((replies) => [pendingReply, ...replies]);
@@ -69,7 +68,6 @@ const SendReply: React.FC<Props> = ({
 				reset();
 			}
 			if (repliesLengthRef.current === 0) {
-				console.log('here')
 				if (isModalMounted.current)
 					setSelectedCheet((cheet) => {
 						if (!cheet) return cheet;

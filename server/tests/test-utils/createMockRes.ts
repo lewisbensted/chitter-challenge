@@ -1,4 +1,4 @@
-import { Mock, vi } from "vitest";
+import { vi } from "vitest";
 
 export interface MockResponse {
 	status: ReturnType<typeof vi.fn>;

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { searchUsers } from "../../../src/utils/searchUsers";
+import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
 describe("searchUsers() function", () => {
 	beforeEach(() => {
@@ -15,7 +16,7 @@ describe("searchUsers() function", () => {
 		prismaMock.user.findMany.mockReset();
 	});
 	test("Session user", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock, 5, "search", "mocksessionuuid");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search", "mocksessionuuid");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -29,7 +30,7 @@ describe("searchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("No session user", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock, 5, "search");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -41,7 +42,7 @@ describe("searchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take > users.length", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock, 6, "search");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 6, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -52,7 +53,7 @@ describe("searchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("take < users.length", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock, 3, "search");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 3, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -63,7 +64,7 @@ describe("searchUsers() function", () => {
 		expect(hasNext).toBe(true);
 	});
 	test("take = 0", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock, 0, "search");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 0, "search");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -74,7 +75,7 @@ describe("searchUsers() function", () => {
 		expect(hasNext).toBe(false);
 	});
 	test("Cursor provided", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock, 5, "search", undefined, "mockcursor");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search", undefined, "mockcursor");
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -88,7 +89,7 @@ describe("searchUsers() function", () => {
 	});
 	test("Empty return", async () => {
 		prismaMock.user.findMany.mockResolvedValue([]);
-		const { users, hasNext } = await searchUsers(prismaMock, 5, "search", undefined, "mockcursor");
+		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search", undefined, "mockcursor");
 		expect(users).toHaveLength(0);
 		expect(hasNext).toBe(false);
 	});

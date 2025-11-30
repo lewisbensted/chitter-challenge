@@ -42,7 +42,7 @@ export const unfollowHandler = (prismaClient: ExtendedPrismaClient) => async (re
 		});
 		res.sendStatus(204);
 	} catch (error) {
-		if (typeof error == "object" && error && "code" in error && error?.code === "P2025") {
+		if (typeof error == "object" && error && "code" in error && error.code === "P2025") {
 			return res.sendStatus(204);
 		}
 		console.error("Error unfollowing user:\n" + logError(error));
