@@ -1,20 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-
-vi.mock("../../../src/utils/sendErrorResponse", () => ({
-	sendErrorResponse: vi.fn(),
-}));
-vi.mock("../../../src/utils/logError", () => ({
-	logError: vi.fn(),
-}));
-
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { logoutHandler } from "../../../src/routes/logout";
 import { Response, Request } from "express";
-import { logError } from "../../../src/utils/logError";
-import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
+import { mockNext } from "../../test-utils/mockNext";
 
-describe("Logout handler", () => {
+describe("Unit tests - Logout handler", () => {
 	let mockReq: MockRequest;
 	let mockRes: MockResponse;
 	beforeEach(() => {
@@ -25,12 +16,12 @@ describe("Logout handler", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
-	describe("logoutHandler() function", () => {
+	describe("logoutHandler()", () => {
 		test("success", () => {
 			const destroyMock = vi.fn((callback) => callback(null));
 			mockReq.session = { user: { id: "mockuserid" }, destroy: destroyMock };
 			mockReq.cookies = { token: "mocksession" };
-			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response);
+			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(destroyMock).toHaveBeenCalled();
 			expect(mockRes.clearCookie).toHaveBeenCalledWith("token");
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -40,13 +31,12 @@ describe("Logout handler", () => {
 			const destroyMock = vi.fn((callback) => callback(new Error("DB exploded")));
 			mockReq.session = { user: { id: "mockuserid" }, destroy: destroyMock };
 			mockReq.cookies = { token: "mocksession" };
-			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response);
+			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(destroyMock).toHaveBeenCalled();
-			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
-			expect(logError).toHaveBeenCalledWith(expect.any(Error));
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 		test("no session", () => {
-			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response);
+			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({
 				errors: ["Not logged in."],

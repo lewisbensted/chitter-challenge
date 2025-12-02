@@ -1,15 +1,13 @@
-import express, { Request, Response } from "express";
-import { logError } from "../utils/logError.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
+import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
 
-export const logoutHandler = (req: Request, res: Response) => {
+export const logoutHandler = (req: Request, res: Response, next: NextFunction) => {
 	if (req.session.user) {
 		req.session.destroy((error: unknown) => {
 			if (error) {
-				console.error("Error logging out:\n" + logError(error));
-				sendErrorResponse(error, res);
+				console.error("Error logging out:\n");
+				next(error);
 			} else {
 				Object.keys(req.cookies).forEach((key) => {
 					res.clearCookie(key);

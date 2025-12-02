@@ -1,13 +1,10 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { logError } from "../utils/logError.js";
 import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
-
 
 const router = express.Router();
 
-export const loginHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
+export const loginHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		if (req.session.user) return res.status(403).json({ errors: ["Already logged in."] });
 		const { username, password } = req.body as { username?: string; password?: string };
@@ -36,9 +33,8 @@ export const loginHandler = (prismaClient: ExtendedPrismaClient) => async (req: 
 			res.status(401).json({ errors: ["Invalid username or password."] });
 		}
 	} catch (error) {
-		
-		console.error("Error logging in:\n" + logError(error));
-		sendErrorResponse(error, res);
+		console.error("Error logging in:\n");
+		next(error);
 	}
 };
 

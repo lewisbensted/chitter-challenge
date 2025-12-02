@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchConversations } from "../../../src/utils/fetchConversations";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
+import { Prisma } from "@prisma/client";
 
-describe("fetchConversations() function", () => {
+describe("fetchConversations()", () => {
 	beforeEach(() => {
 		prismaMock.conversation.findMany.mockResolvedValue(
 			Array.from({ length: 5 }, (_, i) => ({
@@ -58,7 +59,7 @@ describe("fetchConversations() function", () => {
 			[],
 			"mockcursor"
 		);
-		const calledArgs = prismaMock.conversation.findMany.mock.calls[0][0];
+		const calledArgs = prismaMock.conversation.findMany.mock.calls[0][0] as Prisma.ConversationFindManyArgs;
 		expect(calledArgs).not.toHaveProperty("mockcursor");
 		expect(calledArgs).not.toHaveProperty("take");
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(
@@ -82,7 +83,7 @@ describe("fetchConversations() function", () => {
 			["mockuser1", "mockuser2", "mockuser3"],
 			"mockcursor"
 		);
-		const calledArgs = prismaMock.conversation.findMany.mock.calls[0][0];
+		const calledArgs = prismaMock.conversation.findMany.mock.calls[0][0] as Prisma.ConversationFindManyArgs;
 		expect(calledArgs).not.toHaveProperty("mockcursor");
 		expect(calledArgs).not.toHaveProperty("take");
 		expect(prismaMock.conversation.findMany).toHaveBeenCalledWith(

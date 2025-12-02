@@ -1,22 +1,15 @@
 import { afterEach, beforeEach, describe, expect, Mock, test, vi } from "vitest";
 import * as bcrypt from "bcrypt";
-vi.mock("../../../src/utils/sendErrorResponse", () => ({
-	sendErrorResponse: vi.fn(),
-}));
-vi.mock("../../../src/utils/logError", () => ({
-	logError: vi.fn(),
-}));
 vi.mock("bcrypt");
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { loginHandler } from "../../../src/routes/login";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { Response, Request } from "express";
-import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
-import { logError } from "../../../src/utils/logError";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
+import { mockNext } from "../../test-utils/mockNext";
 
-describe("Login handler", () => {
+describe("Unit tests - Login handler", () => {
 	let mockReq: MockRequest;
 	let mockRes: MockResponse;
 	beforeEach(() => {
@@ -27,12 +20,13 @@ describe("Login handler", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
-	describe("loginHandler() function", () => {
+	describe("loginHandler()", () => {
 		test("Already logged in", async () => {
 			mockReq.session.user = { uuid: "mockuserir" };
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Already logged in."] });
@@ -41,7 +35,8 @@ describe("Login handler", () => {
 			mockReq.body = { username: "mockusername" };
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Password not provided."] });
@@ -50,7 +45,8 @@ describe("Login handler", () => {
 			mockReq.body = { password: "mockpassword" };
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Username not provided."] });
@@ -59,7 +55,8 @@ describe("Login handler", () => {
 			mockReq.body = {};
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Username not provided.", "Password not provided."] });
@@ -69,7 +66,8 @@ describe("Login handler", () => {
 			prismaMock.user.findUnique.mockResolvedValueOnce(null);
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Invalid username or password."] });
@@ -80,7 +78,8 @@ describe("Login handler", () => {
 			(bcrypt.compareSync as unknown as Mock).mockReturnValueOnce(true);
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith("mockuserid");
@@ -93,10 +92,10 @@ describe("Login handler", () => {
 			prismaMock.user.findUnique.mockRejectedValueOnce(new Error("DB exploded"));
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
-			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
-			expect(logError).toHaveBeenCalledWith(expect.any(Error));
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
 });

@@ -7,7 +7,7 @@ import { readMessages } from "../../../src/utils/readMessages";
 import { generateConversationKey } from "../../../src/utils/generateConversationKey";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
-describe("readMessages() function", () => {
+describe("readMessages()", () => {
 	beforeEach(() => {
 		prismaMock.$transaction.mockImplementation(async (cb: (transaction: typeof prismaMock) => Promise<unknown>) =>
 			cb(prismaMock)

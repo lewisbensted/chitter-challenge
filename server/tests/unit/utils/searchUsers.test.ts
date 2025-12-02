@@ -3,7 +3,7 @@ import { prismaMock } from "../../test-utils/prismaMock";
 import { searchUsers } from "../../../src/utils/searchUsers";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
-describe("searchUsers() function", () => {
+describe("searchUsers()", () => {
 	beforeEach(() => {
 		prismaMock.user.findMany.mockResolvedValue(
 			Array.from({ length: 5 }, (_, i) => ({

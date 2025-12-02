@@ -1,22 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-
-vi.mock("../../../src/utils/sendErrorResponse", () => ({
-	sendErrorResponse: vi.fn(),
-}));
-vi.mock("../../../src/utils/logError", () => ({
-	logError: vi.fn(),
-}));
-
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { followHandler, unfollowHandler } from "../../../src/routes/follow";
 import { Response, Request } from "express";
-import { logError } from "../../../src/utils/logError";
-import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
+import { mockNext } from "../../test-utils/mockNext";
 
-describe("Follow handlers", () => {
+describe("Unit tests - Follow handlers", () => {
 	let mockReq: MockRequest;
 	let mockRes: MockResponse;
 	beforeEach(() => {
@@ -27,11 +18,12 @@ describe("Follow handlers", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
-	describe("followHandler() function", () => {
+	describe("followHandler()", () => {
 		test("Unauthorised", async () => {
 			await followHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
@@ -41,7 +33,8 @@ describe("Follow handlers", () => {
 			mockReq.params.followingId = "mockuserid";
 			await followHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["You cannot follow yourself."] });
@@ -52,7 +45,8 @@ describe("Follow handlers", () => {
 			prismaMock.follow.create.mockResolvedValueOnce({});
 			await followHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(201);
 		});
@@ -62,17 +56,18 @@ describe("Follow handlers", () => {
 			prismaMock.follow.create.mockRejectedValueOnce(new Error("DB exploded"));
 			await followHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
-			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
-			expect(logError).toHaveBeenCalledWith(expect.any(Error));
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("unfollowHandler() function", () => {
+	describe("unfollowHandler()", () => {
 		test("Unauthorised", async () => {
 			await unfollowHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
@@ -83,7 +78,8 @@ describe("Follow handlers", () => {
 			prismaMock.follow.delete.mockResolvedValueOnce({});
 			await unfollowHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
 		});
@@ -95,7 +91,8 @@ describe("Follow handlers", () => {
 			});
 			await unfollowHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
 		});
@@ -105,10 +102,10 @@ describe("Follow handlers", () => {
 			prismaMock.follow.delete.mockRejectedValueOnce(new Error("DB exploded"));
 			await unfollowHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
-			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
-			expect(logError).toHaveBeenCalledWith(expect.any(Error));
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
 });

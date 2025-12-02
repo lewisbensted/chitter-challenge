@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { UserSchema } from "../../../src/schemas/user.schema";
+import { CreateUserSchema } from "../../../src/schemas/user.schema";
 import { prismaMock } from "../../test-utils/prismaMock";
 import * as validation from "../../../src/utils/validation";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
@@ -18,7 +18,7 @@ describe("User schema", () => {
 			username: "mockuser1",
 			password: "password1!",
 		};
-		await expect(UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(validUser)).resolves.toEqual(
+		await expect(CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(validUser)).resolves.toEqual(
 			validUser
 		);
 	});
@@ -34,7 +34,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -55,7 +55,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -76,7 +76,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -97,7 +97,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -120,7 +120,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -141,7 +141,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -162,7 +162,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -183,7 +183,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -195,7 +195,7 @@ describe("User schema", () => {
 		});
 	});
 	describe("Email", () => {
-		test("Early exit", async () => {
+		test("Early exit on invalid email", async () => {
 			vi.spyOn(validation, "isValidName").mockReturnValue(true);
 			const testUser = {
 				firstName: "Mock",
@@ -205,7 +205,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -214,7 +214,8 @@ describe("User schema", () => {
 					},
 				],
 			});
-			expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+			expect(prismaMock.user.findUnique).toHaveBeenCalledTimes(1);
+			expect(prismaMock.user.findUnique).toHaveBeenCalledWith({ where: { username: "mockuser1" } });
 		});
 		test("Already exists", async () => {
 			vi.spyOn(validation, "isValidName").mockReturnValue(true);
@@ -227,7 +228,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -250,7 +251,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -271,7 +272,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -292,7 +293,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{
@@ -313,7 +314,7 @@ describe("User schema", () => {
 				password: "password1!",
 			};
 			await expect(
-				UserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
+				CreateUserSchema(prismaMock as unknown as ExtendedPrismaClient).parseAsync(testUser)
 			).rejects.toMatchObject({
 				issues: [
 					{

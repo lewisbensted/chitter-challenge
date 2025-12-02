@@ -1,21 +1,13 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
-
-vi.mock("../../../src/utils/sendErrorResponse", () => ({
-	sendErrorResponse: vi.fn(),
-}));
-vi.mock("../../../src/utils/logError", () => ({
-	logError: vi.fn(),
-}));
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { prismaMock } from "../../test-utils/prismaMock";
 import { getConversationsHandler, getUnreadHandler } from "../../../src/routes/conversations";
 import { Request, Response } from "express";
-import { sendErrorResponse } from "../../../src/utils/sendErrorResponse";
-import { logError } from "../../../src/utils/logError";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
+import { mockNext } from "../../test-utils/mockNext";
 
-describe("Conversation handlers", () => {
+describe("Unit test - Conversation handlers", () => {
 	let mockReq: MockRequest;
 	let mockRes: MockResponse;
 	beforeEach(() => {
@@ -26,11 +18,12 @@ describe("Conversation handlers", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
-	describe("getUnreadHandler() function", () => {
+	describe("getUnreadHandler()", () => {
 		test("Unauthorised", async () => {
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
@@ -40,7 +33,8 @@ describe("Conversation handlers", () => {
 			prismaMock.conversation.findFirst.mockResolvedValueOnce(null);
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith(false);
@@ -50,7 +44,8 @@ describe("Conversation handlers", () => {
 			prismaMock.conversation.findFirst.mockResolvedValueOnce({ key: "test-key" });
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith(true);
@@ -60,13 +55,13 @@ describe("Conversation handlers", () => {
 			prismaMock.conversation.findFirst.mockRejectedValueOnce(new Error("DB exploded"));
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
-			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
-			expect(logError).toHaveBeenCalledWith(expect.any(Error));
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
-	describe("getConversationsHandler() function", () => {
+	describe("getConversationsHandler()", () => {
 		let fetchConversationsMock: ReturnType<typeof vi.fn>;
 		beforeEach(() => {
 			fetchConversationsMock = vi.fn().mockResolvedValue({ conversations: [], hasNext: false });
@@ -77,7 +72,8 @@ describe("Conversation handlers", () => {
 		test("Unauthorised", async () => {
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
@@ -89,7 +85,8 @@ describe("Conversation handlers", () => {
 			prismaMock.conversation.findUnique.mockResolvedValueOnce({ key: "valid" });
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -107,7 +104,8 @@ describe("Conversation handlers", () => {
 			mockReq.query.userIds = "";
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -125,7 +123,8 @@ describe("Conversation handlers", () => {
 			mockReq.query.userIds = "abc,def,geh";
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -143,7 +142,8 @@ describe("Conversation handlers", () => {
 			mockReq.query.userIds = "abc,,def, ,geh";
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 
 			expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -161,7 +161,8 @@ describe("Conversation handlers", () => {
 			mockReq.query.take = "invalid";
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(fetchConversationsMock).toHaveBeenCalledWith(
 				prismaMock as unknown as ExtendedPrismaClient,
@@ -176,7 +177,8 @@ describe("Conversation handlers", () => {
 			mockReq.query.take = String(100);
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(fetchConversationsMock).toHaveBeenCalledWith(
 				prismaMock as unknown as ExtendedPrismaClient,
@@ -193,7 +195,8 @@ describe("Conversation handlers", () => {
 			prismaMock.conversation.findUnique.mockResolvedValueOnce(null);
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
 			expect(fetchConversationsMock).toHaveBeenCalledWith(
 				prismaMock as unknown as ExtendedPrismaClient,
@@ -208,10 +211,10 @@ describe("Conversation handlers", () => {
 			fetchConversationsMock = vi.fn().mockRejectedValueOnce(new Error("DB exploded"));
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
-				mockRes as unknown as Response
+				mockRes as unknown as Response,
+				mockNext
 			);
-			expect(sendErrorResponse).toHaveBeenCalledWith(expect.any(Error), mockRes);
-			expect(logError).toHaveBeenCalledWith(expect.any(Error));
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
 });

@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { logError } from "../../../src/utils/logError";
 import { ZodError, ZodIssue } from "zod";
 
-describe("logError() function", () => {
+describe("logError()", () => {
 	test("Zod error", () => {
 		const issues: ZodIssue[] = [
 			{

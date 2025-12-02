@@ -4,7 +4,7 @@ import { isValidName, nameExp1, passwordExp1, passwordExp2 } from "../utils/vali
 
 const isTestEnv = process.env.NODE_ENV === "test";
 
-export const UserSchema = (prismaClient: ExtendedPrismaClient) =>
+export const CreateUserSchema = (prismaClient: ExtendedPrismaClient) =>
 	z
 		.object({
 			uuid: z.string().optional(),
@@ -100,6 +100,7 @@ export const UserSchema = (prismaClient: ExtendedPrismaClient) =>
 							code: "custom",
 							message: "Username cannot contain spaces.",
 						});
+						return;
 					}
 					const user = await prismaClient.user.findUnique({ where: { username: val } });
 					if (user) {

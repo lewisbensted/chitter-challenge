@@ -1,4 +1,4 @@
-import express from "express";
+import express, {  } from "express";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import register from "./routes/register.js";
@@ -18,9 +18,10 @@ import cors from "cors";
 import conversations from "./routes/conversations.js";
 import users from "./routes/users.js";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
-import { rateLimiter } from "./middleware/rateLimit.js";
+import { rateLimiter } from "./middleware/rateLimiting.js";
 import follow from "./routes/follow.js";
 import MySQLStoreImport from "express-mysql-session";
+import { errorHandler } from "./middleware/errorHandling.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 
@@ -93,9 +94,12 @@ try {
 	app.use("/api/cheets/:cheetId/replies", generalLimiter, express.json(), replies);
 	app.use("/api/replies", generalLimiter, express.json(), replies);
 	app.use("/api/messages", generalLimiter, express.json(), messages);
+
 	app.all("/api/*", (_req, res) => {
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });
 	});
+	
+	app.use(errorHandler);
 
 	if (process.env.NODE_ENV === "prod") {
 		const buildPath = path.join(PROJECT_ROOT, "frontend", "dist");

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { UserSchema } from "../../src/schemas/user.schema.js";
+import { CreateUserSchema } from "../../src/schemas/user.schema.js";
 import bcrypt from "bcrypt";
 import type { IUser } from "../../types/responses.js";
 import prisma from "../prismaClient.js";
@@ -33,7 +33,7 @@ export const userExtension = Prisma.defineExtension({
 				return user as unknown as IUser[];
 			},
 			async create({ args, query }): Promise<IUser> {
-				const parsedData = await UserSchema(prisma).parseAsync(args.data);
+				const parsedData = await CreateUserSchema(prisma).parseAsync(args.data);
 
 				const { password, ...rest } = parsedData;
 				const passwordHash = await bcrypt.hash(password, 5);

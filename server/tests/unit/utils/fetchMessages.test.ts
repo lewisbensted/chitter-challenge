@@ -3,7 +3,7 @@ import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchMessages } from "../../../src/utils/fetchMessages";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
-describe("fetchMessages() function", () => {
+describe("fetchMessages()", () => {
 	beforeEach(() => {
 		prismaMock.message.findMany.mockResolvedValue(
 			Array.from({ length: 5 }, (_, i) => ({

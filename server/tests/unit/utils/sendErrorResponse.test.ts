@@ -5,7 +5,7 @@ import { ZodError, ZodIssue } from "zod";
 import { Response } from "express";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 
-describe("sendErrorResponse() function", () => {
+describe("sendErrorResponse()", () => {
 	let mockRes: MockResponse;
 	beforeEach(() => {
 		mockRes = createMockRes();

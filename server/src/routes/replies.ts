@@ -1,8 +1,6 @@
-import express, { Request, Response } from "express";
-import { authenticator } from "../middleware/authMiddleware.js";
-import { logError } from "../utils/logError.js";
+import express, { NextFunction, Request, Response } from "express";
+import { authenticator } from "../middleware/authentication.js";
 import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
-import { sendErrorResponse } from "../utils/sendErrorResponse.js";
 import type { EditReplyRequest, SendReplyRequest } from "../../types/requests.js";
 import type { ExtendedReplyClient } from "../../types/extendedClients.js";
 import { fetchReplies, type FetchRepliesType } from "../utils/fetchReplies.js";
@@ -10,25 +8,26 @@ import { fetchReplies, type FetchRepliesType } from "../utils/fetchReplies.js";
 const router = express.Router({ mergeParams: true });
 
 export const getRepliesHandler =
-	(prismaClient: ExtendedPrismaClient, fetchReplies: FetchRepliesType) => async (req: Request, res: Response) => {
-		try {
-			const cheet = await prismaClient.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
-			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
-			let cursor = (req.query.cursor as string | undefined)?.trim();
-			if (cursor) {
-				const replyExists = await prismaClient.reply.findUnique({ where: { uuid: cursor } });
-				if (!replyExists) cursor = undefined;
+	(prismaClient: ExtendedPrismaClient, fetchReplies: FetchRepliesType) =>
+		async (req: Request, res: Response, next: NextFunction) => {
+			try {
+				const cheet = await prismaClient.cheet.findUniqueOrThrow({ where: { uuid: req.params.cheetId } });
+				const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
+				let cursor = (req.query.cursor as string | undefined)?.trim();
+				if (cursor) {
+					const replyExists = await prismaClient.reply.findUnique({ where: { uuid: cursor } });
+					if (!replyExists) cursor = undefined;
+				}
+				const { replies, hasNext } = await fetchReplies(prismaClient, take, cheet.uuid, cursor);
+				res.status(200).json({ replies, hasNext });
+			} catch (error) {
+				console.error("Error retrieving replies from the database:\n");
+				next(error);
 			}
-			const { replies, hasNext } = await fetchReplies(prismaClient, take, cheet.uuid, cursor);
-			res.status(200).json({ replies, hasNext });
-		} catch (error) {
-			console.error("Error retrieving replies from the database:\n" + logError(error));
-			sendErrorResponse(error, res);
-		}
-	};
+		};
 
 export const createReplyHandler =
-	(prismaClient: ExtendedPrismaClient) => async (req: SendReplyRequest, res: Response) => {
+	(prismaClient: ExtendedPrismaClient) => async (req: SendReplyRequest, res: Response, next: NextFunction) => {
 		try {
 			const sessionUser = req.session.user;
 			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
@@ -54,13 +53,13 @@ export const createReplyHandler =
 			});
 			res.status(201).json(result);
 		} catch (error) {
-			console.error("Error adding reply to the database:\n" + logError(error));
-			sendErrorResponse(error, res);
+			console.error("Error adding reply to the database:\n");
+			next(error);
 		}
 	};
 
 export const updateReplyHandler =
-	(prismaClient: ExtendedPrismaClient) => async (req: EditReplyRequest, res: Response) => {
+	(prismaClient: ExtendedPrismaClient) => async (req: EditReplyRequest, res: Response, next: NextFunction) => {
 		try {
 			const sessionUser = req.session.user;
 			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
@@ -80,31 +79,32 @@ export const updateReplyHandler =
 			});
 			return res.status(200).json(updatedReply);
 		} catch (error) {
-			console.error("Error updating reply in the database:\n" + logError(error));
-			sendErrorResponse(error, res);
+			console.error("Error updating reply in the database:\n");
+			next(error);
 		}
 	};
 
-export const deleteReplyHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response) => {
-	try {
-		const sessionUser = req.session.user;
-		if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
-		const targetReply = await (prismaClient.reply as unknown as ExtendedReplyClient).findUniqueOrThrow({
-			where: { uuid: req.params.replyId },
-		});
-		if (targetReply.user.uuid !== sessionUser.uuid)
-			return res.status(403).json({ errors: ["Cannot delete someone else's reply."] });
-		await prismaClient.reply.delete({
-			where: {
-				uuid: targetReply.uuid,
-			},
-		});
-		res.sendStatus(204);
-	} catch (error) {
-		console.error("Error deleting reply from database:\n" + logError(error));
-		sendErrorResponse(error, res);
-	}
-};
+export const deleteReplyHandler =
+	(prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const sessionUser = req.session.user;
+			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
+			const targetReply = await (prismaClient.reply as unknown as ExtendedReplyClient).findUniqueOrThrow({
+				where: { uuid: req.params.replyId },
+			});
+			if (targetReply.user.uuid !== sessionUser.uuid)
+				return res.status(403).json({ errors: ["Cannot delete someone else's reply."] });
+			await prismaClient.reply.delete({
+				where: {
+					uuid: targetReply.uuid,
+				},
+			});
+			res.sendStatus(204);
+		} catch (error) {
+			console.error("Error deleting reply from database:\n");
+			next(error);
+		}
+	};
 
 router.get("/", getRepliesHandler(prisma, fetchReplies));
 router.post("/", authenticator, createReplyHandler(prisma));

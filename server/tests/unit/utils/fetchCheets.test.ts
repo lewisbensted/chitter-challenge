@@ -3,7 +3,7 @@ import { prismaMock } from "../../test-utils/prismaMock";
 import { fetchCheets } from "../../../src/utils/fetchCheets";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 
-describe("fetchCheets() function", () => {
+describe("fetchCheets()", () => {
 	beforeEach(() => {
 		prismaMock.cheet.findMany.mockResolvedValue(
 			Array.from({ length: 5 }, (_, i) => ({

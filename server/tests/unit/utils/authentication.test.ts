@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { authenticate } from "../../../src/utils/authenticate";
 import * as authUtils from "../../../src/utils/authenticate";
-import { authenticator } from "../../../src/middleware/authMiddleware";
+import { authenticator } from "../../../src/middleware/authentication";
 import { Request, Response, NextFunction } from "express";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 
-describe("Authentication", () => {
-	describe("authenticate() function", () => {
+describe("Unit tests - Authentication", () => {
+	describe("authenticate()", () => {
 		test("sessionIDs and userIDs match.", () => {
 			const testReq = {
 				sessionID: "testsessionid",
@@ -97,7 +97,7 @@ describe("Authentication", () => {
 			expect(authenticate(testReq)).toEqual(false);
 		});
 	});
-	describe("authMiddleware() function", () => {
+	describe("authMiddleware()", () => {
 		let mockReq: MockRequest;
 		let mockRes: MockResponse;
 		let mockNext: NextFunction;

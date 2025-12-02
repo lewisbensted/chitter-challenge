@@ -11,7 +11,7 @@ export interface RegisterUserRequestBody {
 
 export type RegisterUserRequest = Request<Record<string, never>, IUser, RegisterUserRequestBody>;
 
-export type SendCheetRequest = Request<{}, ICheet, { text: string }> & {
+export type SendCheetRequest = Request<Record<string, never>, ICheet, { text: string }> & {
 	session: { user?: { uuid: string } };
 };
 
@@ -35,6 +35,11 @@ export type EditMessageRequest = Request<{ recipientId: string; messageId: strin
 	session: { user?: { uuid: string } };
 };
 
-export type SearchUsersRequest = Request<{}, ICheet, {}, { search?: string; take?: string; cursor?: string }> & {
+export type SearchUsersRequest = Request<
+	Record<string, never>,
+	ICheet,
+	Record<string, unknown>,
+	{ search?: string; take?: string; cursor?: string }
+> & {
 	session: { user?: { uuid: string } };
 };
