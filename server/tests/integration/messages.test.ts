@@ -8,7 +8,11 @@ describe("Integration tests - Message routes", () => {
 		test("Success - empty return", () => {
 			expect(true).toBe(false);
 		});
+		test("Success - cursor and take", () => {
+			expect(true).toBe(false);
+		});
 		test("Failure - DB error", () => {
+			
 			expect(true).toBe(false);
 		});
 	});

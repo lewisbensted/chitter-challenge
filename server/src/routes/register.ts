@@ -1,5 +1,5 @@
 import express, { NextFunction, Response } from "express";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { type RegisterUserRequest } from "../../types/requests.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
 
@@ -18,6 +18,10 @@ export const registerHandler =
 		}
 	};
 
-router.post("/", registerHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router();
+	
+	router.post("/", registerHandler(prismaClient));
 
-export default router;
+	return router;
+};

@@ -13,6 +13,7 @@ import { EditCheetRequest, SendCheetRequest } from "../../../types/requests";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 import { mockNext } from "../../test-utils/mockNext";
 
+
 describe("Unit test - Cheet handlers", () => {
 	let mockReq: MockRequest;
 	let mockRes: MockResponse;

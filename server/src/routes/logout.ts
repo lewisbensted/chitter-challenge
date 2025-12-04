@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
+import { ExtendedPrismaClient } from "../../prisma/prismaClient";
 
-const router = express.Router();
+
 
 export const logoutHandler = (req: Request, res: Response, next: NextFunction) => {
 	if (req.session.user) {
@@ -20,6 +21,8 @@ export const logoutHandler = (req: Request, res: Response, next: NextFunction) =
 	}
 };
 
-router.delete("/", logoutHandler);
-
-export default router;
+export default () => {
+	const router = express.Router();
+	router.delete("/", logoutHandler);
+	return router;
+};

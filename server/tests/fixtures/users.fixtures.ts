@@ -1,6 +1,6 @@
 export const testUsers = [
 	{
-		uuid: "testuseruuid1",
+		uuid: "testuserid1",
 		email: "testuser1@test.com",
 		firstName: "Test",
 		lastName: "User",
@@ -9,7 +9,7 @@ export const testUsers = [
 	},
 
 	{
-		uuid: "testuseruuid2",
+		uuid: "testuserid2",
 		email: "testuser2@test.com",
 		firstName: "Test",
 		lastName: "User",
@@ -17,7 +17,7 @@ export const testUsers = [
 		username: "testuser2",
 	},
 	{
-		uuid: "testuseruuid3",
+		uuid: "testuserid3",
 		email: "testuser3@test.com",
 		firstName: "Test",
 		lastName: "User",
@@ -26,7 +26,7 @@ export const testUsers = [
 	},
 
 	{
-		uuid: "testuseruuid4",
+		uuid: "testuserid4",
 		email: "testuser4@test.com",
 		firstName: "Test",
 		lastName: "User",
@@ -35,21 +35,19 @@ export const testUsers = [
 	},
 
 	{
-		uuid: "testuseruuid5",
+		uuid: "testuserid5",
 		email: "testuser5@test.com",
 		firstName: "Test",
 		lastName: "User",
 		passwordHash: "placeholder",
 		username: "testuser5",
 	},
-	{
-		uuid: "testuseruuid6",
-		email: "testuser6@test.com",
-		firstName: "Test",
-		lastName: "User",
-		passwordHash: "placeholder",
-		username: "testuserunique",
-	},
 ];
 
-
+export const validUser = {
+	username: "testuser",
+	password: "password1!",
+	firstName: "Test",
+	lastName: "User",
+	email: "testuser@test.com",
+};

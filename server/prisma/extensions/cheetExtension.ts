@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { CreateCheetSchema, UpdateCheetSchema } from "../../src/schemas/cheet.schema.js";
-import { userFilters } from "./userExtension.js";
 import type { ICheet } from "../../types/responses.js";
+import { userFilters } from "./userExtension.js";
 
 const cheetFilters = {
 	include: { user: userFilters, cheetStatus: { omit: { cheetId: true } } },

@@ -1,21 +1,21 @@
 import { describe, expect, test } from "vitest";
 
-describe("Integration tests - Cheet routes", () => {
-	describe("Fetch cheets at route [GET] /cheets", () => {
-		test("Success - no userId provided", () => {
-			expect(true).toBe(false);
-		});
-		test("Success - userId provided", () => {
+describe("Integration tests - Reply routes", () => {
+	describe("Fetch replys at route [GET] /replies", () => {
+		test("Success", () => {
 			expect(true).toBe(false);
 		});
 		test("Success - empty return", () => {
 			expect(true).toBe(false);
 		});
+		test("Success - cursor and take", () => {
+			expect(true).toBe(false);
+		});
 		test("Failure - DB error", () => {
 			expect(true).toBe(false);
 		});
 	});
-	describe("Send cheet at route [POST] /cheets", () => {
+	describe("Send reply at route [POST] /replies", () => {
 		test("Success", () => {
 			expect(true).toBe(false);
 		});
@@ -23,7 +23,7 @@ describe("Integration tests - Cheet routes", () => {
 			expect(true).toBe(false);
 		});
 	});
-	describe("Edit cheet at route [PUT] /cheets/:cheetId", () => {
+	describe("Edit reply at route [PUT] /replies/:replyId", () => {
 		test("Success", () => {
 			expect(true).toBe(false);
 		});
@@ -31,7 +31,7 @@ describe("Integration tests - Cheet routes", () => {
 			expect(true).toBe(false);
 		});
 	});
-	describe("Delete cheet at route [DELETE] /cheets/:cheetId", () => {
+	describe("Delete reply at route [DELETE] /replies/:replyId", () => {
 		test("Success", () => {
 			expect(true).toBe(false);
 		});

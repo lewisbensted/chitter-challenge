@@ -1,36 +1,39 @@
-import prisma from "../prisma/prismaClient.js";
+import { Prisma } from "@prisma/client";
+
 import { RegisterUserRequestBody } from "./requests.js";
 import type { IUser, ICheet, IReply, IMessage, IConversation } from "./responses.js";
 
 export interface ExtendedUserClient {
-	findMany(args: Parameters<typeof prisma.user.findMany>[0]): Promise<IUser[]>;
-	findUniqueOrThrow(args: Parameters<typeof prisma.user.findUniqueOrThrow>[0]): Promise<IUser>;
-	findUnique(args: Parameters<typeof prisma.user.findUnique>[0]): Promise<(IUser & { passwordHash: string }) | null>;
-	create(args: { data: RegisterUserRequestBody }): Promise<IUser>;
+	createMany(args: Prisma.UserCreateManyArgs): Promise<Prisma.BatchPayload>;
+	findMany(args: Prisma.UserFindManyArgs): Promise<IUser[]>;
+	findUniqueOrThrow(args: Prisma.UserFindUniqueOrThrowArgs): Promise<IUser>;
+	findUnique(args: Prisma.UserFindUniqueArgs): Promise<(IUser & { passwordHash: string }) | null>;
+	create(args: { data: Omit<Prisma.UserCreateInput, "passwordHash"> & { password: string } }): Promise<IUser>;
 }
 
 export interface ExtendedCheetClient {
-	findUniqueOrThrow(args: Parameters<typeof prisma.cheet.findUniqueOrThrow>[0]): Promise<ICheet>;
-	findMany(args: Parameters<typeof prisma.cheet.findMany>[0]): Promise<ICheet[]>;
-	create(args: Parameters<typeof prisma.cheet.create>[0]): Promise<ICheet>;
-	update(args: Parameters<typeof prisma.cheet.update>[0]): Promise<ICheet>;
-	delete(args: Parameters<typeof prisma.cheet.delete>[0]): Promise<ICheet>;
+	createMany(args: Prisma.CheetCreateManyArgs): Promise<Prisma.BatchPayload>;
+	findUniqueOrThrow(args: Prisma.CheetFindUniqueOrThrowArgs): Promise<ICheet>;
+	findMany(args: Prisma.CheetFindManyArgs): Promise<ICheet[]>;
+	create(args: Prisma.CheetCreateArgs): Promise<ICheet>;
+	update(args: Prisma.CheetUpdateArgs): Promise<ICheet>;
+	delete(args: Prisma.CheetDeleteArgs): Promise<ICheet>;
 }
 
 export interface ExtendedReplyClient {
-	findUniqueOrThrow(args: Parameters<typeof prisma.reply.findUniqueOrThrow>[0]): Promise<IReply>;
-	findMany(args: Parameters<typeof prisma.reply.findMany>[0]): Promise<IReply[]>;
-	create(args: Parameters<typeof prisma.reply.create>[0]): Promise<IReply>;
-	update(args: Parameters<typeof prisma.reply.update>[0]): Promise<IReply>;
-	delete(args: Parameters<typeof prisma.cheet.delete>[0]): Promise<IReply>;
+	findUniqueOrThrow(args: Prisma.ReplyFindUniqueOrThrowArgs): Promise<IReply>;
+	findMany(args: Prisma.ReplyFindManyArgs): Promise<IReply[]>;
+	create(args: Prisma.ReplyCreateArgs): Promise<IReply>;
+	update(args: Prisma.ReplyUpdateArgs): Promise<IReply>;
+	delete(args: Prisma.ReplyDeleteArgs): Promise<IReply>;
 }
 
 export interface ExtendedMessageClient {
-	findUniqueOrThrow(args: Parameters<typeof prisma.message.findUniqueOrThrow>[0]): Promise<IMessage>;
-	findFirst(args: Parameters<typeof prisma.message.findFirst>[0]): Promise<IMessage | null>;
-	findMany(args: Parameters<typeof prisma.message.findMany>[0]): Promise<IMessage[]>;
-	create(args: Parameters<typeof prisma.message.create>[0]): Promise<IMessage>;
-	update(args: Parameters<typeof prisma.message.update>[0]): Promise<IMessage>;
+	findUniqueOrThrow(args: Prisma.MessageFindUniqueOrThrowArgs): Promise<IMessage>;
+	findFirst(args: Prisma.MessageFindFirstArgs): Promise<IMessage | null>;
+	findMany(args: Prisma.MessageFindManyArgs): Promise<IMessage[]>;
+	create(args: Prisma.MessageCreateArgs): Promise<IMessage>;
+	update(args: Prisma.MessageUpdateArgs): Promise<IMessage>;
 }
 
 export interface ExtendedMessageStatusClient {
@@ -38,6 +41,5 @@ export interface ExtendedMessageStatusClient {
 }
 
 export interface ExtendedConversationClient {
-	findMany(args: Parameters<typeof prisma.conversation.findMany>[0]): Promise<IConversation[]>;
+	findMany(args: Prisma.ConversationFindManyArgs): Promise<IConversation[]>;
 }
-

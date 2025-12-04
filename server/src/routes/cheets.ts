@@ -1,42 +1,40 @@
 import express, { NextFunction, Request, Response } from "express";
 import { authenticator } from "../middleware/authentication.js";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
 import type { ExtendedCheetClient } from "../../types/extendedClients.js";
 import { fetchCheets, type FetchCheetsType } from "../utils/fetchCheets.js";
 
-const router = express.Router({ mergeParams: true });
-
 export const getCheetsHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchCheetsType) =>
-		async (req: Request, res: Response, next: NextFunction) => {
-			try {
-				let user;
-				if (req.params.userId) {
-					user = await prismaClient.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
-				}
-				const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
-
-				let cursor = (req.query.cursor as string | undefined)?.trim();
-				if (cursor) {
-					const cheetExists = await prismaClient.cheet.findUnique({ where: { uuid: cursor } });
-					if (!cheetExists) cursor = undefined;
-				}
-
-				const { cheets, hasNext } = await fetchFn(prismaClient, take, req.session.user?.uuid, user?.uuid, cursor);
-				res.status(200).json({ cheets, hasNext });
-			} catch (error) {
-				console.error("Error retrieving cheets from the database:\n");
-				next(error);
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			let user;
+			if (req.params.userId) {
+				user = await prismaClient.user.findUniqueOrThrow({ where: { uuid: req.params.userId } });
 			}
-		};
+			const take = Math.min(req.query.take && Number(req.query.take) > 0 ? Number(req.query.take) : 10, 50);
+
+			let cursor = (req.query.cursor as string | undefined)?.trim();
+			if (cursor) {
+				const cheetExists = await prismaClient.cheet.findUnique({ where: { uuid: cursor } });
+				if (!cheetExists) cursor = undefined;
+			}
+
+			const { cheets, hasNext } = await fetchFn(prismaClient, take, req.session.user?.uuid, user?.uuid, cursor);
+			res.status(200).json({ cheets, hasNext });
+		} catch (error) {
+			console.error("Error retrieving cheets from the database:\n");
+			next(error);
+		}
+	};
 
 export const createCheetHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendCheetRequest, res: Response, next: NextFunction) => {
 		try {
 			const sessionUser = req.session.user;
 			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
-			const result = await prismaClient.$transaction(async (transaction) => {
+			const result = await prismaClient.$transaction(async (transaction: typeof prismaClient) => {
 				const newCheet = await transaction.cheet.create({
 					data: {
 						userId: sessionUser.uuid,
@@ -117,9 +115,13 @@ export const deleteCheetHandler =
 		}
 	};
 
-router.get("/", getCheetsHandler(prisma, fetchCheets));
-router.post("/", authenticator, createCheetHandler(prisma));
-router.put("/:cheetId", authenticator, updateCheetHandler(prisma));
-router.delete("/:cheetId", authenticator, deleteCheetHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.get("/", getCheetsHandler(prismaClient, fetchCheets));
+	router.post("/", authenticator, createCheetHandler(prismaClient));
+	router.put("/:cheetId", authenticator, updateCheetHandler(prismaClient));
+	router.delete("/:cheetId", authenticator, deleteCheetHandler(prismaClient));
+
+	return router;
+};

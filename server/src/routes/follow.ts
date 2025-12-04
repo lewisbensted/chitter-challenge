@@ -1,8 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { authenticator } from "../middleware/authentication.js";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
-
-const router = express.Router({ mergeParams: true });
+import { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 
 export const followHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response, next: NextFunction) => {
@@ -50,7 +48,11 @@ export const unfollowHandler =
 		}
 	};
 
-router.post("/", authenticator, followHandler(prisma));
-router.delete("/", authenticator, unfollowHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.post("/", authenticator, followHandler(prismaClient));
+	router.delete("/", authenticator, unfollowHandler(prismaClient));
+
+	return router;
+};

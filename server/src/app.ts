@@ -1,4 +1,4 @@
-import express, {  } from "express";
+import express from "express";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import register from "./routes/register.js";
@@ -7,8 +7,7 @@ import validate from "./routes/validate.js";
 import cheets from "./routes/cheets.js";
 import replies from "./routes/replies.js";
 import logout from "./routes/logout.js";
-import { logError } from "./utils/logError.js";
-import prisma from "../prisma/prismaClient.js";
+import { ExtendedPrismaClient } from "../prisma/prismaClient.js";
 import messages from "./routes/messages.js";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
@@ -17,7 +16,6 @@ import path from "path";
 import cors from "cors";
 import conversations from "./routes/conversations.js";
 import users from "./routes/users.js";
-import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 import { rateLimiter } from "./middleware/rateLimiting.js";
 import follow from "./routes/follow.js";
 import MySQLStoreImport from "express-mysql-session";
@@ -41,22 +39,8 @@ const storeOptions = {
 
 const sessionStore = new MySQLStore(storeOptions);
 
-const checkValidPort = (port: number, side: string) => {
-	if (Number.isNaN(port)) {
-		throw new TypeError(`Invalid ${side} port provided - must be a number between 0 and 65536.`);
-	} else if (port < 0 || port > 65535) {
-		throw new RangeError(`Invalid ${side} port provided - must be a number between 0 and 65536.`);
-	}
-};
-
-try {
-	await prisma.$connect();
-
+export const createApp = (prismaClient: ExtendedPrismaClient, frontendPort: number, projectRoot: string) => {
 	const app = express();
-	const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 5173;
-	const SERVER_PORT = Number(process.env.SERVER_PORT);
-	checkValidPort(SERVER_PORT, "server");
-	const PROJECT_ROOT = path.resolve(__dirname, "../../..");
 
 	app.use(cookieParser());
 	app.use(
@@ -70,10 +54,9 @@ try {
 	);
 
 	if (process.env.NODE_ENV !== "prod") {
-		checkValidPort(FRONTEND_PORT, "frontend");
 		app.use(
 			cors({
-				origin: `http://localhost:${FRONTEND_PORT}`,
+				origin: `http://localhost:${frontendPort}`,
 				credentials: true,
 			})
 		);
@@ -82,41 +65,34 @@ try {
 	const authLimiter = rateLimiter(1000 * 60, 5);
 	const generalLimiter = rateLimiter(1000 * 60 * 10, 1000);
 
-	app.use("/api/users", generalLimiter, express.json(), users);
-	app.use("/api/follow/:followingId", generalLimiter, express.json(), follow);
-	app.use("/api/register", authLimiter, express.json(), register);
-	app.use("/api/login", authLimiter, express.json(), login);
-	app.use("/api/validate", generalLimiter, validate);
-	app.use("/api/logout", generalLimiter, logout);
-	app.use("/api/cheets", generalLimiter, express.json(), cheets);
-	app.use("/api/conversations", generalLimiter, express.json(), conversations);
-	app.use("/api/users/:userId/cheets", generalLimiter, express.json(), cheets);
-	app.use("/api/cheets/:cheetId/replies", generalLimiter, express.json(), replies);
-	app.use("/api/replies", generalLimiter, express.json(), replies);
-	app.use("/api/messages", generalLimiter, express.json(), messages);
+	app.use(express.json());
+
+	app.use("/api/users", generalLimiter, users(prismaClient));
+	app.use("/api/follow/:followingId", generalLimiter, follow(prismaClient));
+	app.use("/api/register", authLimiter, register(prismaClient));
+	app.use("/api/login", authLimiter, login(prismaClient));
+	app.use("/api/validate", generalLimiter, validate());
+	app.use("/api/logout", generalLimiter, logout());
+	app.use("/api/conversations", generalLimiter, conversations(prismaClient));
+	// app.use("/api/cheets", generalLimiter, cheets(prismaClient));
+	// app.use("/api/users/:userId/cheets", generalLimiter, cheets(prismaClient));
+	// app.use("/api/cheets/:cheetId/replies", generalLimiter, replies(prismaClient));
+	// app.use("/api/replies", generalLimiter, replies(prismaClient));
+	// app.use("/api/messages", generalLimiter, messages(prismaClient));
 
 	app.all("/api/*", (_req, res) => {
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });
 	});
-	
-	app.use(errorHandler);
 
 	if (process.env.NODE_ENV === "prod") {
-		const buildPath = path.join(PROJECT_ROOT, "frontend", "dist");
+		const buildPath = path.join(projectRoot, "frontend", "dist");
 		app.use(express.static(buildPath));
 		app.get("*", (_req, res) => {
 			res.sendFile(path.join(buildPath, "index.html"));
 		});
 	}
 
-	app.listen(SERVER_PORT, () => {
-		console.log(`\nServer running on port ${SERVER_PORT}.\n`);
-	}).on("error", (error) => {
-		console.error(logError(error));
-	});
-} catch (error) {
-	console.error(
-		(error instanceof PrismaClientInitializationError ? "\nError initialising database connection:\n" : "") +
-			logError(error)
-	);
-}
+	app.use(errorHandler);
+
+	return app
+};

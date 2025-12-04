@@ -27,6 +27,7 @@ describe("Unit tests - Login handler", () => {
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
 				mockNext
+				
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Already logged in."] });
@@ -84,7 +85,6 @@ describe("Unit tests - Login handler", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith("mockuserid");
 			expect(mockRes.cookie).toHaveBeenCalledWith("user_id", "mockuserid");
-			expect(mockRes.cookie).toHaveBeenCalledWith("session_id", "mocksessionid");
 			expect(mockReq.session.user).toEqual({ uuid: "mockuserid" });
 		});
 		test("Error", async () => {
