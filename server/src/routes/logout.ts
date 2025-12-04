@@ -20,6 +20,8 @@ export const logoutHandler = (req: Request, res: Response, next: NextFunction) =
 	}
 };
 
-router.delete("/", logoutHandler);
-
-export default router;
+export default () => {
+	const router = express.Router();
+	router.delete("/", logoutHandler);
+	return router;
+};

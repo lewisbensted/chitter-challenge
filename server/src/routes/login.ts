@@ -1,8 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import prisma, { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
-
-const router = express.Router();
+import { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 
 export const loginHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -38,6 +36,8 @@ export const loginHandler = (prismaClient: ExtendedPrismaClient) => async (req: 
 	}
 };
 
-router.post("/", loginHandler(prisma));
-
-export default router;
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router();
+	router.post("/", loginHandler(prismaClient));
+	return router;
+};

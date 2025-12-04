@@ -50,7 +50,11 @@ export const unfollowHandler =
 		}
 	};
 
-router.post("/", authenticator, followHandler(prisma));
-router.delete("/", authenticator, unfollowHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.post("/", authenticator, followHandler(prismaClient));
+	router.delete("/", authenticator, unfollowHandler(prismaClient));
+
+	return router;
+};

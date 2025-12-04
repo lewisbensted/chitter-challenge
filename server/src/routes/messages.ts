@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { authenticator } from "../middleware/authentication.js";
 import type { EditMessageRequest, SendMessageRequest } from "../../types/requests.js";
 import type { ExtendedMessageClient } from "../../types/extendedClients.js";
@@ -7,8 +7,6 @@ import { generateConversationKey } from "../utils/generateConversationKey.js";
 import { messageFilters } from "../../prisma/extensions/messageExtension.js";
 import { fetchMessages, type FetchMessagesType } from "../utils/fetchMessages.js";
 import { readMessages } from "../utils/readMessages.js";
-
-const router = express.Router({ mergeParams: true });
 
 export const getMessagesHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchMessagesType) =>
@@ -151,10 +149,13 @@ export const deleteMessageHandler =
 		}
 	};
 
-router.get("/:recipientId", authenticator, getMessagesHandler(prisma, fetchMessages));
-router.post("/:recipientId", authenticator, postMessageHandler(prisma));
-router.put("/:messageId", authenticator, updateMessageHandler(prisma));
-router.delete("/:messageId", authenticator, deleteMessageHandler(prisma));
-router.put("/:recipientId/read", authenticator, readMessagesHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
+	router.get("/:recipientId", authenticator, getMessagesHandler(prismaClient, fetchMessages));
+	router.post("/:recipientId", authenticator, postMessageHandler(prismaClient));
+	router.put("/:messageId", authenticator, updateMessageHandler(prismaClient));
+	router.delete("/:messageId", authenticator, deleteMessageHandler(prismaClient));
+	router.put("/:recipientId/read", authenticator, readMessagesHandler(prismaClient));
 
-export default router;
+	return router;
+};

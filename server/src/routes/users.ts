@@ -1,10 +1,9 @@
 import express, { NextFunction, Request, Response } from "express";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { ExtendedUserClient } from "../../types/extendedClients.js";
 import type { SearchUsersRequest } from "../../types/requests.js";
 import { searchUsers, type FetchUsersType } from "../utils/searchUsers.js";
 
-const router = express.Router({ mergeParams: true });
 
 export const searchUsersHandler =
 	(prismaClient: ExtendedPrismaClient, searchFn: FetchUsersType) =>
@@ -51,7 +50,11 @@ export const getUserHandler =
 		}
 	};
 
-router.get("/", searchUsersHandler(prisma, searchUsers));
-router.get("/:userId", getUserHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.get("/", searchUsersHandler(prismaClient, searchUsers));
+	router.get("/:userId", getUserHandler(prismaClient));
+
+	return router;
+};

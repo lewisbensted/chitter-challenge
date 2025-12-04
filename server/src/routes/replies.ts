@@ -1,11 +1,9 @@
 import express, { NextFunction, Request, Response } from "express";
 import { authenticator } from "../middleware/authentication.js";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { EditReplyRequest, SendReplyRequest } from "../../types/requests.js";
 import type { ExtendedReplyClient } from "../../types/extendedClients.js";
 import { fetchReplies, type FetchRepliesType } from "../utils/fetchReplies.js";
-
-const router = express.Router({ mergeParams: true });
 
 export const getRepliesHandler =
 	(prismaClient: ExtendedPrismaClient, fetchReplies: FetchRepliesType) =>
@@ -106,9 +104,13 @@ export const deleteReplyHandler =
 		}
 	};
 
-router.get("/", getRepliesHandler(prisma, fetchReplies));
-router.post("/", authenticator, createReplyHandler(prisma));
-router.put("/:replyId", authenticator, updateReplyHandler(prisma));
-router.delete("/:replyId", authenticator, deleteReplyHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.get("/", getRepliesHandler(prismaClient, fetchReplies));
+	router.post("/", authenticator, createReplyHandler(prismaClient));
+	router.put("/:replyId", authenticator, updateReplyHandler(prismaClient));
+	router.delete("/:replyId", authenticator, deleteReplyHandler(prismaClient));
+	
+	return router;
+};

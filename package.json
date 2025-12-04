@@ -8,7 +8,7 @@
 		"lint": "npx eslint .",
 		"reset:dev": "npm --prefix server run reset:dev",
 		"migrate:dev": "npm --prefix server run migrate:dev",
-		"start:dev": "cross-env NODE_ENV=dev concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"node await-server.js\"",
+		"start:dev": "cross-env NODE_ENV=development concurrently --names Backend,Frontend \"npm --prefix server run start:dev\" \"node await-server.js\"",
 		"build:prod": "concurrently --names Backend,Frontend \"npm --prefix server run build:prod\" \"npm --prefix frontend run build\"",
 		"migrate:prod": "npm --prefix server run migrate:prod",
 		"start:prod": "npm --prefix server run start:prod"

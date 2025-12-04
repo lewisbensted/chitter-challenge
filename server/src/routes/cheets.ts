@@ -117,9 +117,13 @@ export const deleteCheetHandler =
 		}
 	};
 
-router.get("/", getCheetsHandler(prisma, fetchCheets));
-router.post("/", authenticator, createCheetHandler(prisma));
-router.put("/:cheetId", authenticator, updateCheetHandler(prisma));
-router.delete("/:cheetId", authenticator, deleteCheetHandler(prisma));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.get("/", getCheetsHandler(prismaClient, fetchCheets));
+	router.post("/", authenticator, createCheetHandler(prismaClient));
+	router.put("/:cheetId", authenticator, updateCheetHandler(prismaClient));
+	router.delete("/:cheetId", authenticator, deleteCheetHandler(prismaClient));
+
+	return router;
+};

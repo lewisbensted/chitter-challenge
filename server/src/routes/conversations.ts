@@ -55,7 +55,12 @@ export const getConversationsHandler =
 			}
 		};
 
-router.get("/unread", authenticator, getUnreadHandler(prisma));
-router.get("/", authenticator, getConversationsHandler(prisma, fetchConversations));
+export default (prismaClient: ExtendedPrismaClient) => {
+	const router = express.Router({ mergeParams: true });
 
-export default router;
+	router.get("/unread", authenticator, getUnreadHandler(prismaClient));
+	router.get("/", authenticator, getConversationsHandler(prismaClient, fetchConversations));
+
+	return router;
+};
+
