@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import type { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { isValidName, nameExp1, passwordExp1, passwordExp2 } from "../utils/validation.js";
 
 const isTestEnv = process.env.NODE_ENV === "test";

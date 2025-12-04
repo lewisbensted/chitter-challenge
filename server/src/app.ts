@@ -7,7 +7,7 @@ import validate from "./routes/validate.js";
 import cheets from "./routes/cheets.js";
 import replies from "./routes/replies.js";
 import logout from "./routes/logout.js";
-import { ExtendedPrismaClient } from "../prisma/prismaClient.js";
+import type { ExtendedPrismaClient } from "../prisma/prismaClient.js";
 import messages from "./routes/messages.js";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";

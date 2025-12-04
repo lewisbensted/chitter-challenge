@@ -1,11 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import { authenticator } from "../middleware/authentication.js";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import type { EditCheetRequest, SendCheetRequest } from "../../types/requests.js";
 import type { ExtendedCheetClient } from "../../types/extendedClients.js";
 import { fetchCheets, type FetchCheetsType } from "../utils/fetchCheets.js";
 
-const router = express.Router({ mergeParams: true });
 
 export const getCheetsHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchCheetsType) =>

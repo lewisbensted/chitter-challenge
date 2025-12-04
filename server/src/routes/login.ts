@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import type { ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 
 export const loginHandler = (prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response, next: NextFunction) => {
 	try {

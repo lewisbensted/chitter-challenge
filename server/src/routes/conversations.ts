@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { authenticator } from "../middleware/authentication.js";
-import prisma, { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
+import  { type ExtendedPrismaClient } from "../../prisma/prismaClient.js";
 import { type FetchConversationsType, fetchConversations } from "../utils/fetchConversations.js";
 
 const router = express.Router({ mergeParams: true });

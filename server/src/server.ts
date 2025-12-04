@@ -1,8 +1,7 @@
 import { logError } from "./utils/logError.js";
-import prisma from "../prisma/prismaClient.js";
+import { createPrismaClient } from "../prisma/prismaClient.js";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
-
 import path from "path";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
 import { createApp } from "./app.js";
@@ -18,6 +17,7 @@ const checkValidPort = (port: number, side: string) => {
 };
 
 try {
+    const prisma = createPrismaClient()
 	await prisma.$connect();
 
 	const FRONTEND_PORT = process.env.PORT ? Number(process.env.PORT) : 5173;

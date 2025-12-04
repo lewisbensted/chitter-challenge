@@ -7,6 +7,7 @@ import { generateConversationKey } from "../utils/generateConversationKey.js";
 import { messageFilters } from "../../prisma/extensions/messageExtension.js";
 import { fetchMessages, type FetchMessagesType } from "../utils/fetchMessages.js";
 import { readMessages } from "../utils/readMessages.js";
+import { softDeleteMessageStatus } from "../../prisma/services/messageStatus.js";
 
 export const getMessagesHandler =
 	(prismaClient: ExtendedPrismaClient, fetchFn: FetchMessagesType) =>
@@ -141,7 +142,7 @@ export const deleteMessageHandler =
 			});
 			if (targetMessage.sender.uuid !== sessionUser.uuid)
 				return res.status(403).json({ errors: ["Cannot delete someone else's message."] });
-			const deletedMessage = await prismaClient.messageStatus.softDelete(targetMessage.uuid);
+			const deletedMessage = await softDeleteMessageStatus(prismaClient, targetMessage.uuid);
 			res.status(200).json({ ...deletedMessage, text: null });
 		} catch (error) {
 			console.error("Error deleting message from the database:\n");

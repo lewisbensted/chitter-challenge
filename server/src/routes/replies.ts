@@ -5,6 +5,7 @@ import type { EditReplyRequest, SendReplyRequest } from "../../types/requests.js
 import type { ExtendedReplyClient } from "../../types/extendedClients.js";
 import { fetchReplies, type FetchRepliesType } from "../utils/fetchReplies.js";
 
+
 export const getRepliesHandler =
 	(prismaClient: ExtendedPrismaClient, fetchReplies: FetchRepliesType) =>
 		async (req: Request, res: Response, next: NextFunction) => {
@@ -112,5 +113,5 @@ export default (prismaClient: ExtendedPrismaClient) => {
 	router.put("/:replyId", authenticator, updateReplyHandler(prismaClient));
 	router.delete("/:replyId", authenticator, deleteReplyHandler(prismaClient));
 	
-	return router;
+	return router
 };
