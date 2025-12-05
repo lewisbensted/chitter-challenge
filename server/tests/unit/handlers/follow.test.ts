@@ -19,7 +19,7 @@ describe("Unit tests - Follow handlers", () => {
 		vi.restoreAllMocks();
 	});
 	describe("followHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await followHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -50,7 +50,7 @@ describe("Unit tests - Follow handlers", () => {
 			);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(201);
 		});
-		test("Failure", async () => {
+		test("Failure - database error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.followingId = "otheruserid";
 			prismaMock.follow.create.mockRejectedValueOnce(new Error("DB exploded"));
@@ -63,7 +63,7 @@ describe("Unit tests - Follow handlers", () => {
 		});
 	});
 	describe("unfollowHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await unfollowHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -83,7 +83,7 @@ describe("Unit tests - Follow handlers", () => {
 			);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
 		});
-		test("Record already removed", async () => {
+		test("Success - record already removed", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.followingId = "otheruserid";
 			prismaMock.follow.create.mockRejectedValueOnce({
@@ -96,7 +96,7 @@ describe("Unit tests - Follow handlers", () => {
 			);
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(204);
 		});
-		test("Failure", async () => {
+		test("Failure - database error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.followingId = "otheruserid";
 			prismaMock.follow.delete.mockRejectedValueOnce(new Error("DB exploded"));

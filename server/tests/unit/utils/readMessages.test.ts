@@ -16,7 +16,6 @@ describe("readMessages()", () => {
 			count: 1,
 		});
 	});
-
 	afterEach(() => {
 		vi.clearAllMocks();
 	});
@@ -37,5 +36,11 @@ describe("readMessages()", () => {
 			where: { key: "test-key" },
 		});
 		expect(count).toBe(1);
+	});
+	test("Failure - database error", async () => {
+		prismaMock.conversation.update.mockRejectedValueOnce(new Error("DB Error"));
+		await expect(
+			readMessages(prismaMock as unknown as ExtendedPrismaClient, "mockuserA", "mockuserB")
+		).rejects.toThrow("DB Error");
 	});
 });

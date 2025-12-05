@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { authenticate } from "../utils/authenticate.js";
 
 export const authenticator = (req: Request, res: Response, next: NextFunction) => {
-	if (authenticate(req)) {
+	if (!!req.session.user?.uuid && req.session.user.uuid === req.cookies?.user_id) {
 		next();
 	} else {
 		res.status(401).json({ errors: ["Unauthorised."] });

@@ -14,7 +14,7 @@ describe("fetchReplies()", () => {
 	afterEach(() => {
 		prismaMock.cheet.findMany.mockReset();
 	});
-	test("Fetch replies of a specified cheet", async () => {
+	test("Fetch replies to a specified cheet", async () => {
 		const { replies, hasNext } = await fetchReplies(
 			prismaMock as unknown as ExtendedPrismaClient,
 			5,
@@ -74,7 +74,7 @@ describe("fetchReplies()", () => {
 		expect(replies).toHaveLength(4);
 		expect(hasNext).toBe(false);
 	});
-	test("cursor provided", async () => {
+	test("Pagination", async () => {
 		const { replies, hasNext } = await fetchReplies(
 			prismaMock as unknown as ExtendedPrismaClient,
 			3,
@@ -101,5 +101,11 @@ describe("fetchReplies()", () => {
 		);
 		expect(replies).toHaveLength(0);
 		expect(hasNext).toBe(false);
+	});
+	test("Failure - database error", async () => {
+		prismaMock.reply.findMany.mockRejectedValueOnce(new Error("DB Error"));
+		await expect(fetchReplies(prismaMock as unknown as ExtendedPrismaClient, 5, "mockcheetid")).rejects.toThrow(
+			"DB Error"
+		);
 	});
 });

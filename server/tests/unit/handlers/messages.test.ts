@@ -6,6 +6,9 @@ vi.mock("../../../src/utils/generateConversationKey", () => ({
 vi.mock("../../../src/utils/readMessages", () => ({
 	readMessages: vi.fn(),
 }));
+vi.mock("../../../prisma/services/messageStatus", () => ({
+	softDeleteMessageStatus: vi.fn(),
+}));
 
 import { createMockReq, MockRequest } from "../../test-utils/createMockReq";
 import { createMockRes, MockResponse } from "../../test-utils/createMockRes";
@@ -24,6 +27,7 @@ import { Response, Request } from "express";
 import { ExtendedPrismaClient } from "../../../prisma/prismaClient";
 import { mockNext } from "../../test-utils/mockNext";
 import { Prisma } from "@prisma/client";
+import { softDeleteMessageStatus } from "../../../prisma/services/messageStatus";
 
 describe("Unit tests - Message handlers", () => {
 	let mockReq: MockRequest;
@@ -47,7 +51,7 @@ describe("Unit tests - Message handlers", () => {
 		afterEach(() => {
 			vi.clearAllMocks();
 		});
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await getMessagesHandler(prismaMock as unknown as ExtendedPrismaClient, fetchMessagesMock)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -80,7 +84,7 @@ describe("Unit tests - Message handlers", () => {
 				"valid"
 			);
 		});
-		test("Invalid recipient ID provided", async () => {
+		test("Failure - invalid recipient ID provided", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			prismaMock.user.findUniqueOrThrow.mockRejectedValueOnce(new Error("Recipient not found"));
 			await getMessagesHandler(prismaMock as unknown as ExtendedPrismaClient, fetchMessagesMock)(
@@ -142,9 +146,20 @@ describe("Unit tests - Message handlers", () => {
 				undefined
 			);
 		});
+		test("Failure - fetchMessages() error", async () => {
+			mockReq.session.user = { uuid: "mockuserid" };
+			prismaMock.user.findUniqueOrThrow.mockResolvedValueOnce({ uuid: "mockrecipientid" });
+			fetchMessagesMock.mockRejectedValueOnce(new Error("Fetch Error"));
+			await getMessagesHandler(prismaMock as unknown as ExtendedPrismaClient, fetchMessagesMock)(
+				mockReq as unknown as Request,
+				mockRes as unknown as Response,
+				mockNext
+			);
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+		});
 	});
 	describe("readMessagesHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await readMessagesHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -177,9 +192,9 @@ describe("Unit tests - Message handlers", () => {
 			expect(consoleWarnSpy).not.toHaveBeenCalled();
 			expect(mockRes.sendStatus).toHaveBeenCalledWith(200);
 		});
-		test("Failure", async () => {
+		test("Failure - readMessages() error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
-			(readMessages as Mock).mockRejectedValueOnce(new Error("DB Exploded"));
+			(readMessages as Mock).mockRejectedValueOnce(new Error("Read Error"));
 			await readMessagesHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -195,7 +210,7 @@ describe("Unit tests - Message handlers", () => {
 				async (cb: (transaction: typeof prismaMock) => Promise<unknown>) => cb(prismaMock)
 			);
 		});
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await postMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as SendMessageRequest,
 				mockRes as unknown as Response,
@@ -244,7 +259,7 @@ describe("Unit tests - Message handlers", () => {
 				uuid: "mockmessageid",
 			});
 		});
-		test("Success - first user sender", async () => {
+		test("Success - first user is sender", async () => {
 			mockReq.session.user = { uuid: "a-mocksenderid" };
 			mockReq.body = { text: "Mock message" };
 
@@ -287,7 +302,7 @@ describe("Unit tests - Message handlers", () => {
 				uuid: "mockmessageid",
 			});
 		});
-		test("Success - second user sender", async () => {
+		test("Success - second user is sender", async () => {
 			mockReq.session.user = { uuid: "b-mocksenderid" };
 			mockReq.body = { text: "Mock message" };
 			prismaMock.$transaction.mockImplementationOnce(
@@ -332,9 +347,9 @@ describe("Unit tests - Message handlers", () => {
 				uuid: "mockmessageid",
 			});
 		});
-		test("Failure", async () => {
+		test("Failure - database error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
-			prismaMock.$transaction.mockRejectedValueOnce(new Error("DB exploded"));
+			prismaMock.$transaction.mockRejectedValueOnce(new Error("DB Error"));
 			await postMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as SendMessageRequest,
 				mockRes as unknown as Response,
@@ -344,7 +359,7 @@ describe("Unit tests - Message handlers", () => {
 		});
 	});
 	describe("updateMessageHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await updateMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as EditMessageRequest,
 				mockRes as unknown as Response,
@@ -439,7 +454,7 @@ describe("Unit tests - Message handlers", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot update someone else's message."] });
 		});
-		test("Failure - message deleted", async () => {
+		test("Failure - message previously deleted", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			mockReq.params.messageId = "mockmessageid";
 			prismaMock.message.findUniqueOrThrow.mockResolvedValueOnce({
@@ -457,9 +472,20 @@ describe("Unit tests - Message handlers", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot update a deleted message."] });
 		});
+		test("Failure - database error", async () => {
+			mockReq.session.user = { uuid: "mockuserid" };
+			mockReq.params.messageId = "mockmessageid";
+			prismaMock.message.findUniqueOrThrow.mockRejectedValueOnce(new Error("DB Error"));
+			await updateMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as EditMessageRequest,
+				mockRes as unknown as Response,
+				mockNext
+			);
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+		});
 	});
 	describe("deleteMessageHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await deleteMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -475,7 +501,7 @@ describe("Unit tests - Message handlers", () => {
 				uuid: "mockmessageid",
 				sender: { uuid: "mockuserid" },
 			});
-			prismaMock.message.delete.mockResolvedValueOnce({ uuid: "mockmessageid", text: null });
+			(softDeleteMessageStatus as Mock).mockResolvedValueOnce({ uuid: "mockmessageid", text: null });
 			await deleteMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -508,6 +534,17 @@ describe("Unit tests - Message handlers", () => {
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot delete someone else's message."] });
+		});
+		test("Failure - database error", async () => {
+			mockReq.session.user = { uuid: "mockuserid" };
+			mockReq.params.messageId = "mockmessageid";
+			prismaMock.message.findUniqueOrThrow.mockRejectedValueOnce(new Error("DB Error"));
+			await deleteMessageHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as EditMessageRequest,
+				mockRes as unknown as Response,
+				mockNext
+			);
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
 });

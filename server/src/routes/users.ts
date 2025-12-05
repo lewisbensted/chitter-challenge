@@ -34,7 +34,7 @@ export const searchUsersHandler =
 export const getUserHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const user = await (prismaClient.user as ExtendedUserClient).findUniqueOrThrow({
+			const user = await (prismaClient.user as unknown as ExtendedUserClient).findUniqueOrThrow({
 				where: { uuid: req.params.userId },
 				include: req.session.user?.uuid
 					? { followers: { where: { followerId: req.session.user.uuid }, select: { followerId: true } } }

@@ -30,8 +30,8 @@ describe("Unit tests - Registration handler", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(201);
 			expect(mockRes.json).toHaveBeenCalledWith({ uuid: "newuser" });
 		});
-		test("Failure", async () => {
-			prismaMock.user.create.mockRejectedValueOnce(new Error("DB exploded"));
+		test("Failure - database error", async () => {
+			prismaMock.user.create.mockRejectedValueOnce(new Error("DB Error"));
 			await registerHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as RegisterUserRequest,
 				mockRes as unknown as Response,

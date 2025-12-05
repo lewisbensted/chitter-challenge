@@ -19,7 +19,7 @@ describe("Unit test - Conversation handlers", () => {
 		vi.restoreAllMocks();
 	});
 	describe("getUnreadHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -28,7 +28,7 @@ describe("Unit test - Conversation handlers", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(401);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Unauthorised."] });
 		});
-		test("No unread", async () => {
+		test("No unread messages", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			prismaMock.conversation.findFirst.mockResolvedValueOnce(null);
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
@@ -39,7 +39,7 @@ describe("Unit test - Conversation handlers", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith(false);
 		});
-		test("Unread", async () => {
+		test("Unread messages", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			prismaMock.conversation.findFirst.mockResolvedValueOnce({ key: "test-key" });
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
@@ -50,9 +50,9 @@ describe("Unit test - Conversation handlers", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith(true);
 		});
-		test("Error", async () => {
+		test("Failure - database error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
-			prismaMock.conversation.findFirst.mockRejectedValueOnce(new Error("DB exploded"));
+			prismaMock.conversation.findFirst.mockRejectedValueOnce(new Error("DB Error"));
 			await getUnreadHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,
@@ -206,9 +206,9 @@ describe("Unit test - Conversation handlers", () => {
 				undefined
 			);
 		});
-		test("Error", async () => {
+		test("Failure - fetchConversations() error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
-			fetchConversationsMock = vi.fn().mockRejectedValueOnce(new Error("DB exploded"));
+			fetchConversationsMock = vi.fn().mockRejectedValueOnce(new Error("Fetch Error"));
 			await getConversationsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchConversationsMock)(
 				mockReq as unknown as Request,
 				mockRes as unknown as Response,

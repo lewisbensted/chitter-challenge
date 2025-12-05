@@ -17,7 +17,7 @@ describe("Unit tests - Logout handler", () => {
 		vi.restoreAllMocks();
 	});
 	describe("logoutHandler()", () => {
-		test("success", () => {
+		test("Success", () => {
 			const destroyMock = vi.fn((callback) => callback(null));
 			mockReq.session = { user: { id: "mockuserid" }, destroy: destroyMock };
 			mockReq.cookies = { token: "mocksession" };
@@ -27,15 +27,15 @@ describe("Unit tests - Logout handler", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(200);
 			expect(mockRes.json).toHaveBeenCalledWith("Logout successful.");
 		});
-		test("error", () => {
-			const destroyMock = vi.fn((callback) => callback(new Error("DB exploded")));
+		test("Failure - destroy session error", () => {
+			const destroyMock = vi.fn((callback) => callback(new Error("Destroy Error")));
 			mockReq.session = { user: { id: "mockuserid" }, destroy: destroyMock };
 			mockReq.cookies = { token: "mocksession" };
 			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(destroyMock).toHaveBeenCalled();
 			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
-		test("no session", () => {
+		test("No active session", () => {
 			logoutHandler(mockReq as unknown as Request, mockRes as unknown as Response, mockNext);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({

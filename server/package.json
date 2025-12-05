@@ -27,6 +27,8 @@
 		"@types/supertest": "^6.0.2",
 		"nodemon": "^3.1.0",
 		"prisma": "^6.11.1",
+		"supertest": "^7.1.4",
+		"supertest-session": "^5.0.1",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.4.2",
 		"vitest": "^3.2.4",

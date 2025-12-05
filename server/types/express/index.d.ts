@@ -9,3 +9,4 @@ declare module "express-session" {
 		user?: SessionUser;
 	}
 }
+

@@ -23,8 +23,6 @@ import { errorHandler } from "./middleware/errorHandling.js";
 
 dotenvExpand.expand(dotenv.config({ path: `../.env${process.env.NODE_ENV ? "." + process.env.NODE_ENV : ""}` }));
 
-const __dirname = import.meta.dirname;
-
 const MySQLStore = MySQLStoreImport(session);
 
 const storeOptions = {
@@ -39,7 +37,7 @@ const storeOptions = {
 
 const sessionStore = new MySQLStore(storeOptions);
 
-export const createApp = (prisma: ExtendedPrismaClient, frontendPort: number, projectRoot: string) => {
+export const createApp = (prisma: ExtendedPrismaClient, frontendPort?: number, projectRoot?: string) => {
 	const app = express();
 
 	app.use(cookieParser());
@@ -53,13 +51,23 @@ export const createApp = (prisma: ExtendedPrismaClient, frontendPort: number, pr
 		})
 	);
 
-	if (process.env.NODE_ENV !== "production") {
+	if (process.env.NODE_ENV === "development") {
 		app.use(
 			cors({
 				origin: `http://localhost:${frontendPort}`,
 				credentials: true,
 			})
 		);
+	}
+
+	if (process.env.NODE_ENV === "test") {
+		app.use((req, _res, next) => {
+			if (!req.session.user && req.headers["session-required"]) {
+				req.session.user = { uuid: "testusersessionid" };
+				req.cookies.user_id = "testusersessionid";
+			}
+			next();
+		});
 	}
 
 	const authLimiter = rateLimiter(1000 * 60, 5);
@@ -84,7 +92,7 @@ export const createApp = (prisma: ExtendedPrismaClient, frontendPort: number, pr
 		res.status(404).json({ errors: ["Route not found."], code: "ROUTE_NOT_FOUND" });
 	});
 
-	if (process.env.NODE_ENV === "production") {
+	if (process.env.NODE_ENV === "production" && projectRoot) {
 		const buildPath = path.join(projectRoot, "frontend", "dist");
 		app.use(express.static(buildPath));
 		app.get("*", (_req, res) => {

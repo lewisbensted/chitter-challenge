@@ -26,7 +26,7 @@ describe("fetchConversations()", () => {
 	afterEach(() => {
 		prismaMock.conversation.findMany.mockReset();
 	});
-	test("Fetch all conversations - no interlocutors ID array provided", async () => {
+	test("Fetch all conversations - no interlocutor ID array provided", async () => {
 		const { conversations, hasNext } = await fetchConversations(
 			prismaMock as unknown as ExtendedPrismaClient,
 			5,
@@ -158,5 +158,11 @@ describe("fetchConversations()", () => {
 		);
 		expect(conversations).toHaveLength(4);
 		expect(hasNext).toBe(false);
+	});
+	test("Failure - database error", async () => {
+		prismaMock.conversation.findMany.mockRejectedValueOnce(new Error("DB Error"));
+		await expect(
+			fetchConversations(prismaMock as unknown as ExtendedPrismaClient, 5, "mockuserid")
+		).rejects.toThrow("DB Error");
 	});
 });

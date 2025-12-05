@@ -87,7 +87,7 @@ describe("Unit tests - Login handler", () => {
 			expect(mockRes.cookie).toHaveBeenCalledWith("session_id", "mocksessionid");
 			expect(mockReq.session.user).toEqual({ uuid: "mockuserid" });
 		});
-		test("Error", async () => {
+		test("Failure - database error", async () => {
 			mockReq.body = { username: "mockusername", password: "mockpassword" };
 			prismaMock.user.findUnique.mockRejectedValueOnce(new Error("DB exploded"));
 			await loginHandler(prismaMock as unknown as ExtendedPrismaClient)(

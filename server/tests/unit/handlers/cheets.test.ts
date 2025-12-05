@@ -129,7 +129,7 @@ describe("Unit test - Cheet handlers", () => {
 				undefined
 			);
 		});
-		test("Invalid userId provided", async () => {
+		test("Failure - invalid userId provided", async () => {
 			mockReq.params.userId = "mockuserid";
 			prismaMock.user.findUniqueOrThrow.mockRejectedValueOnce(new Error("User not found"));
 			await getCheetsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchCheetsMock)(
@@ -139,9 +139,18 @@ describe("Unit test - Cheet handlers", () => {
 			);
 			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
+		test("Failure - fetchCheets() error", async () => {
+			fetchCheetsMock.mockRejectedValueOnce(new Error("Fetch Error"));
+			await getCheetsHandler(prismaMock as unknown as ExtendedPrismaClient, fetchCheetsMock)(
+				mockReq as unknown as Request,
+				mockRes as unknown as Response,
+				mockNext
+			);
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+		});
 	});
 	describe("createCheetHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await createCheetHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as SendCheetRequest,
 				mockRes as unknown as Response,
@@ -169,7 +178,7 @@ describe("Unit test - Cheet handlers", () => {
 				cheetStatus: { hasReplies: false },
 			});
 		});
-		test("Failure", async () => {
+		test("Failure - database error", async () => {
 			mockReq.session.user = { uuid: "mockuserid" };
 			prismaMock.$transaction = vi.fn().mockRejectedValue(new Error("DB exploded"));
 			await createCheetHandler(prismaMock as unknown as ExtendedPrismaClient)(
@@ -181,7 +190,7 @@ describe("Unit test - Cheet handlers", () => {
 		});
 	});
 	describe("updateCheetHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await updateCheetHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as EditCheetRequest,
 				mockRes as unknown as Response,
@@ -300,9 +309,20 @@ describe("Unit test - Cheet handlers", () => {
 			expect(mockRes.status).toHaveBeenCalledWith(400);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot update a cheet with replies."] });
 		});
+		test("Failure - database error", async () => {
+			mockReq.session.user = { uuid: "mockuserid" };
+			mockReq.params.cheetId = "mockcheetuuid";
+			prismaMock.cheet.findUniqueOrThrow.mockRejectedValueOnce(new Error("DB Error"));
+			await updateCheetHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as EditCheetRequest,
+				mockRes as unknown as Response,
+				mockNext
+			);
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+		});
 	});
 	describe("deleteCheetHandler()", () => {
-		test("Unauthorised", async () => {
+		test("Failure - unauthorised", async () => {
 			await deleteCheetHandler(prismaMock as unknown as ExtendedPrismaClient)(
 				mockReq as unknown as EditCheetRequest,
 				mockRes as unknown as Response,
@@ -349,6 +369,17 @@ describe("Unit test - Cheet handlers", () => {
 			);
 			expect(mockRes.status).toHaveBeenCalledWith(403);
 			expect(mockRes.json).toHaveBeenCalledWith({ errors: ["Cannot delete someone else's cheet."] });
+		});
+		test("Failure - database error", async () => {
+			mockReq.session.user = { uuid: "mockuserid" };
+			mockReq.params.cheetId = "mockcheetuuid";
+			prismaMock.cheet.findUniqueOrThrow.mockRejectedValueOnce(new Error("DB Error"));
+			await deleteCheetHandler(prismaMock as unknown as ExtendedPrismaClient)(
+				mockReq as unknown as EditCheetRequest,
+				mockRes as unknown as Response,
+				mockNext
+			);
+			expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 		});
 	});
 });

@@ -25,7 +25,7 @@ describe("fetchCheets()", () => {
 		expect(cheets).toHaveLength(5);
 		expect(hasNext).toBe(false);
 	});
-	test("Fetch cheets from a specific user - userId provided", async () => {
+	test("Fetch cheets from specific user - userId provided", async () => {
 		const { cheets, hasNext } = await fetchCheets(
 			prismaMock as unknown as ExtendedPrismaClient,
 			5,
@@ -133,5 +133,9 @@ describe("fetchCheets()", () => {
 		const { cheets, hasNext } = await fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 5);
 		expect(cheets).toHaveLength(0);
 		expect(hasNext).toBe(false);
+	});
+	test("Failure - database error", async () => {
+		prismaMock.cheet.findMany.mockRejectedValueOnce(new Error("DB Error"));
+		await expect(fetchCheets(prismaMock as unknown as ExtendedPrismaClient, 5)).rejects.toThrow("DB Error");
 	});
 });

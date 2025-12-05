@@ -17,7 +17,7 @@ describe("fetchMessages()", () => {
 	afterEach(() => {
 		prismaMock.message.findMany.mockReset();
 	});
-	test("Fetch all messages between specific users", async () => {
+	test("Fetch messages between user and interlocutor", async () => {
 		const { messages, hasNext } = await fetchMessages(
 			prismaMock as unknown as ExtendedPrismaClient,
 			5,
@@ -107,7 +107,7 @@ describe("fetchMessages()", () => {
 		expect(messages).toHaveLength(4);
 		expect(hasNext).toBe(false);
 	});
-	test("Cursor provided", async () => {
+	test("Pagination", async () => {
 		const { messages, hasNext } = await fetchMessages(
 			prismaMock as unknown as ExtendedPrismaClient,
 			0,
@@ -141,5 +141,11 @@ describe("fetchMessages()", () => {
 		);
 		expect(messages).toHaveLength(0);
 		expect(hasNext).toBe(false);
+	});
+	test("Failure - database error", async () => {
+		prismaMock.message.findMany.mockRejectedValueOnce(new Error("DB Error"));
+		await expect(
+			fetchMessages(prismaMock as unknown as ExtendedPrismaClient, 5, "mockuserid", "mockinterlocutorid")
+		).rejects.toThrow("DB Error");
 	});
 });

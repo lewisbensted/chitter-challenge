@@ -7,7 +7,7 @@ import type { ExtendedUserClient } from "../../types/extendedClients.js";
 export const registerHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: RegisterUserRequest, res: Response, next: NextFunction) => {
 		try {
-			const newUser = await (prismaClient.user as ExtendedUserClient).create({
+			const newUser = await (prismaClient.user as unknown as ExtendedUserClient).create({
 				data: req.body,
 			});
 			res.status(201).json(newUser);

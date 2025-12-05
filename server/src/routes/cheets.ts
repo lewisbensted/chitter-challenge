@@ -33,6 +33,7 @@ export const getCheetsHandler =
 export const createCheetHandler =
 	(prismaClient: ExtendedPrismaClient) => async (req: SendCheetRequest, res: Response, next: NextFunction) => {
 		try {
+		
 			const sessionUser = req.session.user;
 			if (!sessionUser) return res.status(401).json({ errors: ["Unauthorised."] });
 			const result = await prismaClient.$transaction(async (transaction) => {

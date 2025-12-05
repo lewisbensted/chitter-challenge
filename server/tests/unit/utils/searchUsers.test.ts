@@ -16,7 +16,12 @@ describe("searchUsers()", () => {
 		prismaMock.user.findMany.mockReset();
 	});
 	test("Session user", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search", "mocksessionuuid");
+		const { users, hasNext } = await searchUsers(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"search",
+			"mocksessionuuid"
+		);
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -74,8 +79,14 @@ describe("searchUsers()", () => {
 		expect(users).toHaveLength(4);
 		expect(hasNext).toBe(false);
 	});
-	test("Cursor provided", async () => {
-		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search", undefined, "mockcursor");
+	test("Pagination", async () => {
+		const { users, hasNext } = await searchUsers(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"search",
+			undefined,
+			"mockcursor"
+		);
 		expect(prismaMock.user.findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: { username: { contains: "search" } },
@@ -89,8 +100,20 @@ describe("searchUsers()", () => {
 	});
 	test("Empty return", async () => {
 		prismaMock.user.findMany.mockResolvedValue([]);
-		const { users, hasNext } = await searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search", undefined, "mockcursor");
+		const { users, hasNext } = await searchUsers(
+			prismaMock as unknown as ExtendedPrismaClient,
+			5,
+			"search",
+			undefined,
+			"mockcursor"
+		);
 		expect(users).toHaveLength(0);
 		expect(hasNext).toBe(false);
+	});
+	test("Failure - database error", async () => {
+		prismaMock.user.findMany.mockRejectedValueOnce(new Error("DB Error"));
+		await expect(searchUsers(prismaMock as unknown as ExtendedPrismaClient, 5, "search")).rejects.toThrow(
+			"DB Error"
+		);
 	});
 });
